@@ -1,0 +1,145 @@
+import React, { useState, useEffect } from "react";
+import Select from "react-select";
+import { toast } from "sonner";
+import { attendeeTableColumns } from "../../utils/columnData";
+import { useSelector } from "react-redux";
+
+const SwapAttendeeFieldsModal = ({ onClose, onSubmit }) => {
+  const { isSwapping, isSuccess } = useSelector((state) => state.attendee);
+
+  const [field1, setField1] = useState(null);
+  const [field2, setField2] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (isSuccess) {
+      onClose();
+    }
+  }, [isSuccess]);
+
+  useEffect(() => {
+    if (isSwapping) {
+      setIsLoading(true);
+    } else {
+      setField1(null);
+      setField2(null);
+      setTimeout(() => {
+        setIsLoading(false);
+      }, 200);
+    }
+  }, [isSwapping]);
+
+  const customStyles = {
+    menu: (provided) => ({
+      ...provided,
+
+      maxHeight: "150px",
+      overflowY: "auto", // Ensure overflow is set to auto for scrolling
+    }),
+    menuList: (provided) => ({
+      ...provided,
+      maxHeight: "150px",
+      padding: 0, // Ensure no padding interferes with scrolling
+    }),
+  };
+
+  const handleCancel = () => {
+    setField1(null);
+    setField2(null);
+    onClose();
+  };
+
+  const handleSubmit = () => {
+    if (field1 && field2) {
+      onSubmit(field1.value, field2.value);
+    } else {
+      toast.dismiss();
+      toast.error("Please select both fields.");
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-gray-600 bg-opacity-50 z-50 flex justify-center items-center">
+      <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <h2 className="text-xl font-semibold mb-4">Swap Attendee Fields</h2>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Field 1</label>
+          <Select
+            value={field1}
+            onChange={setField1}
+            options={attendeeTableColumns
+              .filter(
+                (column) =>
+                  column.key !== "isAssigned" &&
+                  column.key !== "status" &&
+                  column.key !== "timeInSession" &&
+                  column.key !== "enrollments" &&
+                  column.key !== "tags" &&
+                  column.key !== "createdAt" &&
+                  column.key !== "registeredCount" &&
+                  column.key !== "attendedCount" &&
+                  column.key !== "email"
+              )
+              .map((column) => ({
+                value: column.key,
+                label: column.header,
+              }))}
+            placeholder="Select Field 1"
+            className="react-select-container"
+            classNamePrefix="react-select"
+            styles={customStyles}
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 mb-2">Field 2</label>
+          <Select
+            value={field2}
+            onChange={setField2}
+            options={attendeeTableColumns
+              .filter(
+                (column) =>
+                  column.key !== "isAssigned" &&
+                  column.key !== "status" &&
+                  column.key !== "timeInSession" &&
+                  column.key !== "enrollments" &&
+                  column.key !== "tags" &&
+                  column.key !== "createdAt" &&
+                  column.key !== "registeredCount" &&
+                  column.key !== "attendedCount" &&
+                  column.key !== "email"
+              )
+              .map((column) => ({
+                value: column.key,
+                label: column.header,
+              }))}
+            placeholder="Select Field 2"
+            className="react-select-container"
+            classNamePrefix="react-select"
+            styles={customStyles}
+          />
+        </div>
+
+        <div className="flex justify-end space-x-4">
+          <button
+            disabled={isSwapping}
+            className="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600"
+            onClick={handleCancel}
+          >
+            Cancel
+          </button>
+          <button
+            disabled={isSwapping || !field1 || !field2 || isLoading}
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+            onClick={handleSubmit}
+          >
+            {isSwapping || isLoading ? "Swapping..." : "Submit"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SwapAttendeeFieldsModal;

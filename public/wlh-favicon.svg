@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" viewBox="0 0 425 450">
+  <!-- Generator: Adobe Illustrator 29.6.0, SVG Export Plug-In . SVG Version: 2.1.1 Build 207)  -->
+  <defs>
+    <style>
+      .st0 {
+        fill: url(#linear-gradient);
+      }
+
+      .st1 {
+        fill: #fff;
+      }
+
+      .st2 {
+        font-family: AbacaxiDevanagari-Bold, 'Abacaxi Devanagari';
+        font-size: 161.05px;
+        font-weight: 700;
+      }
+
+      .st2, .st3 {
+        fill: #ffdf00;
+      }
+
+      .st4 {
+        fill: #000925;
+      }
+    </style>
+    <linearGradient id="linear-gradient" x1="56.8" y1="238.23" x2="368.2" y2="238.23" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#31ce53"/>
+      <stop offset="1" stop-color="#125323"/>
+    </linearGradient>
+  </defs>
+  <rect class="st4" y="8.09" width="425" height="419.28" rx="19.59" ry="19.59"/>
+  <circle class="st1" cx="110.98" cy="76.23" r="30.95"/>
+  <circle class="st1" cx="210.92" cy="58.43" r="34.16"/>
+  <circle class="st1" cx="315.5" cy="75.01" r="30.95"/>
+  <path class="st1" d="M56.8,158.03c1.5-6.09,7.55-27.26,28.37-38.69,22.29-12.24,56-5.18,59.44,3.64,1.31,3.35-3.25,4.16-7.8,13.89-4.07,8.7-3.72,15.5-4.06,21.17H56.8Z"/>
+  <path class="st1" d="M368.2,158.03c-1.5-6.09-7.55-27.26-28.37-38.69-22.29-12.24-56-5.18-59.44,3.64-1.31,3.35,3.25,4.16,7.8,13.89,4.07,8.7,3.72,15.5,4.06,21.17,24.82,0,51.13,0,75.95,0Z"/>
+  <path class="st1" d="M144.85,158.03h132.9c-5.49-32.52-34-56.47-66.83-56.28-32.56.18-60.62,24.04-66.07,56.28Z"/>
+  <path class="st0" d="M58.83,166.91h307.18c1.9,0,2.9,2.46,1.61,3.98-38.87,46.13-77.75,92.25-116.62,138.38-29.78.11-45.17.17-74.95.27-39.56-46.32-79.13-92.63-118.69-138.95-1.2-1.4-.28-3.69,1.48-3.69Z"/>
+  <text class="st2" transform="translate(169.81 441.91) scale(.93 1)"><tspan x="0" y="0">₹</tspan></text>
+  <path class="st3" d="M119.81,405.38c4.08-3.32,15.94,2.92,35.58,18.73-2.19,5.76-4.37,11.51-6.56,17.27-9.68-7.63-19.35-15.26-29.03-22.89-2.14-7-2.14-11.37,0-13.11Z"/>
+  <path class="st3" d="M306.15,404.86c-4.08-3.32-15.94,2.92-35.58,18.73,2.19,5.76,4.37,11.51,6.56,17.27l29.03-22.89c2.14-7,2.14-11.37,0-13.11Z"/>
+  <rect class="st4" x="45.67" y="206.04" width="324.72" height="5.93"/>
+  <rect class="st4" x="41.29" y="264.48" width="324.72" height="5.93"/>
+</svg>

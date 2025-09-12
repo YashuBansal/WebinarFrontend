@@ -1,0 +1,435 @@
+import React, { useState, useEffect, Suspense } from "react";
+import multiService from "../../services/multiService";
+import { errorToast, formatDateAsNumber } from "../../utils/extra";
+import useRoles from "../../hooks/useRoles";
+import { useDispatch, useSelector } from "react-redux";
+import { useSearchParams } from "react-router-dom";
+import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import {
+  getAllWebinars,
+  getEmployeeWebinars,
+} from "../../features/actions/webinarContact";
+import { socket } from "../../socket";
+import ModalFallback from "../../components/Fallback/ModalFallback";
+import EmpAssignModal from "./EmpAssignModal";
+import { VisibilityIcon } from "../../components/SVGs";
+import useMediaQuery from "../../hooks/useMediaQuery";
+
+const EmployeeAssignMetrics = () => {
+  const dispatch = useDispatch();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const roles = useRoles();
+  const { userData, subscription } = useSelector((state) => state.auth);
+  const { webinarData } = useSelector((state) => state.webinarContact);
+  const { employeeModeData } = useSelector((state) => state.employee);
+  const employeeId = employeeModeData?._id;
+
+  const role = userData?.role;
+  const [startDate, setStartDate] = useState(
+    new Date(new Date().setDate(new Date().getDate() - 7))
+      .toISOString()
+      .split("T")[0]
+  );
+  const [endDate, setEndDate] = useState(
+    new Date().toISOString().split("T")[0]
+  );
+  const [loading, setLoading] = useState(false);
+  const [stats, setStats] = useState({
+    total: 0,
+    completed: 0,
+    active: 0,
+    daily: [],
+  });
+  const webinarInQuery = searchParams.get("webinarId");
+  const [currentWebinar, setCurrentWebinar] = useState(
+    webinarInQuery ? webinarInQuery : "all"
+  );
+  const [selectedData, setSelectedData] = useState(null);
+  const fetchMetrics = async (webinarId) => {
+    try {
+      setLoading(true);
+      // Create adjusted end date
+      const adjustEndDate = (dateString) => {
+        const date = new Date(dateString);
+        date.setDate(date.getDate() + 1);
+        return date.toISOString().split("T")[0];
+      };
+
+      const adjustStartDate = (dateString) => {
+        const date = new Date(dateString);
+        date.setDate(date.getDate() - 1);
+        return date.toISOString().split("T")[0];
+      };
+
+      if (roles.isEmployeeId(role) || employeeModeData) {
+        const dailyRes = await multiService.getDailyAssignmentStats({
+          start: adjustStartDate(startDate),
+          end: endDate,
+          webinarId,
+          employeeId: employeeId || userData?._id,
+        });
+        if (dailyRes?.success) {
+          const dailyData = dailyRes.data || [];
+
+          const statsData = { total: 0, completed: 0, active: 0 };
+          dailyData.forEach((item) => {
+            statsData.total += item.count;
+            statsData.completed += item.completed;
+            statsData.active += item.count - item.completed;
+          });
+
+          setStats({
+            ...statsData,
+            daily: dailyData || [],
+          });
+        }
+      } else {
+        const allRes = await multiService.getAllAssignmentsByDateRange({
+          start: adjustStartDate(startDate),
+          end: endDate,
+          webinarId,
+        });
+
+        if (allRes?.success) {
+          const allData = allRes.data || [];
+          const result = { total: 0, completed: 0, active: 0 };
+          const dataByDate = {};
+          allData.forEach((item) => {
+            result.total += item.count;
+            result.completed += item.completed;
+            result.active += item.count - item.completed;
+            if (!dataByDate[item.date]) {
+              dataByDate[item.date] = {
+                count: item.count,
+                completed: item.completed,
+                active: item.count - item.completed,
+                date: item.date,
+                data: [item],
+              };
+            } else {
+              dataByDate[item.date].count += item.count;
+              dataByDate[item.date].completed += item.completed;
+              dataByDate[item.date].active += item.count - item.completed;
+              dataByDate[item.date].data.push(item);
+            }
+          });
+          const dailyData = Object.values(dataByDate);
+
+          setStats((prev) => ({ ...prev, ...result, daily: dailyData }));
+        }
+      }
+    } catch (error) {
+      errorToast(error.message || "Error loading metrics");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDateApply = () => {
+    if (new Date(startDate) > new Date(endDate)) {
+      errorToast("End date cannot be before start date");
+      return;
+    }
+    fetchMetrics();
+  };
+
+  const isSmallScreen = useMediaQuery("(max-width: 768px)");
+
+  useEffect(() => {
+    const webinarId =
+      webinarInQuery && webinarInQuery !== "all" ? webinarInQuery : undefined;
+    fetchMetrics(webinarId);
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!webinarData.length) {
+      console.log("employeeId", employeeId, role, roles.isEmployeeId(role));
+
+      if (roles.isEmployeeId(role) || employeeModeData) {
+        dispatch(getEmployeeWebinars({ employeeId }));
+      } else dispatch(getAllWebinars({}));
+    }
+  }, []);
+
+  useEffect(() => {
+    function onNoteCreation() {
+      const webinarId =
+        webinarInQuery && webinarInQuery !== "all" ? webinarInQuery : undefined;
+      fetchMetrics(webinarId);
+    }
+    socket.on("note-creation", onNoteCreation);
+    return () => {
+      socket.off("note-creation", onNoteCreation);
+    };
+  }, [searchParams]);
+
+  // Calculate max value for scaling
+  // const maxAssignments = Math.max(...stats.daily.map((d) => d.count), 1);
+  const assignmentMetrics = subscription?.plan?.assignmentMetrics || false;
+  if (!assignmentMetrics) {
+    return null;
+  }
+
+  return (
+    <div className="p-8 max-w-7xl mt-10 mx-auto">
+      <div className="mb-8">
+        <div className="flex justify-between flex-col sm:flex-row items-center gap-4">
+          <h1 className="text-2xl font-bold text-gray-900">
+            Assignment Metrics
+          </h1>
+          <FormControl className=" w-full md:w-40">
+            <InputLabel id="webinar-label">Webinar</InputLabel>
+            <Select
+              labelId="webinar-label"
+              label="Webinar"
+              value={currentWebinar}
+              onChange={(e) => {
+                const webinarId = e.target.value;
+                const webinar = webinarData.find(
+                  (web) => web._id === webinarId
+                );
+                console.log(webinar);
+                if (webinar) {
+                  setStartDate(
+                    new Date(webinar.webinarDate).toISOString().split("T")[0]
+                  );
+                }
+                setCurrentWebinar(webinarId);
+                setSearchParams({ webinarId });
+              }}
+            >
+              <MenuItem value="all">All Webinars</MenuItem>
+              {webinarData.map((webinar, index) => (
+                <MenuItem key={index} value={webinar._id}>
+                  {webinar?.webinarName} -{" "}
+                  {formatDateAsNumber(webinar?.webinarDate)}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </div>
+        <div className="flex flex-col md:flex-row gap-4 mt-4">
+          <div className="flex gap-4 justify-between items-center">
+            <div className="flex items-center gap-2 flex-col md:flex-row ">
+            <label className="text-sm text-gray-600">From:</label>
+            <input
+              type="date"
+              value={startDate}
+              max={endDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="px-3 py-2 border rounded-md text-sm"
+            />
+          </div>
+
+          <div className="flex items-center gap-2 flex-col md:flex-row">
+            <label className="text-sm text-gray-600">To:</label>
+            <input
+              type="date"
+              value={endDate}
+              min={startDate}
+              max={new Date().toISOString().split("T")[0]}
+              onChange={(e) => setEndDate(e.target.value)}
+              className="px-3 py-2 border rounded-md text-sm"
+            />
+          </div>
+          </div>
+
+          <button
+            onClick={handleDateApply}
+            disabled={loading}
+            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+          >
+            {loading ? "Applying..." : "Apply Dates"}
+          </button>
+        </div>
+
+        {/* <p className="text-gray-500 mt-4">
+          Showing data from {formatDateAsNumber(startDate)} to {formatDateAsNumber(endDate)}
+        </p> */}
+
+        {loading ? (
+          <></>
+        ) : (
+          <>
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-700">
+                  Total Assignments
+                </h3>
+                <p className="text-3xl font-bold text-indigo-600 mt-2">
+                  {stats.total}
+                </p>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-700">
+                  Completed
+                </h3>
+                <p className="text-3xl font-bold text-green-600 mt-2">
+                  {stats.completed}
+                </p>
+              </div>
+              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
+                <h3 className="text-lg font-semibold text-gray-700">Pending</h3>
+                <p className="text-3xl font-bold text-amber-600 mt-2">
+                  {stats.active}
+                </p>
+              </div>
+            </div>
+
+            {isSmallScreen ? (
+              // --- CARD VIEW for Small Screens ---
+              <div className="space-y-4">
+                {stats.daily.map((day) => (
+                  <DailyStatCard
+                    key={day.date}
+                    day={day}
+                    onViewDetails={setSelectedData}
+                    showViewButton={
+                      !roles.isEmployeeId(role) && !employeeModeData
+                    }
+                  />
+                ))}
+              </div>
+            ) : (
+              // --- TABLE VIEW for Larger Screens (Your Original Code) ---
+              <div className="rounded-lg border border-gray-100 bg-white shadow-sm">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="pr-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        Date
+                      </th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        Total
+                      </th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        Completed
+                      </th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        Pending
+                      </th>
+                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
+                        Completion Rate
+                      </th>
+                      {!roles.isEmployeeId(role) && <th className="py-3"></th>}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 bg-white">
+                    {stats.daily.map((day) => (
+                      <tr key={day.date}>
+                        <td className="pr-6 py-4 text-center whitespace-nowrap">
+                          {day.date}
+                        </td>
+                        <td className="px-6 py-4 text-center whitespace-nowrap">
+                          {day.count}
+                        </td>
+                        <td className="px-6 py-4 text-center whitespace-nowrap text-green-600">
+                          {day.completed}
+                        </td>
+                        <td className="px-6 py-4 text-center whitespace-nowrap text-amber-600">
+                          {day.count - day.completed}
+                        </td>
+                        <td className="px-6 py-4 text-center whitespace-nowrap">
+                          {((day.completed / day.count) * 100 || 0).toFixed(1)}%
+                        </td>
+                        {!roles.isEmployeeId(role) && !employeeModeData && (
+                          <td className="whitespace-nowrap px-4">
+                            <button
+                              onClick={() => setSelectedData(day)}
+                              className="rounded-full px-2 py-2 hover:bg-neutral-200"
+                            >
+                              <img
+                                src={VisibilityIcon}
+                                alt="Bookmark"
+                                className="h-6 w-6 min-h-6 min-w-6"
+                              />
+                            </button>
+                          </td>
+                        )}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+      <Suspense fallback={<ModalFallback />}>
+        {selectedData && (
+          <EmpAssignModal
+            selectedData={selectedData}
+            setSelectedData={setSelectedData}
+          />
+        )}
+      </Suspense>
+    </div>
+  );
+};
+
+export default EmployeeAssignMetrics;
+
+const StatRow = ({ label, value, valueClassName = "" }) => (
+  <div className="flex items-center justify-between">
+    <p className="text-sm text-gray-500">{label}</p>
+    <p className={`text-sm font-medium text-gray-800 ${valueClassName}`}>
+      {value}
+    </p>
+  </div>
+);
+
+// The main card component
+const DailyStatCard = ({ day, onViewDetails, showViewButton }) => {
+  const pendingCount = day.count - day.completed;
+  const completionRate = (day.completed / day.count) * 100 || 0;
+
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
+      {/* Card Header */}
+      <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
+        <p className="font-bold text-gray-800">{day.date}</p>
+        {showViewButton && (
+          <button
+            onClick={() => onViewDetails(day)}
+            className="rounded-full p-2 transition-colors hover:bg-neutral-100"
+            title="View Details"
+          >
+            <img src={VisibilityIcon} alt="View Details" className="h-6 w-6" />
+          </button>
+        )}
+      </div>
+
+      {/* Card Body with Stats */}
+      <div className="space-y-3">
+        <StatRow label="Total" value={day.count} />
+        <StatRow
+          label="Completed"
+          value={day.completed}
+          valueClassName="text-green-600"
+        />
+        <StatRow
+          label="Pending"
+          value={pendingCount}
+          valueClassName="text-amber-600"
+        />
+        {/* Completion Rate with a visual progress bar */}
+        <div>
+          <div className="mb-1 flex items-center justify-between">
+            <p className="text-sm text-gray-500">Completion Rate</p>
+            <p className="text-sm font-medium text-gray-800">
+              {completionRate.toFixed(1)}%
+            </p>
+          </div>
+          <div className="h-2 w-full rounded-full bg-gray-200">
+            <div
+              className="h-2 rounded-full bg-blue-500"
+              style={{ width: `${completionRate}%` }}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
