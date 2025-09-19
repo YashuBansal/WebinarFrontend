@@ -15,7 +15,7 @@ import {
   AssignmentIcon,
   BillIcon,
   WhatsappIcon,
-  ZoomIcon
+  ZoomIcon,
 } from "./SVGs";
 import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../../../features/slices/auth";
@@ -169,14 +169,15 @@ const Sidebar = ({ toggleButtonRef }) => {
             },
 
             {
-              path: "/whatsapp",
+              path: "http://localhost:5174",
               label: "Whatsapp",
+              external: true,
               icon: (
                 <img src={WhatsappIcon} width={30} height={30} alt="Employee" />
               ),
               children: [],
             },
-             {
+            {
               path: "/zoom",
               label: "Zoom",
               icon: (
@@ -386,25 +387,42 @@ const Sidebar = ({ toggleButtonRef }) => {
               navGroup.roles.includes(role) &&
               navGroup.items.map((item, idx) => (
                 <li key={`${index}-${idx}`}>
-                  <Link
-                    to={item.path}
-                    onClick={() => handleNavigation(item.path)}
-                    className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-300 group ${
-                      isActiveRoute(item) ? "bg-gray-300" : ""
-                    }`}
-                  >
-                    {item.icon}
-                    <span className="flex-1 ms-3 whitespace-nowrap">
-                      {item.label}{" "}
-                      {item.label === "Notice Board" &&
-                        isUpdated &&
-                        roles.isEmployeeId(role) && (
-                          <div className="inline-flex items-center rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-medium text-rose-800">
-                            New
-                          </div>
-                        )}
-                    </span>
-                  </Link>
+                  {item.external ? (
+                    <a
+                      href={item.path}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => handleNavigation(item.path)}
+                      className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-300 group ${
+                        isActiveRoute(item) ? "bg-gray-300" : ""
+                      }`}
+                    >
+                      {item.icon}
+                      <span className="flex-1 ms-3 whitespace-nowrap">
+                        {item.label}
+                      </span>
+                    </a>
+                  ) : (
+                    <Link
+                      to={item.path}
+                      onClick={() => handleNavigation(item.path)}
+                      className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-300 group ${
+                        isActiveRoute(item) ? "bg-gray-300" : ""
+                      }`}
+                    >
+                      {item.icon}
+                      <span className="flex-1 ms-3 whitespace-nowrap">
+                        {item.label}{" "}
+                        {item.label === "Notice Board" &&
+                          isUpdated &&
+                          roles.isEmployeeId(role) && (
+                            <div className="inline-flex items-center rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-medium text-rose-800">
+                              New
+                            </div>
+                          )}
+                      </span>
+                    </Link>
+                  )}
                 </li>
               ))
           )}
