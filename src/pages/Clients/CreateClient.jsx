@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { ClipLoader } from "react-spinners";
@@ -13,6 +13,8 @@ import {
   MenuItem,
   InputAdornment,
   IconButton,
+  Switch,
+  FormControlLabel,
 } from "@mui/material";
 import { clientSignup } from "../../features/actions/client";
 import { getPricePlans } from "../../features/actions/pricePlan";
@@ -32,6 +34,7 @@ function CreateClient() {
   const [billingData, setBillingData] = useState(null);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isYearly, setIsYearly] = useState(false); // Toggle for monthly/yearly
 
   const {
     register,
@@ -52,7 +55,7 @@ function CreateClient() {
       }
       console.log(billingData);
       data["plan"] = selectedPlan;
-      data["durationType"] = billingData.durationType;
+      data["durationType"] = isYearly ? "yearly" : "monthly";
       data["userName"] = data.clientUserName;
       dispatch(clientSignup(data)).then((res) => {
         if (res?.meta?.requestStatus === "fulfilled") {
@@ -69,6 +72,20 @@ function CreateClient() {
   const togglePasswordVisibility = () => {
     setShowPassword((prev) => !prev);
   };
+
+  // Memoize filtered plans to prevent unnecessary re-renders
+  const filteredPlans = useMemo(() => {
+    if (!planData || !Array.isArray(planData)) return [];
+    
+    const durationType = isYearly ? "yearly" : "monthly";
+    
+    return planData.filter((item) => {
+      console.log("item", item);
+      const durationConfig = item.planDurationConfig?.[durationType];
+      console.log("durationConfig", durationConfig);
+      return durationConfig?.isEnabled === true;
+    });
+  }, [planData, isYearly]);
 
   useEffect(() => {
     reset({});
@@ -246,24 +263,41 @@ function CreateClient() {
             >
               Step 2: Choose Plan
             </Typography>
+            
+            {/* Monthly/Yearly Toggle */}
+            <Box className="flex justify-center mb-6">
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={isYearly}
+                    onChange={(e) => setIsYearly(e.target.checked)}
+                    color="primary"
+                  />
+                }
+                label={
+                  <Typography variant="h6" className="ml-2">
+                    {isYearly ? "Yearly Plans" : "Monthly Plans"}
+                  </Typography>
+                }
+              />
+            </Box>
+
             <div className="flex overflow-x-auto gap-4">
-              {planData &&
-                Array.isArray(planData) &&
-                planData.map((item, index) => (
-                  <div key={index} className="min-w-72">
-                    <PlanCard
-                      plan={item}
-                      key={item._id}
-                      isSelectVisible={true}
-                      selectedPlan={selectedPlan}
-                      handlePlanSelection={(id, billing) => {
-                        setSelectedPlan(id);
-                        console.log("--->", billing);
-                        setBillingData(billing);
-                      }}
-                    />
-                  </div>
-                ))}
+              {filteredPlans.map((item, index) => (
+                <div key={item._id || index} className="min-w-72">
+                  <PlanCard
+                    plan={item}
+                    isSelectVisible={true}
+                    selectedPlan={selectedPlan}
+                    isYearly={isYearly}
+                    handlePlanSelection={(id, billing) => {
+                      setSelectedPlan(id);
+                      console.log("--->", billing);
+                      setBillingData(billing);
+                    }}
+                  />
+                </div>
+              ))}
             </div>
             <Box className="flex justify-between mt-4">
               <Button variant="outlined" onClick={handleBack}>

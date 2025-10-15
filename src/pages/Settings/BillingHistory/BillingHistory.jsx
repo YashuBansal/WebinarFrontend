@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { jsPDF } from "jspdf";
+import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import { getAdminBillingHistory } from "../../../features/actions/pricePlan";
 import Pagination from "@mui/material/Pagination";
 import PageLimitEditor from "../../../components/PageLimitEditor";
@@ -20,7 +20,6 @@ const BillingHistory = () => {
   const { billingHistory, totalPages } = useSelector(
     (state) => state.pricePlans
   );
-  const { superAdminData, userData } = useSelector((state) => state.auth);
 
   const [page, setPage] = useState(1);
   const LIMIT = useSelector(
@@ -32,22 +31,17 @@ const BillingHistory = () => {
   }, [page, LIMIT]);
 
   useEffect(() => {
-    console.log("userData", userData);
     dispatch(getSuperAdmin());
   }, []);
 
-  const downloadPDF = (bill) => {
-    if (!superAdminData || !userData) {
-      toast.error("Super Admin and Admin Data is required to download the PDF");
+  const downloadPDF = async (bill) => {
+    if (!bill?.admin) {
+      toast.error("Admin Data is required to download the PDF");
       return;
     }
 
-    if (!superAdminData?.address) {
-      toast.error("Super Admin's Address is required to download the PDF");
-      return;
-    }
 
-    if (!userData?.address) {
+    if (!bill?.admin?.address) {
       toast.error("Address is required to download the PDF");
       navigate("/profile");
       return;
@@ -58,191 +52,202 @@ const BillingHistory = () => {
       return;
     }
 
-    const doc = new jsPDF();
+    try {
+      // Load the empty PDF template
+      const existingPdfBytes = await fetch('/Invoice.pdf').then(res => res.arrayBuffer());
+      const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
-    let YAxis = 20;
-    doc.setFontSize(40);
-    doc.setFont("Times New Roman", "bold");
-    doc.text("Invoice", 200, YAxis + 5, { align: "right" });
+      const page = pdfDoc.getPages()[0];
+      const { width, height } = page.getSize();
 
-    doc.setFontSize(9);
-    doc
-      .text("" + bill?.invoiceNumber || "" + "", 200, YAxis + 15, {
-        align: "right",
-      })
-      .setFontSize(10);
+      // High-resolution text rendering with Poppins font
+      const createTextImage = (text, fontSize = 12, fontWeight = 'normal', color = '#000000') => {
+        // Use high DPI for crisp text
+        const scale = 2; // 2x resolution for sharp text
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
 
-    doc.text(
-      "Invoice No. :",
-      200 - doc.getTextWidth(bill?.invoiceNumber || ""),
-      YAxis + 15,
-      {
-        align: "right",
+        // Set font first to measure text properly
+        ctx.font = `${fontWeight} ${fontSize}px Poppins, Arial, sans-serif`;
+        const metrics = ctx.measureText(text);
+
+        // Calculate proper canvas dimensions
+        const textWidth = Math.ceil(metrics.width);
+        const textHeight = fontSize;
+        const padding = 10;
+
+        // Set canvas size with high DPI
+        canvas.width = (textWidth + padding * 2) * scale;
+        canvas.height = (textHeight + padding * 2) * scale;
+
+        // Scale context for high DPI
+        ctx.scale(scale, scale);
+
+        // Enable text rendering optimizations
+        ctx.textRenderingOptimization = 'optimizeQuality';
+        ctx.imageSmoothingEnabled = false;
+
+        // Clear canvas
+        ctx.clearRect(0, 0, textWidth + padding * 2, textHeight + padding * 2);
+
+        // Set font and color
+        ctx.font = `${fontWeight} ${fontSize}px Poppins, Arial, sans-serif`;
+        ctx.fillStyle = color;
+        ctx.textBaseline = 'top';
+        ctx.textAlign = 'left';
+
+        // Draw text with proper positioning
+        ctx.fillText(text, padding, padding);
+
+        return canvas.toDataURL('image/png');
+      };
+
+      // Wait for Poppins font to load
+      await document.fonts.load('12px Poppins');
+      await document.fonts.load('bold 12px Poppins');
+      console.log('Poppins font loaded, using high-resolution canvas rendering');
+
+      // Helper function to format currency
+      const formatINR = (amount) => `₹ ${amount}`;
+
+      // Helper function to format date
+      const formatDate = (date) => {
+        const d = new Date(date);
+        return `${String(d.getDate()).padStart(2, "0")} ${d.toLocaleString('default', { month: 'short' })} ${d.getFullYear()}`;
+      };
+
+      // Helper function to draw text as image (right-aligned)
+      const drawRightString = async (text, x, y, fontSize = 12, fontWeight = 'normal') => {
+        const textImage = createTextImage(text, fontSize, fontWeight);
+        const imageBytes = await fetch(textImage).then(res => res.arrayBuffer());
+        const image = await pdfDoc.embedPng(imageBytes);
+
+        // Calculate dimensions for right alignment
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.font = `${fontWeight} ${fontSize}px Poppins, Arial, sans-serif`;
+        const metrics = ctx.measureText(text);
+        const textWidth = Math.ceil(metrics.width);
+        const textHeight = fontSize;
+        const padding = 10;
+
+        page.drawImage(image, {
+          x: x - textWidth - padding,
+          y: y - padding,
+          width: textWidth + padding * 2,
+          height: textHeight + padding * 2,
+        });
+      };
+
+      // Helper function to draw text as image (left-aligned)
+      const drawString = async (text, x, y, fontSize = 12, fontWeight = 'normal') => {
+        const textImage = createTextImage(text, fontSize, fontWeight);
+        const imageBytes = await fetch(textImage).then(res => res.arrayBuffer());
+        const image = await pdfDoc.embedPng(imageBytes);
+
+        // Calculate dimensions
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.font = `${fontWeight} ${fontSize}px Poppins, Arial, sans-serif`;
+        const metrics = ctx.measureText(text);
+        const textWidth = Math.ceil(metrics.width);
+        const textHeight = fontSize;
+        const padding = 10;
+
+        page.drawImage(image, {
+          x: x - padding,
+          y: y - padding,
+          width: textWidth + padding * 2,
+          height: textHeight + padding * 2,
+        });
+      };
+
+      // Header / Top-right coordinates
+      await drawString(bill?.invoiceNumber || "", 460, 688, 10);
+      await drawString(formatDate(bill?.date), 460, 668, 10);
+      await drawRightString(formatINR(bill?.amount), 490, 648, 10);
+      await drawString("PAID", 420, 628, 12, 'bold');
+
+      // Billing period
+      const startDate = new Date(bill?.startDate || bill?.createdAt);
+      const expiryDate = new Date(bill?.expiryDate);
+      const billingPeriod = `${formatDate(startDate)} to ${formatDate(expiryDate)}`;
+      await drawString(billingPeriod, 420, 510, 11);
+
+      // Bill To section (left column)
+      await drawString(bill?.admin?.companyName || "Company Name", 35, 510, 12, 'bold');
+
+      // Split address into lines
+      const addressLines = bill?.admin?.address.split(', ');
+      for (let index = 0; index < addressLines.length; index++) {
+        await drawString(addressLines[index], 35, 492 - (index * 20), 12);
       }
-    );
 
-    doc.setFontSize(12);
-    doc.text(superAdminData?.companyName, 13, YAxis).setFontSize(9);
+      let currentY = 510 - (addressLines.length * 20);
 
-    YAxis += 5;
-    doc.setFont("Times New Roman", "normal");
-    doc.text("Email : ", 13, YAxis);
-    doc.text("" + superAdminData?.email + "", 30, YAxis);
+      if (bill?.admin?.gst) {
+        await drawString(`GSTIN: ${bill?.admin?.gst}`, 35, currentY - 20, 12);
+        currentY -= 20;
+      }
 
-    YAxis = YAxis + 5;
+      await drawString(bill?.admin?.email || "Email", 35, currentY - 20, 12);
+      await drawString(bill?.admin?.phone || "Phone", 35, currentY - 40, 12);
 
-    doc.text("Address : ", 13, YAxis);
-    doc.text(superAdminData.address, 30, YAxis);
+      // Item/Service table
+      const tableY = 328;
+      // drawString("ITEM/SERVICE", 35, tableY, helveticaBoldFont, 12);
+      // drawString("1", 360, tableY, helveticaFont, 10); // Qty
+      // drawRightString(formatINR(bill.itemAmount), 430, tableY, helveticaFont, 10); // Unit price
+      // drawRightString(formatINR(bill.itemAmount), 520, tableY, helveticaFont, 10); // Line total
 
-    YAxis += 10;
-    doc
-      .setFont("Times New Roman", "bold")
-      .text("Bill To", 13, YAxis)
-      .setFont("Times New Roman", "normal");
+      // Item description
+      const description = bill.addOn
+        ? `${bill.addOn.addonName} (Add-On)`
+        : `${bill.plan.name} (Plan)`;
+      await drawString(description, 35, tableY, 12);
 
-    YAxis += 5;
+      // Totals block (bottom-right)
+      const subtotalAmount = bill.itemAmount - bill.discountAmount;
+      await drawRightString(formatINR(subtotalAmount), 520, tableY, 12, 'bold');
+      await drawRightString(formatINR(subtotalAmount), 520, tableY - 45, 12, 'bold');
 
-    doc
-      .text("Company Name : ", 13, YAxis)
-      .text("" + userData?.companyName + "", 40, YAxis);
+      await drawRightString(formatINR(bill.taxAmount), 520, tableY - 67, 12, 'bold');
 
-    YAxis += 5;
+      await drawRightString(formatINR(bill.amount), 514, tableY - 104, 14, 'bold');
 
-    doc.text("Email : ", 13, YAxis).text("" + userData?.email + "", 40, YAxis);
+      // Payment details
+      const paymentDate = new Date(bill?.date);
+      const formattedPaymentDate = `${formatDate(paymentDate)} ${String(paymentDate.getHours()).padStart(2, "0")}:${String(paymentDate.getMinutes()).padStart(2, "0")} IST`;
+      await drawString(`${formatINR(bill.amount)} was paid on ${formattedPaymentDate}`, 52, 110, 12);
 
-    YAxis += 5;
+      // Notes
 
-    doc
-      .text("Contact : ", 13, YAxis)
-      .text("" + userData?.phone + "", 40, YAxis);
+      // Generate PDF bytes
+      const pdfBytes = await pdfDoc.save();
 
-    YAxis += 5;
+      // Create blob and download
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
 
-    doc.text("Address : ", 13, YAxis).text(userData.address, 40, YAxis);
+      const invoiceDate = new Date(bill?.date);
+      const formattedInvoiceDate = `${String(invoiceDate.getDate()).padStart(2, "0")}-${String(invoiceDate.getMonth() + 1).padStart(2, "0")}-${invoiceDate.getFullYear()}`;
+      const filename = `Invoice_${bill?.invoiceNumber || 'Unknown'}_${formattedInvoiceDate.replace(/-/g, '_')}.pdf`;
 
-    if (userData?.gst) {
-      YAxis += 5;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
 
-      doc.text("GSTIN : ", 13, YAxis).text("" + userData.gst + "", 40, YAxis);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast.error('Failed to generate PDF');
     }
-    YAxis += 3;
-
-    doc.line(13, YAxis, 200, YAxis);
-
-    YAxis += 10;
-
-    if (bill.addOn) {
-      doc
-        .setFont("Times New Roman", "bold")
-        .text("Item Type : ", 13, YAxis)
-        .text("Add-On Name :", 13, YAxis + 5)
-        .setFont("Times New Roman", "normal")
-        .text("Add-On", 40, YAxis)
-        .text("" + bill?.addOn?.addonName + "", 40, YAxis + 5);
-    } else {
-      doc
-        .setFont("Times New Roman", "bold")
-        .text("Item Type : ", 13, YAxis)
-        .text("Plan Name :", 13, YAxis + 5)
-        .setFont("Times New Roman", "normal")
-        .text("Plan", 40, YAxis)
-        .text("" + bill?.plan?.name + "", 40, YAxis + 5);
-    }
-    YAxis += 10;
-
-    const date = new Date(bill?.date);
-
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
-    const year = date.getFullYear();
-
-    const hours = String(date.getHours()).padStart(2, "0");
-    const minutes = String(date.getMinutes()).padStart(2, "0");
-
-    const formattedDate = `${day}-${month}-${year} ${hours}:${minutes}`;
-
-    doc
-      .setFont("Times New Roman", "bold")
-      .text("Purchase Date : ", 13, YAxis)
-      .setFont("Times New Roman", "normal")
-      .text(formattedDate, 40, YAxis);
-
-    YAxis += 3;
-
-    doc.line(13, YAxis, 200, YAxis);
-
-    YAxis += 6;
-
-    doc
-      .text("DESCRIPTION", 13, YAxis)
-      .text("UNITS", 130, YAxis, { align: "right" })
-      .text("UNIT PRICE", 170, YAxis, { align: "right" })
-      .text("AMOUNT (INR)", 200, YAxis, { align: "right" });
-    YAxis += 3;
-
-    doc.line(13, YAxis, 200, YAxis);
-
-    YAxis += 8;
-
-    const description = bill.addOn
-      ? `${bill.addOn.addonName} (Add-On)`
-      : `${bill.plan.name} (Plan)`;
-
-    doc.setFontSize(12);
-
-    doc
-      .setFont("Times New Roman", "normal")
-      .text(description, 13, YAxis)
-      .text("1", 130, YAxis, { align: "right" })
-      .text(`Rs.${bill.itemAmount}`, 170, YAxis, { align: "right" })
-      .setFont("Times New Roman", "bold")
-      .text(`Rs.${bill.itemAmount}`, 200, YAxis, { align: "right" });
-
-    YAxis += 5;
-
-    doc.line(13, YAxis, 200, YAxis);
-
-    YAxis += 5;
-
-    doc
-      .setFont("Times New Roman", "normal")
-      .text(`Discount`, 170, YAxis, { align: "right" })
-      .text(`Rs.${bill.discountAmount}`, 200, YAxis, { align: "right" });
-
-    YAxis += 4;
-
-    doc.line(150, YAxis, 200, YAxis);
-
-    YAxis += 7;
-
-    doc
-      .setFont("Times New Roman", "normal")
-      .text(`Sub Total`, 170, YAxis, { align: "right" })
-      .text(`Rs.${bill.itemAmount - bill.discountAmount}`, 200, YAxis, {
-        align: "right",
-      });
-
-    YAxis += 7;
-
-    doc
-      .text(`IGST @ ${GST_VALUE}%`, 170, YAxis, { align: "right" })
-      .text(`Rs.${bill.taxAmount}`, 200, YAxis, { align: "right" });
-    YAxis += 4;
-
-    doc.line(150, YAxis, 200, YAxis);
-
-    YAxis += 7;
-
-    doc
-      .setFont("Times New Roman", "bold")
-      .text(`Total`, 170, YAxis, { align: "right" })
-      .text(`Rs.${bill.amount}`, 200, YAxis, { align: "right" });
-
-    YAxis += 4;
-    doc.line(150, YAxis, 200, YAxis);
-
-    doc.save("a4.pdf");
   };
+
+
 
   const isSmallScreen = useMediaQuery("(max-width: 1280px)");
   const hasHistory = billingHistory && billingHistory.length > 0;
@@ -351,7 +356,7 @@ const BillingHistory = () => {
 
 export default BillingHistory;
 
-const StatRow = ({ label, value, className="" }) => (
+const StatRow = ({ label, value, className = "" }) => (
   <div className="flex justify-between py-2 text-sm">
     <dt className="text-gray-500">{label}</dt>
     <dd className={`font-medium text-gray-800 text-right ${className}`}>{value}</dd>

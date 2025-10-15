@@ -209,21 +209,36 @@ const regularDurations = {
     duration: 30,
     discountType: "percent",
     discountValue: 0,
+    price: 0,
+    isEnabled: false,
   },
   quarterly: {
     duration: 90,
     discountType: "percent",
     discountValue: 0,
+    price: 0,
+    isEnabled: false,
   },
   halfyearly: {
     duration: 180,
     discountType: "percent",
     discountValue: 0,
+    price: 0,
+    isEnabled: false,
   },
   yearly: {
     duration: 365,
     discountType: "percent",
     discountValue: 0,
+    price: 0,
+    isEnabled: false,
+  },
+  custom: {
+    duration: 0,
+    discountType: "percent",
+    discountValue: 0,
+    price: 0,
+    isEnabled: false,
   },
 };
 
@@ -301,11 +316,12 @@ export default function AddPlan() {
       reset({
         name: singlePlanData.name || "",
         internalName: singlePlanData.internalName || "",
-        amount: singlePlanData.amount || 0,
         planDuration: singlePlanData.planDuration || 0,
         employeeCount: singlePlanData.employeeCount || 0,
         contactLimit: singlePlanData.contactLimit || 0,
         toggleLimit: singlePlanData.toggleLimit || 0,
+        whatsappProjectLimit: singlePlanData.whatsappProjectLimit || 0,
+        zoomProjectLimit: singlePlanData.zoomProjectLimit || 0,
         attendeeTableConfig: singlePlanData.attendeeTableConfig || {},
         whatsappNotificationOnAlarms:
           singlePlanData.whatsappNotificationOnAlarms || false,
@@ -325,10 +341,33 @@ export default function AddPlan() {
       setAssignedUsers(singlePlanData.assignedUsers || []);
 
       if (singlePlanData.planDurationConfig) {
-        setPlanDurationConfig(singlePlanData.planDurationConfig);
+        // Ensure all required fields are present for each duration
+        const updatedConfig = { ...regularDurations };
+        Object.keys(singlePlanData.planDurationConfig).forEach(key => {
+          if (updatedConfig[key]) {
+            updatedConfig[key] = {
+              ...updatedConfig[key],
+              ...singlePlanData.planDurationConfig[key]
+            };
+          }
+        });
+        setPlanDurationConfig(updatedConfig);
+        
+        // Set form values for each duration field
+        Object.keys(updatedConfig).forEach(duration => {
+          setValue(`planDurationConfig.${duration}.price`, updatedConfig[duration].price);
+          setValue(`planDurationConfig.${duration}.isEnabled`, updatedConfig[duration].isEnabled);
+          setValue(`planDurationConfig.${duration}.discountType`, updatedConfig[duration].discountType);
+          setValue(`planDurationConfig.${duration}.discountValue`, updatedConfig[duration].discountValue);
+          if (duration === 'custom') {
+            setValue(`planDurationConfig.${duration}.duration`, updatedConfig[duration].duration);
+          }
+        });
+      } else {
+        setPlanDurationConfig(regularDurations);
       }
     }
-  }, [singlePlanData, isEditMode]);
+  }, [singlePlanData, isEditMode, setValue]);
 
   useEffect(() => {
     if (!id) {
@@ -368,14 +407,6 @@ export default function AddPlan() {
               errorMessage="Plan name is required"
             />
             <FormInput
-              name="amount"
-              label="Price"
-              type="number"
-              control={control}
-              required={true}
-              errorMessage="Price is required"
-            />
-            <FormInput
               name="employeeCount"
               label="Employees Count"
               type="number"
@@ -399,6 +430,22 @@ export default function AddPlan() {
               control={control}
               required={true}
               errorMessage="Toggle limit is required"
+            />
+            <FormInput
+              name="whatsappProjectLimit"
+              label="WhatsApp Project Limit"
+              type="number"
+              control={control}
+              required={true}
+              errorMessage="WhatsApp project limit is required"
+            />
+            <FormInput
+              name="zoomProjectLimit"
+              label="Zoom Project Limit"
+              type="number"
+              control={control}
+              required={true}
+              errorMessage="Zoom project limit is required"
             />
             <FormControl variant="outlined">
               <InputLabel id="attendee-label">Plan Type</InputLabel>
@@ -695,7 +742,7 @@ export default function AddPlan() {
 
           <Box className="mt-6">
             <Typography variant="h6" className="mb-2 font-semibold">
-              Discounts
+              Duration Pricing & Discounts
             </Typography>
 
             <DiscountSection
@@ -703,6 +750,7 @@ export default function AddPlan() {
               setPlanDurationConfig={setPlanDurationConfig}
               regularDurations={regularDurations}
               watch={watch}
+              control={control}
             />
           </Box>
 

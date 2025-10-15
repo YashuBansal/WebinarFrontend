@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getPricePlans } from "../../features/actions/pricePlan";
 import PlanCard from "../Settings/Plans/PlanCard";
@@ -7,6 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { ClipLoader } from "react-spinners";
 import { updateClientPlan } from "../../features/actions/client";
 import { resetClientState } from "../../features/slices/client";
+import { Switch, FormControlLabel, Typography, Box } from "@mui/material";
 
 const UpdateClientPlan = (props) => {
   const dispatch = useDispatch();
@@ -16,8 +17,21 @@ const UpdateClientPlan = (props) => {
   const { planData } = useSelector((state) => state.pricePlans);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [durationType, setDurationType] = useState(null);
+  const [isYearly, setIsYearly] = useState(false); // Toggle for monthly/yearly
 
   const { isUpdating, isSuccess } = useSelector((state) => state.client);
+
+  // Memoize filtered plans to prevent unnecessary re-renders
+  const filteredPlans = useMemo(() => {
+    if (!planData || !Array.isArray(planData)) return [];
+    
+    const durationType = isYearly ? "yearly" : "monthly";
+    
+    return planData.filter((item) => {
+      const durationConfig = item.planDurationConfig?.[durationType];
+      return durationConfig?.isEnabled === true;
+    });
+  }, [planData, isYearly]);
 
   useEffect(() => {
     dispatch(getPricePlans());
@@ -60,22 +74,39 @@ const UpdateClientPlan = (props) => {
           </button>
         </div>
 
+        {/* Monthly/Yearly Toggle */}
+        <Box className="flex justify-center mb-6">
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isYearly}
+                onChange={(e) => setIsYearly(e.target.checked)}
+                color="primary"
+              />
+            }
+            label={
+              <Typography variant="h6" className="ml-2">
+                {isYearly ? "Yearly Plans" : "Monthly Plans"}
+              </Typography>
+            }
+          />
+        </Box>
+
         <div className="flex overflow-x-auto gap-4">
-          {Array.isArray(planData) &&
-            planData.map((item, index) => (
-              <div key={index} className="min-w-72">
-                <PlanCard
-                  plan={item}
-                  key={item._id}
-                  isSelectVisible={true}
-                  selectedPlan={selectedPlan}
-                  handlePlanSelection={(id, billing) => {
-                    setSelectedPlan(id);
-                    setDurationType(billing.durationType || "monthly");
-                  }}
-                />
-              </div>
-            ))}
+          {filteredPlans.map((item, index) => (
+            <div key={item._id || index} className="min-w-72">
+              <PlanCard
+                plan={item}
+                isSelectVisible={true}
+                selectedPlan={selectedPlan}
+                isYearly={isYearly}
+                handlePlanSelection={(id, billing) => {
+                  setSelectedPlan(id);
+                  setDurationType(billing.durationType || (isYearly ? "yearly" : "monthly"));
+                }}
+              />
+            </div>
+          ))}
         </div>
       </div>
     </div>

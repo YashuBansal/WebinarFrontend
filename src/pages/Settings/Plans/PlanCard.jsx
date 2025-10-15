@@ -26,6 +26,7 @@ const PlanCard = (props) => {
     plan,
     isMenuVisible = false,
     isSelectVisible = false,
+    isYearly = false,
     handlePlanSelection = (id, billingData) => {
       dispatch(
         checkout({ plan: id, durationType: billingData.durationType })
@@ -85,6 +86,53 @@ const PlanCard = (props) => {
 
 
   const { isCustomOptionsAllowed = false } = attendeeTableConfig || {};
+
+  // Calculate display price based on selected duration
+  const calculateDisplayPrice = () => {
+    const durationType = isYearly ? "yearly" : "monthly";
+    const durationConfig = plan.planDurationConfig?.[durationType];
+    
+    if (!durationConfig) return amount;
+    
+    let basePrice = durationConfig.price || amount;
+    
+    // Apply discount
+    if (durationConfig.discountType === "flat") {
+      basePrice = Math.max(basePrice - (durationConfig.discountValue || 0), 0);
+    } else if (durationConfig.discountType === "percent") {
+      const discountValue = durationConfig.discountValue || 0;
+      basePrice = Math.max(basePrice * ((100 - discountValue) / 100), 0);
+    }
+    
+    // If yearly is selected, convert to monthly equivalent for display
+    if (isYearly) {
+      return basePrice / 12;
+    }
+    
+    return basePrice;
+  };
+
+  const displayPrice = calculateDisplayPrice() || 0;
+  
+  // Calculate savings for yearly plans
+  const calculateSavings = () => {
+    if (!isYearly) return 0;
+    
+    const monthlyConfig = plan.planDurationConfig?.get?.("monthly");
+    const yearlyConfig = plan.planDurationConfig?.get?.("yearly");
+    
+    if (!monthlyConfig || !yearlyConfig) return 0;
+    
+    const monthlyPrice = monthlyConfig.price || amount;
+    const yearlyPrice = yearlyConfig.price || amount;
+    
+    const monthlyTotal = monthlyPrice * 12;
+    const yearlyTotal = yearlyPrice;
+    
+    return monthlyTotal - yearlyTotal;
+  };
+  
+  const savings = calculateSavings();
 
   return (
     <div className="relative mx-auto border border-gray-200 p-6 overflow-hidden rounded-xl shadow-lg max-w-sm bg-white m-4 transition-all duration-300 hover:shadow-xl">
@@ -184,8 +232,20 @@ const PlanCard = (props) => {
 
         <p className="text-4xl font-extrabold text-blue-600">
           {"\u20B9"}
-          {amount}
-          <span className="text-base font-normal text-gray-500">/month</span>
+          {displayPrice.toFixed(0)}
+          <span className="text-base font-normal text-gray-500">
+            /month
+            {isYearly && (
+              <span className="block text-xs text-green-600 font-semibold">
+                (Billed Yearly)
+                {savings > 0 && (
+                  <span className="block text-xs text-green-600 font-bold">
+                    Save ₹{savings.toFixed(0)}/year
+                  </span>
+                )}
+              </span>
+            )}
+          </span>
         </p>
       </div>
 
@@ -238,7 +298,14 @@ const PlanCard = (props) => {
           <ComponentGuard allowedRoles={isSelectVisible ? [] : [roles.ADMIN]}>
             {isActive && (
               <button
-                onClick={() => setDurationModalOpen(true)}
+                onClick={() => {
+                  const durationType = isYearly ? "yearly" : "monthly";
+                    const billingData = {
+                      durationType: durationType,
+                      totalAmount: displayPrice * (isYearly ? 12 : 1), // Convert back to actual billing amount
+                    };
+                    handlePlanSelection(plan?._id, billingData);
+                }}
                 className={`${
                   selectedPlan === plan?._id ? "bg-green-600" : "bg-blue-500"
                 } w-full mt-6 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-600 transition-colors duration-300`}

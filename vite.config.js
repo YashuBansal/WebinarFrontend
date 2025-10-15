@@ -16,4 +16,10 @@ export default defineConfig({
   build: {
     minify: true,
   },
+  optimizeDeps: {
+    include: ['@pdf-lib/fontkit']
+  },
+  define: {
+    global: 'globalThis',
+  },
 });

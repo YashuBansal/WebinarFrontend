@@ -10,6 +10,7 @@ import { resetPricePlanSuccess } from "../../../features/slices/pricePlan";
 import PlanInactiveModal from "./PlanInactiveModal";
 import { globalButton } from "../../../utils/style";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
+import { Switch, FormControlLabel, Typography, Box } from "@mui/material";
 
 const BrowseHeader = ({planURI}) => {
   return (
@@ -50,15 +51,24 @@ const ViewPlans = () => {
 
   const [modalData, setModalData] = useState(null);
   const [planType, setPlanType] = useState("active");
+  const [isYearly, setIsYearly] = useState(false); // Toggle for monthly/yearly
 
   const planDataFiltered = useMemo(() => {
     if (!Array.isArray(planData) || !userData || !roles) return [];
-    if (roles.isSuperAdmin(userData.role)) return planData;
+    
+    // Filter plans based on selected duration (monthly/yearly)
+    const durationType = isYearly ? "yearly" : "monthly";
+    const durationFilteredPlans = planData.filter((item) => {
+      const durationConfig = item.planDurationConfig?.[durationType];
+      return durationConfig?.isEnabled === true;
+    });
+    
+    if (roles.isSuperAdmin(userData.role)) return durationFilteredPlans;
     if (!subscription || !subscription.plan) return [];
-    const plan = planData.find((plan) => plan._id === subscription.plan._id);
+    const plan = durationFilteredPlans.find((plan) => plan._id === subscription.plan._id);
     if (!plan) return [];
     return [plan];
-  }, [userData, planData, roles, subscription]);
+  }, [userData, planData, roles, subscription, isYearly]);
 
   useEffect(() => {
     dispatch(getPricePlans({ isActive: planType }));
@@ -90,13 +100,31 @@ const ViewPlans = () => {
   return (
     <div className="py-14 px-4 md:px-8 flex flex-col items-center">
       <div className="w-full max-w-screen-2xl">
-        <BrowseHeader planURI={planURI}/>
+        {/* <BrowseHeader planURI={planURI}/> */}
       </div>
 
       <div className="p-6 bg-gray-50 rounded-lg w-full">
         <div className="flex gap-4 justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-700">Manage Plans</h2>
         </div>
+
+        {/* Monthly/Yearly Toggle */}
+        <Box className="flex justify-center mb-6">
+          <FormControlLabel
+            control={
+              <Switch
+                checked={isYearly}
+                onChange={(e) => setIsYearly(e.target.checked)}
+                color="primary"
+              />
+            }
+            label={
+              <Typography variant="h6" className="ml-2">
+                {isYearly ? "Yearly Plans" : "Monthly Plans"}
+              </Typography>
+            }
+          />
+        </Box>
 
         <div className="grid grid-cols-1   lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5">
           <div className="col-span-full  flex justify-end items-end pt-6">
@@ -133,6 +161,7 @@ const ViewPlans = () => {
                   isMenuVisible={true}
                   key={item?._id}
                   currentPlan={subscription?.plan?._id}
+                  isYearly={isYearly}
                 />
               </div>
             );

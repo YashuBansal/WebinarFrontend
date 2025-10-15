@@ -169,17 +169,18 @@ const Sidebar = ({ toggleButtonRef }) => {
             },
 
             {
-              path: "http://localhost:5174",
+              path: "https://msg.webinarleadshub.com",
               label: "Whatsapp",
               external: true,
               icon: (
                 <img src={WhatsappIcon} width={30} height={30} alt="Employee" />
               ),
               children: [],
-            },
+            },      
             {
-              path: "/zoom",
+              path: "https://livezoom.webinarleadshub.com",
               label: "Zoom",
+              external: true,
               icon: (
                 <img src={ZoomIcon} width={30} height={30} alt="Employee" />
               ),
