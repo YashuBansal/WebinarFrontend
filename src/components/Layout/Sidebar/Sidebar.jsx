@@ -169,7 +169,7 @@ const Sidebar = ({ toggleButtonRef }) => {
             },
 
             {
-              path: "https://msg.webinarleadshub.com",
+              path: "https://msg.ajaybansal.com",
               label: "Whatsapp",
               external: true,
               icon: (
@@ -178,7 +178,7 @@ const Sidebar = ({ toggleButtonRef }) => {
               children: [],
             },      
             {
-              path: "https://livezoom.webinarleadshub.com",
+              path: "https://livezoom.ajaybansal.com",
               label: "Zoom",
               external: true,
               icon: (
