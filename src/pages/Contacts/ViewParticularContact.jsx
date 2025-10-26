@@ -128,7 +128,7 @@ const ViewParticularContact = () => {
   }, []);
 
   useEffect(() => {
-    setSelectedOption(attendeeLeadType);
+    setSelectedOption(attendeeLeadType?.leadType || "");
   }, [attendeeLeadType]);
 
   useEffect(() => {
@@ -143,8 +143,12 @@ const ViewParticularContact = () => {
     )
       return;
 
+    const somePhones = attendeeLeadType?.phones || [];
+    const someNames = attendeeLeadType?.fullNames || [];
+
+
     const uniquePhonesArr = Array.from(
-      new Set(attendee?.data?.map((item) => item?.phone).filter(Boolean))
+      new Set([...somePhones, ...attendee?.data?.map((item) => item?.phone).filter(Boolean)])
     );
     setUniquePhones(uniquePhonesArr);
 
@@ -157,7 +161,7 @@ const ViewParticularContact = () => {
         return null;
       })
       .filter(Boolean);
-    const uniqueNamesArr = Array.from(new Set(namesArr));
+    const uniqueNamesArr = Array.from(new Set([...someNames, ...namesArr]));
     setUniqueNames(uniqueNamesArr);
 
     const data = [...selectedAttendee[0]?.data];
@@ -232,7 +236,7 @@ const ViewParticularContact = () => {
     // based on your specified rules.
 
     setAttendeeHistoryData(filteredData.reverse());
-  }, [selectedAttendee]);
+  }, [selectedAttendee, attendeeLeadType]);
 
   useEffect(() => {
     if (!leadTypeData) return;

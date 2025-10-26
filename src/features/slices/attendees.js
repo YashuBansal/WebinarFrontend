@@ -36,7 +36,7 @@ const initialState = {
   totalPages: 1,
   errorMessage: "",
   tabValue: "preWebinar",
-  attendeeLeadType: "",
+  attendeeLeadType: {},
   pagination: {},
   isSwapping: false,
   isImporting: false,
@@ -64,7 +64,7 @@ export const attendeeSlice = createSlice({
       state.tabValue = action.payload;
     },
     clearLeadType(state) {
-      state.attendeeLeadType = "";
+      state.attendeeLeadType = {};
       state.attendeeEnrollments = [];
       state.selectedAttendee = [];
     },
@@ -211,7 +211,7 @@ export const attendeeSlice = createSlice({
       })
       .addCase(getAttendeeLeadTypeByEmail.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.attendeeLeadType = action.payload?.leadType || "";
+        state.attendeeLeadType = action.payload || {};
       })
       .addCase(getAttendeeLeadTypeByEmail.rejected, (state, action) => {
         state.isLoading = false;
