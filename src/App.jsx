@@ -65,6 +65,7 @@ import {
   EmployeeAssignMetrics,
   AdminActivityLogs,
   ClientBillingHistories,
+  WebhookSetup,
 } from "./pages";
 import RouteGuard from "./components/AccessControl/RouteGuard";
 
@@ -286,6 +287,15 @@ const App = () => {
           element: (
             <RouteGuard roleNames={["ADMIN"]}>
               <WebinarAttendees />
+            </RouteGuard>
+          ),
+        },
+
+        {
+          path: "/webinar-webhook/setup/:id",
+          element: (
+            <RouteGuard roleNames={["ADMIN"]}>
+              <WebhookSetup />
             </RouteGuard>
           ),
         },

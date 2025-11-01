@@ -56,6 +56,63 @@ class TagsService {
       return { success: false };
     }
   }
+
+  async getWebinarWebhooks(webinarId) {
+    try {
+      const { data } = await instance.get(`webinar-webhook`, {
+        params: { webinarId },
+      });
+      return data;
+    } catch (error) {
+      console.error(error);
+      errorToast(error || "Error fetching webhooks");
+      return { success: false };
+    }
+  }
+
+  async createWebinarWebhook(payload) {
+    try {
+      const { data } = await instance.post(`webinar-webhook`, payload);
+      return data;
+    } catch (error) {
+      console.error(error);
+      errorToast(error || "Error creating webhook");
+      return { success: false };
+    }
+  }
+
+  async updateWebinarWebhook(id, payload) {
+    try {
+      const { data } = await instance.patch(`webinar-webhook/${id}`, payload);
+      return data;
+    } catch (error) {
+      console.error(error);
+      errorToast(error || "Error updating webhook");
+      return { success: false };
+    }
+  }
+
+  async deleteWebinarWebhook(id) {
+    try {
+      const { data } = await instance.delete(`webinar-webhook/${id}`);
+      return data;
+    } catch (error) {
+      console.error(error);
+      errorToast(error || "Error deleting webhook");
+      return { success: false };
+    }
+  }
+
+  async getWebinarWebhookById(id) {
+    try {
+      const { data } = await instance.get(`webinar-webhook/${id}`);
+      return data;
+    } catch (error) {
+      console.error(error);
+      errorToast(error || "Error fetching webhook");
+      return { success: false };
+    }
+  }
 }
 
 const tagsService = new TagsService();

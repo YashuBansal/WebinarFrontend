@@ -1,4 +1,11 @@
-import { useEffect, useState, lazy, Suspense, useRef, useCallback } from "react";
+import {
+  useEffect,
+  useState,
+  lazy,
+  Suspense,
+  useRef,
+  useCallback,
+} from "react";
 
 const Pullbacks = lazy(() => import("./Pullbacks"));
 const Enrollments = lazy(() => import("./Enrollments"));
@@ -35,6 +42,9 @@ import { globalButton } from "../../utils/style";
 import { useMediaQuery, useTheme } from "@mui/material";
 import AutoAssignmentModal from "./modal/AutoAssignmentModal";
 import tagsService from "../../services/tagsService";
+const WebinarWebhooksListDialog = lazy(() =>
+  import("./modal/WebinarWebhooksListDialog")
+);
 
 const WebinarAttendees = () => {
   const { id } = useParams();
@@ -42,11 +52,9 @@ const WebinarAttendees = () => {
   const logUserActivity = useAddUserActivity();
 
   const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md")); 
+  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
 
-  const { enrollmentCounts } = useSelector(
-    (state) => state.attendee
-  );
+  const { enrollmentCounts } = useSelector((state) => state.attendee);
   const { userData } = useSelector((state) => state.auth);
   const { reAssignCounts } = useSelector((state) => state.reAssign);
   const [selectedRows, setSelectedRows] = useState([]);
@@ -63,7 +71,7 @@ const WebinarAttendees = () => {
   const subTabValueRef = useRef(searchParams.get("subTabValue") || "attendees");
 
   const [settingModalOpen, setSettingModalOpen] = useState(false);
-
+  const [webhookDialogOpen, setWebhookDialogOpen] = useState(false);
 
   useEffect(() => {
     // Get the current values from the URL
@@ -111,24 +119,21 @@ const WebinarAttendees = () => {
     setSearchParams,
   ]);
 
-  const fetchWebinarData = useCallback(()=> {
+  const fetchWebinarData = useCallback(() => {
     tagsService.getWebinarById(id).then((res) => {
-      if(res?.success){
+      if (res?.success) {
         setWebinarData(res.data);
+      } else {
+        setWebinarData(null);
       }
-      else{
-        setWebinarData(null)
-      }
-    })
-  },[id, tagsService])
+    });
+  }, [id, tagsService]);
 
   useEffect(() => {
     dispatch(getLeadType());
     dispatch(getAllEmployees({}));
     fetchCounts();
     fetchWebinarData();
-    
-
   }, []);
 
   function fetchCounts() {
@@ -222,12 +227,20 @@ const WebinarAttendees = () => {
         </div>
         <div className="flex gap-2 ">
           {tabValueRef.current !== "enrollments" && (
-            <button
-              className={globalButton}
-              onClick={() => setSettingModalOpen(true)}
-            >
-              Settings
-            </button>
+            <div className="flex gap-2">
+              <button
+                className={globalButton}
+                onClick={() => setWebhookDialogOpen(true)}
+              >
+                Webhook
+              </button>
+              <button
+                className={globalButton}
+                onClick={() => setSettingModalOpen(true)}
+              >
+                Settings
+              </button>
+            </div>
           )}
 
           {tabValueRef.current === "postWebinar" && (
@@ -237,14 +250,22 @@ const WebinarAttendees = () => {
           )}
         </div>
 
-        {
-          tabValueRef.current === 'enrollments' && (
-            <div className="flex gap-4">
-              <span className="text-sm text-neutral-900">Total Enrollments: <span className="font-semibold text-lg text-indigo-500">{enrollmentCounts?.totalEnrollments || 0}</span></span>
-              <span className="text-sm text-neutral-900">Total Revenue: <span className="font-semibold text-lg text-indigo-500">{enrollmentCounts?.totalRevenue || 0}</span></span>
-            </div>
-          )
-        }
+        {tabValueRef.current === "enrollments" && (
+          <div className="flex gap-4">
+            <span className="text-sm text-neutral-900">
+              Total Enrollments:{" "}
+              <span className="font-semibold text-lg text-indigo-500">
+                {enrollmentCounts?.totalEnrollments || 0}
+              </span>
+            </span>
+            <span className="text-sm text-neutral-900">
+              Total Revenue:{" "}
+              <span className="font-semibold text-lg text-indigo-500">
+                {enrollmentCounts?.totalRevenue || 0}
+              </span>
+            </span>
+          </div>
+        )}
       </div>
 
       {tabValueRef.current && (
@@ -468,6 +489,17 @@ const WebinarAttendees = () => {
         webinarData={webinarData}
         refetchWebinarData={fetchWebinarData}
       />
+
+      {webhookDialogOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <WebinarWebhooksListDialog
+            webinarId={id}
+            isOpen={webhookDialogOpen}
+            onClose={() => setWebhookDialogOpen(false)}
+            onRefresh={fetchWebinarData}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };
