@@ -7,25 +7,34 @@ import {
 } from "@mui/icons-material";
 import { copyToClipboard } from "../../../../utils/extra";
 import tagsService from "../../../../services/tagsService";
+import ConfirmDeleteModal from "../../../../components/ConfirmDeleteModal";
 
 const WebhookItem = ({ webhook, onUpdate, onDelete }) => {
   const navigate = useNavigate();
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleSetup = () => {
     navigate(`/webinar-webhook/setup/${webhook._id}`);
   };
 
-  const handleDelete = async () => {
-    if (window.confirm("Are you sure you want to delete this webhook?")) {
-      try {
-        const response = await tagsService.deleteWebinarWebhook(webhook._id);
-        if (response?.success && onDelete) {
-          onDelete();
-        }
-      } catch (error) {
-        console.error("Error deleting webhook:", error);
+  const handleDeleteClick = () => {
+    setShowDeleteModal(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setIsDeleting(true);
+    try {
+      const response = await tagsService.deleteWebinarWebhook(webhook._id);
+      if (response?.success && onDelete) {
+        setShowDeleteModal(false);
+        onDelete();
       }
+    } catch (error) {
+      console.error("Error deleting webhook:", error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -108,7 +117,7 @@ const WebhookItem = ({ webhook, onUpdate, onDelete }) => {
             <Settings className="w-4 h-4" /> Setup
           </button>
           <button
-            onClick={handleDelete}
+            onClick={handleDeleteClick}
             disabled={isUpdating}
             className="px-3 py-1.5 rounded-lg text-sm font-medium bg-red-100 text-red-700 hover:bg-red-200 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
             type="button"
@@ -117,6 +126,15 @@ const WebhookItem = ({ webhook, onUpdate, onDelete }) => {
           </button>
         </div>
       </div>
+      
+      {showDeleteModal && (
+        <ConfirmDeleteModal
+          setModal={setShowDeleteModal}
+          triggerDelete={handleConfirmDelete}
+          isLoading={isDeleting}
+          title={`Are you sure you want to delete "${webhook.webhookName || "this webhook"}"? Please confirm deletion by entering the number below:`}
+        />
+      )}
     </div>
   );
 };

@@ -228,12 +228,14 @@ const WebinarAttendees = () => {
         <div className="flex gap-2 ">
           {tabValueRef.current !== "enrollments" && (
             <div className="flex gap-2">
-              <button
-                className={globalButton}
-                onClick={() => setWebhookDialogOpen(true)}
-              >
-                Webhook
-              </button>
+              {tabValueRef.current === "preWebinar" && (
+                <button
+                  className={globalButton}
+                  onClick={() => setWebhookDialogOpen(true)}
+                >
+                  Webhook
+                </button>
+              )}
               <button
                 className={globalButton}
                 onClick={() => setSettingModalOpen(true)}

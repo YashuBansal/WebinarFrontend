@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { ArrowBack, ContentCopy, CheckCircle } from "@mui/icons-material";
 import tagsService from "../../../services/tagsService";
-import { copyToClipboard } from "../../../utils/extra";
+import { copyToClipboard, errorToast, successToast } from "../../../utils/extra";
 import LoadingSpinner from "./components/LoadingSpinner";
 
 // Helper function to flatten nested objects
@@ -45,6 +45,7 @@ const WebhookSetup = () => {
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [fieldMapping, setFieldMapping] = useState({});
+  const [staticValues, setStaticValues] = useState({});
   const [isSavingMapping, setIsSavingMapping] = useState(false);
   
   // Attendee fields that can be mapped
@@ -92,6 +93,13 @@ const WebhookSetup = () => {
     } else {
       setFieldMapping({});
     }
+    
+    // Update static values state when webhook data changes
+    if (webhook?.staticValues) {
+      setStaticValues(webhook.staticValues);
+    } else {
+      setStaticValues({});
+    }
   }, [webhook]);
 
   // Polling effect - check every 5 seconds if response is not captured
@@ -118,11 +126,21 @@ const WebhookSetup = () => {
   const handleMappingChange = (webhookFieldPath, attendeeField) => {
     // Update local state only - don't save yet
     const newMapping = { ...fieldMapping };
+    const previouslyMappedField = newMapping[webhookFieldPath];
+    const newStaticValues = { ...staticValues };
+    
     if (attendeeField) {
       newMapping[webhookFieldPath] = attendeeField;
+      // Clear static value for the newly mapped field when mapping dynamically (user chose dynamic mapping)
+      if (attendeeField !== previouslyMappedField && attendeeField !== "email" && staticValues[attendeeField]) {
+        delete newStaticValues[attendeeField];
+        setStaticValues(newStaticValues);
+      }
     } else {
+      // Unmapping - don't clear static value, just remove the mapping (static input will become visible)
       delete newMapping[webhookFieldPath];
     }
+    
     setFieldMapping(newMapping);
   };
 
@@ -132,7 +150,7 @@ const WebhookSetup = () => {
     // Check if email is mapped (required field)
     const emailMapped = Object.values(fieldMapping).includes("email");
     if (!emailMapped) {
-      alert("Email field mapping is required. Please map at least the email field.");
+      errorToast("Email field mapping is required. Please map at least the email field.");
       return;
     }
 
@@ -151,17 +169,27 @@ const WebhookSetup = () => {
         throw new Error("Email field mapping is required");
       }
 
+      // Clean staticValues - remove empty values
+      const staticValuesToSave = {};
+      Object.entries(staticValues).forEach(([field, value]) => {
+        if (value && value.trim()) {
+          staticValuesToSave[field] = value.trim();
+        }
+      });
+
       const response = await tagsService.updateWebinarWebhook(webhook._id, {
         fieldMapping: mappingToSave,
+        staticValues: staticValuesToSave,
       });
 
       if (response?.success) {
         // Refresh webhook data to get the updated mapping
         await fetchWebhook();
+        successToast("Field mappings saved successfully");
       }
     } catch (error) {
       console.error("Error saving field mapping:", error);
-      alert(error.message || "Error saving field mapping. Email field mapping is required.");
+      errorToast(error.message || "Error saving field mapping. Email field mapping is required.");
       // Revert on error
       if (webhook?.fieldMapping) {
         const reversedMapping = {};
@@ -171,6 +199,11 @@ const WebhookSetup = () => {
           }
         });
         setFieldMapping(reversedMapping);
+      }
+      if (webhook?.staticValues) {
+        setStaticValues(webhook.staticValues);
+      } else {
+        setStaticValues({});
       }
     } finally {
       setIsSavingMapping(false);
@@ -185,11 +218,13 @@ const WebhookSetup = () => {
       const response = await tagsService.updateWebinarWebhook(webhook._id, {
         isResponseCaptured: false,
         fieldMapping: {}, // Clear previous mappings
+        staticValues: {}, // Clear previous static values
       });
 
       if (response?.success) {
         // Clear local mapping state
         setFieldMapping({});
+        setStaticValues({});
         // Refresh webhook data
         await fetchWebhook();
       }
@@ -203,6 +238,22 @@ const WebhookSetup = () => {
   // Helper function to find which attendee field a webhook path is mapped to
   const getMappedField = (webhookFieldPath) => {
     return fieldMapping[webhookFieldPath] || "";
+  };
+
+  // Helper function to handle static value change
+  const handleStaticValueChange = (field, value) => {
+    const newStaticValues = { ...staticValues };
+    if (value && value.trim()) {
+      newStaticValues[field] = value.trim();
+    } else {
+      delete newStaticValues[field];
+    }
+    setStaticValues(newStaticValues);
+  };
+
+  // Helper function to check if a field is dynamically mapped
+  const isFieldDynamicallyMapped = (fieldName) => {
+    return Object.values(fieldMapping).includes(fieldName);
   };
 
   // Extract only the body from captured data for display
@@ -362,7 +413,7 @@ const WebhookSetup = () => {
               Captured Data & Field Mapping
             </h2>
             <p className="text-sm text-gray-600 mb-4">
-              Map each captured field to an attendee field using the dropdown. <span className="font-semibold text-red-600">Email field mapping is required.</span>
+              Map each captured field to an attendee field using the dropdown, or set static values for fields below. <span className="font-semibold text-red-600">Email field mapping is required (must map from webhook data, not static).</span>
             </p>
             {Object.keys(flattenedData).length > 0 ? (
               <div className="overflow-x-auto">
@@ -423,6 +474,61 @@ const WebhookSetup = () => {
                 No data fields found
               </div>
             )}
+
+            {/* Static Values Section */}
+            <div className="mt-8 border-t border-gray-200 pt-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                Static Values
+              </h3>
+              <p className="text-sm text-gray-600 mb-4">
+                Set static values for attendee fields that will always use these values instead of mapping from webhook data. <span className="font-semibold">Email cannot be set as static (must be mapped from webhook).</span>
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {attendeeFields
+                  .filter(
+                    (field) =>
+                      field.value !== "email" && // Exclude email
+                      !isFieldDynamicallyMapped(field.value) // Exclude dynamically mapped fields
+                  )
+                  .map((field) => (
+                    <div key={field.value} className="flex flex-col">
+                      <label className="text-sm font-medium text-gray-700 mb-2">
+                        {field.label}
+                      </label>
+                      <input
+                        type="text"
+                        value={staticValues[field.value] || ""}
+                        onChange={(e) =>
+                          handleStaticValueChange(field.value, e.target.value)
+                        }
+                        disabled={isSavingMapping}
+                        placeholder={`Enter static value for ${field.label}`}
+                        className={`px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent ${
+                          isSavingMapping
+                            ? "opacity-50 cursor-not-allowed bg-gray-100"
+                            : "bg-white"
+                        } ${
+                          staticValues[field.value]
+                            ? "bg-blue-50 border-blue-300"
+                            : ""
+                        }`}
+                      />
+                    </div>
+                  ))}
+                {attendeeFields
+                  .filter(
+                    (field) =>
+                      field.value !== "email" &&
+                      isFieldDynamicallyMapped(field.value)
+                  ).length > 0 && (
+                  <div className="col-span-full mt-2">
+                    <p className="text-xs text-gray-500 italic">
+                      Note: Fields that are dynamically mapped from webhook data are not shown here. Unmap them to set static values.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
             
             {/* Save Button */}
             <div className="mt-6 flex justify-end">
@@ -447,17 +553,35 @@ const WebhookSetup = () => {
                 </p>
               </div>
             )}
-            {webhook?.fieldMapping && Object.keys(webhook.fieldMapping).length > 0 && (
+            {((webhook?.fieldMapping && Object.keys(webhook.fieldMapping).length > 0) ||
+              (webhook?.staticValues && Object.keys(webhook.staticValues).length > 0)) && (
               <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
                 <p className="text-sm font-semibold text-green-800 mb-2">Active Mappings:</p>
                 <div className="space-y-1">
-                  {Object.entries(webhook.fieldMapping).map(([attendeeField, webhookPath]) => (
-                    <div key={attendeeField} className="text-sm text-green-700">
-                      <span className="font-medium capitalize">{attendeeField}:</span>{" "}
-                      <code className="bg-green-100 px-2 py-0.5 rounded">{webhookPath}</code>
-                    </div>
-                  ))}
+                  {webhook?.fieldMapping &&
+                    Object.entries(webhook.fieldMapping).map(([attendeeField, webhookPath]) => (
+                      <div key={attendeeField} className="text-sm text-green-700">
+                        <span className="font-medium capitalize">{attendeeField}:</span>{" "}
+                        <code className="bg-green-100 px-2 py-0.5 rounded">{webhookPath}</code>
+                        <span className="ml-2 text-xs text-green-600">(mapped from webhook)</span>
+                      </div>
+                    ))}
                 </div>
+                {webhook?.staticValues &&
+                  Object.keys(webhook.staticValues).length > 0 && (
+                    <div className="mt-3 pt-3 border-t border-green-300">
+                      <p className="text-sm font-semibold text-purple-800 mb-2">Static Values:</p>
+                      <div className="space-y-1">
+                        {Object.entries(webhook.staticValues).map(([attendeeField, staticValue]) => (
+                          <div key={attendeeField} className="text-sm text-purple-700">
+                            <span className="font-medium capitalize">{attendeeField}:</span>{" "}
+                            <code className="bg-purple-100 px-2 py-0.5 rounded">{staticValue}</code>
+                            <span className="ml-2 text-xs text-purple-600">(static)</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
               </div>
             )}
           </div>
