@@ -169,16 +169,20 @@ const Sidebar = ({ toggleButtonRef }) => {
             },
 
             {
-              path: "https://msg.ajaybansal.com",
+              path:
+                import.meta.env.VITE_REACT_APP_WHATSAPP_URL ||
+                "https://msg.ajaybansal.com",
               label: "Whatsapp",
               external: true,
               icon: (
                 <img src={WhatsappIcon} width={30} height={30} alt="Employee" />
               ),
               children: [],
-            },      
+            },
             {
-              path: "https://livezoom.ajaybansal.com",
+              path:
+                import.meta.env.VITE_REACT_APP_ZOOM_URL ||
+                "https://livezoom.ajaybansal.com",
               label: "Zoom",
               external: true,
               icon: (
