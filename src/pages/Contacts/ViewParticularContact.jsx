@@ -1,4 +1,4 @@
-import { useEffect, useState, Suspense, lazy } from "react";
+import { useEffect, useState, Suspense, lazy, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AddNoteForm from "./AddNoteForm";
 import { getLeadType, getNotes } from "../../features/actions/assign";
@@ -63,7 +63,12 @@ const ViewParticularContact = () => {
 
   const searchParams = new URLSearchParams(location.search);
   const email = searchParams.get("email");
-  const attendeeId = searchParams.get("attendeeId");
+  const paramAttendeeId = searchParams.get("attendeeId");
+
+  const attendeeId = useMemo(() => {
+    return paramAttendeeId ? paramAttendeeId : null;
+  }, [paramAttendeeId]);
+
   const [showTimerModal, setShowTimerModal] = useState(false);
   const [selectedOption, setSelectedOption] = useState("");
   const [uniquePhones, setUniquePhones] = useState([]);
