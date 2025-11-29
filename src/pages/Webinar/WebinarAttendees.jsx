@@ -72,6 +72,7 @@ const WebinarAttendees = () => {
 
   const [settingModalOpen, setSettingModalOpen] = useState(false);
   const [webhookDialogOpen, setWebhookDialogOpen] = useState(false);
+  const [applyTagsModalOpen, setApplyTagsModalOpen] = useState(false);
 
   useEffect(() => {
     // Get the current values from the URL
@@ -242,6 +243,15 @@ const WebinarAttendees = () => {
               >
                 Settings
               </button>
+              {console.log(tabValueRef.current, subTabValueRef.current, userData?.isActive)}
+              { (tabValueRef.current === "preWebinar" || tabValueRef.current === "postWebinar") && subTabValueRef.current === "attendees" && userData?.isActive && (
+                <button
+                  className={globalButton}
+                  onClick={() => setApplyTagsModalOpen(true)}
+                >
+                  Apply Tags
+                </button>
+              )}
             </div>
           )}
 
@@ -416,6 +426,8 @@ const WebinarAttendees = () => {
                   setSelectedRows={setSelectedRows}
                   selectedAssignmentType={selectedAssignmentType}
                   setSelectedAssignmentType={setSelectedAssignmentType}
+                  applyTagsModalOpen={applyTagsModalOpen}
+                  setApplyTagsModalOpen={setApplyTagsModalOpen}
                 />
               )}
             {subTabValueRef.current !== "attendees" &&

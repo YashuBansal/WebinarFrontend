@@ -21,7 +21,6 @@ import {
   deleteAllAttendeesData,
   getAttendeeLogs,
   getWebinarParticipants,
-  updateAttendeeTag,
 } from "../actions/attendees";
 
 const initialState = {
@@ -93,19 +92,6 @@ export const attendeeSlice = createSlice({
         state.isLoading = false;
         errorToast(action?.payload);
         state.isImporting = false;
-      })
-      .addCase(updateAttendeeTag.pending, (state) => {
-        state.isLoading = true;
-        state.isSuccess = false;
-      })
-      .addCase(updateAttendeeTag.fulfilled, (state) => {
-        state.isLoading = false;
-        state.isSuccess = true;
-        successToast("Attendees Tag Added Successfully");
-      })
-      .addCase(updateAttendeeTag.rejected, (state, action) => {
-        state.isLoading = false;
-        errorToast(action?.payload);
       })
       .addCase(updateAttendee.pending, (state) => {
         state.isLoading = true;

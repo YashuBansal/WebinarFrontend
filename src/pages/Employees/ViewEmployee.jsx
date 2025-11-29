@@ -43,6 +43,10 @@ import { setWebinarAttendeesFilters } from "../../features/slices/filters.slice"
 import { exportUserActivitiesByUser } from "../../features/actions/export-excel";
 import ModalFallback from "../../components/Fallback/ModalFallback";
 import { resetUserActivities } from "../../features/slices/userActivity";
+import { createPortal } from "react-dom";
+import ApplyTagsModal from "../../components/Webinar/ApplyTagsModal";
+import { useApplyTagsToEmployeeAssignments } from "../../hooks/useTags";
+import { globalButton } from "../../utils/style";
 
 const ExportEmployeeAssignments = lazy(() =>
   import("../../components/Export/ExportEmployeeAssignments")
@@ -109,6 +113,8 @@ const ViewEmployee = () => {
   const [validCallFlag, setValidCallFlag] = useState(
     searchParams.get("valid-call") || "all"
   );
+
+  const [applyTagsModalOpen, setApplyTagsModalOpen] = useState(false);
 
   const resetFilterRef = useRef(false);
   useEffect(() => {
@@ -277,6 +283,19 @@ const ViewEmployee = () => {
     };
   }, [assignData, leadTypeData, notAllowedColumns]);
 
+  const {
+    mutateAsync: applyTagsForEmployee,
+    isPending: isApplyingTags,
+  } = useApplyTagsToEmployeeAssignments(id, () => {
+    // After tagging, refetch assignments based on current tab
+    if (tabValue === "history") {
+      fetchEmployeeAssignments("Worked");
+    } else {
+      fetchEmployeeAssignments("Pending");
+    }
+    setApplyTagsModalOpen(false);
+  });
+
   const handleTabChange = (_, newValue) => {
     setTabValue(newValue);
     if (newValue === "activityLogs") {
@@ -401,6 +420,16 @@ const ViewEmployee = () => {
         )}
         {(tabValue === "history" || tabValue === "assignments") && (
           <>
+            {currentWebinar && (
+              <div className="flex justify-end mb-4">
+                <button
+                  className={globalButton}
+                  onClick={() => setApplyTagsModalOpen(true)}
+                >
+                  Apply Tags
+                </button>
+              </div>
+            )}
             <DataTable
               tableHeader={tableHeader}
               ButtonGroup={WebinarDropdown}
@@ -458,6 +487,34 @@ const ViewEmployee = () => {
                 />
               </Suspense>
             )}
+            {applyTagsModalOpen &&
+              createPortal(
+                <Suspense fallback={<ModalFallback />}>
+                  <ApplyTagsModal
+                    onClose={() => setApplyTagsModalOpen(false)}
+                    onSubmit={async (tag) => {
+                        const normalizedWebinarId =
+                          currentWebinar && currentWebinar !== "all"
+                            ? currentWebinar
+                            : undefined;
+
+                      await applyTagsForEmployee({
+                        webinarId: normalizedWebinarId,
+                        isAttended:
+                          role === "EMPLOYEE_SALES" ||
+                          role === roles.EMPLOYEE_SALES,
+                        filters: webinarAttendeesFilters,
+                        validCall: tabValue === "history" ? "Worked" : "Pending",
+                        assignmentType: "Assigned",
+                        assignmentStatus: AssignmentStatus.ACTIVE,
+                        tag,
+                      });
+                    }}
+                    isLoading={isApplyingTags}
+                  />
+                </Suspense>,
+                document.body
+              )}
           </>
         )}
       </div>

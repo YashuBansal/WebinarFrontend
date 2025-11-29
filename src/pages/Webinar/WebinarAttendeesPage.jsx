@@ -35,6 +35,9 @@ const ExportWebinarAttendeesModal = lazy(() =>
 const SwapAttendeeFieldsModal = lazy(() =>
   import("../../components/Webinar/SwapAttendeeFieldsModal")
 );
+const ApplyTagsModal = lazy(() =>
+  import("../../components/Webinar/ApplyTagsModal")
+);
 import { createPortal } from "react-dom";
 import ModalFallback from "../../components/Fallback/ModalFallback";
 import { setWebinarAttendeesFilters } from "../../features/slices/filters.slice";
@@ -45,6 +48,9 @@ import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
 import { VisibilityIcon } from "../../components/SVGs";
 import { clearWebinarData } from "../../features/slices/webinarContact";
 import { baseURL } from "../../services/axiosInterceptor";
+import { getTagsData, setTagsData } from "../../features/slices/globalData";
+import tagsService from "../../services/tagsService";
+import { useBulkApplyTagsByFilters } from "../../hooks/useTags";
 
 const WebinarAttendeesPage = (props) => {
   const {
@@ -59,6 +65,8 @@ const WebinarAttendeesPage = (props) => {
     setSelectedRows,
     setSelectedAssignmentType,
     selectedAssignmentType,
+    applyTagsModalOpen,
+    setApplyTagsModalOpen,
   } = props;
 
   const tableHeader = "Attendees Table";
@@ -127,6 +135,41 @@ const WebinarAttendeesPage = (props) => {
     };
   }, [tabValue]);
 
+  const tagsData = useSelector(getTagsData);
+
+  const { mutateAsync: applyTagsByFilters, isPending: isApplyingTags,  } =
+    useBulkApplyTagsByFilters(() => {
+      // After successful tagging, refetch attendees for first page
+      dispatch(
+        getAttendees({
+          id,
+          isAttended: tabValue === "postWebinar",
+          filters: webinarAttendeesFilters,
+          validCall: selected === "All" ? undefined : selected,
+          assignmentType:
+            selectedAssignmentType === "All"
+              ? undefined
+              : selectedAssignmentType,
+          sort: sortByOption,
+          page: 1,
+          limit: LIMIT,
+        })
+      );
+      // Close the Apply Tags dialog
+      setApplyTagsModalOpen(false);
+    });
+
+  useEffect(() => {
+    // Fetch tags if not already loaded
+    if (!tagsData || tagsData.length === 0) {
+      tagsService.getTags().then((res) => {
+        if (res.success) {
+          dispatch(setTagsData(res.data));
+        }
+      });
+    }
+  }, [dispatch, tagsData]);
+
   useEffect(() => {
     if (tabValue !== "enrollments" && subTabValue === "attendees") {
       setSelectedRows([]);
@@ -177,6 +220,7 @@ const WebinarAttendeesPage = (props) => {
       dispatch(resetReAssignSuccess());
       dispatch(resetAssignSuccess());
       setDeleteModal(false);
+      setApplyTagsModalOpen(false);
       setSelectedRows([]);
     }
   }, [isSuccess, assignSuccess, isSuccessReAssign, sortByOption]);
@@ -407,6 +451,31 @@ const handleCopy = useCallback(
 );
 
 
+  const handleApplyTag = useCallback(
+    async (tag) => {
+      await applyTagsByFilters({
+        webinarId: id,
+        isAttended: tabValue === "postWebinar",
+        filters: webinarAttendeesFilters,
+        validCall: selected === "All" ? undefined : selected,
+        assignmentType:
+          selectedAssignmentType === "All" ? undefined : selectedAssignmentType,
+        tag,
+      });
+    },
+    [
+      applyTagsByFilters,
+      id,
+      tabValue,
+      webinarAttendeesFilters,
+      selected,
+      selectedAssignmentType,
+      LIMIT,
+      sortByOption,
+      dispatch,
+    ]
+  );
+
   return (
     <>
       <DataTable
@@ -494,6 +563,18 @@ const handleCopy = useCallback(
                 )
               }
               isLoading={isDeleting}
+            />
+          </Suspense>,
+          document.body
+        )}
+
+      {applyTagsModalOpen &&
+        createPortal(
+          <Suspense fallback={<ModalFallback />}>
+            <ApplyTagsModal
+              onClose={() => setApplyTagsModalOpen(false)}
+              onSubmit={handleApplyTag}
+              isLoading={isApplyingTags}
             />
           </Suspense>,
           document.body

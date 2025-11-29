@@ -127,7 +127,6 @@ const AttendeeHistoryTable = ({
                   <th className="py-3 min-w-[200px]">Webinar Minutes</th>
                   <th className="py-3 px-1">Location</th>
                   <th className="py-3 px-1 min-w-[150px]">Webinar Date</th>
-                  <th className="py-3 px-1">Tags</th>
                   <ComponentGuard
                     conditions={[!employeeModeData, userData?.isActive]}
                   >
@@ -176,25 +175,6 @@ const AttendeeHistoryTable = ({
                       {Array.isArray(item?.webinar) && item.webinar.length > 0
                         ? formatDateAsNumber(item.webinar[0].webinarDate)
                         : "-"}
-                    </td>
-                    <td className="px-3 py-4">
-                      <div className="flex flex-nowrap gap-2">
-                        {Array.isArray(item?.tags)
-                          ? item.tags
-                              .filter(
-                                (tag) =>
-                                  typeof tag === "string" && tag.trim() !== ""
-                              )
-                              .map((tag, idx) => (
-                                <span
-                                  key={idx}
-                                  className="px-2 py-1 rounded-full text-xs bg-gray-300 text-gray-800"
-                                >
-                                  {tag}
-                                </span>
-                              ))
-                          : "-"}
-                      </div>
                     </td>
                     <ComponentGuard
                       conditions={[!employeeModeData, userData?.isActive]}
@@ -278,19 +258,6 @@ const HistoryCard = ({ item, index, onEdit, formatDate, showEditButton }) => {
         <StatRow label="Location" value={item?.location || "N/A"} valueClassName="capitalize" />
       </dl>
       
-      {/* Tags */}
-      {Array.isArray(item?.tags) && item.tags.filter(t => t).length > 0 && (
-         <div className="mt-3 pt-3 border-t border-gray-100">
-            <p className="text-sm text-gray-500 mb-2">Tags</p>
-            <div className="flex flex-wrap gap-2">
-                {item.tags.filter(t => t).map((tag, idx) => (
-                    <span key={idx} className="px-2 py-1 rounded-full text-xs bg-gray-200 text-gray-800">
-                        {tag}
-                    </span>
-                ))}
-            </div>
-        </div>
-      )}
     </div>
   );
 };

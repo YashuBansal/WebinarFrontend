@@ -14,18 +14,6 @@ export const addAttendees = createAsyncThunk(
   }
 );
 
-export const updateAttendeeTag = createAsyncThunk(
-  "attendees/update/tag",
-  async (payload, { rejectWithValue }) => {
-    try {
-      const response = await instance.put(`/attendees/tag`, payload);
-      return response;
-    } catch (e) {
-      return rejectWithValue(e);
-    }
-  }
-);
-
 //get single Attendee
 export const getAttendee = createAsyncThunk(
   "attendee",
