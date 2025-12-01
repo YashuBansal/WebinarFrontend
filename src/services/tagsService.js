@@ -57,6 +57,20 @@ class TagsService {
     }
   }
 
+  async updateAttendeeAssociationTag(email, tag, action) {
+    try {
+      const { data } = await instance.patch(
+        `attendee-association/${email}/tags`,
+        { tag, action }
+      );
+      return data;
+    } catch (error) {
+      console.error(error);
+      errorToast(error || "Error updating tag");
+      return { success: false };
+    }
+  }
+
   async getWebinarWebhooks(webinarId) {
     try {
       const { data } = await instance.get(`webinar-webhook`, {

@@ -23,6 +23,9 @@ import { clearEmployeeData } from "../../features/slices/employee";
 import { getAllEmployees } from "../../features/actions/employee";
 import GroupedAttendeesExportModal from "./Modal/GroupedAttendeeExportModal";
 import { baseURL } from "../../services/axiosInterceptor";
+import { useBulkApplyTagsToAllAttendees } from "../../hooks/useTags";
+import { globalButton } from "../../utils/style";
+import ApplyTagsModal from "../../components/Webinar/ApplyTagsModal";
 
 const WebinarAttendees = () => {
   // ----------------------- ModalNames for Redux -----------------------
@@ -54,6 +57,7 @@ const WebinarAttendees = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(searchParams.get("page") || 1);
   const [deleteModal, setDeleteModal] = useState(false);
+  const [applyTagsModalOpen, setApplyTagsModalOpen] = useState(false);
 
   useEffect(() => {
     const currentPageInUrl = searchParams.get("page");
@@ -154,6 +158,23 @@ const WebinarAttendees = () => {
     [employeeData]
   );
 
+  const {
+    mutateAsync: applyTagsToAllAttendees,
+    isPending: isApplyingTags,
+  } = useBulkApplyTagsToAllAttendees(() => {
+    // After tagging, refetch grouped attendees from first page
+    setPage(1);
+    dispatch(
+      fetchGroupedAttendees({
+        page: 1,
+        limit: LIMIT,
+        filters: allAttendeesFilters,
+        sort: allAttendeesSortBy,
+      })
+    );
+    setApplyTagsModalOpen(false);
+  });
+
   const handleCopy = useCallback(
     (additionalFilters = {}) => {
       const GROUPED_ATTENDEES_ENDPOINT = "/attendees/grouped";
@@ -189,6 +210,14 @@ const WebinarAttendees = () => {
 
   return (
     <div className=" md:px-10 pt-14 space-y-6">
+      <div className="flex justify-end">
+        <button
+          className={globalButton}
+          onClick={() => setApplyTagsModalOpen(true)}
+        >
+          Apply Tags
+        </button>
+      </div>
       <DataTable
         employees={employees}
         tableHeader={tableHeader}
@@ -252,6 +281,23 @@ const WebinarAttendees = () => {
               }
               isLoading={isDeleting}
             />
+          </Suspense>,
+          document.body
+        )}
+      {applyTagsModalOpen &&
+        createPortal(
+          <Suspense fallback={<ModalFallback />}>
+              <ApplyTagsModal
+                onClose={() => setApplyTagsModalOpen(false)}
+                onSubmit={async (tag) => {
+                  await applyTagsToAllAttendees({
+                    filters: allAttendeesFilters,
+                    sort: allAttendeesSortBy,
+                    tag,
+                  });
+                }}
+                isLoading={isApplyingTags}
+              />
           </Suspense>,
           document.body
         )}

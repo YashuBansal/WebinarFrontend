@@ -5,19 +5,16 @@ import Select from "react-select";
 import {
   getAttendees,
   getWebinarParticipants,
-  updateAttendeeTag,
 } from "../../../features/actions/attendees";
 import { clearWebinarParticipants } from "../../../features/slices/attendees";
 import WebinarTrendChart from "./WebinarTrendChart";
 import WebinarParticipantsTable from "./WebinarParticipantsTable"; // Import the new component
 import * as XLSX from "xlsx";
 import { getTagsData, setTagsData } from "../../../features/slices/globalData";
-import {
-  errorToast,
-  formatIsoStringAsLocalAmPm,
-} from "../../../utils/extra";
+import { errorToast, formatIsoStringAsLocalAmPm } from "../../../utils/extra";
 import FilteredParticipantsTable from "./FilteredParticipantsTable";
 import tagsService from "../../../services/tagsService";
+import { useBulkApplyTagsToEmails } from "../../../hooks/useTags";
 
 const WebinarParticipants = () => {
   const dispatch = useDispatch();
@@ -39,6 +36,12 @@ const WebinarParticipants = () => {
     isLoading: attendeeLoading,
     webinarName,
   } = useSelector((state) => state.attendee);
+
+  const { mutateAsync: applyTagsToEmails, isLoading: isApplyingTags } =
+    useBulkApplyTagsToEmails(() => {
+      // Refetch participants after tagging
+      fetchData();
+    });
 
   const mergedAttendeeData = useMemo(() => {
     const attendeeMap = new Map();
@@ -245,7 +248,7 @@ const WebinarParticipants = () => {
     [getParticipantsActiveAt]
   );
 
-  const handleApplyTag = () => {
+  const handleApplyTag = async () => {
     if (!selectedTag) {
       errorToast("Please select a tag first.");
       return;
@@ -266,13 +269,11 @@ const WebinarParticipants = () => {
       return;
     }
 
-    dispatch(
-      updateAttendeeTag({
-        emails: allParticipantEmails,
-        webinar: id,
-        tag: selectedTag,
-      })
-    );
+    await applyTagsToEmails({
+      emails: allParticipantEmails,
+      webinarId: id,
+      tag: selectedTag,
+    });
   };
 
   const tagOptions = useMemo(

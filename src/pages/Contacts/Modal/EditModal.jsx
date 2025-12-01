@@ -66,7 +66,6 @@ const EditModal = ({
       phone: initialData?.phone,
       location: initialData?.location,
       gender: initialData?.gender,
-      tags: initialData?.tags || [],
     },
   });
 
@@ -75,7 +74,6 @@ const EditModal = ({
     data["id"] = initialData?._id;
     let finalData = removeBlankAttributes(data);
 
-    finalData["tags"] = data?.tags;
     finalData["createdBy"] = userData?.userName;
     if (Array.isArray(initialData?.webinar) && initialData?.webinar.length > 0)
       finalData["webinarName"] = initialData.webinar[0]?.webinarName;
@@ -215,39 +213,6 @@ const EditModal = ({
               />
             </div> */}
 
-            <div>
-              <label className="block text-sm mb-1 font-medium">Tags</label>
-
-              <Controller
-                name="tags"
-                control={control}
-                render={({ field }) => (
-                  <Select
-                    isMulti
-                    value={tagData.filter((option) =>
-                      field.value?.includes(option.value)
-                    )}
-                    className="w-full mt-2"
-                    options={tagData}
-                    onChange={(selectedOptions) => {
-                      field.onChange(
-                        selectedOptions.map((option) => option.value)
-                      );
-                    }}
-                    isClearable={true}
-                    placeholder="Tags"
-                    menuPlacement="auto"
-                    menuPortalTarget={document.body}
-                    styles={{
-                      menuPortal: (base) => ({
-                        ...base,
-                        zIndex: 9999,
-                      }),
-                    }}
-                  />
-                )}
-              />
-            </div>
           </div>
           <button
             type="submit"

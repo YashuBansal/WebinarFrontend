@@ -69,6 +69,8 @@ const GroupedAttendeeFilterModal = ({ modalName, setPage, handleCopy }) => {
       email: "",
       "timeInSession.$gte": "",
       "timeInSession.$lte": "",
+      "createdAt.$gte": "",
+      "createdAt.$lte": "",
       "attendedWebinarCount.$gte": "",
       "attendedWebinarCount.$lte": "",
       "registeredWebinarCount.$gte": "",
@@ -89,6 +91,8 @@ const GroupedAttendeeFilterModal = ({ modalName, setPage, handleCopy }) => {
       email: "",
       "timeInSession.$gte": "",
       "timeInSession.$lte": "",
+      "createdAt.$gte": "",
+      "createdAt.$lte": "",
       "attendedWebinarCount.$gte": "",
       "attendedWebinarCount.$lte": "",
       "registeredWebinarCount.$gte": "",
@@ -324,6 +328,43 @@ const GroupedAttendeeFilterModal = ({ modalName, setPage, handleCopy }) => {
                   />
                 </div>
               </div>
+            )}
+
+            {tableConfig?.createdAt?.filterable && (
+              <>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Start Date
+                  </label>
+                  <Controller
+                    name="createdAt.$gte"
+                    control={control}
+                    render={({ field }) => (
+                      <input
+                        {...field}
+                        type="date"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                      />
+                    )}
+                  />
+                </div>
+                <div className="mb-4">
+                  <label className="block text-sm font-medium text-gray-700">
+                    End Date
+                  </label>
+                  <Controller
+                    name="createdAt.$lte"
+                    control={control}
+                    render={({ field }) => (
+                      <input
+                        {...field}
+                        type="date"
+                        className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-primary focus:border-primary"
+                      />
+                    )}
+                  />
+                </div>
+              </>
             )}
 
             {tableConfig?.registeredWebinarCount?.filterable && (

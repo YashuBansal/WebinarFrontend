@@ -2,7 +2,6 @@ import { useEffect, useState, Suspense, lazy, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AddNoteForm from "./AddNoteForm";
 import { getLeadType, getNotes } from "../../features/actions/assign";
-import NoteItem from "../../components/NoteItem";
 import {
   getAttendee,
   getAttendeeLeadTypeByEmail,
@@ -21,7 +20,6 @@ import {
   DialogContentText,
   DialogTitle,
   FormControl,
-  IconButton,
   ListItemIcon,
   ListItemText,
   MenuItem,
@@ -46,6 +44,7 @@ import { clearNoteData } from "../../features/slices/assign";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import NotesSection from "./NotesSection";
 import AttendeeHistoryTable from "./AttendeeHistoryTable";
+import TagsSection from "./TagsSection";
 
 // Lazy load modals
 const ViewFullDetailsModal = lazy(() => import("./Modal/ViewFullDetailModal"));
@@ -640,6 +639,17 @@ const ViewParticularContact = () => {
               </div>
             )}
           </div>
+
+
+          <TagsSection
+            tags={attendeeLeadType?.tags}
+            email={email}
+            onTagUpdate={() => {
+              if (email) {
+                dispatch(getAttendeeLeadTypeByEmail(email));
+              }
+            }}
+          />
         </div>
       </div>
       <Suspense fallback={<ModalFallback />}>

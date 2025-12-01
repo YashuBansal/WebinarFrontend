@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import {
   getDashboardCardsData,
@@ -32,6 +33,12 @@ import { resetDashboardData } from "../../features/slices/globalData";
 const SuperAdminDashboard = () => {
   const dispatch = useDispatch();
   const { dashBoardCardsData } = useSelector((state) => state.globalData);
+
+  const apiUrl = `${
+    import.meta.env.VITE_REACT_APP_WORKING_ENVIRONMENT === "development"
+      ? import.meta.env.VITE_REACT_APP_API_BASE_URL_DEVELOPMENT
+      : import.meta.env.VITE_REACT_APP_API_BASE_URL_MAIN_PRODUCTION
+  }`;
 
   // The cardData array definition remains the same.
   const cardData = [
@@ -170,6 +177,47 @@ const SuperAdminDashboard = () => {
     setEndDate(date);
   };
 
+  const formatDateForApi = (date) =>
+    date ? date.toISOString().split("T")[0] : null;
+
+  const {
+    data: wabaAnalytics,
+    isLoading: isWabaLoading,
+    isError: isWabaError,
+  } = useQuery({
+    queryKey: [
+      "wabaMessageAnalytics",
+      {
+        startDate: startDate ? startDate.getTime() : null,
+        endDate: endDate ? endDate.getTime() : null,
+      },
+    ],
+    enabled: !!startDate && !!endDate,
+    queryFn: async () => {
+      if (!startDate || !endDate) return null;
+
+      const start = formatDateForApi(startDate);
+      const end = formatDateForApi(endDate);
+
+      const params = new URLSearchParams();
+      params.set("startDate", start);
+      params.set("endDate", end);
+
+      const response = await fetch(
+        `${apiUrl}/waba-message/analytics?${params.toString()}`,
+        {
+          credentials: "include",
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch WABA analytics");
+      }
+
+      return response.json();
+    },
+  });
+
   const fetchData = () => {
     if (startDate && endDate) {
       dispatch(getDashboardCardsData({ startDate, endDate }));
@@ -236,7 +284,61 @@ const SuperAdminDashboard = () => {
           ))}
       </div>
 
-      {/* --- Responsive Charts Grid --- */}
+      {/* --- WhatsApp Message Analytics (Counts under previous counts) --- */}
+      <div className="mt-8">
+        <Typography variant="h6" className="mb-4">
+          WhatsApp Message Analytics
+        </Typography>
+
+        {isWabaLoading && (
+          <Typography variant="body2" color="textSecondary">
+            Loading WhatsApp message analytics...
+          </Typography>
+        )}
+
+        {isWabaError && (
+          <Typography variant="body2" color="error">
+            Failed to load WhatsApp message analytics.
+          </Typography>
+        )}
+
+        {!isWabaLoading && !isWabaError && wabaAnalytics && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <MetricCard
+              label="Total Messages"
+              value={wabaAnalytics.totalMessages || 0}
+              color="primary"
+            />
+            <MetricCard
+              label="Pending Messages"
+              value={wabaAnalytics.pending || 0}
+              color="warning"
+            />
+            <MetricCard
+              label="Sent Messages"
+              value={wabaAnalytics.sent || 0}
+              color="success"
+            />
+            <MetricCard
+              label="Delivered Messages"
+              value={wabaAnalytics.delivered || 0}
+              color="success"
+            />
+            <MetricCard
+              label="Read Messages"
+              value={wabaAnalytics.read || 0}
+              color="primary"
+            />
+            <MetricCard
+              label="Failed Messages"
+              value={wabaAnalytics.failed || 0}
+              color="error"
+            />
+          </div>
+        )}
+      </div>
+
+      {/* --- Responsive Charts Grid (Trends) --- */}
       <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
         <PlanPopularityChart />
         <ContactUsageChart />

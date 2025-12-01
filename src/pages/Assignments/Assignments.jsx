@@ -8,14 +8,12 @@ import React, {
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
-  Button,
   Tabs,
   Tab,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
-  ButtonGroup,
 } from "@mui/material";
 import CancelIcon from "@mui/icons-material/Cancel";
 import { attendeeTableColumns } from "../../utils/columnData";
@@ -48,6 +46,8 @@ import { setWebinarAttendeesFilters } from "../../features/slices/filters.slice"
 import { VisibilityIcon, RedCrossIcon } from "../../components/SVGs";
 import { clearWebinarData } from "../../features/slices/webinarContact";
 import { globalButton } from "../../utils/style";
+import ApplyTagsModal from "../../components/Webinar/ApplyTagsModal";
+import { useApplyTagsToEmployeeAssignments } from "../../hooks/useTags";
 
 const Assignments = () => {
   const employeeId = useParams()?.id;
@@ -108,6 +108,7 @@ const Assignments = () => {
     "enrollments",
     "isAssigned",
   ]);
+  const [applyTagsModalOpen, setApplyTagsModalOpen] = useState(false);
 
   useEffect(() => {
     const currentParams = Object.fromEntries([...searchParams.entries()]);
@@ -312,6 +313,33 @@ const Assignments = () => {
     };
   }, [assignData, leadTypeData, notAllowedColumns]);
 
+  const targetEmployeeId = employeeId || userData?._id;
+
+  const {
+    mutateAsync: applyTagsForEmployee,
+    isPending: isApplyingTags,
+  } = useApplyTagsToEmployeeAssignments(targetEmployeeId, () => {
+    // After tagging, refetch assignments
+    if (currentWebinar) {
+      dispatch(
+        getAssignments({
+          id: targetEmployeeId,
+          page: 1,
+          limit: LIMIT,
+          filters: webinarAttendeesFilters,
+          sort: sortByOption,
+          webinarId: currentWebinar,
+          validCall:
+            selected === "All" || tabValue !== AssignmentStatus.ACTIVE
+              ? undefined
+              : selected,
+          assignmentStatus: tabValue,
+        })
+      );
+    }
+    setApplyTagsModalOpen(false);
+  });
+
   // ----------------------- Action Icons -----------------------
 
   const actionIcons = useMemo(() => {
@@ -418,6 +446,15 @@ const Assignments = () => {
             </button>
           )}
 
+          {userData?.isActive && tabValue === AssignmentStatus.ACTIVE && (
+            <button
+              className={globalButton}
+              onClick={() => setApplyTagsModalOpen(true)}
+            >
+              Apply Tags
+            </button>
+          )}
+
           {selectedRows.length > 0 &&
             userData?.isActive &&
             tabValue === AssignmentStatus.ACTIVE && (
@@ -508,6 +545,31 @@ const Assignments = () => {
           <RequestReassignmentModal
             onClose={() => setOpenReassignModal(false)}
             onSubmit={(reason) => handleReassignRequest(reason)}
+          />,
+          document.body
+        )}
+      {applyTagsModalOpen &&
+        createPortal(
+          <ApplyTagsModal
+            onClose={() => setApplyTagsModalOpen(false)}
+            onSubmit={async (tag) => {
+              const normalizedWebinarId =
+                currentWebinar && currentWebinar !== "all"
+                  ? currentWebinar
+                  : undefined;
+
+              await applyTagsForEmployee({
+                webinarId: normalizedWebinarId,
+                filters: webinarAttendeesFilters,
+                validCall:
+                  selected === "All" || tabValue !== AssignmentStatus.ACTIVE
+                    ? undefined
+                    : selected,
+                assignmentStatus: tabValue,
+                tag,
+              });
+            }}
+            isLoading={isApplyingTags}
           />,
           document.body
         )}

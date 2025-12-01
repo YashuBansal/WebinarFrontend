@@ -221,7 +221,7 @@ export const exportEmployeeAssignmentsExcel = createAsyncThunk(
   async (
     {
       id = "",
-      limit = 10,
+      limit,
       filters = {},
       webinarId = "",
       validCall,
