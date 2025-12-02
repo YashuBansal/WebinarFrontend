@@ -7,11 +7,11 @@ import Profile from "./profile.svg";
 import { setEmployeeModeId } from "../../../features/slices/employee";
 import ComponentGuard from "../../AccessControl/ComponentGuard";
 import useRoles from "../../../hooks/useRoles";
+import usePlanExpiryWarning from "../../../hooks/usePlanExpiryWarning";
 import NotificationBell from "../../Notification/NotificationBell";
 import ImportExportNotifications from "../../Notification/ImportExportNotifications";
 import { formatDateAsNumber } from "../../../utils/extra";
 const Header = ({ toggleButtonRef }) => {
-  const [expiryDays, setExpiryDays] = useState();
   const [showExpiryNotice, setShowExpiryNotice] = useState(true);
   const dispatch = useDispatch();
   const roles = useRoles();
@@ -21,21 +21,7 @@ const Header = ({ toggleButtonRef }) => {
   );
   const { employeeModeData } = useSelector((state) => state.employee);
 
-  useEffect(() => {
-    if (subscription) {
-      const expiryDate = new Date(subscription.expiryDate);
-      expiryDate.setHours(0, 0, 0, 0);
-
-      const currentDate = new Date();
-      currentDate.setHours(0, 0, 0, 0);
-
-      const diffTime = Math.abs(expiryDate - currentDate);
-      const diffDays = diffTime / (1000 * 3600 * 24);
-      if (diffDays <= 15) {
-        setExpiryDays(diffDays);
-      }
-    }
-  }, [subscription]);
+  const { showWarning, daysLeft, expiryDate } = usePlanExpiryWarning(15);
 
   const handleProfileClick = () => {
     // Navigate to the profile page
@@ -131,9 +117,8 @@ const Header = ({ toggleButtonRef }) => {
             <ComponentGuard
               allowedRoles={[roles.ADMIN]}
               conditions={[
-                expiryDays ? true : false,
+                showWarning,
                 showExpiryNotice,
-                userData?.isActive,
               ]}
             >
               <div className="bg-red-50 border hidden border-red-200 rounded-lg px-4 py-2 mx-4 lg:flex gap-2 justify-between items-center">
@@ -141,8 +126,8 @@ const Header = ({ toggleButtonRef }) => {
                   to="/plans"
                   className="text-red-600 whitespace-nowrap hover:text-red-700"
                 >
-                  Plan expiring in {expiryDays && expiryDays} days on{" "}
-                  {subscription && formatDateAsNumber(subscription?.expiryDate)}
+                  Plan expiring in {daysLeft} days on{" "}
+                  {expiryDate && formatDateAsNumber(expiryDate)}
                   , click to see plans.
                 </Link>
                 <button
@@ -213,9 +198,8 @@ const Header = ({ toggleButtonRef }) => {
       <ComponentGuard
         allowedRoles={[roles.ADMIN]}
         conditions={[
-          expiryDays ? true : false,
+          showWarning,
           showExpiryNotice,
-          userData?.isActive,
         ]}
       >
         <div className="bg-red-50 absolute top-20 left-1/2 -translate-x-1/2 z-50 border lg:hidden border-red-200 rounded-lg px-4 py-2 flex gap-2 justify-between items-center max-w-[90%]">
@@ -224,10 +208,10 @@ const Header = ({ toggleButtonRef }) => {
             className="text-red-600 hover:text-red-700 flex flex-col"
           >
             <span className="font-medium whitespace-nowrap">
-              Plan expiring in {expiryDays && expiryDays} days
+              Plan expiring in {daysLeft} days
             </span>
             <span className="text-sm whitespace-nowrap">
-              on {subscription && formatDateAsNumber(subscription?.expiryDate)},
+              on {expiryDate && formatDateAsNumber(expiryDate)},
               click to see plans.
             </span>
           </Link>
