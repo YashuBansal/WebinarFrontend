@@ -309,14 +309,14 @@ const PabblyToken = () => {
           {/* Clients API Endpoints - Grouped */}
           <div className="bg-white shadow-md rounded-lg p-4 sm:p-6 space-y-6">
             <h2 className="text-xl font-semibold text-gray-800 border-b pb-3">
-              Client Management APIs
+              Fetch Clients API
             </h2>
             
             <div className="space-y-4">
 
               <div className="">
                 <InfoBoxHeader
-                  title="Get All Clients ( Method: GET )"
+                  title="Fetch Clients ( Method: GET )"
                   onCopy={handleCopy}
                   copyText={`${apiUrl}/users/clients?page=1&limit=1000`}
                 />
