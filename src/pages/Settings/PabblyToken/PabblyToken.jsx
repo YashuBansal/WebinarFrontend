@@ -313,24 +313,58 @@ const PabblyToken = () => {
             </h2>
             
             <div className="space-y-4">
-              <div>
-                <InfoBoxHeader
-                  title="Get Client ( Method: GET )"
-                  onCopy={handleCopy}
-                  copyText={authClientAPIEndpoint}
-                />
-                <p className="text-gray-700 text-sm break-words">
-                  {authClientAPIEndpoint}
-                </p>
-              </div>
 
-              <div className="border-t pt-4">
+              <div className="">
                 <InfoBoxHeader
                   title="Get All Clients ( Method: GET )"
                   onCopy={handleCopy}
                   copyText={`${apiUrl}/users/clients?page=1&limit=1000`}
                 />
                 <p className="text-gray-700 text-sm break-words">{`${apiUrl}/users/clients?page=1&limit=1000`}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white shadow-md rounded-lg p-4 sm:p-6 space-y-6">
+            <h2 className="text-xl font-semibold text-gray-800 border-b pb-3">
+              Client Creation API
+            </h2>
+            
+            <div className="space-y-4">
+              <div>
+                <InfoBoxHeader
+                  title="Create Client ( Method: POST )"
+                  onCopy={handleCopy}
+                  copyText={authClientAPIEndpoint}
+                />
+                <p className="text-gray-700 text-sm break-words mb-4">
+                  {authClientAPIEndpoint}
+                </p>
+
+                <div className="border-t pt-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      JSON Body:
+                    </h3>
+                    <div className="flex gap-2 w-full sm:w-auto">
+                      <button
+                        onClick={() => handleDownload(superAdminJsonBody)}
+                        className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors"
+                      >
+                        Download
+                      </button>
+                      <button
+                        onClick={() => handleCopy(superAdminJsonBody)}
+                        className={`${globalButton} flex-1`}
+                      >
+                        Copy
+                      </button>
+                    </div>
+                  </div>
+                  <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-auto">
+                    {superAdminJsonBody}
+                  </pre>
+                </div>
               </div>
             </div>
           </div>

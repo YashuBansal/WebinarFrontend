@@ -10,7 +10,6 @@ import { resetPricePlanSuccess } from "../../../features/slices/pricePlan";
 import PlanInactiveModal from "./PlanInactiveModal";
 import { globalButton } from "../../../utils/style";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-import { Switch, FormControlLabel, Typography, Box } from "@mui/material";
 
 const BrowseHeader = ({planURI}) => {
   return (
@@ -51,24 +50,43 @@ const ViewPlans = () => {
 
   const [modalData, setModalData] = useState(null);
   const [planType, setPlanType] = useState("active");
-  const [isYearly, setIsYearly] = useState(false); // Toggle for monthly/yearly
+  const [planDuration, setPlanDuration] = useState("monthly"); // monthly | yearly | custom
+
+  const durationTabs = useMemo(() => {
+    const tabs = [
+      { key: "monthly", label: "Monthly" },
+      { key: "yearly", label: "Yearly" },
+    ];
+
+    if (userData && roles?.isSuperAdmin?.(userData.role)) {
+      tabs.push({ key: "custom", label: "Custom" });
+    }
+
+    return tabs;
+  }, [roles, userData]);
+
+  // Ensure selected tab is valid for current role
+  useEffect(() => {
+    if (!durationTabs.find((tab) => tab.key === planDuration)) {
+      setPlanDuration(durationTabs[0]?.key || "monthly");
+    }
+  }, [durationTabs, planDuration]);
 
   const planDataFiltered = useMemo(() => {
     if (!Array.isArray(planData) || !userData || !roles) return [];
-    
-    // Filter plans based on selected duration (monthly/yearly)
-    const durationType = isYearly ? "yearly" : "monthly";
+
+    const durationType = planDuration;
     const durationFilteredPlans = planData.filter((item) => {
       const durationConfig = item.planDurationConfig?.[durationType];
       return durationConfig?.isEnabled === true;
     });
-    
+
     if (roles.isSuperAdmin(userData.role)) return durationFilteredPlans;
     if (!subscription || !subscription.plan) return [];
     const plan = durationFilteredPlans.find((plan) => plan._id === subscription.plan._id);
     if (!plan) return [];
     return [plan];
-  }, [userData, planData, roles, subscription, isYearly]);
+  }, [userData, planData, roles, subscription, planDuration]);
 
   useEffect(() => {
     dispatch(getPricePlans({ isActive: planType }));
@@ -108,23 +126,26 @@ const ViewPlans = () => {
           <h2 className="text-2xl font-bold text-gray-700">Manage Plans</h2>
         </div>
 
-        {/* Monthly/Yearly Toggle */}
-        <Box className="flex justify-center mb-6">
-          <FormControlLabel
-            control={
-              <Switch
-                checked={isYearly}
-                onChange={(e) => setIsYearly(e.target.checked)}
-                color="primary"
-              />
-            }
-            label={
-              <Typography variant="h6" className="ml-2">
-                {isYearly ? "Yearly Plans" : "Monthly Plans"}
-              </Typography>
-            }
-          />
-        </Box>
+        <div className="flex justify-center mb-6">
+          <div className="inline-flex rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+            {durationTabs.map((tab) => {
+              const isActive = tab.key === planDuration;
+              return (
+                <button
+                  key={tab.key}
+                  onClick={() => setPlanDuration(tab.key)}
+                  className={`px-4 py-2 text-sm font-semibold transition-colors ${
+                    isActive
+                      ? "bg-indigo-600 text-white"
+                      : "text-gray-700 hover:bg-gray-100"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
 
         <div className="grid grid-cols-1   lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5">
           <div className="col-span-full  flex justify-end items-end pt-6">
@@ -161,7 +182,7 @@ const ViewPlans = () => {
                   isMenuVisible={true}
                   key={item?._id}
                   currentPlan={subscription?.plan?._id}
-                  isYearly={isYearly}
+                  isYearly={planDuration === "yearly"}
                 />
               </div>
             );
