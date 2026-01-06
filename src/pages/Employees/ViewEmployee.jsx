@@ -432,7 +432,7 @@ const ViewEmployee = () => {
             )}
             <DataTable
               tableHeader={tableHeader}
-              ButtonGroup={WebinarDropdown}
+              buttonGroupContent={<WebinarDropdown />}
               tableUniqueKey="employeeAssignmentsTable"
               filters={webinarAttendeesFilters}
               setFilters={(filters) => {

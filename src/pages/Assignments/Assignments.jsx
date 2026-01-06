@@ -500,7 +500,7 @@ const Assignments = () => {
       <DataTable
         tableHeader={tableHeader}
         tableUniqueKey="viewAssignmentsTable"
-        ButtonGroup={AttendeeDropdown}
+        buttonGroupContent={<AttendeeDropdown />}
         isSelectVisible={
           (employeeId || !userData?.isActive ? false : true) &&
           tabValue === AssignmentStatus.ACTIVE

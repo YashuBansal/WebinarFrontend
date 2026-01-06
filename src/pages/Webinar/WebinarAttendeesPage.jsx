@@ -117,7 +117,7 @@ const WebinarAttendeesPage = (props) => {
   const sortByOption = useMemo(
     () =>
       tabValue === "preWebinar" ? webinarAttendeesSortBy : salesAttendeesSortBy,
-    [tabValue, salesAttendeesSortBy, webinarAttendeesFilters]
+    [tabValue, webinarAttendeesSortBy, salesAttendeesSortBy]
   );
 
   const notAllowedFields = useMemo(
@@ -343,9 +343,9 @@ const WebinarAttendeesPage = (props) => {
     return (
       <div className="md:flex gap-4 grid grid-cols-2">
         <FormControl className="md:w-40 " variant="outlined">
-          <InputLabel id="attendee-label">Activity</InputLabel>
+          <InputLabel id="activity-label">Activity</InputLabel>
           <Select
-            labelId="attendee-label"
+            labelId="activity-label"
             className="h-10"
             value={selected}
             onChange={handleChange}
@@ -358,9 +358,9 @@ const WebinarAttendeesPage = (props) => {
         </FormControl>
 
         <FormControl className="md:w-40 " variant="outlined">
-          <InputLabel id="attendee-label">Assignment</InputLabel>
+          <InputLabel id="assignment-label">Assignment</InputLabel>
           <Select
-            labelId="attendee-label"
+            labelId="assignment-label"
             className="h-10"
             value={selectedAssignmentType}
             onChange={handleAssignmentChange}
@@ -476,12 +476,16 @@ const handleCopy = useCallback(
     ]
   );
 
+  const attendeeDropdownElement = useMemo(() => {
+    return <AttendeeDropdown />;
+  }, [selected, selectedAssignmentType]);
+
   return (
     <>
       <DataTable
         tableHeader={tableHeader}
         tableUniqueKey="webinarAttendeesTable"
-        ButtonGroup={React.memo(AttendeeDropdown)}
+        buttonGroupContent={attendeeDropdownElement}
         isSelectVisible={userData?.isActive}
         sortByOrder={sortByOption?.sortOrder}
         tableData={tableData}

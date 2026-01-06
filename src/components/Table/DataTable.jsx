@@ -1,11 +1,10 @@
-import {
+import React, {
   memo,
   Suspense,
   useState,
   lazy,
   useEffect,
   useRef,
-  useMemo,
 } from "react";
 import Pagination from "@mui/material/Pagination";
 import PageLimitEditor from "../PageLimitEditor";
@@ -28,7 +27,9 @@ import { successToast } from "../../utils/extra";
 const DataTable = ({
   tableHeader = "Table",
   tableUniqueKey = "id",
-  ButtonGroup = null,
+  // Prefer passing a rendered ReactNode instead of a component type,
+  // so parents fully control memoization and props.
+  buttonGroupContent = null,
   filters,
   setFilters,
   ClientCards = null,
@@ -80,7 +81,6 @@ const DataTable = ({
       document.removeEventListener("mousedown", handleOutsideClick);
     };
   }, [open]);
-
   return (
     <div
       className={`bg-gray-50 transition-all duration-300 ${
@@ -159,10 +159,12 @@ const DataTable = ({
 
       <div
         className={`flex flex-col md:flex-row flex-wrap gap-4 ${
-          ButtonGroup ? "justify-between" : "justify-end"
+          buttonGroupContent ? "justify-between" : "justify-end"
         } py-2 items-stretch md:items-center`}
       >
-        {ButtonGroup && <div className="flex-shrink-0">{<ButtonGroup />}</div>}
+        {buttonGroupContent && (
+          <div className="flex-shrink-0">{buttonGroupContent}</div>
+        )}
 
         {userData?.isActive && filterModalName !== "" && (
           <div className="flex gap-2 sm:gap-4 flex-wrap justify-start md:justify-end">

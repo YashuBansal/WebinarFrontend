@@ -128,7 +128,7 @@ const Enrollments = (props) => {
         tableHeader={tableHeader}
         exportModalName={exportModalName}
         tableUniqueKey="enrollmentsTable"
-        ButtonGroup={AttendeeDropdown}
+        buttonGroupContent={<AttendeeDropdown />}
         tableData={{
           columns: enrollmentsColumn.map((column) => {
             return column;
