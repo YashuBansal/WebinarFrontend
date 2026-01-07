@@ -160,6 +160,25 @@ const authSlice = createSlice({
       })
       .addCase(getUserSubscription.fulfilled, (state, action) => {
         state.subscription = action.payload;
+
+        const expiryRaw = action.payload?.expiryDate;
+        const isActive = state.userData?.isActive;
+
+        if (expiryRaw && isActive) {
+          const expiryDate = new Date(expiryRaw);
+          const today = new Date();
+
+          if (!Number.isNaN(expiryDate.getTime())) {
+            if (expiryDate.getTime() < today.getTime()) {
+              // If the subscription has already expired while the user
+              // is still marked active, log them out with a clear message.
+              state.isUserLoggedIn = false;
+              state.userData = null;
+              state.subscription = null;
+              errorToast("Your subscription has expired.");
+            }
+          }
+        }
       })
       .addCase(getUserSubscription.rejected, (state, action) => {
         errorToast(action?.payload || "Error getting user subscription");
