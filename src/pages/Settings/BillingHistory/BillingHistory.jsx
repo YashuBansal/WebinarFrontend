@@ -54,7 +54,7 @@ const BillingHistory = () => {
 
     try {
       // Load the empty PDF template
-      const existingPdfBytes = await fetch('/Invoice.pdf').then(res => res.arrayBuffer());
+      const existingPdfBytes = await fetch('/invoice-2.pdf').then(res => res.arrayBuffer());
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
 
       const page = pdfDoc.getPages()[0];
@@ -139,9 +139,18 @@ const BillingHistory = () => {
         });
       };
 
+      // Helper to measure text width for Poppins
+      const measureTextWidth = (text, fontSize = 12, fontWeight = 'normal') => {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        ctx.font = `${fontWeight} ${fontSize}px Poppins, Arial, sans-serif`;
+        const metrics = ctx.measureText(text);
+        return Math.ceil(metrics.width);
+      };
+
       // Helper function to draw text as image (left-aligned)
-      const drawString = async (text, x, y, fontSize = 12, fontWeight = 'normal') => {
-        const textImage = createTextImage(text, fontSize, fontWeight);
+      const drawString = async (text, x, y, fontSize = 12, fontWeight = 'normal', color = '#000000') => {
+        const textImage = createTextImage(text, fontSize, fontWeight, color);
         const imageBytes = await fetch(textImage).then(res => res.arrayBuffer());
         const image = await pdfDoc.embedPng(imageBytes);
 
@@ -165,28 +174,47 @@ const BillingHistory = () => {
       // Header / Top-right coordinates
       await drawString(bill?.invoiceNumber || "", 460, 688, 10);
       await drawString(formatDate(bill?.date), 460, 668, 10);
-      await drawRightString(formatINR(bill?.amount), 490, 648, 10);
-      await drawString("PAID", 420, 628, 12, 'bold');
+      await drawRightString(formatINR(bill?.amount), 494, 648, 10);
+      await drawString("PAID", 420, 628, 12, 'bold', '#00AA00');
 
       // Billing period
       const startDate = new Date(bill?.startDate || bill?.createdAt);
       const expiryDate = new Date(bill?.expiryDate);
-      const billingPeriod = `${formatDate(startDate)} to ${formatDate(expiryDate)}`;
-      await drawString(billingPeriod, 420, 510, 11);
+      const billingPeriod = `Billing Period: ${formatDate(startDate)} to ${formatDate(expiryDate)}`;
+      await drawString(billingPeriod, 35, 660, 11);
 
       // Bill To section (left column)
-      await drawString(bill?.admin?.companyName || "Company Name", 35, 510, 12, 'bold');
+      await drawString(bill?.admin?.companyName || "Company Name", 35, 470, 12, 'bold');
 
-      // Split address into lines
-      const addressLines = bill?.admin?.address.split(', ');
-      for (let index = 0; index < addressLines.length; index++) {
-        await drawString(addressLines[index], 35, 492 - (index * 20), 12);
+      // Split address into lines (max two lines)
+      const rawAddress = bill?.admin?.address?.trim();
+      let addressLinesToDraw = [];
+
+      if (rawAddress) {
+        const parts = rawAddress.split(", ");
+
+        if (parts.length <= 2) {
+          addressLinesToDraw = parts;
+        } else {
+          addressLinesToDraw = [parts[0], parts.slice(1).join(", ")];
+        }
+
+        for (let index = 0; index < addressLinesToDraw.length; index++) {
+          await drawString(addressLinesToDraw[index], 35, 450 - index * 20, 12);
+        }
       }
 
-      let currentY = 510 - (addressLines.length * 20);
+      let currentY = 470 - (addressLinesToDraw.length * 20);
 
       if (bill?.admin?.gst) {
-        await drawString(`GSTIN: ${bill?.admin?.gst}`, 35, currentY - 20, 12);
+        const gstLabel = "GSTIN: ";
+        const gstFontSize = 12;
+        const gstY = currentY - 20;
+        const gstLabelWidth = measureTextWidth(gstLabel, gstFontSize);
+
+        await drawString(gstLabel, 35, gstY, gstFontSize);
+        await drawString(bill?.admin?.gst, 35 + gstLabelWidth + 4, gstY, gstFontSize, 'bold');
+
         currentY -= 20;
       }
 
@@ -194,7 +222,7 @@ const BillingHistory = () => {
       await drawString(bill?.admin?.phone || "Phone", 35, currentY - 40, 12);
 
       // Item/Service table
-      const tableY = 328;
+      const tableY = 295;
       // drawString("ITEM/SERVICE", 35, tableY, helveticaBoldFont, 12);
       // drawString("1", 360, tableY, helveticaFont, 10); // Qty
       // drawRightString(formatINR(bill.itemAmount), 430, tableY, helveticaFont, 10); // Unit price
@@ -211,9 +239,9 @@ const BillingHistory = () => {
       await drawRightString(formatINR(subtotalAmount), 520, tableY, 12, 'bold');
       await drawRightString(formatINR(subtotalAmount), 520, tableY - 45, 12, 'bold');
 
-      await drawRightString(formatINR(bill.taxAmount), 520, tableY - 67, 12, 'bold');
+      await drawRightString(formatINR(bill.taxAmount), 514, tableY - 67, 12, 'bold');
 
-      await drawRightString(formatINR(bill.amount), 514, tableY - 104, 14, 'bold');
+      await drawRightString(formatINR(bill.amount), 507, tableY - 104, 14, 'bold');
 
       // Payment details
       const paymentDate = new Date(bill?.date);
