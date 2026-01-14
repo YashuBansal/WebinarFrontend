@@ -166,7 +166,7 @@ const Clients = () => {
   const LIMIT = useSelector((state) => state.pageLimits[tableHeader] || 10);
 
   const [searchParams, setSearchParams] = useSearchParams();
-  const [filters, setFilters] = useState({});
+  const [filters, setFilters] = useState({ isActive: "active" });
   const [page, setPage] = useState(searchParams.get("page") || 1);
 
   const tableData = useMemo(() => {

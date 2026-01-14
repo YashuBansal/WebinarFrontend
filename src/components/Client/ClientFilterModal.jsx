@@ -16,7 +16,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { closeModal } from "../../features/slices/modalSlice";
 import FormInput from "../FormInput";
 import { filterTruthyValues, successToast } from "../../utils/extra";
-import { getPlansForDropdown } from "../../features/actions/pricePlan";
 
 const FilterModal = ({ modalName, setFilters, filters }) => {
   // console.log("filter modal render");
