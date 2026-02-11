@@ -93,8 +93,11 @@ const ViewPlans = () => {
   }, [planType]);
 
   useEffect(() => {
-    dispatch(getUserSubscription());
-  }, []);
+    // Super admin ke liye subscription fetch nahi karna
+    if (userData && !roles.isSuperAdmin(userData.role)) {
+      dispatch(getUserSubscription());
+    }
+  }, [dispatch, roles, userData]);
 
   useEffect(() => {
     if (isSuccess) {
@@ -103,17 +106,6 @@ const ViewPlans = () => {
     }
   }, [isSuccess]);
 
-    const [planURI, setPlanURI] = useState("/");
-  useEffect(() => {
-    dispatch(getExternalPlanURI()).then((response) => {
-      if (
-        response?.meta?.requestStatus === "fulfilled" &&
-        typeof response.payload === "string"
-      ) {
-        setPlanURI(response.payload);
-      }
-    });
-  }, [dispatch]);
 
   return (
     <div className="py-14 px-4 md:px-8 flex flex-col items-center">

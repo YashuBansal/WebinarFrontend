@@ -204,9 +204,15 @@ const App = () => {
 
     function initFunctions() {
       if (isUserLoggedIn && userData?.role) {
-        console.log("fetching subscription");
-        // && !roles.isEmployeeId(role) removed this from the condition
-        dispatch(getUserSubscription());
+        console.log("initializing auth data");
+
+        // Super admin ke liye subscription fetch nahi karna
+        if (!roles.isSuperAdmin(role)) {
+          console.log("fetching subscription");
+          // && !roles.isEmployeeId(role) removed this from the condition
+          dispatch(getUserSubscription());
+        }
+
         dispatch(getAllRoles());
       }
     }
