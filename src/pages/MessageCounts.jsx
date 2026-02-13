@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
+import * as XLSX from "xlsx";
 import DataTable from "../components/Table/DataTable";
 import { messageCountsColumns } from "../utils/columnData";
 import { instance } from "../services/axiosInterceptor";
@@ -80,6 +81,22 @@ const MessageCounts = () => {
     [rows, total]
   );
 
+  const downloadVisibleTableExcel = () => {
+    const exportRows = rows.map((row) => ({
+      "Company Name": row.companyName ?? "",
+      "Admin Email": row.email ?? "",
+      "Project Name": row.projectName ?? "",
+      Phone: row.phone ?? "",
+      Sent: row.outbound ?? 0,
+      Received: row.inbound ?? 0,
+    }));
+    const worksheet = XLSX.utils.json_to_sheet(exportRows);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Message Counts");
+    const filename = `message-counts-${new Date().toISOString().slice(0, 10)}.xlsx`;
+    XLSX.writeFile(workbook, filename);
+  };
+
   React.useEffect(() => {
     const currentInUrl = searchParams.get("page");
     if (String(page) !== (currentInUrl || "")) {
@@ -125,20 +142,20 @@ const MessageCounts = () => {
             </button>
           </div>
           <div className="flex gap-4 flex-wrap">
-            <div className="flex-1 min-w-[160px] rounded-lg bg-emerald-50 border-l-4 border-emerald-500 px-4 py-3.5">
-              <div className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
-                Total Received
-              </div>
-              <div className="mt-1 text-2xl font-bold text-emerald-900 tabular-nums">
-                {isLoading ? "—" : totalReceived.toLocaleString()}
-              </div>
-            </div>
             <div className="flex-1 min-w-[160px] rounded-lg bg-blue-50 border-l-4 border-blue-500 px-4 py-3.5">
               <div className="text-xs font-semibold uppercase tracking-wide text-blue-700">
                 Total Sent
               </div>
               <div className="mt-1 text-2xl font-bold text-blue-900 tabular-nums">
                 {isLoading ? "—" : totalSent.toLocaleString()}
+              </div>
+            </div>
+            <div className="flex-1 min-w-[160px] rounded-lg bg-emerald-50 border-l-4 border-emerald-500 px-4 py-3.5">
+              <div className="text-xs font-semibold uppercase tracking-wide text-emerald-700">
+                Total Received
+              </div>
+              <div className="mt-1 text-2xl font-bold text-emerald-900 tabular-nums">
+                {isLoading ? "—" : totalReceived.toLocaleString()}
               </div>
             </div>
           </div>
@@ -150,6 +167,17 @@ const MessageCounts = () => {
           {error?.message ?? "Failed to load message counts."}
         </div>
       )}
+
+      <div className="mb-4 flex justify-end">
+        <button
+          type="button"
+          onClick={downloadVisibleTableExcel}
+          disabled={isLoading || !rows?.length}
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-emerald-600 rounded-lg hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        >
+          Download Excel
+        </button>
+      </div>
 
       <DataTable
         tableHeader={TABLE_HEADER}
