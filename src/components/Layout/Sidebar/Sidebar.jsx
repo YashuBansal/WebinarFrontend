@@ -106,6 +106,11 @@ const Sidebar = ({ toggleButtonRef }) => {
           label: "Billing History",
           icon: <img src={BillIcon} width={30} height={30} alt="Revenue" />,
         },
+        {
+          path: "/message-counts",
+          label: "Message Counts",
+          icon: <img src={WhatsappIcon} width={30} height={30} alt="Message Counts" />,
+        },
       ],
     },
     {

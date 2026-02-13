@@ -1,3 +1,12 @@
+export const messageCountsColumns = [
+  { header: "Company Name", key: "companyName", width: 25, type: "" },
+  { header: "Admin Email", key: "email", width: 25, type: "" },
+  { header: "Project Name", key: "projectName", width: 25, type: "" },
+  { header: "Phone", key: "phone", width: 20, type: "" },
+  { header: "Received", key: "inbound", width: 15, type: "" },
+  { header: "Sent", key: "outbound", width: 15, type: "" },
+];
+
 export const clientTableColumns = [
   { header: "Email", key: "email", width: 50, type: "" },
   {

@@ -66,6 +66,7 @@ import {
   AdminActivityLogs,
   ClientBillingHistories,
   WebhookSetup,
+  MessageCounts,
 } from "./pages";
 import RouteGuard from "./components/AccessControl/RouteGuard";
 
@@ -284,6 +285,14 @@ const App = () => {
           element: (
             <RouteGuard roleNames={["SUPER_ADMIN"]}>
               <ClientBillingHistories />
+            </RouteGuard>
+          ),
+        },
+        {
+          path: "/message-counts",
+          element: (
+            <RouteGuard roleNames={["SUPER_ADMIN"]}>
+              <MessageCounts />
             </RouteGuard>
           ),
         },
