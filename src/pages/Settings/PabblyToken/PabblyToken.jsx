@@ -127,7 +127,7 @@ const PabblyToken = () => {
   const [pabblyTokenData, setPabblyTokenData] = useState([]);
   console.log(pabblyTokenData);
   const [secondaryJsonBody, setSecondaryJsonBody] = useState(`{
-  "adminId": "673eeed70werjhg78e917ef4", // <ADMIN_ID>
+  "email": "client@example.com", // <CLIENT_EMAIL>
   "planId": "673lllu70werjhg2f6917ef4", // <PLAN_ID>
   "durationType": "monthly"  // ["monthly", "quarterly", "halfyearly", "yearly"]
 }`);
