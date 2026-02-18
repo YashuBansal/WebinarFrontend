@@ -38,6 +38,9 @@ const SwapAttendeeFieldsModal = lazy(() =>
 const ApplyTagsModal = lazy(() =>
   import("../../components/Webinar/ApplyTagsModal")
 );
+const BulkEnrollmentModal = lazy(() =>
+  import("../../components/Webinar/BulkEnrollmentModal")
+);
 import { createPortal } from "react-dom";
 import ModalFallback from "../../components/Fallback/ModalFallback";
 import { setWebinarAttendeesFilters } from "../../features/slices/filters.slice";
@@ -67,6 +70,8 @@ const WebinarAttendeesPage = (props) => {
     selectedAssignmentType,
     applyTagsModalOpen,
     setApplyTagsModalOpen,
+    bulkEnrollOpen,
+    setBulkEnrollOpen,
   } = props;
 
   const tableHeader = "Attendees Table";
@@ -476,6 +481,33 @@ const handleCopy = useCallback(
     ]
   );
 
+  const handleBulkEnrollSuccess = useCallback(() => {
+    dispatch(
+      getAttendees({
+        id,
+        isAttended: tabValue === "postWebinar",
+        filters: webinarAttendeesFilters,
+        validCall: selected === "All" ? undefined : selected,
+        assignmentType:
+          selectedAssignmentType === "All"
+            ? undefined
+            : selectedAssignmentType,
+        sort: sortByOption,
+        page: 1,
+        limit: LIMIT,
+      })
+    );
+  }, [
+    dispatch,
+    id,
+    tabValue,
+    webinarAttendeesFilters,
+    selected,
+    selectedAssignmentType,
+    sortByOption,
+    LIMIT,
+  ]);
+
   const attendeeDropdownElement = useMemo(() => {
     return <AttendeeDropdown />;
   }, [selected, selectedAssignmentType]);
@@ -579,6 +611,28 @@ const handleCopy = useCallback(
               onClose={() => setApplyTagsModalOpen(false)}
               onSubmit={handleApplyTag}
               isLoading={isApplyingTags}
+            />
+          </Suspense>,
+          document.body
+        )}
+
+      {bulkEnrollOpen &&
+        createPortal(
+          <Suspense fallback={<ModalFallback />}>
+            <BulkEnrollmentModal
+              onClose={() => setBulkEnrollOpen(false)}
+              webinarId={id}
+              isAttended={tabValue === "postWebinar"}
+              selectedRows={selectedRows}
+              total={total}
+              filters={webinarAttendeesFilters}
+              validCall={selected === "All" ? undefined : selected}
+              assignmentType={
+                selectedAssignmentType === "All"
+                  ? undefined
+                  : selectedAssignmentType
+              }
+              onSuccess={handleBulkEnrollSuccess}
             />
           </Suspense>,
           document.body

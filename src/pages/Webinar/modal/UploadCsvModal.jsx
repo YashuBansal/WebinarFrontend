@@ -353,10 +353,14 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
           }
 
           // PapaParse can also return errors for specific rows in results.errors
-          if (results.errors && results.errors.length > 0) {
-            console.warn("Parsing errors encountered:", results.errors);
-            // You might want to inform the user or handle these errors
-            // For now, we'll proceed with the data that was successfully parsed.
+          const parseErrorsCount = results.errors?.length ?? 0;
+          console.log("[UploadCsv] CSV parsed", {
+            fileName: file.name,
+            totalRowsFromFile: jsonData.length,
+            parseErrorsCount,
+          });
+          if (parseErrorsCount > 0) {
+            console.warn("[UploadCsv] Parse errors (first 5):", results.errors.slice(0, 5));
           }
 
           setRawSheetData(jsonData);
@@ -462,6 +466,17 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
     }
 
     const dataRowsAfterHeader = rawSheetData.slice(adjustedHeaderRowIndex + 1);
+    const isBlankRow = (row) => {
+      const arr = Array.isArray(row) ? row : [];
+      return arr.every(
+        (cell) =>
+          cell == null ||
+          cell === undefined ||
+          String(cell).trim() === ""
+      );
+    };
+    const blankRowCount = dataRowsAfterHeader.filter(isBlankRow).length;
+
     const formattedDataObjects = dataRowsAfterHeader.map((dataRowArray) => {
       const obj = {};
       actualHeaderRowArray.forEach((headerValue, cellIndex) => {
@@ -474,6 +489,13 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
         }
       });
       return obj;
+    });
+
+    console.log("[UploadCsv] Header applied", {
+      headerRowNumber: rowNum,
+      dataRowsAfterHeader: dataRowsAfterHeader.length,
+      blankRowsCount: blankRowCount,
+      dataRowsForMapping: formattedDataObjects.length,
     });
 
     setParsedHeaders(uniqueHeaders);
@@ -508,6 +530,7 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
     const unMergedData = [];
     let processedCount = 0;
     let invalidEmailCount = 0;
+    let invalidDateCount = 0;
 
     dataToMerge.forEach((item) => {
       const emailValue = item[currentMapping.email];
@@ -600,15 +623,7 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
 
           unMergedData.push(objForUnmerdedData);
         } else {
-          // This 'else' block is where you handle rows with invalid data.
-          // For now, we'll just log it and skip the row.
-          console.warn(
-            `Skipping row for email "${email}" due to invalid date format.`,
-            {
-              inTimeValue: rawInTime,
-              outTimeValue: rawOutTime,
-            }
-          );
+          invalidDateCount++;
         }
       } else {
         invalidEmailCount++;
@@ -626,7 +641,7 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
       gender: item.gender,
       timeInSession: item.totalTimeInSession,
     }));
-    return { finalData, processedCount, invalidEmailCount, unMergedData };
+    return { finalData, processedCount, invalidEmailCount, unMergedData, invalidDateCount };
   };
 
   const onSubmit = (formData) => {
@@ -651,7 +666,20 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
       processedCount,
       invalidEmailCount,
       unMergedData,
+      invalidDateCount,
     } = mergeDataByEmail(parsedData, currentMapping);
+
+    console.log("[UploadCsv] Processing summary", {
+      inputRowsToMerge: parsedData.length,
+      rowsWithValidEmail: processedCount,
+      invalidOrBlankEmailRows: invalidEmailCount,
+      skippedInvalidDates: invalidDateCount,
+      duplicateRowsMerged: processedCount - mergedResult.length,
+      uniqueMergedRecords: mergedResult.length,
+      unMergedRecords: unMergedData.length,
+      totalRecordsToSendToBackend: mergedResult.length + unMergedData.length,
+      skippedRowsTotal: invalidEmailCount + invalidDateCount,
+    });
 
     if (mergedResult.length === 0) {
       let message = "No valid attendee data found after processing.";
@@ -667,6 +695,13 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
     }
 
     mergedAttendeeCountRef.current = mergedResult.length; // Store for success message
+
+    console.log("[UploadCsv] Sending to backend", {
+      mainAttendeesCount: mergedResult.length,
+      unMergedDataCount: unMergedData.length,
+      webinarId,
+      tab: tabValue,
+    });
 
     logUserActivity({
       action: "import",

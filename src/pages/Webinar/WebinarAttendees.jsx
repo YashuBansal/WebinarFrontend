@@ -73,6 +73,7 @@ const WebinarAttendees = () => {
   const [settingModalOpen, setSettingModalOpen] = useState(false);
   const [webhookDialogOpen, setWebhookDialogOpen] = useState(false);
   const [applyTagsModalOpen, setApplyTagsModalOpen] = useState(false);
+  const [bulkEnrollOpen, setBulkEnrollOpen] = useState(false);
 
   useEffect(() => {
     // Get the current values from the URL
@@ -317,15 +318,24 @@ const WebinarAttendees = () => {
               )}
             {userData?.isActive &&
               tabValueRef.current !== "enrollments" &&
-              subTabValueRef.current === "attendees" &&
-              selectedRows.length === 0 && (
-                <button
-                  onClick={() => setShowModal((prev) => !prev)}
-                  className={`${globalButton} flex gap-1`}
-                >
-                  <AttachFile />
-                  Import
-                </button>
+              subTabValueRef.current === "attendees" && (
+                <>
+                  {selectedRows.length === 0 && (
+                    <button
+                      onClick={() => setShowModal((prev) => !prev)}
+                      className={`${globalButton} flex gap-1`}
+                    >
+                      <AttachFile />
+                      Import
+                    </button>
+                  )}
+                  <button
+                    onClick={() => setBulkEnrollOpen(true)}
+                    className={`${globalButton} flex gap-1`}
+                  >
+                    Create Enrollments
+                  </button>
+                </>
               )}
           </div>
 
@@ -428,6 +438,8 @@ const WebinarAttendees = () => {
                   setSelectedAssignmentType={setSelectedAssignmentType}
                   applyTagsModalOpen={applyTagsModalOpen}
                   setApplyTagsModalOpen={setApplyTagsModalOpen}
+                  bulkEnrollOpen={bulkEnrollOpen}
+                  setBulkEnrollOpen={setBulkEnrollOpen}
                 />
               )}
             {subTabValueRef.current !== "attendees" &&
