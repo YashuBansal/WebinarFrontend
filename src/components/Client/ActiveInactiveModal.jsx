@@ -45,7 +45,7 @@ const ActiveInactiveModal = ({ modalName }) => {
     }
     if (isInputValid) {
       if(clientData?.remainingDays <= 0 && !clientData.isActive) {
-        navigate(`/client/plan/${clientData?._id}`);
+        navigate(`/client/plan/${clientData?.email}`);
 
         return;
       }

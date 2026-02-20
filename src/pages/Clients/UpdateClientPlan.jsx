@@ -12,7 +12,7 @@ import { Switch, FormControlLabel, Typography, Box } from "@mui/material";
 const UpdateClientPlan = (props) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { email } = useParams();
 
   const { planData } = useSelector((state) => state.pricePlans);
   const [selectedPlan, setSelectedPlan] = useState(null);
@@ -39,9 +39,9 @@ const UpdateClientPlan = (props) => {
 
   const handleConfirmPlan = () => {
     if (!selectedPlan) errorToast("Please select a plan");
-    if(!id) errorToast("Client ID not found");
+    if(!email) errorToast("Client email not found");
     const payload = {
-      adminId: id,
+      email,
       planId: selectedPlan,
       durationType,
     };

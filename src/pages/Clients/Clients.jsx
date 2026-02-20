@@ -84,7 +84,7 @@ const Clients = () => {
         ),
         tooltip: "Update Plan",
         onClick: (item) => {
-          navigate(`/client/plan/${item?._id}`);
+          navigate(`/client/plan/${item?.email}`);
         },
       },
       {

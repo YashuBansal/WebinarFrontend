@@ -442,7 +442,7 @@ const App = () => {
           ),
         },
         {
-          path: "/client/plan/:id",
+          path: "/client/plan/:email",
           element: (
             <RouteGuard roleNames={["SUPER_ADMIN"]}>
               <UpdateClientPlan />
