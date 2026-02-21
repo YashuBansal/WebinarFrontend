@@ -13,7 +13,6 @@ import {
 import { toast, Toaster } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
 
-///// pages /////
 import {
   Dashboard,
   Login,
@@ -160,7 +159,7 @@ const App = () => {
       }
     }
 
-    function onLogout(){
+    function onLogout() {
       dispatch(logout());
     }
 
