@@ -89,6 +89,13 @@ export const attendeeTableColumns = [
     capitalize: true,
   },
   {
+    header: "Profession",
+    key: "profession",
+    width: 20,
+    type: "",
+    capitalize: true,
+  },
+  {
     header: "Source",
     key: "source",
     width: 20,
@@ -176,6 +183,13 @@ export const groupedAttendeeTableColumns = [
   {
     header: "Sources",
     key: "sources",
+    width: 20,
+    type: "chip",
+    capitalize: true,
+  },
+  {
+    header: "Professions",
+    key: "professions",
     width: 20,
     type: "chip",
     capitalize: true,

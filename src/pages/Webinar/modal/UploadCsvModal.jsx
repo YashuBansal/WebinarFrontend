@@ -147,6 +147,13 @@ const FIELDS_TO_MAP = [
     exampleFormatter: (val) => (val ? val.toString() : ""),
   },
   {
+    name: "profession",
+    label: "Profession",
+    keywords: ["profession", "job", "title", "occupation"],
+    required: false,
+    exampleFormatter: (val) => (val ? val.toString() : ""),
+  },
+  {
     name: "source",
     label: "Source",
     keywords: ["source"],
@@ -557,6 +564,10 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
               currentMapping.location && item[currentMapping.location]
                 ? String(item[currentMapping.location]).trim()
                 : null,
+            profession:
+              currentMapping.profession && item[currentMapping.profession]
+                ? String(item[currentMapping.profession]).trim()
+                : null,
             source:
               currentMapping.source && item[currentMapping.source]
                 ? String(item[currentMapping.source]).trim()
@@ -636,6 +647,7 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
       lastName: item.lastName,
       phone: item.phone,
       location: item.location,
+      profession: item.profession,
       source: item.source,
       tags: item.tags,
       gender: item.gender,

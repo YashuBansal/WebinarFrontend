@@ -79,6 +79,7 @@ const GroupedAttendeeFilterModal = ({ modalName, setPage, handleCopy }) => {
       lastAssignedTo: "",
       enrollments: [],
       tags: [],
+      professions: [],
     });
   };
 
@@ -696,6 +697,52 @@ const GroupedAttendeeFilterModal = ({ modalName, setPage, handleCopy }) => {
                         components={{
                           DropdownIndicator: () => null, // 🔥 removes dropdown icon
                           IndicatorSeparator: () => null, // optional: removes the vertical bar separator
+                        }}
+                      />
+                    )}
+                  />
+                </div>
+              </div>
+            )}
+
+            {(tableConfig?.professions?.filterable !== false) && (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700">
+                  Professions
+                </label>
+                <div className="flex space-x-4">
+                  <Controller
+                    control={control}
+                    name="professions"
+                    defaultValue={[]}
+                    render={({ field }) => (
+                      <CreatableSelect
+                        isMulti
+                        isClearable
+                        styles={{
+                          menu: (provided, state) => ({
+                            ...provided,
+                            display: state.options?.length ? "block" : "none",
+                          }),
+                        }}
+                        value={
+                          field.value?.map((prof) => ({
+                            value: prof,
+                            label: prof,
+                          })) || []
+                        }
+                        onChange={(selectedOptions) => {
+                          field.onChange(
+                            selectedOptions
+                              ? selectedOptions.map((option) => option.value)
+                              : []
+                          );
+                        }}
+                        className="w-full mt-2"
+                        placeholder="Type Professions"
+                        components={{
+                          DropdownIndicator: () => null,
+                          IndicatorSeparator: () => null,
                         }}
                       />
                     )}

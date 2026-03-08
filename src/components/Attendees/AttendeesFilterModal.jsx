@@ -143,6 +143,7 @@ const FilterModal = ({
       gender: "",
       phone: "",
       location: "",
+      profession: "",
     });
   };
 
@@ -347,6 +348,10 @@ const FilterModal = ({
               )}
               {tableConfig?.location?.filterable && (
                 <FormInput name="location" label="Location" control={control} />
+              )}
+
+              {tableConfig?.profession?.filterable && (
+                <FormInput name="profession" label="Profession" control={control} />
               )}
 
               {tableConfig?.source?.filterable && (

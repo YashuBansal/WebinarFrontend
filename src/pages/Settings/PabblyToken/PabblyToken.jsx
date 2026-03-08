@@ -52,6 +52,10 @@ const webinarFieldDescriptions = {
     description: "Geographic location information (max 100 characters)",
     required: false,
   },
+  profession: {
+    description: "Profession or job title (max 100 characters)",
+    required: false,
+  },
   tags: {
     description:
       "Array of text labels for Product enrollment and Employee Temporary Assignment",
@@ -83,6 +87,7 @@ const adminJsonBody = `{
     "phone": "1234567890",
     "gender": "male",
     "location": "New York",
+    "profession": "Engineer",
     "tags": ["vip", "new-lead"],
     "source": "website-registration"
   }
