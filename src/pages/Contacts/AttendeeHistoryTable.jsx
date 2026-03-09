@@ -126,6 +126,7 @@ const AttendeeHistoryTable = ({
                   <th className="py-3 px-1 min-w-[150px]">Gender</th>
                   <th className="py-3 min-w-[200px]">Webinar Minutes</th>
                   <th className="py-3 px-1">Location</th>
+                  <th className="py-3 px-1 min-w-[120px]">Profession</th>
                   <th className="py-3 px-1 min-w-[150px]">Webinar Date</th>
                   <ComponentGuard
                     conditions={[!employeeModeData, userData?.isActive]}
@@ -171,6 +172,7 @@ const AttendeeHistoryTable = ({
                     <td className="py-4 text-center capitalize">
                       {item?.location || "N/A"}
                     </td>
+                    <td className="px-2 py-4">{item?.profession || "N/A"}</td>
                     <td className="px-3 py-4">
                       {Array.isArray(item?.webinar) && item.webinar.length > 0
                         ? formatDateAsNumber(item.webinar[0].webinarDate)
@@ -256,6 +258,7 @@ const HistoryCard = ({ item, index, onEdit, formatDate, showEditButton }) => {
         <StatRow label="Gender" value={item?.gender || "N/A"}/>
         <StatRow label="Webinar Mins" value={item?.timeInSession || "0"} />
         <StatRow label="Location" value={item?.location || "N/A"} valueClassName="capitalize" />
+        <StatRow label="Profession" value={item?.profession || "N/A"} />
       </dl>
       
     </div>

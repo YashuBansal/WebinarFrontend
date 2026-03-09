@@ -85,6 +85,18 @@ const ViewParticularContact = () => {
   const { selectedAttendee, attendeeLeadType, attendeeEnrollments } =
     useSelector((state) => state.attendee);
 
+  const professionsList = useMemo(() => {
+    if (!Array.isArray(selectedAttendee) || selectedAttendee.length === 0) return [];
+    const data = selectedAttendee[0]?.data;
+    if (!Array.isArray(data)) return [];
+    const set = new Set();
+    data.forEach((item) => {
+      const p = item?.profession?.trim?.();
+      if (p) set.add(p);
+    });
+    return Array.from(set);
+  }, [selectedAttendee]);
+
   const { noteData, isFormSuccess, leadTypeData } = useSelector(
     (state) => state.assign
   );
@@ -650,6 +662,32 @@ const ViewParticularContact = () => {
               }
             }}
           />
+
+          {professionsList.length > 0 && (
+            <div className="border border-gray-300 rounded-lg shadow-sm bg-white">
+              <div className="border-b border-gray-300 px-4 py-3 bg-gray-100">
+                <h3 className="font-semibold text-gray-700 text-lg">Professions</h3>
+              </div>
+              <div className="p-4">
+                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+                  {professionsList.map((profession) => (
+                    <Chip
+                      key={profession}
+                      label={profession}
+                      variant="outlined"
+                      size="small"
+                      className="bg-slate-100 text-gray-700 border-gray-300"
+                      sx={{
+                        "& .MuiChip-label": {
+                          fontWeight: 500,
+                        },
+                      }}
+                    />
+                  ))}
+                </Stack>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       <Suspense fallback={<ModalFallback />}>

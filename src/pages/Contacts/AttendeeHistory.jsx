@@ -199,6 +199,7 @@ const AttendeeHistory = () => {
                     <th className="py-3 px-2">Gender</th>
                     <th className="py-3 px-2 text-center">Webinar Minutes</th>
                     <th className="py-3 px-2">Location</th>
+                    <th className="py-3 px-2">Profession</th>
                     <th className="py-3 px-2">Webinar Date</th>
                     <ComponentGuard
                       conditions={[
@@ -263,7 +264,9 @@ const AttendeeHistory = () => {
                         <td className=" py-4 text-center capitalize whitespace-nowrap">
                           <span>{item?.location || "N/A"}</span>
                         </td>
-
+                        <td className="px-2 py-4 whitespace-nowrap">
+                          {item?.profession || "N/A"}
+                        </td>
                         <td className="px-3 py-4 whitespace-nowrap">
                           {Array.isArray(item?.webinar) &&
                           item.webinar.length > 0
@@ -366,6 +369,7 @@ const HistoryCard = ({ item, index, onEdit, formatDate, showEditButton }) => {
           value={item?.location || "N/A"}
           valueClassName="capitalize"
         />
+        <StatRow label="Profession" value={item?.profession || "N/A"} />
       </dl>
 
     </div>

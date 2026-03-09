@@ -66,6 +66,7 @@ const EditModal = ({
       phone: initialData?.phone,
       location: initialData?.location,
       gender: initialData?.gender,
+      profession: initialData?.profession ?? "",
     },
   });
 
@@ -73,6 +74,7 @@ const EditModal = ({
     console.log(initialData?.webinar?.webinarName, "webinarName");
     data["id"] = initialData?._id;
     let finalData = removeBlankAttributes(data);
+    finalData.profession = data.profession ?? "";
 
     finalData["createdBy"] = userData?.userName;
     if (Array.isArray(initialData?.webinar) && initialData?.webinar.length > 0)
@@ -179,6 +181,16 @@ const EditModal = ({
                 type="text"
                 className="mt-1 block w-full h-10 rounded border border-gray-300 px-3 focus:border-teal-500 focus:outline-none"
                 placeholder="Enter Location"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium">Profession</label>
+              <input
+                {...register("profession")}
+                type="text"
+                className="mt-1 block w-full h-10 rounded border border-gray-300 px-3 focus:border-teal-500 focus:outline-none"
+                placeholder="Enter Profession"
               />
             </div>
 
