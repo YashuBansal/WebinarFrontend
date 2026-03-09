@@ -56,6 +56,7 @@ const WebhookSetup = () => {
     { value: "phone", label: "Phone", required: false },
     { value: "location", label: "Location", required: false },
     { value: "gender", label: "Gender", required: false },
+    { value: "profession", label: "Profession", required: false },
     { value: "tags", label: "Tags", required: false },
     { value: "source", label: "Source", required: false },
   ];

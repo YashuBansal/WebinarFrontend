@@ -86,12 +86,16 @@ const ViewParticularContact = () => {
     useSelector((state) => state.attendee);
 
   const professionsList = useMemo(() => {
-    if (!Array.isArray(selectedAttendee) || selectedAttendee.length === 0) return [];
+    if (!Array.isArray(selectedAttendee) || selectedAttendee.length === 0)
+      return [];
     const data = selectedAttendee[0]?.data;
     if (!Array.isArray(data)) return [];
     const set = new Set();
     data.forEach((item) => {
-      const p = item?.profession?.trim?.();
+      const p =
+        typeof item?.profession === "string"
+          ? item.profession.trim().toLowerCase()
+          : "";
       if (p) set.add(p);
     });
     return Array.from(set);
@@ -676,7 +680,7 @@ const ViewParticularContact = () => {
                       label={profession}
                       variant="outlined"
                       size="small"
-                      className="bg-slate-100 text-gray-700 border-gray-300"
+                      className="bg-slate-100 capitalize text-gray-700 border-gray-300"
                       sx={{
                         "& .MuiChip-label": {
                           fontWeight: 500,
