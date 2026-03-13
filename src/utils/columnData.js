@@ -58,6 +58,7 @@ export const clientTableColumns = [
     type: "",
   },
   { header: "Toggle Limit", key: "toggleLimit", width: 15, type: "" },
+  { header: "Webinar Limit", key: "webinarLimitTotal", width: 15, type: "" },
 ];
 
 export const attendeeTableColumns = [

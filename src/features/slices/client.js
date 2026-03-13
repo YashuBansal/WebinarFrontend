@@ -11,6 +11,7 @@ import {
   updateClient,
   getAllClientsForDropdown,
   updateClientPlan,
+  updateClientWebinarLimit,
   softDeleteClient,
   hardDeleteData,
 } from "../actions/client";
@@ -150,6 +151,21 @@ export const clientSlce = createSlice({
       })
       .addCase(updateClientPlan.rejected, (state, action) => {
         state.isUpdating = false;
+        errorToast(action?.payload);
+      })
+      .addCase(updateClientWebinarLimit.pending, (state, action) => {
+        state.isUpdating = true;
+        state.isSuccess = false;
+        state.errorMessage = "";
+      })
+      .addCase(updateClientWebinarLimit.fulfilled, (state, action) => {
+        state.isUpdating = false;
+        state.isSuccess = true;
+        successToast("Client webinar limit updated successfully");
+      })
+      .addCase(updateClientWebinarLimit.rejected, (state, action) => {
+        state.isUpdating = false;
+        state.errorMessage = action.payload;
         errorToast(action?.payload);
       });
   },

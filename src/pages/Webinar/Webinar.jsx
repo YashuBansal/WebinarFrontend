@@ -16,6 +16,7 @@ import { Edit, Delete, ContentCopy } from "@mui/icons-material";
 import { openModal } from "../../features/slices/modalSlice";
 import ComponentGuard from "../../components/AccessControl/ComponentGuard";
 import CreateWebinar from "../../components/Webinar/CreateWebinar";
+import WebinarLimitModal from "../../components/Webinar/WebinarLimitModal";
 import DeleteModal from "../../components/Webinar/delete";
 import {
   getAllWebinarsForPage,
@@ -24,6 +25,7 @@ import {
 import useAddUserActivity from "../../hooks/useAddUserActivity";
 import {
   clearWebinarPageData,
+  clearWebinarError,
   resetWebinarSuccess,
 } from "../../features/slices/webinarContact";
 const WebinarFilterModal = lazy(() =>
@@ -99,12 +101,23 @@ const Webinar = () => {
   const { isLoading, isSuccess, webinarPageData, pagination } = useSelector(
     (state) => state.webinarContact
   );
+  const { errorMessage } = useSelector((state) => state.webinarContact);
 
   const { totalPages = 1, total = 0 } = pagination;
 
   const { userData, subscription } = useSelector((state) => state.auth);
   const assignmentMetrics = subscription?.plan?.assignmentMetrics || false;
   const dateFormat = userData?.dateFormat || DateFormat.DD_MM_YYYY;
+
+  const [showWebinarLimitModal, setShowWebinarLimitModal] = useState(false);
+  const baseWebinarLimit =
+    Number(subscription?.webinarLimit ?? subscription?.plan?.webinarLimit ?? 0)
+      || 0;
+  const webinarLimitAddon = Number(subscription?.webinarLimitAddon ?? 0);
+  const webinarLimit = baseWebinarLimit + webinarLimitAddon;
+  const isWebinarLimitExceeded =
+    webinarLimit > 0 && Number(total || 0) >= webinarLimit;
+    console.log(webinarLimit, total, isWebinarLimitExceeded);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [id, setId] = useState();
@@ -131,6 +144,13 @@ const Webinar = () => {
   useEffect(() => {
     fetchWebinars();
   }, [fetchWebinars]);
+
+  useEffect(() => {
+    if (errorMessage === "Webinar Limit Exceeded") {
+      setShowWebinarLimitModal(true);
+      dispatch(clearWebinarError());
+    }
+  }, [errorMessage, dispatch]);
 
   useEffect(() => {
     const currentPageInUrl = searchParams.get("page");
@@ -350,7 +370,13 @@ const Webinar = () => {
             </Button>
           )}
           <button
-            onClick={() => dispatch(openModal(createWebinarModalName))}
+            onClick={() => {
+              if (isWebinarLimitExceeded) {
+                setShowWebinarLimitModal(true);
+                return;
+              }
+              dispatch(openModal(createWebinarModalName));
+            }}
             className={`${globalButton} text-sm px-3 py-2 md:text-base md:px-4 md:py-2`}
           >
             Create Webinar
@@ -683,6 +709,13 @@ const Webinar = () => {
         <CreateWebinar modalName={createWebinarModalName} />,
         document.body
       )}
+      {showWebinarLimitModal &&
+        createPortal(
+          <WebinarLimitModal
+            onClose={() => setShowWebinarLimitModal(false)}
+          />,
+          document.body
+        )}
 
       <Suspense fallback={<></>}>
         <WebinarFilterModal

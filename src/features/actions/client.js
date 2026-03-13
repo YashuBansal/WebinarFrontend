@@ -111,3 +111,18 @@ export const updateClientPlan = createAsyncThunk(
     }
   }
 );
+
+export const updateClientWebinarLimit = createAsyncThunk(
+  "client/webinarLimit/update",
+  async ({ adminId = "", webinarLimitAddon = 0 }, { rejectWithValue }) => {
+    try {
+      const { data } = await instance.patch(`subscription/webinar-limit`, {
+        adminId,
+        webinarLimitAddon,
+      });
+      return data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  }
+);

@@ -39,6 +39,9 @@ export const webinarContactSlice = createSlice({
     resetWebinarSuccess: (state) => {
       state.isSuccess = false;
     },
+    clearWebinarError: (state) => {
+      state.errorMessage = "";
+    },
 
     clearAssignedEmployees: (state) => {
       state.assignedEmployees = [];
@@ -172,6 +175,7 @@ export const webinarContactSlice = createSlice({
 export const {
   resetAttendeeContactDetails,
   resetWebinarSuccess,
+  clearWebinarError,
   clearAssignedEmployees,
   clearWebinarData,
   clearWebinarPageData,

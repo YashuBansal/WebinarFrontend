@@ -66,8 +66,8 @@ const UpdateClientModal = ({ modalName }) => {
         companyName: defaultUserInfo.companyName,
         _id: defaultUserInfo._id,
         dateFormat: defaultUserInfo.dateFormat,
-        // *** NEW: Set the planExpiry field, formatting it for the input ***
         planExpiry: formatDateForInput(defaultUserInfo.planExpiry),
+        webinarLimitAddon: defaultUserInfo.webinarLimitAddon ?? 0,
       });
     }
   }, [defaultUserInfo, reset]);
@@ -88,31 +88,47 @@ const UpdateClientModal = ({ modalName }) => {
   }, [defaultUserInfo?.planStartDate]);
 
   const onSubmit = (data) => {
-    const payload = {};
     if (activeTab === 0) {
-      payload.userName = data.userName;
-      payload.email = data.email;
-      payload.phone = data.phone;
-      payload.companyName = data.companyName;
-      payload.dateFormat = data.dateFormat;
+      const payload = {
+        userName: data.userName,
+        email: data.email,
+        phone: data.phone,
+        companyName: data.companyName,
+        dateFormat: data.dateFormat,
+      };
 
-      // *** NEW: Only include planExpiry in the payload if it has changed ***
+      dispatch(updateClient({ data: payload, id: data._id }));
+      logUserActivity({
+        action: "update",
+        type: "Client's information with UserName",
+        detailItem: data.userName,
+      });
+    } else if (activeTab === 1) {
+      const payload = { password: data.newPassword };
+      dispatch(updateClient({ data: payload, id: data._id }));
+      logUserActivity({
+        action: "update",
+        type: "Client's password with UserName",
+        detailItem: data.userName,
+      });
+    } else if (activeTab === 2) {
+      const payload = {};
       const originalExpiry = formatDateForInput(defaultUserInfo.planExpiry);
       if (data.planExpiry !== originalExpiry) {
         payload.planExpiry = data.planExpiry;
       }
-    } else {
-      payload.password = data.newPassword;
-    }
+      const addon = Number(data.webinarLimitAddon ?? 0);
+      if (Number.isFinite(addon) && addon >= 0) {
+        payload.webinarLimitAddon = String(addon);
+      }
 
-    dispatch(updateClient({ data: payload, id: data._id }));
-    logUserActivity({
-      action: "update",
-      type: `Client's ${
-        activeTab === 0 ? "information" : "password"
-      } with UserName`,
-      detailItem: data.userName,
-    });
+      dispatch(updateClient({ data: payload, id: data._id }));
+      logUserActivity({
+        action: "update",
+        type: "Client's plan details with UserName",
+        detailItem: data.userName,
+      });
+    }
   };
 
   const togglePasswordVisibility = (field) => {
@@ -161,6 +177,7 @@ const UpdateClientModal = ({ modalName }) => {
       >
         <Tab label="Basic Info" />
         <Tab label="Password" />
+        <Tab label="Plan Details" />
       </Tabs>
       <DialogContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 pt-4">
@@ -238,17 +255,6 @@ const UpdateClientModal = ({ modalName }) => {
                 )}
               />
 
-              <TextField
-                {...register("planExpiry")}
-                label="Plan Expiry Date"
-                type="date"
-                fullWidth
-                // This is crucial for date inputs to prevent label overlap
-                InputLabelProps={{ shrink: true }}
-                inputProps={{
-                  min: minExpiryDate,
-                }}
-              />
             </Box>
           )}
           {activeTab === 1 && (
@@ -305,6 +311,28 @@ const UpdateClientModal = ({ modalName }) => {
                     </InputAdornment>
                   ),
                 }}
+              />
+            </Box>
+          )}
+          {activeTab === 2 && (
+            <Box className="space-y-4">
+              <TextField
+                {...register("planExpiry")}
+                label="Plan Expiry Date"
+                type="date"
+                fullWidth
+                InputLabelProps={{ shrink: true }}
+                inputProps={{
+                  min: minExpiryDate,
+                }}
+              />
+              <TextField
+                {...register("webinarLimitAddon")}
+                label="Extra Webinar Limit"
+                type="number"
+                fullWidth
+                InputProps={{ inputProps: { min: 0 } }}
+                helperText="Additional webinars allowed beyond the plan limit for this client."
               />
             </Box>
           )}

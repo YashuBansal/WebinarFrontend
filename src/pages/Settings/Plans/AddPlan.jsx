@@ -322,6 +322,7 @@ export default function AddPlan() {
         toggleLimit: singlePlanData.toggleLimit || 0,
         whatsappProjectLimit: singlePlanData.whatsappProjectLimit || 0,
         zoomProjectLimit: singlePlanData.zoomProjectLimit || 0,
+        webinarLimit: singlePlanData.webinarLimit || 0,
         attendeeTableConfig: singlePlanData.attendeeTableConfig || {},
         whatsappNotificationOnAlarms:
           singlePlanData.whatsappNotificationOnAlarms || false,
@@ -446,6 +447,14 @@ export default function AddPlan() {
               control={control}
               required={true}
               errorMessage="Zoom project limit is required"
+            />
+            <FormInput
+              name="webinarLimit"
+              label="Webinar Limit"
+              type="number"
+              control={control}
+              required={true}
+              errorMessage="Webinar limit is required"
             />
             <FormControl variant="outlined">
               <InputLabel id="attendee-label">Plan Type</InputLabel>
