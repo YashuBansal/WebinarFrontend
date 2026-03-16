@@ -172,7 +172,6 @@ const Sidebar = ({ toggleButtonRef }) => {
               ),
               children: ["employees", "employee", "createEmployee"],
             },
-
             {
               path:
                 import.meta.env.VITE_REACT_APP_WHATSAPP_URL ||
@@ -192,6 +191,19 @@ const Sidebar = ({ toggleButtonRef }) => {
               external: true,
               icon: (
                 <img src={ZoomIcon} width={30} height={30} alt="Employee" />
+              ),
+              children: [],
+            },
+            {
+              path: "/interest-pool",
+              label: "Interest Pool",
+              icon: (
+                <img
+                  src={AssignmentIcon}
+                  width={30}
+                  height={30}
+                  alt="Interest Pool"
+                />
               ),
               children: [],
             },

@@ -71,6 +71,7 @@ const ClientBillingHistories = lazy(() =>
 );
 const WebhookSetup = lazy(() => import("./Webinar/modal/WebhookSetup"));
 const MessageCounts = lazy(() => import("./MessageCounts"));
+const InterestPoolPage = lazy(() => import("./InterestPool/InterestPoolPage"));
 
 export {
   CalendarPage,
@@ -125,4 +126,5 @@ export {
   ClientBillingHistories,
   WebhookSetup,
   MessageCounts,
+  InterestPoolPage,
 };

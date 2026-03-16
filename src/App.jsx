@@ -66,6 +66,7 @@ import {
   ClientBillingHistories,
   WebhookSetup,
   MessageCounts,
+  InterestPoolPage,
 } from "./pages";
 import RouteGuard from "./components/AccessControl/RouteGuard";
 
@@ -667,6 +668,14 @@ const App = () => {
           element: (
             <RouteGuard roleNames={["ADMIN"]}>
               <ManageTags />
+            </RouteGuard>
+          ),
+        },
+        {
+          path: "/interest-pool",
+          element: (
+            <RouteGuard roleNames={["ADMIN"]}>
+              <InterestPoolPage />
             </RouteGuard>
           ),
         },
