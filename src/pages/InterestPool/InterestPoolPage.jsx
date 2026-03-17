@@ -1,19 +1,27 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { toast } from "sonner";
+import {
+  useInterestPoolSettings,
+  useUpdateInterestPoolSettings,
+  useInterestSearch,
+} from "../../hooks/useInterestPool";
 
 const InterestPoolPage = () => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [results, setResults] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [savedAccountId, setSavedAccountId] = useState("");
-  const [savedAccessToken, setSavedAccessToken] = useState("");
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [settingsAccountId, setSettingsAccountId] = useState("");
   const [settingsAccessToken, setSettingsAccessToken] = useState("");
-  const [isLoadingSettings, setIsLoadingSettings] = useState(false);
-  const [isSavingSettings, setIsSavingSettings] = useState(false);
 
+  const { data: settings, isLoading: isLoadingSettings } =
+    useInterestPoolSettings();
+  const { mutate: updateSettings, isPending: isSavingSettings } =
+    useUpdateInterestPoolSettings();
+  const { mutate: searchInterests, isPending: isLoading, error: searchError } =
+    useInterestSearch();
+
+  const savedAccountId = settings?.accountId ?? "";
+  const savedAccessToken = settings?.accessToken ?? "";
   const hasConfiguredSettings =
     savedAccountId.trim() !== "" && savedAccessToken.trim() !== "";
 
@@ -30,38 +38,13 @@ const InterestPoolPage = () => {
     return Array.from(keys);
   }, [results]);
 
-  useEffect(() => {
-    const loadSettings = async () => {
-      setIsLoadingSettings(true);
-      try {
-        const res = await fetch("/api/interest-pool/settings");
-        if (!res.ok) {
-          setIsLoadingSettings(false);
-          return;
-        }
-        const data = await res.json();
-        if (data && (data.accountId || data.accessToken)) {
-          setSavedAccountId(data.accountId || "");
-          setSavedAccessToken(data.accessToken || "");
-        }
-      } catch {
-        // ignore initial load errors
-      } finally {
-        setIsLoadingSettings(false);
-      }
-    };
-
-    loadSettings();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
   const openSettings = () => {
     setSettingsAccountId(savedAccountId);
     setSettingsAccessToken(savedAccessToken);
     setIsSettingsOpen(true);
   };
 
-  const handleSaveSettings = async (e) => {
+  const handleSaveSettings = (e) => {
     e.preventDefault();
     const trimmedAccountId = settingsAccountId.trim();
     const trimmedAccessToken = settingsAccessToken.trim();
@@ -71,42 +54,17 @@ const InterestPoolPage = () => {
       return;
     }
 
-    setIsSavingSettings(true);
-    try {
-      const res = await fetch("/api/interest-pool/settings", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
+    updateSettings(
+      { accountId: trimmedAccountId, accessToken: trimmedAccessToken },
+      {
+        onSuccess: () => {
+          setIsSettingsOpen(false);
         },
-        body: JSON.stringify({
-          accountId: trimmedAccountId,
-          accessToken: trimmedAccessToken,
-        }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        const message =
-          data?.message || "Failed to save Interest Pool settings.";
-        toast.error(message);
-        return;
-      }
-
-      const data = await res.json();
-      setSavedAccountId(data.accountId || trimmedAccountId);
-      setSavedAccessToken(data.accessToken || trimmedAccessToken);
-      toast.success("Interest Pool settings saved.");
-      setIsSettingsOpen(false);
-    } catch (err) {
-      const message =
-        err?.message || "Unexpected error while saving settings.";
-      toast.error(message);
-    } finally {
-      setIsSavingSettings(false);
-    }
+      },
+    );
   };
 
-  const handleFetch = async (e) => {
+  const handleFetch = (e) => {
     e.preventDefault();
     if (!canSearch) return;
 
@@ -120,44 +78,27 @@ const InterestPoolPage = () => {
       return;
     }
 
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const params = new URLSearchParams({
+    searchInterests(
+      {
         accountId: effectiveAccountId,
         accessToken: effectiveAccessToken,
         q: searchKeyword.trim(),
-      });
-
-      const res = await fetch(`/api/fb/interest-search?${params.toString()}`);
-      const data = await res.json();
-
-      if (!res.ok || data.error) {
-        const message =
-          data?.error?.message ||
-          `Failed to fetch interests (status ${res.status})`;
-        setError(message);
-        toast.error(message);
-        setResults([]);
-        return;
-      }
-
-      const list = Array.isArray(data?.data) ? data.data : [];
-      setResults(list);
-      if (list.length === 0) {
-        toast.info("No interests found for this keyword.");
-      } else {
-        toast.success(`Fetched ${list.length} interests.`);
-      }
-    } catch (err) {
-      const message = err?.message || "Unexpected error while fetching data.";
-      setError(message);
-      toast.error(message);
-      setResults([]);
-    } finally {
-      setIsLoading(false);
-    }
+      },
+      {
+        onSuccess: (data) => {
+          const list = Array.isArray(data?.data) ? data.data : [];
+          setResults(list);
+          if (list.length === 0) {
+            toast.info("No interests found for this keyword.");
+          } else {
+            toast.success(`Fetched ${list.length} interests.`);
+          }
+        },
+        onError: () => {
+          setResults([]);
+        },
+      },
+    );
   };
 
   const handleDownloadCsv = () => {
@@ -252,9 +193,11 @@ const InterestPoolPage = () => {
           </div>
         </div>
 
-        {error && (
+        {searchError && (
           <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded px-3 py-2">
-            {error}
+            {typeof searchError === "string"
+              ? searchError
+              : searchError?.message || "Failed to fetch interests."}
           </div>
         )}
 
