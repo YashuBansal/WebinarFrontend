@@ -29,14 +29,34 @@ const InterestPoolPage = () => {
     return hasConfiguredSettings && searchKeyword.trim() !== "";
   }, [hasConfiguredSettings, searchKeyword]);
 
-  const columns = useMemo(() => {
-    if (!results || results.length === 0) return [];
-    const keys = new Set();
-    results.forEach((item) => {
-      Object.keys(item || {}).forEach((key) => keys.add(key));
+  const displayedResults = useMemo(() => {
+    if (!Array.isArray(results) || results.length === 0) return [];
+
+    return results.map((item) => {
+      const lower = item?.audience_size_lower_bound;
+      const upper = item?.audience_size_upper_bound;
+      const lowerText = lower != null && lower !== "" ? String(lower) : "-";
+      const upperText = upper != null && upper !== "" ? String(upper) : "-";
+
+      return {
+        name: item?.name ?? "",
+        type: item?.type ?? "",
+        path: item?.path ?? "",
+        Audience: `${lowerText} - ${upperText}`,
+        description: item?.description ?? "",
+      };
     });
-    return Array.from(keys);
   }, [results]);
+
+  const columns = useMemo(() => {
+    return [
+      { key: "name", label: "Name" },
+      { key: "type", label: "Type" },
+      { key: "path", label: "Path" },
+      { key: "Audience", label: "Audience" },
+      { key: "description", label: "Description" },
+    ];
+  }, []);
 
   const openSettings = () => {
     setSettingsAccountId(savedAccountId);
@@ -102,13 +122,13 @@ const InterestPoolPage = () => {
   };
 
   const handleDownloadCsv = () => {
-    if (!results || results.length === 0 || columns.length === 0) return;
+    if (!displayedResults || displayedResults.length === 0) return;
 
     const csvRows = [];
-    csvRows.push(columns.join(","));
+    csvRows.push(columns.map((c) => c.label).join(","));
 
-    results.forEach((item) => {
-      const row = columns.map((key) => {
+    displayedResults.forEach((item) => {
+      const row = columns.map(({ key }) => {
         const value = item && item[key] != null ? item[key] : "";
         const serialized =
           typeof value === "object" ? JSON.stringify(value) : String(value);
@@ -138,8 +158,7 @@ const InterestPoolPage = () => {
         <div>
           <h1 className="text-2xl font-semibold">Interest Pool</h1>
           <p className="text-sm text-gray-600 mt-1">
-            Fetch Facebook ad interests using your account ID, access token, and
-            a search keyword.
+          Find relevant targeting options in meta based on your keyword search.
           </p>
         </div>
         <button
@@ -232,11 +251,12 @@ const InterestPoolPage = () => {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-medium">Results</h2>
           <span className="text-sm text-gray-500">
-            {results.length} record{results.length === 1 ? "" : "s"}
+            {displayedResults.length} record
+            {displayedResults.length === 1 ? "" : "s"}
           </span>
         </div>
 
-        {results.length === 0 ? (
+        {displayedResults.length === 0 ? (
           <p className="text-sm text-gray-500">
             No data to display. Run a search to see interests.
           </p>
@@ -245,32 +265,32 @@ const InterestPoolPage = () => {
             <table className="min-w-full text-sm border border-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  {columns.map((col) => (
+                  {columns.map(({ key, label }) => (
                     <th
-                      key={col}
+                      key={key}
                       className="px-3 py-2 text-left font-semibold text-gray-700 border-b border-gray-200"
                     >
-                      {col}
+                      {label}
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {results.map((item, rowIndex) => (
+                {displayedResults.map((item, rowIndex) => (
                   <tr
                     key={rowIndex}
                     className={rowIndex % 2 === 0 ? "bg-white" : "bg-gray-50"}
                   >
-                    {columns.map((col) => {
+                    {columns.map(({ key }) => {
                       const value =
-                        item && item[col] != null ? item[col] : "";
+                        item && item[key] != null ? item[key] : "";
                       const displayValue =
                         typeof value === "object"
                           ? JSON.stringify(value)
                           : String(value);
                       return (
                         <td
-                          key={col}
+                          key={key}
                           className="px-3 py-2 text-gray-800 border-b border-gray-100 align-top max-w-xs break-words"
                         >
                           {displayValue}
