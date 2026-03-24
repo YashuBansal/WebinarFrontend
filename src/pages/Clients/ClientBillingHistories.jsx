@@ -51,8 +51,11 @@ const formatBillingType = (type) => {
     .join(" ");
 };
 
-const BillingHistoryCard = ({ item, onDownload }) => (
-  <div className="rounded-lg border bg-white p-4 shadow-sm">
+const BillingHistoryCard = ({ item, onDownload }) => {
+  const planOrAddonName = item?.plan?.name || item?.addOn?.addonName || "N/A";
+
+  return (
+    <div className="rounded-lg border bg-white p-4 shadow-sm">
     <div className="flex flex-col gap-2 border-b pb-3 mb-3">
       <div >
         <div className="flex justify-between items-start gap-4" >
@@ -78,7 +81,7 @@ const BillingHistoryCard = ({ item, onDownload }) => (
       </div>
     </div>
     <dl className="divide-y divide-gray-100">
-      <StatRow label="Plan" value={item.plan.name} />
+      <StatRow label="Plan/AddOn" value={planOrAddonName} />
       <StatRow
         label="Duration"
         value={`${formatDate(item?.startDate || item.createdAt)} - ${formatDate(
@@ -111,8 +114,9 @@ const BillingHistoryCard = ({ item, onDownload }) => (
         />
       </div>
     </dl>
-  </div>
-);
+    </div>
+  );
+};
 
 const ClientBillingHistories = () => {
   const tableHeader = "Client Billing Histories";
@@ -264,7 +268,7 @@ const ClientBillingHistories = () => {
                   {item.durationType}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-700">
-                  {item.plan.name}
+                  {item?.plan?.name || item?.addOn?.addonName || "N/A"}
                 </td>
                 <td className="px-6 py-4 text-sm text-gray-700">
                   ₹{(item.itemAmount || 0).toFixed(2)}

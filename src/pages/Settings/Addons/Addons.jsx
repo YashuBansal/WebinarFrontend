@@ -54,12 +54,23 @@ const AddOnsPage = () => {
 
   const onSubmit = (data) => {
     console.log(data);
-    if (!data.employeeLimit && !data.contactLimit) {
-      errorToast("Either Employee Limit or Contact Limit must be provided.");
+    if (
+      !data.employeeLimit &&
+      !data.contactLimit &&
+      !data.webinarLimit &&
+      !data.whatsappProjectLimit &&
+      !data.zoomProjectLimit
+    ) {
+      errorToast(
+        "At least one limit must be provided (Employee, Contact, Webinar, WhatsApp projects, or Zoom projects)."
+      );
       return;
     }
     if (!data.contactLimit) data.contactLimit = 0;
     if (!data.employeeLimit) data.employeeLimit = 0;
+    if (!data.webinarLimit) data.webinarLimit = 0;
+    if (!data.whatsappProjectLimit) data.whatsappProjectLimit = 0;
+    if (!data.zoomProjectLimit) data.zoomProjectLimit = 0;
 
     dispatch(createAddon(data));
   };
@@ -81,19 +92,7 @@ const AddOnsPage = () => {
           </button>
         </ComponentGuard>
 
-        <ComponentGuard
-          allowedRoles={[roles.ADMIN]}
-          conditions={[!id ? true : false]}
-        >
-          <button
-            onClick={() => {
-              navigate(`/addons/${userData?._id}`);
-            }}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          >
-            My AddOns
-          </button>
-        </ComponentGuard>
+        {/* Admin purchase flow lives at /addons/buy now */}
       </div>
 
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -111,9 +110,21 @@ const AddOnsPage = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">Create AddOn</h2>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl">
+            <div className="flex items-center justify-between gap-3 border-b border-gray-100 px-6 py-4">
+              <h2 className="text-lg font-semibold text-gray-900">Create AddOn</h2>
+              <button
+                type="button"
+                onClick={() => setModalOpen(false)}
+                className="rounded-lg px-2 py-1 text-sm text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+              >
+                Close
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit(onSubmit)}>
+              <div className="max-h-[75vh] overflow-y-auto px-6 py-5">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <FormInput
                 name="addonName"
                 label="AddOn Name"
@@ -144,8 +155,41 @@ const AddOnsPage = () => {
               />
 
               <FormInput
+                name="webinarLimit"
+                label="Webinar Limit"
+                control={control}
+                type="number"
+                validation={{
+                  valueAsNumber: true,
+                  min: { value: 0, message: "Must be at least 0" },
+                }}
+              />
+
+              <FormInput
+                name="whatsappProjectLimit"
+                label="WhatsApp Project Limit"
+                control={control}
+                type="number"
+                validation={{
+                  valueAsNumber: true,
+                  min: { value: 0, message: "Must be at least 0" },
+                }}
+              />
+
+              <FormInput
+                name="zoomProjectLimit"
+                label="Zoom Project Limit"
+                control={control}
+                type="number"
+                validation={{
+                  valueAsNumber: true,
+                  min: { value: 0, message: "Must be at least 0" },
+                }}
+              />
+
+              <FormInput
                 name="addOnPrice"
-                label="Price"
+                label="Price (incl. GST)"
                 control={control}
                 type="number"
                 validation={{
@@ -167,17 +211,20 @@ const AddOnsPage = () => {
                 }}
               />
 
-              <div className="flex justify-end space-x-4">
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 border-t border-gray-100 px-6 py-4">
                 <button
                   type="button"
                   onClick={() => setModalOpen(false)}
-                  className="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400"
+                  className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600"
+                  className="rounded-xl bg-green-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-400 focus:ring-offset-2"
                 >
                   Create
                 </button>

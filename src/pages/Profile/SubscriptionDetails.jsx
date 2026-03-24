@@ -4,6 +4,27 @@ import { formatDateAsNumber } from '../../utils/extra';
 
 const SubscriptionDetails = (props) => {
     const {roles, subscription, usedContacts} = props;
+
+    const contactBase = subscription?.contactLimit || 0;
+    const contactAddon = subscription?.contactLimitAddon || 0;
+    const effectiveContact = contactBase + contactAddon;
+
+    const employeeBase = subscription?.employeeLimit || 0;
+    const employeeAddon = subscription?.employeeLimitAddon || 0;
+    const effectiveEmployee = employeeBase + employeeAddon;
+
+    const webinarBase = subscription?.webinarLimit || 0;
+    const webinarAddon = subscription?.webinarLimitAddon || 0;
+    const effectiveWebinar = webinarBase + webinarAddon;
+
+    const whatsappBase = subscription?.whatsappProjectLimit || 0;
+    const whatsappAddon = subscription?.whatsappProjectLimitAddon || 0;
+    const effectiveWhatsapp = whatsappBase + whatsappAddon;
+
+    const zoomBase = subscription?.zoomProjectLimit || 0;
+    const zoomAddon = subscription?.zoomProjectLimitAddon || 0;
+    const effectiveZoom = zoomBase + zoomAddon;
+
   return (
     <ComponentGuard allowedRoles={[roles.ADMIN]}>
             <div className="bg-white shadow-lg rounded-lg p-6 w-full">
@@ -19,7 +40,7 @@ const SubscriptionDetails = (props) => {
 
                 <DetailItem
                   label="Contact Limit"
-                  value={subscription?.contactLimit || 0}
+                  value={effectiveContact}
                 />
                 {/* <DetailItem
                   label="Contact Addons"
@@ -31,7 +52,19 @@ const SubscriptionDetails = (props) => {
                 /> */}
                 <DetailItem
                   label="Employee Limit"
-                  value={subscription?.employeeLimit || 0}
+                  value={effectiveEmployee}
+                />
+                <DetailItem
+                  label="Webinar Limit"
+                  value={effectiveWebinar}
+                />
+                <DetailItem
+                  label="WhatsApp Projects Limit"
+                  value={effectiveWhatsapp}
+                />
+                <DetailItem
+                  label="Zoom Projects Limit"
+                  value={effectiveZoom}
                 />
                 <DetailItem
                   label="Start Date"

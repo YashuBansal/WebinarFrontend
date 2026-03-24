@@ -47,9 +47,15 @@ const ViewSettings = () => {
     },
     {
       to: "/addons",
-      name: "Addons",
+      name: "Manage Addons",
       icon: <img src={Addon} alt="Addon" className="w-10 h-10" />,
       allowedRoles: [roles.SUPER_ADMIN],
+    },
+    {
+      to: "/addons/buy",
+      name: "Buy Addons",
+      icon: <img src={Addon} alt="Addon" className="w-10 h-10" />,
+      allowedRoles: [roles.ADMIN],
     },
     {
       to: "/tags",

@@ -41,6 +41,7 @@ const NotesPage = lazy(() => import("./Contacts/NotesPage"));
 const AttendeeHistory = lazy(() => import("./Contacts/AttendeeHistory"));
 const CalendarPage = lazy(() => import("./Calendar/CalendarPage"));
 const AddOnsPage = lazy(() => import("./Settings/Addons/Addons"));
+const BuyAddOnsPage = lazy(() => import("./Settings/Addons/BuyAddons"));
 const ViewEmployee = lazy(() => import("./Employees/ViewEmployee"));
 const LeadTypes = lazy(() => import("./Settings/LeadType/ManageLeadTypes"));
 const EmployeeDashboard = lazy(() => import("./Dashboard/EmployeeDashboard"));
@@ -78,6 +79,7 @@ export {
   UpdateNoticeBoard,
   NoticeBoard,
   AddOnsPage,
+  BuyAddOnsPage,
   ViewEmployee,
   LeadTypes,
   EmployeeDashboard,

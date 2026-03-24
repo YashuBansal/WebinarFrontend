@@ -19,9 +19,28 @@ export const checkoutAddon = createAsyncThunk(
   "checkout/addon",
   async ({ addon }, { rejectWithValue }) => {
     try {
-      const response = await instance.post(`/razorpay/addon/checkout`, {
-        addon,
-      });
+      const idempotencyKey =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random()}`;
+
+      const response = await instance.post(
+        `/addons/purchases`,
+        { addonId: addon },
+        { headers: { "Idempotency-Key": idempotencyKey } }
+      );
+      return response?.data; // { purchase, order, addon }
+    } catch (e) {
+      return rejectWithValue(e);
+    }
+  }
+);
+
+export const getAddonPurchase = createAsyncThunk(
+  "addonPurchase/get",
+  async ({ purchaseId }, { rejectWithValue }) => {
+    try {
+      const response = await instance.get(`/addons/purchases/${purchaseId}`);
       return response?.data;
     } catch (e) {
       return rejectWithValue(e);

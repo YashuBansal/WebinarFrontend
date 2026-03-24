@@ -44,6 +44,7 @@ import {
   AttendeeHistory,
   CalendarPage,
   AddOnsPage,
+  BuyAddOnsPage,
   ViewEmployee,
   LeadTypes,
   EmployeeDashboard,
@@ -536,8 +537,16 @@ const App = () => {
         {
           path: "/addons",
           element: (
-            <RouteGuard roleNames={["SUPER_ADMIN", "ADMIN"]}>
+            <RouteGuard roleNames={["SUPER_ADMIN"]}>
               <AddOnsPage />
+            </RouteGuard>
+          ),
+        },
+        {
+          path: "/addons/buy",
+          element: (
+            <RouteGuard roleNames={["ADMIN"]}>
+              <BuyAddOnsPage />
             </RouteGuard>
           ),
         },
