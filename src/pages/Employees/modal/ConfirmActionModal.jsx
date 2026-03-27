@@ -14,11 +14,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { closeModal } from "../../../features/slices/modalSlice";
 import { updateEmployeeStatus } from "../../../features/actions/employee";
 import useAddUserActivity from "../../../hooks/useAddUserActivity";
+import useUserSubscription from "../../../hooks/useUserSubscription";
 
 export default function ConfirmActionModal({ modalName }) {
   const logUserActivity = useAddUserActivity();
   const dispatch = useDispatch();
-  const { subscription } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const { modals, modalData } = useSelector((state) => state.modals);
   const open = modals[modalName] ? true : false;
 

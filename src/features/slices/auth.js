@@ -5,7 +5,6 @@ import {
   getAllRoles,
   getCurrentUser,
   getSuperAdmin,
-  getUserSubscription,
   logIn,
   signUp,
   updatePassword,
@@ -34,7 +33,6 @@ const initialState = {
   isOTPGenerated: false,
   isRolesLoading: false,
   roles: [],
-  subscription: null,
   superAdminData: null,
   isSomethingStillLoading: false,
   secretToken: null,
@@ -51,7 +49,6 @@ const authSlice = createSlice({
       socket.disconnect();
       state.isUserLoggedIn = false;
       state.userData = null;
-      state.subscription = null;
     },
     clearLoadingAndData: (state) => {
       state.isLoading = false;
@@ -157,31 +154,6 @@ const authSlice = createSlice({
       })
       .addCase(getAllRoles.rejected, (state, action) => {
         state.isRolesLoading = false;
-      })
-      .addCase(getUserSubscription.fulfilled, (state, action) => {
-        state.subscription = action.payload;
-
-        const expiryRaw = action.payload?.expiryDate;
-        const isActive = state.userData?.isActive;
-
-        if (expiryRaw && isActive) {
-          const expiryDate = new Date(expiryRaw);
-          const today = new Date();
-
-          if (!Number.isNaN(expiryDate.getTime())) {
-            if (expiryDate.getTime() < today.getTime()) {
-              // If the subscription has already expired while the user
-              // is still marked active, log them out with a clear message.
-              state.isUserLoggedIn = false;
-              state.userData = null;
-              state.subscription = null;
-              errorToast("Your subscription has expired.");
-            }
-          }
-        }
-      })
-      .addCase(getUserSubscription.rejected, (state, action) => {
-        errorToast(action?.payload || "Error getting user subscription");
       })
       .addCase(getGSTValue.fulfilled, (state, action) => {
         if (typeof action.payload?.GST_VALUE === "number" && action.payload.GST_VALUE >= 0)

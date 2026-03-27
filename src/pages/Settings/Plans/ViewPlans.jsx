@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getExternalPlanURI, getPricePlans } from "../../../features/actions/pricePlan";
 import PlanCard from "./PlanCard";
-import { getUserSubscription } from "../../../features/actions/auth";
+import useUserSubscription from "../../../hooks/useUserSubscription";
 import ComponentGuard from "../../../components/AccessControl/ComponentGuard";
 import useRoles from "../../../hooks/useRoles";
 import { Link } from "react-router-dom";
@@ -42,7 +42,8 @@ const BrowseHeader = ({planURI}) => {
 
 const ViewPlans = () => {
   const roles = useRoles();
-  const { userData, subscription } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const { planData, isPlanDeleted, isSuccess, isLoading } = useSelector(
     (state) => state.pricePlans
   );
@@ -91,13 +92,6 @@ const ViewPlans = () => {
   useEffect(() => {
     dispatch(getPricePlans({ isActive: planType }));
   }, [planType]);
-
-  useEffect(() => {
-    // Super admin ke liye subscription fetch nahi karna
-    if (userData && !roles.isSuperAdmin(userData.role)) {
-      dispatch(getUserSubscription());
-    }
-  }, [dispatch, roles, userData]);
 
   useEffect(() => {
     if (isSuccess) {

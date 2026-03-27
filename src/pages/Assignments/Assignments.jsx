@@ -48,6 +48,7 @@ import { clearWebinarData } from "../../features/slices/webinarContact";
 import { globalButton } from "../../utils/style";
 import ApplyTagsModal from "../../components/Webinar/ApplyTagsModal";
 import { useApplyTagsToEmployeeAssignments } from "../../hooks/useTags";
+import useUserSubscription from "../../hooks/useUserSubscription";
 
 const Assignments = () => {
   const employeeId = useParams()?.id;
@@ -64,7 +65,8 @@ const Assignments = () => {
 
   const [selectedRows, setSelectedRows] = useState([]);
 
-  const { userData, subscription } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
 
   const semething =
     roles.getRoleNameById(userData?.role) === "EMPLOYEE SALES"

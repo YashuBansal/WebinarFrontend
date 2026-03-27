@@ -14,13 +14,15 @@ import ModalFallback from "../../components/Fallback/ModalFallback";
 import EmpAssignModal from "./EmpAssignModal";
 import { VisibilityIcon } from "../../components/SVGs";
 import useMediaQuery from "../../hooks/useMediaQuery";
+import useUserSubscription from "../../hooks/useUserSubscription";
 
 const EmployeeAssignMetrics = () => {
   const dispatch = useDispatch();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const roles = useRoles();
-  const { userData, subscription } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const { webinarData } = useSelector((state) => state.webinarContact);
   const { employeeModeData } = useSelector((state) => state.employee);
   const employeeId = employeeModeData?._id;

@@ -49,6 +49,7 @@ import {
   BookmarkIcon,
   FilterIcon,
 } from "../../components/SVGs";
+import useUserSubscription from "../../hooks/useUserSubscription";
 
 const Webinar = () => {
   // ----------------------- ModalNames for Redux -----------------------
@@ -68,7 +69,8 @@ const Webinar = () => {
 
   const { totalPages = 1, total = 0 } = pagination;
 
-  const { userData, subscription } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const assignmentMetrics = subscription?.plan?.assignmentMetrics || false;
   const dateFormat = userData?.dateFormat || DateFormat.DD_MM_YYYY;
 

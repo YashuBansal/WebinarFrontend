@@ -36,6 +36,7 @@ const WebinarAttendees = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
+  const { userData } = useSelector((state) => state.auth);
   const { leadTypeData } = useSelector((state) => state.assign);
   const { attendeeData, isLoading, pagination, isDeleting, isSuccess } =
     useSelector((state) => state.attendee);
@@ -211,12 +212,14 @@ const WebinarAttendees = () => {
   return (
     <div className=" md:px-10 pt-14 space-y-6">
       <div className="flex justify-end">
-        <button
-          className={globalButton}
-          onClick={() => setApplyTagsModalOpen(true)}
-        >
-          Apply Tags
-        </button>
+        {userData?.isActive && (
+          <button
+            className={globalButton}
+            onClick={() => setApplyTagsModalOpen(true)}
+          >
+            Apply Tags
+          </button>
+        )}
       </div>
       <DataTable
         employees={employees}
@@ -284,7 +287,7 @@ const WebinarAttendees = () => {
           </Suspense>,
           document.body
         )}
-      {applyTagsModalOpen &&
+      {userData?.isActive && applyTagsModalOpen &&
         createPortal(
           <Suspense fallback={<ModalFallback />}>
               <ApplyTagsModal

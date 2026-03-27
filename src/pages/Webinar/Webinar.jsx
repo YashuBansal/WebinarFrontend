@@ -57,6 +57,7 @@ import {
 
 import {} from "../";
 import useMediaQuery from "../../hooks/useMediaQuery";
+import useUserSubscription from "../../hooks/useUserSubscription";
 
 const CellRenderer = memo(({ column, row }) => {
   const value = row?.[column.key];
@@ -105,7 +106,8 @@ const Webinar = () => {
 
   const { totalPages = 1, total = 0 } = pagination;
 
-  const { userData, subscription } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const assignmentMetrics = subscription?.plan?.assignmentMetrics || false;
   const dateFormat = userData?.dateFormat || DateFormat.DD_MM_YYYY;
 

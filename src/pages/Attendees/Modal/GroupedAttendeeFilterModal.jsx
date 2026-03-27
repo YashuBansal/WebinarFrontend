@@ -11,13 +11,14 @@ import { getAllProductsByAdminId } from "../../../features/actions/product";
 import tagsService from "../../../services/tagsService";
 import { globalButton } from "../../../utils/style";
 import CreatableSelect from "react-select/creatable";
+import useUserSubscription from "../../../hooks/useUserSubscription";
 
 const GroupedAttendeeFilterModal = ({ modalName, setPage, handleCopy }) => {
   const dispatch = useDispatch();
   const { control, handleSubmit, reset, watch } = useForm();
 
   const { leadTypeData } = useSelector((state) => state.assign);
-  const { subscription } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const tableConfig = subscription?.plan?.attendeeTableConfig || {};
   const { allAttendeesFilters, allAttendeesSortBy } = useSelector(
     (state) => state.filters

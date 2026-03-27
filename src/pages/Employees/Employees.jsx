@@ -14,7 +14,7 @@ import {
   setEmployeeModeId,
 } from "../../features/slices/employee";
 import { openModal } from "../../features/slices/modalSlice";
-import { getUserSubscription } from "../../features/actions/auth";
+import useUserSubscription from "../../hooks/useUserSubscription";
 import DataTable from "../../components/Table/DataTable";
 import { employeeTableColumns } from "../../utils/columnData";
 import useRoles from "../../hooks/useRoles";
@@ -48,7 +48,8 @@ const Employees = () => {
   const { employeeData, isLoading, isSuccess, totalPages } = useSelector(
     (state) => state.employee
   );
-  const { userData, subscription } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const employeeInactivity = subscription?.plan?.employeeInactivity;
 
   const modalState = useSelector((state) => state.modals.modals);
@@ -101,7 +102,6 @@ const Employees = () => {
           filters: filters,
         })
       );
-      dispatch(getUserSubscription());
       dispatch(clearSuccess());
     }
   }, [isSuccess]);

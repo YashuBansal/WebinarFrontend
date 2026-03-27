@@ -33,6 +33,7 @@ import { clearEmployeeData } from "../../features/slices/employee";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { globalButton } from "../../utils/style";
+import useUserSubscription from "../../hooks/useUserSubscription";
 const FilterModal = ({
   modalName,
   setPage,
@@ -50,7 +51,8 @@ const FilterModal = ({
       ? webinarAttendeesSortByOptions
       : salesAttendeesSortByOptions;
   const { leadTypeData } = useSelector((state) => state.assign);
-  const { subscription, userData } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
 
   const dateFormat = userData?.dateFormat || DateFormat.DD_MM_YYYY;
 

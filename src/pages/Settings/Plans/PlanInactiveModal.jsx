@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { deletePricePlan } from "../../../features/actions/pricePlan";
 import useAddUserActivity from "../../../hooks/useAddUserActivity";
+import useUserSubscription from "../../../hooks/useUserSubscription";
 
 export default function PlanInactiveModal({ setModalData, modalData, planType }) {
   const logUserActivity = useAddUserActivity();
   const dispatch = useDispatch();
-  const { subscription } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
 
   const { isSuccess } = useSelector((state) => state.pricePlans);
   const [inputValue, setInputValue] = useState("");

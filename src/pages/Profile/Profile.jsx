@@ -11,7 +11,6 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   deleteUserDocumet,
   getCurrentUser,
-  getUserSubscription,
   updateUser,
 } from "../../features/actions/auth";
 import { ExpandLess, ExpandMore, Delete } from "@mui/icons-material";
@@ -21,6 +20,7 @@ import useAddUserActivity from "../../hooks/useAddUserActivity";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
 import { DateFormat, formatDateAsNumber } from "../../utils/extra";
 import SubscriptionDetails from "./SubscriptionDetails";
+import useUserSubscription from "../../hooks/useUserSubscription";
 
 import TwoFactorAuthSection from "./TwoFactorAuthSection";
 
@@ -30,15 +30,14 @@ const ProfilePage = () => {
   const logUserActivity = useAddUserActivity();
 
   const [isEditingInfo, setIsEditingInfo] = useState(false);
-  const { isLoading, userData, isSuccess, subscription, secretToken } =
-    useSelector((state) => state.auth);
+  const { isLoading, userData, isSuccess, secretToken } = useSelector(
+    (state) => state.auth,
+  );
+  const { data: subscription } = useUserSubscription();
 
   const dateFormat = userData?.dateFormat || DateFormat.DD_MM_YYYY;
-  const totalContactLimit =
-    (subscription?.contactLimit ?? 0) + (subscription?.contactLimitAddon ?? 0);
-  const totalEmployeeLimit =
-    (subscription?.employeeLimit ?? 0) +
-    (subscription?.employeeLimitAddon ?? 0);
+   
+   
   const usedContacts = subscription?.contactCount ?? 0;
 
   const [isDocumentOpen, setIsDocumentOpen] = useState(false);
@@ -79,8 +78,6 @@ const ProfilePage = () => {
 
   useEffect(() => {
     dispatch(getCurrentUser());
-    if(subscription)
-    dispatch(getUserSubscription());
   }, []);
 
   return (

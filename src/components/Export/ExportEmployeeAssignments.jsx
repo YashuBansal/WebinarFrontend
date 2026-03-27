@@ -34,6 +34,7 @@ import {
 } from "../../features/slices/filter-preset";
 import DeleteIcon from "../../components/SVGs/red-bin.svg";
 import { globalButton } from "../../utils/style";
+import useUserSubscription from "../../hooks/useUserSubscription";
 
 const tableName = "Webinar Attendees Export";
 
@@ -67,7 +68,7 @@ const ExportEmployeeAssignments = ({
 }) => {
   const dispatch = useDispatch();
 
-  const { subscription } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const tableConfig = subscription?.plan?.attendeeTableConfig || {};
 
   const { isExportLoading } = useSelector((state) => state.export);

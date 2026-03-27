@@ -1,9 +1,10 @@
 import { useMemo } from "react";
-import { useSelector } from "react-redux";
 import {
   evaluateSubscription,
   SubscriptionStatus,
 } from "../utils/subscription";
+import { useSelector } from "react-redux";
+import useUserSubscription from "./useUserSubscription";
 
 /**
  * Hook to compute plan expiry warning info from Redux auth state.
@@ -11,7 +12,8 @@ import {
  * @param {number} warningThresholdDays - Days before expiry when warning starts (default 15).
  */
 export default function usePlanExpiryWarning(warningThresholdDays = 15) {
-  const { subscription, userData } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
 
   const result = useMemo(() => {
     const evaluation = evaluateSubscription({

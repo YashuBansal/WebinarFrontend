@@ -11,14 +11,14 @@ import usePlanExpiryWarning from "../../../hooks/usePlanExpiryWarning";
 import NotificationBell from "../../Notification/NotificationBell";
 import ImportExportNotifications from "../../Notification/ImportExportNotifications";
 import { formatDateAsNumber } from "../../../utils/extra";
+import useUserSubscription from "../../../hooks/useUserSubscription";
 const Header = ({ toggleButtonRef }) => {
   const [showExpiryNotice, setShowExpiryNotice] = useState(true);
   const dispatch = useDispatch();
   const roles = useRoles();
   const navigate = useNavigate(); // Initialize useNavigate for navigation
-  const { userData, subscription, HEADER_LABEL } = useSelector(
-    (state) => state.auth
-  );
+  const { userData, HEADER_LABEL } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const { employeeModeData } = useSelector((state) => state.employee);
 
   const { showWarning, daysLeft, expiryDate } = usePlanExpiryWarning(15);

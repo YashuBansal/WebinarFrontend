@@ -74,10 +74,10 @@ import RouteGuard from "./components/AccessControl/RouteGuard";
 import {
   getAllRoles,
   getCurrentUser,
-  getUserSubscription,
 } from "./features/actions/auth";
 import useRoles from "./hooks/useRoles";
 import useAddUserActivity from "./hooks/useAddUserActivity";
+import useUserSubscription from "./hooks/useUserSubscription";
 
 import { socket } from "./socket";
 
@@ -100,6 +100,7 @@ const App = () => {
   const { userData, isUserLoggedIn, subscription } = useSelector(
     (state) => state.auth
   );
+  useUserSubscription();
   const role = userData?.role || "";
   const calendarFeatures = subscription?.plan?.calendarFeatures || false;
   const productRevenueMetrics =
@@ -207,13 +208,6 @@ const App = () => {
     function initFunctions() {
       if (isUserLoggedIn && userData?.role) {
         console.log("initializing auth data");
-
-        // Super admin ke liye subscription fetch nahi karna
-        if (!roles.isSuperAdmin(role)) {
-          console.log("fetching subscription");
-          // && !roles.isEmployeeId(role) removed this from the condition
-          dispatch(getUserSubscription());
-        }
 
         dispatch(getAllRoles());
       }

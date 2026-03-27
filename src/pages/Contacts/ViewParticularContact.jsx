@@ -36,6 +36,7 @@ import { DateFormat, formatDateAsNumber } from "../../utils/extra";
 import useAddUserActivity from "../../hooks/useAddUserActivity";
 import useRoles from "../../hooks/useRoles";
 import ModalFallback from "../../components/Fallback/ModalFallback";
+import useUserSubscription from "../../hooks/useUserSubscription";
 import LogsModal from "./Modal/LogsModal";
 import { createPortal } from "react-dom";
 import { clearAttendeeAlarm } from "../../features/slices/alarm";
@@ -79,7 +80,8 @@ const ViewParticularContact = () => {
   const [showEnrollmentModal, setShowEnrollmentModal] = useState(false);
   const [attendeeHistoryData, setAttendeeHistoryData] = useState([]);
 
-  const { userData, subscription } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const setAlarm = subscription?.plan?.setAlarm;
   const dateFormat = userData?.dateFormat || DateFormat.MM_DD_YYYY;
   const { selectedAttendee, attendeeLeadType, attendeeEnrollments } =

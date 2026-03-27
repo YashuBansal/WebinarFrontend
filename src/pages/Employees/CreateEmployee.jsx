@@ -29,6 +29,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import tagsService from "../../services/tagsService";
 import { clearSingleClientData } from "../../features/slices/client";
 import ReactSelect from "react-select";
+import useUserSubscription from "../../hooks/useUserSubscription";
 const CreateEmployee = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -49,7 +50,8 @@ const CreateEmployee = () => {
       tags: [],
     },
   });
-  const { userData, subscription } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const employeeInactivity = subscription?.plan?.employeeInactivity;
   const { isLoading, isSuccess, singleEmployeeData } = useSelector(
     (state) => state.employee

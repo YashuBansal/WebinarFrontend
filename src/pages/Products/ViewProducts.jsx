@@ -24,6 +24,7 @@ import EditProductModal from "./Modal/EditProductModal";
 import productLevelService from "../../services/productLevelService";
 import { globalButton } from "../../utils/style";
 import ProductFilterModal from "../../components/Filter/ProductFilterModal";
+import useUserSubscription from "../../hooks/useUserSubscription";
 
 const ViewProducts = () => {
   // ----------------------- ModalNames for Redux -----------------------
@@ -36,7 +37,8 @@ const ViewProducts = () => {
   const navigate = useNavigate();
   const roles = useRoles();
   const logUserActivity = useAddUserActivity();
-  const { userData, subscription } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const role = userData?.role;
   const productRevenueMetrics = subscription?.plan?.productRevenueMetrics;
 

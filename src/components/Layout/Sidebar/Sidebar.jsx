@@ -38,6 +38,7 @@ import {
   setTagsData,
 } from "../../../features/slices/globalData";
 import useMediaQuery from "../../../hooks/useMediaQuery";
+import useUserSubscription from "../../../hooks/useUserSubscription";
 const Sidebar = ({ toggleButtonRef }) => {
   const dispatch = useDispatch();
   const roles = useRoles();
@@ -47,9 +48,8 @@ const Sidebar = ({ toggleButtonRef }) => {
 
   const { isUpdated } = useSelector((state) => state.noticeBoard);
   const { sidebarLinkData } = useSelector((state) => state.sidebarLink);
-  const { userData, isUserLoggedIn, subscription } = useSelector(
-    (state) => state.auth
-  );
+  const { userData, isUserLoggedIn } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const calendarFeatures = subscription?.plan?.calendarFeatures;
   const { isSidebarOpen } = useSelector((state) => state.globalData);
   const [showImportantLinks, setShowImportantLinks] = useState(false); // toggle state for sub-links

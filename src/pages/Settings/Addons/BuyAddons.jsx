@@ -6,6 +6,7 @@ import ComponentGuard from "../../../components/AccessControl/ComponentGuard";
 import { getAddons } from "../../../features/actions/pricePlan";
 import { resetAddonsData } from "../../../features/slices/pricePlan";
 import AddonCard from "./AddonCard";
+import useUserSubscription from "../../../hooks/useUserSubscription";
 
 const BuyAddOnsPage = () => {
   const dispatch = useDispatch();
@@ -14,6 +15,15 @@ const BuyAddOnsPage = () => {
 
   const { userData } = useSelector((state) => state.auth);
   const { addonsData = [] } = useSelector((state) => state.pricePlans);
+  const { data: subscription } = useUserSubscription();
+
+  const expiryDate = subscription?.expiryDate
+    ? new Date(subscription.expiryDate)
+    : null;
+  const isSubscriptionExpired = expiryDate
+    ? expiryDate.getTime() <= Date.now()
+    : true;
+  const canBuyAddons = Boolean(userData?.isActive) && !isSubscriptionExpired;
 
   useEffect(() => {
     dispatch(getAddons());
@@ -37,6 +47,12 @@ const BuyAddOnsPage = () => {
         </ComponentGuard>
       </div>
 
+      {!canBuyAddons && (
+        <div className="mb-6 rounded-md border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+          Add-on purchase is unavailable because your account/subscription is inactive or expired. You can still view your previous add-ons.
+        </div>
+      )}
+
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {addonsData.map((addon) => (
           <AddonCard
@@ -45,6 +61,7 @@ const BuyAddOnsPage = () => {
             roles={roles}
             id={addon._id}
             showExpiryDate={true}
+            showAction={canBuyAddons}
           />
         ))}
       </div>

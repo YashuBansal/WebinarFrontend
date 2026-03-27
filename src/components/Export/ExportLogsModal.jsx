@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { closeModal } from "../../features/slices/modalSlice";
 import { ClipLoader } from "react-spinners";
 import { globalButton } from "../../utils/style";
+import useUserSubscription from "../../hooks/useUserSubscription";
 
 const ExportModal = ({ modalName, defaultColumns, handleExport }) => {
   const dispatch = useDispatch();
@@ -18,7 +19,7 @@ const ExportModal = ({ modalName, defaultColumns, handleExport }) => {
   const { isExportLoading } = useSelector((state) => state.export);
   const modalState = useSelector((state) => state.modals.modals);
   const open = modalState[modalName] ? true : false;
-  const { subscription } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const employeeInactivity = subscription?.plan?.employeeInactivity;
 
   const [limit, setLimit] = useState("");

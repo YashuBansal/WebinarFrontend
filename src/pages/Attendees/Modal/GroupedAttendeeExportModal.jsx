@@ -32,6 +32,7 @@ import {
 import DeleteIcon from "../../../components/SVGs/red-bin.svg";
 import { exportGroupedAttendeesExcel } from "../../../features/actions/export-excel";
 import { globalButton } from "../../../utils/style";
+import useUserSubscription from "../../../hooks/useUserSubscription";
 
 const tableName = "All Attendees Export";
 
@@ -55,7 +56,7 @@ const modalStyle = {
 const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
   const dispatch = useDispatch();
 
-  const { subscription } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const tableConfig = subscription?.plan?.attendeeTableConfig || {};
 
   const { isExportLoading } = useSelector((state) => state.export);

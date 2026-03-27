@@ -95,6 +95,7 @@ const ViewEmployee = () => {
     useSelector((state) => state.assign);
   const { totalPages = 1, total = 0 } = pagination;
   const { locationsData } = useSelector((state) => state.location);
+  const { userData } = useSelector((state) => state.auth);
 
   const { webinarData } = useSelector((state) => state.webinarContact);
   const modalState = useSelector((state) => state.modals.modals);
@@ -420,7 +421,7 @@ const ViewEmployee = () => {
         )}
         {(tabValue === "history" || tabValue === "assignments") && (
           <>
-            {currentWebinar && (
+            {currentWebinar && userData?.isActive && (
               <div className="flex justify-end mb-4">
                 <button
                   className={globalButton}
@@ -487,7 +488,7 @@ const ViewEmployee = () => {
                 />
               </Suspense>
             )}
-            {applyTagsModalOpen &&
+            {userData?.isActive && applyTagsModalOpen &&
               createPortal(
                 <Suspense fallback={<ModalFallback />}>
                   <ApplyTagsModal

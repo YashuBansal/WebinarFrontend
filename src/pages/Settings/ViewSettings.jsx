@@ -20,6 +20,7 @@ import {
   Tags,
 } from "./SVGs";
 import { clearOTPGenerated } from "../../features/slices/auth";
+import useUserSubscription from "../../hooks/useUserSubscription";
 
 const ViewSettings = () => {
   const roles = useRoles();
@@ -28,7 +29,7 @@ const ViewSettings = () => {
   const { isTablesMasked } = useSelector((state) => state.table);
   const { isLoading, isSuccess } = useSelector((state) => state.auth);
 
-  const { subscription } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const tableConfig = subscription?.plan?.attendeeTableConfig || {};
   const isCustomStatusEnabled = tableConfig?.isCustomOptionsAllowed || false;
 
