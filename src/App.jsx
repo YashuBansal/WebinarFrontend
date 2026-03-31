@@ -223,6 +223,13 @@ const App = () => {
           window.location.reload();
         }
       }
+
+      if (event.data.type === "LOGOUT") {
+        dispatch(logout());
+        if (window.location.pathname !== "/login") {
+          window.location.href = "/login";
+        }
+      }
     };
     return () => channel.close();
   }, []);

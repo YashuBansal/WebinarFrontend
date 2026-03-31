@@ -282,7 +282,7 @@ const Sidebar = ({ toggleButtonRef }) => {
 
     dispatch(logOutAndClearCookies()).then(() => {
       const broadcastChannel = new BroadcastChannel("auth-saas-crm");
-      broadcastChannel.postMessage({ type: "REFRESH" });
+      broadcastChannel.postMessage({ type: "LOGOUT" });
       broadcastChannel.close();
     });
   };
