@@ -68,6 +68,10 @@ import {
   WebhookSetup,
   MessageCounts,
   InterestPoolPage,
+  PolicyPage,
+  TermsPage,
+  SupportPage,
+  DocumentationPage,
 } from "./pages";
 import RouteGuard from "./components/AccessControl/RouteGuard";
 
@@ -692,6 +696,22 @@ const App = () => {
       ],
     },
     {
+      path: "/policy",
+      element: <PolicyPage />,
+    },
+    {
+      path: "/terms",
+      element: <TermsPage />,
+    },
+    {
+      path: "/support",
+      element: <SupportPage />,
+    },
+    {
+      path: "/documentation",
+      element: <DocumentationPage />,
+    },
+    {
       path: "/login",
       element: !isUserLoggedIn ? (
         <Suspense fallback={<></>}>
@@ -701,6 +721,10 @@ const App = () => {
       ) : (
         <Navigate to="/" replace />
       ),
+    },
+    {
+      path: "/policy",
+      element: <PolicyPage />,
     },
     {
       path: "*",

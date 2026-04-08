@@ -73,6 +73,10 @@ const ClientBillingHistories = lazy(() =>
 const WebhookSetup = lazy(() => import("./Webinar/modal/WebhookSetup"));
 const MessageCounts = lazy(() => import("./MessageCounts"));
 const InterestPoolPage = lazy(() => import("./InterestPool/InterestPoolPage"));
+const PolicyPage = lazy(() => import("./Public/PolicyPage"));
+const TermsPage = lazy(() => import("./Public/TermsPage"));
+const SupportPage = lazy(() => import("./Public/SupportPage"));
+const DocumentationPage = lazy(() => import("./Public/DocumentationPage"));
 
 export {
   CalendarPage,
@@ -129,4 +133,8 @@ export {
   WebhookSetup,
   MessageCounts,
   InterestPoolPage,
+  PolicyPage,
+  TermsPage,
+  SupportPage,
+  DocumentationPage,
 };
