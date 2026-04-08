@@ -24,6 +24,16 @@ export const injectStore = (_store) => {
   store = _store;
 };
 
+const logoutAndRedirectToLogin = () => {
+  store?.dispatch({ type: "auth/logout" });
+  if (
+    typeof window !== "undefined" &&
+    window.location.pathname !== "/login"
+  ) {
+    window.location.href = "/login";
+  }
+};
+
 // Dedupe concurrent refresh calls across requests
 let refreshPromise = null;
 
@@ -51,6 +61,15 @@ instance.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config;
 
+    if (originalRequest?.url?.includes("auth/refresh")) {
+      logoutAndRedirectToLogin();
+      const errorMessage = getErrorMessage(
+        error?.response?.status,
+        error?.response?.data?.message
+      );
+      return Promise.reject(errorMessage);
+    }
+
     if (
       (error?.response?.status === 401 || error?.response?.status === 403) &&
       !originalRequest._retry
@@ -61,9 +80,7 @@ instance.interceptors.response.use(
 
         return instance(originalRequest);
       } catch (refreshError) {
-        console.log("refreshError", refreshError);
-        console.error("Token refresh failed. Logging out user.");
-        store.dispatch({ type: "auth/logout" });
+        logoutAndRedirectToLogin();
         return Promise.reject("Token refresh failed. Please log in again.");
       }
     }
