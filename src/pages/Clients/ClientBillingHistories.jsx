@@ -11,7 +11,6 @@ import { Pagination, Skeleton } from "@mui/material";
 import PageLimitEditor from "../../components/PageLimitEditor";
 import { formatDate } from "../../utils/extra";
 import { exportClientBillings } from "../../features/actions/export-excel";
-import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import DownloadIcon from "../../components/SVGs/download-blueish.svg";
 import { generateInvoicePdf } from "../../utils/invoicePdf";
@@ -152,9 +151,6 @@ const ClientBillingHistories = () => {
       bill,
       billToName:
         bill?.admin?.companyName || bill?.admin?.userName || "Company Name",
-      onMissingAddress: () => {
-        toast.error("Address is required to download the PDF");
-      },
     });
   };
 

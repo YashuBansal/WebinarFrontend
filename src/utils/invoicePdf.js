@@ -13,15 +13,6 @@ export const generateInvoicePdf = async ({
     return;
   }
 
-  if (!bill?.admin?.address) {
-    if (onMissingAddress) {
-      onMissingAddress();
-    } else {
-      toast.error("Address is required to download the PDF");
-    }
-    return;
-  }
-
   if (!bill?.date) {
     toast.error("Invalid Date");
     return;
@@ -202,7 +193,9 @@ export const generateInvoicePdf = async ({
     await drawString(resolvedBillToName, 35, 470, 12, "bold");
 
     const rawAddress = bill?.admin?.address?.trim();
-    const addressLinesToDraw = splitAddressIntoTwoLines(rawAddress);
+    const addressLinesToDraw = rawAddress
+      ? splitAddressIntoTwoLines(rawAddress)
+      : [];
 
     for (let index = 0; index < addressLinesToDraw.length; index++) {
       await drawString(addressLinesToDraw[index], 35, 450 - index * 20, 12);
