@@ -66,40 +66,53 @@ function Login() {
 // text field
 const glassTextFieldSx = {
   "& .MuiOutlinedInput-root": {
-    backgroundColor: "rgba(255,255,255,0.07)",
+    backgroundColor: "rgba(255,255,255,0.07) !important",
     backdropFilter: "blur(10px)",
     WebkitBackdropFilter: "blur(10px)",
-    color: "#ffffff",
+    color: "#ffffff !important",
     height: "52px",
     borderRadius: "12px",
     fontSize: "0.95rem",
 
     "& fieldset": {
-      borderColor: "rgba(255,255,255,0.2)",
+      borderColor: "rgba(255,255,255,0.2) !important",
     },
     "&:hover fieldset": {
-      borderColor: "rgba(255,255,255,0.4)",
+      borderColor: "rgba(255,255,255,0.4) !important",
     },
     "&.Mui-focused fieldset": {
-      borderColor: "#22B573",
+      borderColor: "#22B573 !important",
       borderWidth: "1px",
     },
     "& input": {
+      backgroundColor: "transparent !important",
+      color: "#ffffff !important",
       "&::placeholder": {
-        color: "rgba(255,255,255,0.5)",
+        color: "rgba(255,255,255,0.5) !important",
         opacity: 1,
+      },
+      "&:-webkit-autofill": {
+        WebkitBoxShadow: "0 0 0 1000px rgba(10, 30, 34, 0.9) inset !important",
+        WebkitTextFillColor: "#ffffff !important",
+        transition: "background-color 5000s ease-in-out 0s",
       },
     },
   },
   "& .MuiInputLabel-root": {
-    color: "rgba(255,255,255,0.6)",
+    color: "rgba(255,255,255,0.6) !important",
     fontSize: "0.9rem",
   },
   "& .MuiInputLabel-root.Mui-focused": {
-    color: "#22B573",
+    color: "#22B573 !important",
   },
   "& .MuiFormHelperText-root": {
-    color: "rgba(255,255,255,0.5)",
+    color: "rgba(255,255,255,0.5) !important",
+  },
+  "& .MuiInputAdornment-root .MuiSvgIcon-root": {
+    color: "rgba(255,255,255,0.7) !important",
+  },
+  "& .MuiIconButton-root": {
+    color: "rgba(255,255,255,0.7) !important",
   },
 };
 
@@ -159,7 +172,7 @@ const glassTextFieldSx = {
       <div className="relative w-24 h-24">
         <div className="absolute inset-0 rounded-full bg-blue-400 opacity-60 blur-3xl scale-150"></div>
         <div className="relative z-10 w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-          <img src="/wlhLogo.png" className="w-14 h-14" />
+          <img src="/zapier_icon.png" className="w-14 h-14" />
         </div>
       </div>
     </div>
