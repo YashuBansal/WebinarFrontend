@@ -100,6 +100,10 @@ const ViewPlans = () => {
     }
   }, [isSuccess]);
 
+  const currentPlanId =
+    userData && roles.isSuperAdmin(userData.role)
+      ? null
+      : subscription?.plan?._id;
 
   return (
     <div className="py-14 px-4 md:px-8 flex flex-col items-center">
@@ -167,7 +171,7 @@ const ViewPlans = () => {
                   setModalData={setModalData}
                   isMenuVisible={true}
                   key={item?._id}
-                  currentPlan={subscription?.plan?._id}
+                  currentPlan={currentPlanId}
                   isYearly={planDuration === "yearly"}
                 />
               </div>

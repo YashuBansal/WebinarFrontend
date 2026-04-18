@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import useRoles from "../../hooks/useRoles";
@@ -9,6 +9,10 @@ export default function RouteGuard({ children, roleNames = [], conditions = [] }
   const roles = useRoles();
   const { userData } = useSelector((state) => state.auth);
   const role = userData?.role || "";
+  const conditionsKey = useMemo(
+    () => JSON.stringify(conditions.map((c) => !!c)),
+    [conditions]
+  );
 
   useEffect(() => {
     // console.log("role naimgn useEffecter", roleNames);
@@ -45,7 +49,7 @@ export default function RouteGuard({ children, roleNames = [], conditions = [] }
     }
 
     setLoader(false);
-  }, [roleNames, role]);
+  }, [roleNames, role, conditionsKey, navigate]);
   // console.log("role naimgn render loadaer --- >",loader);
   return loader ? <h1>Loading...</h1> : <>{children}</>;
 }

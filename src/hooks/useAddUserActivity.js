@@ -1,10 +1,11 @@
 import { useDispatch, useSelector } from "react-redux"; // Import useSelector
-import { useEffect, useRef } from "react"; // Use useRef for the timer ID
+import { useEffect } from "react";
 import {
   addUserActivity,
   sendInactiveNotification,
 } from "../features/actions/userActivity";
 import useRoles from "./useRoles";
+import useUserSubscription from "./useUserSubscription";
 // store is no longer needed for getting state, useSelector is preferred in hooks
 
 // Shared state across all instances of the hook - using useRef is a better practice
@@ -63,9 +64,9 @@ const useAddUserActivity = () => {
   const roles = useRoles();
   const dispatch = useDispatch();
 
-  // Use useSelector to subscribe to changes in auth state
   const userData = useSelector((state) => state.auth.userData);
-  const subscription = useSelector((state) => state.auth.subscription);
+  const subscriptionQuery = useUserSubscription();
+  const { data: subscription } = subscriptionQuery;
 
   // Calculate inactivity time based on latest userData
   const InactivityTimeInSeconds = userData?.inactivityTime || 10;
@@ -154,8 +155,14 @@ const useAddUserActivity = () => {
   }) => {
     let detailLog = "";
 
-    if( !userData || !subscription){
-      console.warn("User data or subscription not available. Skipping activity log.");
+    if (!userData) {
+      console.warn("User data not available. Skipping activity log.");
+      return;
+    }
+    if (
+      subscriptionQuery.isPending &&
+      subscriptionQuery.data === undefined
+    ) {
       return;
     }
 

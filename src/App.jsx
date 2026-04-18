@@ -101,10 +101,8 @@ const App = () => {
 
   const roles = useRoles();
   const logUserActivity = useAddUserActivity();
-  const { userData, isUserLoggedIn, subscription } = useSelector(
-    (state) => state.auth
-  );
-  useUserSubscription();
+  const { userData, isUserLoggedIn } = useSelector((state) => state.auth);
+  const { data: subscription } = useUserSubscription();
   const role = userData?.role || "";
   const calendarFeatures = subscription?.plan?.calendarFeatures || false;
   const productRevenueMetrics =
