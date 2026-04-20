@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Card,
   Typography,
@@ -40,76 +40,103 @@ const SuperAdminDashboard = () => {
       : import.meta.env.VITE_REACT_APP_API_BASE_URL_MAIN_PRODUCTION
   }`;
 
-  // The cardData array definition remains the same.
-  const cardData = [
-    {
-      label: "Accounts Created",
-      value:
-        (dashBoardCardsData?.adminCount?.totalCount || 0) +
-        (dashBoardCardsData?.employeeCount?.totalCount || 0),
-      color: "primary",
+  const {
+    data: uniqueEmailMetrics,
+    isPending: isUniqueEmailPending,
+    refetch: refetchUniqueAttendeeEmails,
+  } = useQuery({
+    queryKey: ["uniqueAttendeeEmailsSuperAdmin"],
+    queryFn: async () => {
+      const response = await fetch(
+        `${apiUrl}/attendees/metrics/unique-email-count`,
+        { credentials: "include" }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch unique attendee email count");
+      }
+      return response.json();
     },
-    {
-      label: "Active Accounts",
-      value:
-        (dashBoardCardsData?.adminCount?.activeCount || 0) +
-        (dashBoardCardsData?.employeeCount?.activeCount || 0),
-      color: "success",
-    },
-    {
-      label: "In-Active Accounts",
-      value:
-        (dashBoardCardsData?.adminCount?.inactiveCount || 0) +
-        (dashBoardCardsData?.employeeCount?.inactiveCount || 0),
-      color: "error",
-    },
-    {
-      label: "Total Admins",
-      value: dashBoardCardsData?.adminCount?.totalCount || 0,
-      color: "primary",
-    },
-    {
-      label: "Total Active Admins",
-      value: dashBoardCardsData?.adminCount?.activeCount || 0,
-      color: "primary",
-    },
-    {
-      label: "Total In-Active Admins",
-      value: dashBoardCardsData?.adminCount?.inactiveCount || 0,
-      color: "primary",
-    },
-    {
-      label: "Total Employees",
-      value: dashBoardCardsData?.employeeCount?.totalCount || 0,
-      color: "success",
-    },
-    {
-      label: "Total Active Employees",
-      value: dashBoardCardsData?.employeeCount?.activeCount || 0,
-      color: "primary",
-    },
-    {
-      label: "Total In-Active Employees",
-      value: dashBoardCardsData?.employeeCount?.inactiveCount || 0,
-      color: "primary",
-    },
-    {
-      label: "Contacts",
-      value: `${dashBoardCardsData?.totalContactsUsed || 0} / ${
-        dashBoardCardsData?.totalContactsLimit || 0
-      }`,
-      color: "textPrimary",
-    },
-    {
-      label: "Overall Revenue",
-      value: `\u20B9 ${
-        dashBoardCardsData?.totalRevenue
-          ? dashBoardCardsData?.totalRevenue.toFixed(2)
-          : 0
-      }`,
-      color: "secondary",
-    },
-  ];
+  });
+
+  const cardData = useMemo(
+    () => [
+      {
+        label: "Accounts Created",
+        value:
+          (dashBoardCardsData?.adminCount?.totalCount || 0) +
+          (dashBoardCardsData?.employeeCount?.totalCount || 0),
+        color: "primary",
+      },
+      {
+        label: "Active Accounts",
+        value:
+          (dashBoardCardsData?.adminCount?.activeCount || 0) +
+          (dashBoardCardsData?.employeeCount?.activeCount || 0),
+        color: "success",
+      },
+      {
+        label: "In-Active Accounts",
+        value:
+          (dashBoardCardsData?.adminCount?.inactiveCount || 0) +
+          (dashBoardCardsData?.employeeCount?.inactiveCount || 0),
+        color: "error",
+      },
+      {
+        label: "Total Admins",
+        value: dashBoardCardsData?.adminCount?.totalCount || 0,
+        color: "primary",
+      },
+      {
+        label: "Total Active Admins",
+        value: dashBoardCardsData?.adminCount?.activeCount || 0,
+        color: "primary",
+      },
+      {
+        label: "Total In-Active Admins",
+        value: dashBoardCardsData?.adminCount?.inactiveCount || 0,
+        color: "primary",
+      },
+      {
+        label: "Total Employees",
+        value: dashBoardCardsData?.employeeCount?.totalCount || 0,
+        color: "success",
+      },
+      {
+        label: "Total Active Employees",
+        value: dashBoardCardsData?.employeeCount?.activeCount || 0,
+        color: "primary",
+      },
+      {
+        label: "Total In-Active Employees",
+        value: dashBoardCardsData?.employeeCount?.inactiveCount || 0,
+        color: "primary",
+      },
+      {
+        label: "Contacts",
+        value: `${dashBoardCardsData?.totalContactsUsed || 0} / ${
+          dashBoardCardsData?.totalContactsLimit || 0
+        }`,
+        color: "textPrimary",
+      },
+      {
+        label: "Overall Revenue",
+        value: `\u20B9 ${
+          dashBoardCardsData?.totalRevenue
+            ? dashBoardCardsData?.totalRevenue.toFixed(2)
+            : 0
+        }`,
+        color: "secondary",
+      },
+      {
+        label: "Unique attendee emails",
+        value: isUniqueEmailPending
+          ? "…"
+          : uniqueEmailMetrics?.uniqueEmailCount ?? 0,
+        color: "primary",
+      },
+    ],
+    [dashBoardCardsData, isUniqueEmailPending, uniqueEmailMetrics]
+  );
 
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
@@ -122,6 +149,7 @@ const SuperAdminDashboard = () => {
     "Total Admins",
     "Total Employees",
     "Contacts",
+    "Unique attendee emails",
   ]);
 
   // All your hooks and handlers remain the same.
@@ -225,6 +253,7 @@ const SuperAdminDashboard = () => {
       dispatch(getDashboardUsersData({ startDate, endDate }));
       dispatch(getDashboardRevenueData({ startDate, endDate }));
     }
+    refetchUniqueAttendeeEmails();
   };
 
   return (
