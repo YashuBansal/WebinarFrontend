@@ -67,10 +67,20 @@ const AddonCard = ({ addon, id, roles, showAction = true, showExpiryDate = false
             {showExpiryDate ? (
               <>Validity: {addon.validityInDays} days</>
             ) : (
-              <>
-                Expiry:{" "}
-                {addon.expiryDate ? formatDateAsNumber(addon.expiryDate) : "N/A"}
-              </>
+              <div className="flex flex-col gap-0.5">
+                <span className="flex justify-between">
+                  <span>Start At:</span>
+                  <span className="font-medium text-gray-700">
+                    {addon.startAt ? formatDateAsNumber(addon.startAt) : "N/A"}
+                  </span>
+                </span>
+                <span className="flex justify-between">
+                  <span>Expiry:</span>
+                  <span className="font-medium text-gray-700">
+                    {addon.expiryDate ? formatDateAsNumber(addon.expiryDate) : "N/A"}
+                  </span>
+                </span>
+              </div>
             )}
           </p>
         </div>

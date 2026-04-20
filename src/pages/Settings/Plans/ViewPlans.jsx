@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { getExternalPlanURI, getPricePlans } from "../../../features/actions/pricePlan";
+import { getPricePlans } from "../../../features/actions/pricePlan";
 import PlanCard from "./PlanCard";
 import useUserSubscription from "../../../hooks/useUserSubscription";
 import ComponentGuard from "../../../components/AccessControl/ComponentGuard";
@@ -11,34 +11,6 @@ import PlanInactiveModal from "./PlanInactiveModal";
 import { globalButton } from "../../../utils/style";
 import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 
-const BrowseHeader = ({planURI}) => {
-  return (
-    <div className="bg-gradient-to-r from-neutral-600 to-neutral-700 text-white p-8 rounded-xl mb-10 shadow-lg">
-      <div className="flex flex-col md:flex-row justify-between items-center gap-6">
-        <div className="text-center md:text-left">
-          <h1 className="text-3xl font-extrabold tracking-tight">
-            Browse Our Plans
-          </h1>
-          <p className="mt-2 max-w-2xl text-gray-300">
-            Explore our full range of subscription tiers. Find the perfect fit
-            for your needs and unlock powerful features to elevate your workflow.
-          </p>
-        </div>
-        <div className="flex-shrink-0 mt-4 md:mt-0">
-          <a
-            href={planURI}
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-transparent text-base font-medium rounded-md text-gray-900 bg-white hover:bg-gray-200 transition-all duration-300 shadow-md transform hover:scale-105"
-          >
-            Explore All Features
-            <ArrowForwardIcon className="h-5 w-5" />
-          </a>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const ViewPlans = () => {
   const roles = useRoles();
@@ -82,9 +54,16 @@ const ViewPlans = () => {
       return durationConfig?.isEnabled === true;
     });
 
-    if (roles.isSuperAdmin(userData.role)) return durationFilteredPlans;
+    if (
+      roles.isSuperAdmin(userData.role) ||
+      roles.isAdmin(userData.role)
+    ) {
+      return durationFilteredPlans;
+    }
     if (!subscription || !subscription.plan) return [];
-    const plan = durationFilteredPlans.find((plan) => plan._id === subscription.plan._id);
+    const plan = durationFilteredPlans.find(
+      (p) => p._id === subscription.plan._id
+    );
     if (!plan) return [];
     return [plan];
   }, [userData, planData, roles, subscription, planDuration]);
@@ -108,7 +87,6 @@ const ViewPlans = () => {
   return (
     <div className="py-14 px-4 md:px-8 flex flex-col items-center">
       <div className="w-full max-w-screen-2xl">
-        {/* <BrowseHeader planURI={planURI}/> */}
       </div>
 
       <div className="p-6 bg-gray-50 rounded-lg w-full">
