@@ -525,7 +525,7 @@ const Sidebar = ({ toggleButtonRef }) => {
                     children: [
                       "plans",
                       "addons",
-                      "pabblyToken",
+                      "api-docs",
                       "settings",
                       "sidebarLinks",
                       "update-landing-page",

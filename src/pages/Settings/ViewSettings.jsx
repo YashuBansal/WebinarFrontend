@@ -71,7 +71,7 @@ const ViewSettings = () => {
       allowedRoles: [roles.ADMIN],
     },
     {
-      to: "/pabblyToken",
+      to: "/api-docs",
       name: "External API Token",
       icon: <img src={API} alt="Tags" className="w-10 h-10" />,
       allowedRoles: [roles.SUPER_ADMIN, roles.ADMIN],
