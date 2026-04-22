@@ -28,34 +28,47 @@ const PlanCard = (props) => {
     isSelectVisible = false,
     isYearly = false,
     handlePlanSelection = (id, billingData) => {
-      dispatch(
-        checkout({ plan: id, durationType: billingData.durationType })
-      ).then((res) => {
-        if (res?.payload?.result) {
-          const order = res?.payload?.result;
-          const plan = res?.payload?.planData;
-          const options = {
-            key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Replace with your Razorpay key_id
-            amount: order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-            currency: order.currency,
-            order_id: order.id, // This is the order_id created in the backend
-            callback_url: `${
-              import.meta.env.VITE_REACT_APP_WORKING_ENVIRONMENT ===
-              "development"
-                ? import.meta.env.VITE_REACT_APP_API_BASE_URL_DEVELOPMENT
-                : import.meta.env.VITE_REACT_APP_API_BASE_URL_MAIN_PRODUCTION
-            }/razorpay/payment-success?planId=${plan._id}&adminId=${
-              userData?._id
-            }&durationType=${billingData?.durationType} `,
-            theme: {
-              color: "#F37254",
-            },
-          };
+      dispatch(checkout({ plan: id, durationType: billingData.durationType }))
+        .unwrap()
+        .then((payload) => {
+          const order = payload?.result;
+          const selectedPlanDoc = payload?.planData;
+          if (!order?.id || !selectedPlanDoc?._id) return;
+
+          const callbackBase =
+            import.meta.env.VITE_REACT_APP_WORKING_ENVIRONMENT === "development"
+              ? import.meta.env.VITE_REACT_APP_API_BASE_URL_DEVELOPMENT
+              : import.meta.env.VITE_REACT_APP_API_BASE_URL_MAIN_PRODUCTION;
+          const callbackUrl = `${callbackBase}/razorpay/payment-success?planId=${selectedPlanDoc._id}&adminId=${userData?._id}&durationType=${billingData?.durationType}`;
+
+          const isSubscription =
+            payload?.checkoutMode === "subscription" ||
+            order?.entity === "subscription" ||
+            (typeof order?.id === "string" && order.id.startsWith("sub_"));
+
+          const options = isSubscription
+            ? {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                subscription_id: order.id,
+                name: selectedPlanDoc?.name || "Subscription",
+                description:
+                  selectedPlanDoc?.internalName || selectedPlanDoc?.name || "",
+                callback_url: callbackUrl,
+                theme: { color: "#F37254" },
+              }
+            : {
+                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+                amount: order.amount,
+                currency: order.currency,
+                order_id: order.id,
+                callback_url: callbackUrl,
+                theme: { color: "#F37254" },
+              };
 
           const rzp = new Razorpay(options);
           rzp.open();
-        }
-      });
+        })
+        .catch(() => {});
     },
     selectedPlan = null,
     currentPlan = null,
