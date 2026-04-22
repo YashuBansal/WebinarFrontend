@@ -618,7 +618,7 @@ const App = () => {
           ),
         },
         {
-          path: "/pabblyToken",
+          path: "/api-docs",
           element: <PabblyToken />,
         },
         {
