@@ -11,6 +11,22 @@ import { PersistGate } from "redux-persist/integration/react";
 import { injectStoreInDateFormat } from "./utils/extra";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+function mountCharlaWidget() {
+  if (document.querySelector('script[src="https://app.charla.com/widget/widget.js"]')) return;
+  const widgetElement = document.createElement("charla-widget");
+  widgetElement.setAttribute("p", "d962825c-a38f-4cd8-90ab-90616f476692");
+  document.body.appendChild(widgetElement);
+  const widgetCode = document.createElement("script");
+  widgetCode.src = "https://app.charla.com/widget/widget.js";
+  document.body.appendChild(widgetCode);
+}
+
+if (document.readyState === "complete") {
+  mountCharlaWidget();
+} else {
+  window.addEventListener("load", mountCharlaWidget);
+}
+
 injectStore(store);
 injectStoreInDateFormat(store);
 let persistor = persistStore(store);
