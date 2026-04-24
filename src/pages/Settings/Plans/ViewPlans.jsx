@@ -9,14 +9,19 @@ import { Link } from "react-router-dom";
 import { resetPricePlanSuccess } from "../../../features/slices/pricePlan";
 import PlanInactiveModal from "./PlanInactiveModal";
 import { globalButton } from "../../../utils/style";
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
-
+import SubscriptionOverviewPanel from "./SubscriptionOverviewPanel";
+import SubscriptionEntitlementsTable from "./SubscriptionEntitlementsTable";
 
 const ViewPlans = () => {
   const roles = useRoles();
   const { userData } = useSelector((state) => state.auth);
-  const { data: subscription } = useUserSubscription();
-  const { planData, isPlanDeleted, isSuccess, isLoading } = useSelector(
+  const {
+    data: subscription,
+    isLoading: subscriptionLoading,
+    isError: subscriptionError,
+    error: subscriptionQueryError,
+  } = useUserSubscription();
+  const { planData, isSuccess, isLoading } = useSelector(
     (state) => state.pricePlans
   );
   const dispatch = useDispatch();
@@ -24,6 +29,11 @@ const ViewPlans = () => {
   const [modalData, setModalData] = useState(null);
   const [planType, setPlanType] = useState("active");
   const [planDuration, setPlanDuration] = useState("monthly"); // monthly | yearly | custom
+
+  const isAdminOnly =
+    userData &&
+    roles.isAdmin(userData.role) &&
+    !roles.isSuperAdmin(userData.role);
 
   const durationTabs = useMemo(() => {
     const tabs = [
@@ -84,85 +94,137 @@ const ViewPlans = () => {
       ? null
       : subscription?.plan?._id;
 
+  const showEntitlementsBlock =
+    isAdminOnly &&
+    !subscriptionLoading &&
+    !subscriptionError &&
+    subscription;
+
   return (
     <div className="py-14 px-4 md:px-8 flex flex-col items-center">
-      <div className="w-full max-w-screen-2xl">
-      </div>
+      <div className="w-full max-w-screen-2xl space-y-8">
+        {isAdminOnly && (
+          <header className="px-1">
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+              Plans &amp; subscription
+            </h1>
+            <p className="mt-2 text-gray-600 max-w-3xl text-sm sm:text-base">
+              Review your organization&apos;s subscription status, limits, and
+              billing provider. Compare plans and upgrade when you need more
+              capacity.
+            </p>
+          </header>
+        )}
 
-      <div className="p-6 bg-gray-50 rounded-lg w-full">
-        <div className="flex gap-4 justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-700">Manage Plans</h2>
-        </div>
+        {isAdminOnly && (
+          <>
+            <SubscriptionOverviewPanel
+              subscription={subscription}
+              isLoading={subscriptionLoading}
+              isError={subscriptionError}
+              error={subscriptionQueryError}
+            />
+            {showEntitlementsBlock && (
+              <SubscriptionEntitlementsTable subscription={subscription} />
+            )}
+          </>
+        )}
 
-        <div className="flex justify-center mb-6">
-          <div className="inline-flex rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
-            {durationTabs.map((tab) => {
-              const isActive = tab.key === planDuration;
+        <div className="p-6 bg-gray-50 rounded-lg w-full border border-gray-200/80 shadow-sm">
+          <div className="flex gap-4 justify-between items-center flex-wrap">
+            <h2 className="text-2xl font-bold text-gray-700">
+              {isAdminOnly ? "Plan options" : "Manage Plans"}
+            </h2>
+          </div>
+
+          <div className="flex justify-center my-6">
+            <div className="inline-flex rounded-lg border border-gray-200 bg-white shadow-sm overflow-hidden">
+              {durationTabs.map((tab) => {
+                const isActive = tab.key === planDuration;
+                return (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setPlanDuration(tab.key)}
+                    className={`px-4 py-2 text-sm font-semibold transition-colors ${
+                      isActive
+                        ? "bg-indigo-600 text-white"
+                        : "text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5">
+            <div className="col-span-full flex justify-end items-end pt-6">
+              <ComponentGuard allowedRoles={[roles.SUPER_ADMIN]}>
+                <div className="flex gap-5 w-full justify-between flex-wrap">
+                  <div className="flex gap-5 justify-between w-full md:w-auto">
+                    <Link to="/plans/order">
+                      <button type="button" className={globalButton}>
+                        Change Order
+                      </button>
+                    </Link>
+                    <Link to="/plans/addPlan">
+                      <button type="button" className={globalButton}>
+                        Add Plan
+                      </button>
+                    </Link>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setPlanType(planType === "active" ? "inactive" : "active");
+                    }}
+                    disabled={isLoading}
+                    className={globalButton}
+                  >
+                    {planType === "active" ? "Inactive" : "Active"} Plans
+                  </button>
+                </div>
+              </ComponentGuard>
+            </div>
+            {planDataFiltered?.map((item, idx) => {
+              const samePlanCheckoutDisabled =
+                isAdminOnly &&
+                subscription?.expiryDate &&
+                subscription?.plan?._id &&
+                String(subscription.plan._id) === String(item._id) &&
+                new Date(subscription.expiryDate).getTime() > Date.now();
+
               return (
-                <button
-                  key={tab.key}
-                  onClick={() => setPlanDuration(tab.key)}
-                  className={`px-4 py-2 text-sm font-semibold transition-colors ${
-                    isActive
-                      ? "bg-indigo-600 text-white"
-                      : "text-gray-700 hover:bg-gray-100"
-                  }`}
-                >
-                  {tab.label}
-                </button>
+                <div key={item?._id ?? idx} className="">
+                  <PlanCard
+                    plan={item}
+                    planType={planType}
+                    setModalData={setModalData}
+                    isMenuVisible={true}
+                    currentPlan={currentPlanId}
+                    isYearly={planDuration === "yearly"}
+                    samePlanCheckoutDisabled={samePlanCheckoutDisabled}
+                    subscriptionExpiresAt={
+                      samePlanCheckoutDisabled
+                        ? subscription.expiryDate
+                        : null
+                    }
+                  />
+                </div>
               );
             })}
           </div>
+          {modalData && (
+            <PlanInactiveModal
+              setModalData={setModalData}
+              modalData={modalData}
+              planType={planType}
+            />
+          )}
         </div>
-
-        <div className="grid grid-cols-1   lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-4 sm:gap-5">
-          <div className="col-span-full  flex justify-end items-end pt-6">
-            <ComponentGuard allowedRoles={[roles.SUPER_ADMIN]}>
-              <div className=" flex gap-5 w-full justify-between flex-wrap">
-                <div className="flex gap-5 justify-between w-full md:w-auto">
-                  <Link to="/plans/order">
-                    <button className={globalButton}>Change Order</button>
-                  </Link>
-                  <Link to="/plans/addPlan">
-                    <button className={globalButton}>Add Plan</button>
-                  </Link>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setPlanType(planType === "active" ? "inactive" : "active");
-                  }}
-                  disabled={isLoading}
-                  className={globalButton}
-                >
-                  {planType === "active" ? "Inactive" : "Active"} Plans
-                </button>
-              </div>
-            </ComponentGuard>
-          </div>
-          {planDataFiltered?.map((item, idx) => {
-            return (
-              <div key={idx} className="">
-                <PlanCard
-                  plan={item}
-                  planType={planType}
-                  setModalData={setModalData}
-                  isMenuVisible={true}
-                  key={item?._id}
-                  currentPlan={currentPlanId}
-                  isYearly={planDuration === "yearly"}
-                />
-              </div>
-            );
-          })}
-        </div>
-        {modalData && (
-          <PlanInactiveModal
-            setModalData={setModalData}
-            modalData={modalData}
-            planType={planType}
-          />
-        )}
       </div>
     </div>
   );

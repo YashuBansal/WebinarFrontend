@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import TextField from "@mui/material/TextField";
 import FormInput from "../../../components/FormInput";
 import { errorToast } from "../../../utils/extra";
 import { useDispatch, useSelector } from "react-redux";
@@ -12,12 +11,11 @@ import {
 import { resetAddonsData, resetPricePlanSuccess } from "../../../features/slices/pricePlan";
 import ComponentGuard from "../../../components/AccessControl/ComponentGuard";
 import useRoles from "../../../hooks/useRoles";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import AddonCard from "./AddonCard";
 
 const AddOnsPage = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const roles = useRoles();
   const { id } = useParams();
 
@@ -71,6 +69,15 @@ const AddOnsPage = () => {
     if (!data.webinarLimit) data.webinarLimit = 0;
     if (!data.whatsappProjectLimit) data.whatsappProjectLimit = 0;
     if (!data.zoomProjectLimit) data.zoomProjectLimit = 0;
+
+    const rzp = String(data.razorpayPlanId || "").trim();
+    if (!/^plan_[A-Za-z0-9]+$/i.test(rzp)) {
+      errorToast(
+        "Razorpay plan id is required: create a plan in Razorpay Dashboard (Subscriptions) and enter its id, e.g. plan_XXXX."
+      );
+      return;
+    }
+    data.razorpayPlanId = rzp;
 
     dispatch(createAddon(data));
   };
@@ -210,6 +217,19 @@ const AddOnsPage = () => {
                   min: { value: 1, message: "Must be at least 1 day" },
                 }}
               />
+
+              <div className="sm:col-span-2">
+                <FormInput
+                  name="razorpayPlanId"
+                  label="Razorpay plan id (Subscriptions)"
+                  control={control}
+                  validation={{ required: "Razorpay plan id is required for checkout" }}
+                />
+                <p className="mt-1 text-xs text-gray-500">
+                  From Razorpay Dashboard → Subscriptions → Plans. Must match the same
+                  test/live mode as the app. Example: <code className="rounded bg-gray-100 px-1">plan_XXXX</code>
+                </p>
+              </div>
 
                 </div>
               </div>

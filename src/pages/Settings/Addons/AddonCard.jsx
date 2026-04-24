@@ -3,54 +3,41 @@ import { checkoutAddon } from "../../../features/actions/razorpay";
 import ComponentGuard from "../../../components/AccessControl/ComponentGuard";
 import { errorToast, formatDateAsNumber } from "../../../utils/extra";
 import { getGSTStateValue } from "../../../features/slices/auth";
-import { useNavigate } from "react-router-dom";
-import { instance } from "../../../services/axiosInterceptor";
-
 const AddonCard = ({ addon, id, roles, showAction = true, showExpiryDate = false }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
   const { userData } = useSelector((state) => state.auth);
   const GST_VALUE = useSelector(getGSTStateValue);
 
   const handleAddonSelection = (addonId) => {
-    dispatch(checkoutAddon({ addon: addonId })).then((res) => {
-      console.log(res);
-      if (res?.payload?.order?.id && res?.payload?.purchase?._id) {
-        const order = res?.payload?.order;
-        const purchase = res?.payload?.purchase;
-        const purchasedAddon = res?.payload?.addon;
+    dispatch(checkoutAddon({ addon: addonId }))
+      .unwrap()
+      .then((payload) => {
+        const sub = payload?.result ?? payload?.order;
+        const purchase = payload?.purchase;
+        const purchasedAddon = payload?.addon;
+        if (!sub?.id || !purchase?._id) return;
+
+        const callbackBase =
+          import.meta.env.VITE_REACT_APP_WORKING_ENVIRONMENT === "development"
+            ? import.meta.env.VITE_REACT_APP_API_BASE_URL_DEVELOPMENT
+            : import.meta.env.VITE_REACT_APP_API_BASE_URL_MAIN_PRODUCTION;
+        const callbackUrl = `${callbackBase}/razorpay/addon/payment-success?adminId=${userData?._id}&purchaseId=${purchase._id}`;
+
         const options = {
-          key: import.meta.env.VITE_RAZORPAY_KEY_ID, // Replace with your Razorpay key_id
-          amount: order.amount, // Amount is in currency subunits. Default currency is INR. Hence, 50000 refers to 50000 paise
-          currency: order.currency,
-          order_id: order.id, // This is the order_id created in the backend
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          subscription_id: sub.id,
           name: "Add-on purchase",
           description: purchasedAddon?.addonName || "Add-on",
-          handler: async (response) => {
-            try {
-              await instance.post(`/razorpay/addon/confirm`, {
-                purchaseId: purchase._id,
-                razorpay_order_id: response?.razorpay_order_id,
-                razorpay_payment_id: response?.razorpay_payment_id,
-                razorpay_signature: response?.razorpay_signature,
-              });
-            } catch (e) {
-              errorToast(e);
-            } finally {
-              navigate(`/addons/${userData?._id}?purchaseId=${purchase._id}`, {
-                replace: true,
-              });
-            }
-          },
-          theme: {
-            color: "#F37254",
-          },
+          callback_url: callbackUrl,
+          theme: { color: "#F37254" },
         };
 
         const rzp = new Razorpay(options);
         rzp.open();
-      }
-    });
+      })
+      .catch((e) => {
+        errorToast(e);
+      });
   };
 
   return (

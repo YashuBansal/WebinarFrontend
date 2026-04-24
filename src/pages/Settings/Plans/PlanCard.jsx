@@ -1,7 +1,16 @@
 import React, { lazy, Suspense, useState } from "react";
 import { Link } from "react-router-dom";
 import ComponentGuard from "../../../components/AccessControl/ComponentGuard";
-import { copyToClipboard } from "../../../utils/extra";
+import { copyToClipboard, errorToast } from "../../../utils/extra";
+
+function checkoutErrorMessage(err) {
+  const raw = err?.payload != null ? err.payload : err;
+  const fromAxios = raw?.response?.data?.message;
+  if (typeof fromAxios === "string") return fromAxios;
+  if (Array.isArray(fromAxios) && fromAxios[0]) return String(fromAxios[0]);
+  if (typeof raw?.message === "string") return raw.message;
+  return "Checkout failed. Please try again.";
+}
 import { useDispatch, useSelector } from "react-redux";
 import { checkout } from "../../../features/actions/razorpay";
 import useRoles from "../../../hooks/useRoles";
@@ -41,39 +50,29 @@ const PlanCard = (props) => {
               : import.meta.env.VITE_REACT_APP_API_BASE_URL_MAIN_PRODUCTION;
           const callbackUrl = `${callbackBase}/razorpay/payment-success?planId=${selectedPlanDoc._id}&adminId=${userData?._id}&durationType=${billingData?.durationType}`;
 
-          const isSubscription =
-            payload?.checkoutMode === "subscription" ||
-            order?.entity === "subscription" ||
-            (typeof order?.id === "string" && order.id.startsWith("sub_"));
-
-          const options = isSubscription
-            ? {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-                subscription_id: order.id,
-                name: selectedPlanDoc?.name || "Subscription",
-                description:
-                  selectedPlanDoc?.internalName || selectedPlanDoc?.name || "",
-                callback_url: callbackUrl,
-                theme: { color: "#F37254" },
-              }
-            : {
-                key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-                amount: order.amount,
-                currency: order.currency,
-                order_id: order.id,
-                callback_url: callbackUrl,
-                theme: { color: "#F37254" },
-              };
+          const options = {
+            key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+            subscription_id: order.id,
+            name: selectedPlanDoc?.name || "Subscription",
+            description:
+              selectedPlanDoc?.internalName || selectedPlanDoc?.name || "",
+            callback_url: callbackUrl,
+            theme: { color: "#F37254" },
+          };
 
           const rzp = new Razorpay(options);
           rzp.open();
         })
-        .catch(() => {});
+        .catch((e) => {
+          errorToast(checkoutErrorMessage(e));
+        });
     },
     selectedPlan = null,
     currentPlan = null,
     setModalData = () => {},
     planType = "active",
+    samePlanCheckoutDisabled = false,
+    subscriptionExpiresAt = null,
   } = props;
 
   const {
@@ -146,6 +145,15 @@ const PlanCard = (props) => {
   };
   
   const savings = calculateSavings();
+
+  const currentPlanUntilLabel =
+    samePlanCheckoutDisabled && subscriptionExpiresAt
+      ? new Date(subscriptionExpiresAt).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : null;
 
   return (
     <div className="relative mx-auto border border-gray-200 p-6 overflow-hidden rounded-xl shadow-lg max-w-sm bg-white m-4 transition-all duration-300 hover:shadow-xl">
@@ -311,23 +319,41 @@ const PlanCard = (props) => {
           <ComponentGuard allowedRoles={isSelectVisible ? [] : [roles.ADMIN]}>
             {isActive && (
               <button
+                type="button"
+                disabled={samePlanCheckoutDisabled}
+                title={
+                  samePlanCheckoutDisabled
+                    ? "You already have this plan until the term ends."
+                    : undefined
+                }
                 onClick={() => {
+                  if (samePlanCheckoutDisabled) return;
                   const durationType = isYearly ? "yearly" : "monthly";
-                    const billingData = {
-                      durationType: durationType,
-                      totalAmount: displayPrice * (isYearly ? 12 : 1), // Convert back to actual billing amount
-                    };
-                    handlePlanSelection(plan?._id, billingData);
+                  const billingData = {
+                    durationType: durationType,
+                    totalAmount: displayPrice * (isYearly ? 12 : 1), // Convert back to actual billing amount
+                  };
+                  handlePlanSelection(plan?._id, billingData);
                 }}
                 className={`${
-                  selectedPlan === plan?._id ? "bg-green-600" : "bg-blue-500"
-                } w-full mt-6 text-white py-2 px-4 rounded-lg font-semibold hover:bg-green-600 transition-colors duration-300`}
+                  samePlanCheckoutDisabled
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : selectedPlan === plan?._id
+                      ? "bg-green-600"
+                      : "bg-blue-500"
+                } w-full mt-6 text-white py-2 px-4 rounded-lg font-semibold ${
+                  samePlanCheckoutDisabled ? "" : "hover:bg-green-600"
+                } transition-colors duration-300`}
               >
-                {selectedPlan === null
-                  ? "Choose Plan"
-                  : selectedPlan === plan?._id
-                  ? "Selected"
-                  : "Choose Plan"}
+                {samePlanCheckoutDisabled
+                  ? currentPlanUntilLabel
+                    ? `Current plan (until ${currentPlanUntilLabel})`
+                    : "Current plan"
+                  : selectedPlan === null
+                    ? "Choose Plan"
+                    : selectedPlan === plan?._id
+                      ? "Selected"
+                      : "Choose Plan"}
               </button>
             )}
           </ComponentGuard>
