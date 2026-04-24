@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import FormInput from "../../../components/FormInput";
 import { errorToast } from "../../../utils/extra";
@@ -13,6 +13,7 @@ import ComponentGuard from "../../../components/AccessControl/ComponentGuard";
 import useRoles from "../../../hooks/useRoles";
 import { useParams } from "react-router-dom";
 import AddonCard from "./AddonCard";
+import { addonHasConfiguredRazorpayPlan } from "../../../utils/addonCatalog";
 
 const AddOnsPage = () => {
   const dispatch = useDispatch();
@@ -28,9 +29,13 @@ const AddOnsPage = () => {
   } = useForm();
 
   const { userData } = useSelector((state) => state.auth);
-  const { isLoading, isSuccess, addonsData } = useSelector(
-    (state) => state.pricePlans
-  );
+  const { isSuccess, addonsData } = useSelector((state) => state.pricePlans);
+
+  const catalogAddons = useMemo(() => {
+    const list = addonsData || [];
+    if (id) return list;
+    return list.filter(addonHasConfiguredRazorpayPlan);
+  }, [addonsData, id]);
 
   useEffect(() => {
     if (!id) dispatch(getAddons());
@@ -102,8 +107,14 @@ const AddOnsPage = () => {
         {/* Admin purchase flow lives at /addons/buy now */}
       </div>
 
+      {!id && (addonsData || []).length > 0 && catalogAddons.length === 0 && (
+        <div className="mb-6 rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-600">
+          No add-ons are listed until they have a Razorpay plan id (plan_…) configured.
+        </div>
+      )}
+
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {addonsData.map((addon) => (
+        {catalogAddons.map((addon) => (
           <AddonCard
             key={addon._id}
             addon={addon}

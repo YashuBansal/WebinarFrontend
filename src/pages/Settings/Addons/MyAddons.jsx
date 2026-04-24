@@ -1,27 +1,36 @@
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  getClientAddons,
-} from "../../../features/actions/pricePlan";
+import { getClientAddons } from "../../../features/actions/pricePlan";
 import { resetAddonsData } from "../../../features/slices/pricePlan";
 import useRoles from "../../../hooks/useRoles";
+import useUserSubscription from "../../../hooks/useUserSubscription";
 import { useParams, useSearchParams } from "react-router-dom";
 import AddonCard from "./AddonCard";
+import AddonSubscriptionsOverview from "./AddonSubscriptionsOverview";
 import { instance } from "../../../services/axiosInterceptor";
 import { errorToast, successToast } from "../../../utils/extra";
 
 const MyAddOns = () => {
   const dispatch = useDispatch();
   const roles = useRoles();
+  const { userData } = useSelector((state) => state.auth);
   const { id } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
+  const {
+    data: subscription,
+    isLoading: subscriptionLoading,
+    isError: subscriptionError,
+  } = useUserSubscription();
 
-
-  const { addonsData } = useSelector(
+  const { addonsData, isLoading: addonsLoading } = useSelector(
     (state) => state.pricePlans
   );
+
+  const isAdminOnly =
+    userData &&
+    roles.isAdmin(userData.role) &&
+    !roles.isSuperAdmin(userData.role);
 
   useEffect(() => {
     if (id) {
@@ -30,8 +39,8 @@ const MyAddOns = () => {
 
     return () => {
       dispatch(resetAddonsData());
-    }
-  }, [id]);
+    };
+  }, [id, dispatch]);
 
   useEffect(() => {
     const purchaseId = searchParams.get("purchaseId");
@@ -78,64 +87,103 @@ const MyAddOns = () => {
   const isExpired = (addon) => {
     if (!addon) return false;
 
-    // Primary: expiryDate based classification
     if (addon.expiryDate) {
       const expiry = new Date(addon.expiryDate);
       if (!isNaN(expiry.getTime()) && expiry <= now) return true;
     }
 
-    // Fallback: status-based classification (cron/status update can lag)
     return addon.status === "EXPIRED";
   };
 
   const activeAddons = addonsData?.filter((addon) => !isExpired(addon)) || [];
   const expiredAddons = addonsData?.filter((addon) => isExpired(addon)) || [];
 
+  const { activeCount, expiredCount } = useMemo(
+    () => ({
+      activeCount: activeAddons.length,
+      expiredCount: expiredAddons.length,
+    }),
+    [activeAddons.length, expiredAddons.length]
+  );
+
   return (
-    <div className="bg-gray-100 min-h-screen px-6 pt-14">
-      <h1 className="text-2xl font-bold text-center mb-6">My AddOns</h1>
+    <div className="py-14 px-4 md:px-8 flex flex-col items-center bg-gray-50 min-h-screen">
+      <div className="w-full max-w-screen-2xl space-y-8">
+        {isAdminOnly && (
+          <header className="px-1">
+            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
+              Add-ons &amp; billing
+            </h1>
+            <p className="mt-2 text-gray-600 max-w-3xl text-sm sm:text-base">
+              Review purchased add-ons, current term dates, and Razorpay
+              subscription ids. Buy more from the add-ons catalog when you need
+              extra capacity.
+            </p>
+          </header>
+        )}
 
-      <div className="space-y-10">
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Active AddOns
-          </h2>
-          {activeAddons.length ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {activeAddons.map((addon) => (
-                <AddonCard
-                  key={addon._id}
-                  addon={addon}
-                  roles={roles}
-                  id={addon._id}
-                  showAction={false}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-gray-500">No active add-ons found.</p>
-          )}
-        </div>
+        {isAdminOnly ? (
+          <AddonSubscriptionsOverview
+            isLoadingAddons={addonsLoading}
+            activeCount={activeCount}
+            expiredCount={expiredCount}
+            subscription={subscription}
+            subscriptionLoading={subscriptionLoading}
+            subscriptionError={subscriptionError}
+            showOrgContext={isAdminOnly}
+          />
+        ) : (
+          <h1 className="text-2xl font-bold text-center text-gray-900">
+            My add-ons
+          </h1>
+        )}
 
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
-            Expired AddOns
-          </h2>
-          {expiredAddons.length ? (
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              {expiredAddons.map((addon) => (
-                <AddonCard
-                  key={addon._id}
-                  addon={addon}
-                  roles={roles}
-                  id={addon._id}
-                  showAction={false}
-                />
-              ))}
+        <div className="p-6 bg-white rounded-lg w-full border border-gray-200/80 shadow-sm">
+          <div className="space-y-10">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                Active add-ons
+              </h2>
+              {activeAddons.length ? (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {activeAddons.map((addon) => (
+                    <AddonCard
+                      key={addon._id}
+                      addon={addon}
+                      roles={roles}
+                      id={addon._id}
+                      showAction={false}
+                      showBillingMeta={Boolean(isAdminOnly)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">No active add-ons found.</p>
+              )}
             </div>
-          ) : (
-            <p className="text-gray-500">No expired add-ons found.</p>
-          )}
+
+            <div>
+              <h2 className="text-xl font-semibold text-gray-800 mb-4">
+                Expired add-ons
+              </h2>
+              {expiredAddons.length ? (
+                <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                  {expiredAddons.map((addon) => (
+                    <AddonCard
+                      key={addon._id}
+                      addon={addon}
+                      roles={roles}
+                      id={addon._id}
+                      showAction={false}
+                      showBillingMeta={Boolean(isAdminOnly)}
+                    />
+                  ))}
+                </div>
+              ) : (
+                <p className="text-gray-500">No expired add-ons found.</p>
+              )}
+            </div>
+          </div>
         </div>
       </div>
     </div>

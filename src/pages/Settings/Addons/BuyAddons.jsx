@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import useRoles from "../../../hooks/useRoles";
@@ -7,6 +7,7 @@ import { getAddons } from "../../../features/actions/pricePlan";
 import { resetAddonsData } from "../../../features/slices/pricePlan";
 import AddonCard from "./AddonCard";
 import useUserSubscription from "../../../hooks/useUserSubscription";
+import { addonHasConfiguredRazorpayPlan } from "../../../utils/addonCatalog";
 
 const BuyAddOnsPage = () => {
   const dispatch = useDispatch();
@@ -24,6 +25,11 @@ const BuyAddOnsPage = () => {
     ? expiryDate.getTime() <= Date.now()
     : true;
   const canBuyAddons = Boolean(userData?.isActive) && !isSubscriptionExpired;
+
+  const purchasableAddons = useMemo(
+    () => (addonsData || []).filter(addonHasConfiguredRazorpayPlan),
+    [addonsData]
+  );
 
   useEffect(() => {
     dispatch(getAddons());
@@ -53,8 +59,14 @@ const BuyAddOnsPage = () => {
         </div>
       )}
 
+      {canBuyAddons && purchasableAddons.length === 0 && (
+        <div className="mb-6 rounded-md border border-gray-200 bg-white px-4 py-3 text-sm text-gray-600">
+          No add-ons are available for purchase right now. Each add-on needs a Razorpay Subscriptions plan id configured in admin.
+        </div>
+      )}
+
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {addonsData.map((addon) => (
+        {purchasableAddons.map((addon) => (
           <AddonCard
             key={addon._id}
             addon={addon}

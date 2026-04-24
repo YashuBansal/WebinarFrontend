@@ -1,9 +1,59 @@
 import { useDispatch, useSelector } from "react-redux";
 import { checkoutAddon } from "../../../features/actions/razorpay";
 import ComponentGuard from "../../../components/AccessControl/ComponentGuard";
-import { errorToast, formatDateAsNumber } from "../../../utils/extra";
+import { copyToClipboard, errorToast, formatDateAsNumber } from "../../../utils/extra";
 import { getGSTStateValue } from "../../../features/slices/auth";
-const AddonCard = ({ addon, id, roles, showAction = true, showExpiryDate = false }) => {
+import { formatRazorpayStatus } from "../Plans/subscriptionStatusUtils";
+
+function entitlementBadgeClass(status) {
+  const s = String(status || "")
+    .toUpperCase()
+    .trim();
+  if (s === "ACTIVE")
+    return "bg-emerald-50 text-emerald-800 ring-emerald-600/20";
+  if (s === "EXPIRED") return "bg-red-50 text-red-800 ring-red-600/20";
+  if (s === "CANCELLED") return "bg-amber-50 text-amber-900 ring-amber-600/20";
+  if (s === "PENDING") return "bg-blue-50 text-blue-800 ring-blue-600/20";
+  if (s === "FAILED") return "bg-red-50 text-red-900 ring-red-600/25";
+  return "bg-gray-100 text-gray-700 ring-gray-500/10";
+}
+
+function formatEntitlementStatus(status) {
+  const s = String(status || "")
+    .toUpperCase()
+    .trim();
+  const labels = {
+    ACTIVE: "Access active",
+    EXPIRED: "Access expired",
+    CANCELLED: "Access cancelled",
+    PENDING: "Access pending",
+    FAILED: "Access failed",
+  };
+  return labels[s] || (s ? s.charAt(0) + s.slice(1).toLowerCase() : "Unknown");
+}
+
+function razorpayBillingBadgeClass(status) {
+  const s = String(status || "")
+    .toLowerCase()
+    .trim();
+  if (s === "active" || s === "authenticated")
+    return "bg-indigo-50 text-indigo-800 ring-indigo-600/15";
+  if (s === "cancelled" || s === "halted")
+    return "bg-red-50 text-red-800 ring-red-600/20";
+  if (s === "paused") return "bg-amber-50 text-amber-900 ring-amber-600/20";
+  if (s === "completed") return "bg-gray-100 text-gray-800 ring-gray-200";
+  if (s === "created" || s === "pending")
+    return "bg-slate-50 text-slate-800 ring-slate-200";
+  return "bg-gray-50 text-gray-700 ring-gray-200";
+}
+const AddonCard = ({
+  addon,
+  id,
+  roles,
+  showAction = true,
+  showExpiryDate = false,
+  showBillingMeta = false,
+}) => {
   const dispatch = useDispatch();
   const { userData } = useSelector((state) => state.auth);
   const GST_VALUE = useSelector(getGSTStateValue);
@@ -50,7 +100,28 @@ const AddonCard = ({ addon, id, roles, showAction = true, showExpiryDate = false
           <h2 className="truncate text-lg font-semibold text-gray-900">
             {addon.addonName}
           </h2>
-          <p className="mt-1 text-sm text-gray-500">
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <span
+              className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${entitlementBadgeClass(
+                addon.status
+              )}`}
+            >
+              {formatEntitlementStatus(addon.status)}
+            </span>
+            {addon.providerRazorpaySubscriptionId ? (
+              <span
+                className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${razorpayBillingBadgeClass(
+                  addon.providerRazorpaySubscriptionStatus
+                )}`}
+              >
+                Razorpay:{" "}
+                {addon.providerRazorpaySubscriptionStatus
+                  ? formatRazorpayStatus(addon.providerRazorpaySubscriptionStatus)
+                  : "Status pending"}
+              </span>
+            ) : null}
+          </div>
+          <p className="mt-2 text-sm text-gray-500">
             {showExpiryDate ? (
               <>Validity: {addon.validityInDays} days</>
             ) : (
@@ -135,6 +206,45 @@ const AddonCard = ({ addon, id, roles, showAction = true, showExpiryDate = false
           ) : null}
         </div>
       </div>
+
+      {showBillingMeta &&
+        (addon.providerRazorpaySubscriptionId || addon.validityInDays) ? (
+        <div className="mt-4 space-y-2 rounded-xl border border-gray-100 bg-gray-50/90 px-3 py-3 text-xs text-gray-600">
+          {addon.providerRazorpaySubscriptionId ? (
+            <div>
+              <div className="font-semibold text-gray-700">Razorpay subscription</div>
+              <div className="mt-1 flex flex-wrap items-center gap-2">
+                <code className="rounded bg-white px-2 py-1 font-mono text-[11px] text-gray-800 ring-1 ring-gray-200">
+                  {addon.providerRazorpaySubscriptionId}
+                </code>
+                <button
+                  type="button"
+                  className="rounded-md bg-white px-2 py-1 text-[11px] font-semibold text-indigo-700 ring-1 ring-indigo-200 hover:bg-indigo-50"
+                  onClick={() =>
+                    copyToClipboard(
+                      addon.providerRazorpaySubscriptionId,
+                      "Razorpay subscription"
+                    )
+                  }
+                >
+                  Copy
+                </button>
+              </div>
+              <p className="mt-2 leading-relaxed text-gray-600">
+                Recurring billing runs in Razorpay until you cancel this add-on
+                subscription in the Razorpay dashboard or customer portal.
+              </p>
+            </div>
+          ) : null}
+          {addon.validityInDays ? (
+            <p className="text-gray-500">
+              <span className="font-medium text-gray-700">Cycle length:</span>{" "}
+              {addon.validityInDays} day{addon.validityInDays === 1 ? "" : "s"} per
+              renewal (keep in sync with your Razorpay plan interval).
+            </p>
+          ) : null}
+        </div>
+      ) : null}
 
       <ComponentGuard allowedRoles={[roles.ADMIN]}>
         {showAction && (

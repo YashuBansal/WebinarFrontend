@@ -54,6 +54,7 @@ export function formatRazorpayStatus(status) {
     created: "Created",
     authenticated: "Authenticated",
     pending: "Pending",
+    completed: "Completed",
   };
   return labels[s] || status.charAt(0).toUpperCase() + status.slice(1);
 }
