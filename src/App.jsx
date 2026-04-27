@@ -1,10 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -27,6 +21,7 @@ import {
   ViewAttendees,
   CreateEmployee,
   ViewSettings,
+  ViewMaskedTables,
   ViewPlans,
   AddPlan,
   ViewSidebarLinks,
@@ -519,6 +514,10 @@ const App = () => {
           element: <ViewSettings />,
         },
         {
+          path: "/maskedtables",
+          element: <ViewMaskedTables />,
+        },
+        {
           path: "/settings/custom-status",
           element: (
             <RouteGuard
@@ -688,6 +687,22 @@ const App = () => {
           element: (
             <RouteGuard roleNames={["ADMIN"]}>
               <InterestPoolPage />
+            </RouteGuard>
+          ),
+        },
+        {
+          path: "/whatsapp",
+          element: (
+            <RouteGuard roleNames={["ADMIN"]}>
+              <ComingSoon />
+            </RouteGuard>
+          ),
+        },
+        {
+          path: "/zoom",
+          element: (
+            <RouteGuard roleNames={["ADMIN"]}>
+              <ComingSoon />
             </RouteGuard>
           ),
         },

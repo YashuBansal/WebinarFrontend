@@ -6,20 +6,19 @@ import viteCompression from "vite-plugin-compression";
 export default defineConfig({
   plugins: [react(), viteCompression({ algorithm: "gzip", ext: ".gz" })],
   server: {
-    host: "0.0.0.0",
+    host: "localhost",
     port: 5174,
     hmr: {
-      host: "domain2.local",
-      protocol: "ws",
+      host: "localhost",
     },
   },
   build: {
     minify: true,
   },
   optimizeDeps: {
-    include: ['@pdf-lib/fontkit']
+    include: ["@pdf-lib/fontkit"],
   },
   define: {
-    global: 'globalThis',
+    global: "globalThis",
   },
 });

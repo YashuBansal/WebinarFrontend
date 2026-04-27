@@ -7,9 +7,9 @@ import {
   updatePricePlans,
 } from "../../../features/actions/pricePlan";
 import { useNavigate, useParams } from "react-router-dom";
+import AppLoader from "../../../components/AppLoader";
 import {
   Button,
-  CircularProgress,
   Checkbox,
   Typography,
   Box,
@@ -31,6 +31,7 @@ import {
 import InfoIcon from '@mui/icons-material/Info';
 
 import FormInput from "../../../components/FormInput";
+import HubSubpageShell from "../../../components/Layout/HubSubpageShell";
 import { filterTruthyValues } from "../../../utils/extra";
 import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { getCustomOptions } from "../../../features/actions/globalData";
@@ -384,8 +385,9 @@ export default function AddPlan() {
   }, []);
 
   return (
-    <div className="min-h-screen pt-14 flex justify-center items-center bg-gray-100 px-2">
-      <Box className="max-w-4xl w-full bg-white shadow-md rounded-lg">
+    <HubSubpageShell>
+      <div className="flex w-full justify-center px-2 py-2">
+        <Box className="max-w-4xl w-full rounded-lg border border-slate-200 bg-white shadow-md dark:border-slate-700 dark:bg-slate-900/80">
         <Box className="px-6 py-4 bg-gray-50 border-b border-gray-200">
           <Typography variant="h6" className="font-semibold text-gray-800">
             {isEditMode ? "Edit Price Plan" : "Add Price Plan"}
@@ -773,7 +775,7 @@ export default function AddPlan() {
               className="py-2 text-sm font-medium"
             >
               {isLoading ? (
-                <CircularProgress size={24} color="inherit" />
+                <AppLoader size="md" variant="inverse" />
               ) : isEditMode ? (
                 "Update Plan"
               ) : (
@@ -783,6 +785,7 @@ export default function AddPlan() {
           </Box>
         </form>
       </Box>
-    </div>
+      </div>
+    </HubSubpageShell>
   );
 }

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { CircleLoader } from "react-spinners";
 import Select from "react-select";
 
 import { getAttendeeLogs } from "../../../features/actions/attendees";

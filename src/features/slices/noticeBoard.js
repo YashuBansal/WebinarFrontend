@@ -67,6 +67,9 @@ export const noticeBoardSlice = createSlice({
   },
 });
 
-export const { resetSuccessAndUpdate, setNoticeBoardUpdated, clearNoticeBoardUpdated } =
-  noticeBoardSlice.actions;
+export const {
+  resetSuccessAndUpdate,
+  setNoticeBoardUpdated,
+  clearNoticeBoardUpdated,
+} = noticeBoardSlice.actions;
 export default noticeBoardSlice.reducer;

@@ -11,18 +11,18 @@ export const updateNoticeBoard = createAsyncThunk(
     } catch (e) {
       return rejectWithValue(e);
     }
-  }
+  },
 );
 
 // Get Notice Board Data
 export const getNoticeBoard = createAsyncThunk(
   "noticeBoard/get",
-  async (type="sales", { rejectWithValue }) => {
+  async (type = "sales", { rejectWithValue }) => {
     try {
       const { data } = await instance.get(`/notice-board?type=${type}`);
       return data;
     } catch (e) {
       return rejectWithValue(e);
     }
-  }
+  },
 );

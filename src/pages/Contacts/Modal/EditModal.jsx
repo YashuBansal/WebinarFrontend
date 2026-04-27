@@ -7,7 +7,7 @@ import FormControl from "@mui/material/FormControl";
 import MenuItem from "@mui/material/MenuItem";
 import { Select as MuiSelect } from "@mui/material";
 import tagsService from "../../../services/tagsService";
-import TailwindLoader from "../../../components/TailwindLoader";
+import AppLoader from "../../../components/AppLoader";
 import AddRequestLocation from "../../Location/Modal/AddRequestLocation";
 import { states } from "../../../utils/columnData";
 import { capitalizeWords } from "../../../utils/extra";
@@ -231,7 +231,7 @@ const EditModal = ({
             disabled={isLoading}
             className="w-full py-2 mt-4 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition duration-150"
           >
-            {isLoading ? <TailwindLoader size={6} /> : "Submit"}
+            {isLoading ? <AppLoader size="md" variant="inverse" /> : "Submit"}
           </button>
         </form>
 

@@ -1,96 +1,180 @@
-import React, { useState, useEffect } from "react";
-import { ClipLoader } from "react-spinners";
+import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, AlertTriangle, RefreshCw } from "lucide-react";
+import AppLoader from "./AppLoader";
+import { Button } from "./ui/button";
+import { useTheme } from "../contexts/ThemeContext";
 
-export default function ConfirmDeleteModal({ setModal, triggerDelete, isLoading, title="Please confirm deletion by entering the number below:" }) {
-  const [generatedNumber, setGeneratedNumber] = useState("");
-  const [inputValue, setInputValue] = useState("");
-  const [isInputValid, setIsInputValid] = useState(true);
+export default function ConfirmDeleteModal({
+  setModal,
+  triggerDelete,
+  isLoading,
+  title = "Please confirm deletion by entering the number below:",
+  itemName,
+}) {
+  const { theme } = useTheme();
+  const [confirmationCode, setConfirmationCode] = useState("");
+  const [userInput, setUserInput] = useState("");
+  const [isShaking, setIsShaking] = useState(false);
 
-  useEffect(() => {
-    const randomNumber = Math.floor(100000 + Math.random() * 900000);
-    setGeneratedNumber(randomNumber);
-  }, []);
- 
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-    setIsInputValid(e.target.value === generatedNumber.toString());
+  const generateCode = () => {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setConfirmationCode(code);
+    setUserInput("");
   };
 
-  const handleConfirmDelete = () => {
-    if (inputValue === "") {
-      setIsInputValid(false);
-      return;
-    }
-    if (isInputValid) {
+  useEffect(() => {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setConfirmationCode(code);
+    setUserInput("");
+  }, []);
+
+  const handleClose = () => {
+    setModal(false);
+  };
+
+  const handleConfirm = () => {
+    if (userInput === confirmationCode) {
       triggerDelete();
+    } else {
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
     }
   };
 
   return (
-    
-    <div className="fixed inset-0 p-4 flex flex-wrap justify-center items-center w-full h-full before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]"  style={{ zIndex: 100 }}>
-      <div className="w-full max-w-md bg-white shadow-lg rounded-md p-6 relative">
-        <div className="border-b border-b-neutral-500 flex justify-end pb-2">
-          <svg
-            onClick={() => {
-              setModal(false);
-            }}
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-3.5 cursor-pointer shrink-0 fill-black hover:fill-red-500 float-right"
-            viewBox="0 0 320.591 320.591"
+    <AnimatePresence>
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 z-[600] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{
+            opacity: 1,
+            scale: 1,
+            y: 0,
+            x: isShaking ? [0, -10, 10, -10, 10, 0] : 0,
+          }}
+          transition={{ duration: isShaking ? 0.4 : 0.2 }}
+          className="relative w-full max-w-md rounded-3xl shadow-2xl overflow-hidden"
+          style={{
+            backgroundColor: theme === "dark" ? "#0f172a" : "#ffffff",
+            border: `1px solid ${theme === "dark" ? "#334155" : "#e5e7eb"}`,
+          }}
+        >
+          <div
+            className="flex items-center justify-between p-5 border-b"
+            style={{ borderColor: theme === "dark" ? "#334155" : "#e5e7eb" }}
           >
-            <path d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"></path>
-            <path d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"></path>
-          </svg>
-        </div>
-        <div className="mt-8 mb-4 text-center">
-          <h4 className="text-xl font-semibold mt-6">
-            {title}
-          </h4>
-          <div className="text-lg font-bold text-red-500 mb-4">
-            {generatedNumber}
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 dark:bg-red-500/20 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-500" />
+              </div>
+              <h3
+                className="text-lg font-bold"
+                style={{ color: theme === "dark" ? "#f8fafc" : "#1e293b" }}
+              >
+                Confirm Deletion
+              </h3>
+            </div>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 transition-colors"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
           </div>
-          <div className="relative pb-5">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={handleInputChange}
-              placeholder="Enter the number to confirm"
-              className={`border ${
-                isInputValid ? "border-gray-300" : "border-red-500"
-              } p-2 rounded-md w-full`}
-            />
-            {!isInputValid && (
-              <p className="text-red-500 text-sm absolute bottom-0 left-1/2 -translate-x-1/2 text-nowrap">
-                The number entered does not match.
-              </p>
-            )}
+
+          <div className="p-6 space-y-6">
+            <div className="text-center">
+              {itemName ? (
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">
+                  You are about to delete{" "}
+                  <span className="font-bold text-red-500">&quot;{itemName}&quot;</span>. This
+                  action cannot be undone.
+                </p>
+              ) : (
+                <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{title}</p>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-slate-800/50 border border-dashed border-gray-300 dark:border-slate-600">
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">
+                  Enter this code to confirm
+                </p>
+                <div className="flex items-center gap-4">
+                  <span className="text-3xl font-black tracking-[0.5em] text-blue-500 select-none">
+                    {confirmationCode}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={generateCode}
+                    disabled={isLoading}
+                    className="p-1.5 rounded-lg hover:bg-blue-100 dark:hover:bg-blue-500/20 transition-colors disabled:opacity-50"
+                    title="Regenerate Code"
+                  >
+                    <RefreshCw className="w-4 h-4 text-blue-400" />
+                  </button>
+                </div>
+              </div>
+
+              <input
+                type="text"
+                maxLength={6}
+                value={userInput}
+                onChange={(e) => setUserInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                placeholder="Type 6-digit code here"
+                className="w-full p-4 rounded-2xl border-2 text-center text-xl font-bold tracking-widest focus:outline-none focus:ring-4 transition-all"
+                style={{
+                  backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
+                  borderColor:
+                    userInput.length === 6
+                      ? userInput === confirmationCode
+                        ? "#22B573"
+                        : "#EF4444"
+                      : theme === "dark"
+                        ? "#334155"
+                        : "#e5e7eb",
+                  color: theme === "dark" ? "#f8fafc" : "#1e293b",
+                  boxShadow:
+                    userInput.length === 6 && userInput === confirmationCode
+                      ? "0 0 20px rgba(34, 181, 115, 0.2)"
+                      : "none",
+                }}
+              />
+            </div>
           </div>
-        </div>
-        <div className="flex flex-col space-y-2">
-          <button
-            onClick={handleConfirmDelete}
-            type="button"
-            disabled={!isInputValid || isLoading} // Disable if input is not valid
-            className={`px-6 py-2.5 rounded-md text-white text-sm font-semibold border-none outline-none ${
-              isInputValid
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-gray-300 cursor-not-allowed"
-            }`}
-          >
-            {isLoading ? <ClipLoader color="#fff" size={20} /> : "Delete"}
-          </button>
-          <button
-            onClick={() => {
-              setModal(false);
-            }}
-            type="button"
-            className="px-6 py-2.5 rounded-md text-black text-sm font-semibold border-none outline-none bg-slate-300/70"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
+
+          <div className="p-5 bg-gray-50 dark:bg-slate-800/30 flex gap-3">
+            <Button
+              type="button"
+              onClick={handleClose}
+              className="flex-1 h-12 rounded-2xl font-bold"
+              variant="outline"
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              onClick={handleConfirm}
+              disabled={userInput !== confirmationCode || isLoading}
+              className={`flex-1 h-12 rounded-2xl font-bold transition-all ${
+                userInput === confirmationCode && !isLoading
+                  ? "bg-red-500 hover:bg-red-600 shadow-lg shadow-red-500/30 text-white"
+                  : "bg-gray-300 dark:bg-slate-700 opacity-50 cursor-not-allowed"
+              }`}
+            >
+              {isLoading ? <AppLoader size="md" variant="inverse" /> : "Delete Permanently"}
+            </Button>
+          </div>
+        </motion.div>
+      </motion.div>
+    </AnimatePresence>
   );
 }

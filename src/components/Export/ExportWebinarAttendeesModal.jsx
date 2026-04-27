@@ -18,7 +18,7 @@ import CloseIcon from "@mui/icons-material/Close"; // For a dedicated close butt
 import { useDispatch, useSelector } from "react-redux";
 import { closeModal } from "../../features/slices/modalSlice";
 import { exportWebinarAttendeesExcel } from "../../features/actions/export-excel";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../AppLoader";
 import { attendeeTableColumns, groupedAttendeeTableColumns } from "../../utils/columnData";
 import { resetExportSuccess } from "../../features/slices/export-excel";
 import {
@@ -526,7 +526,7 @@ const ExportWebinarAttendeesModal = ({
                   sx={{ flexGrow: { xs: 1, sm: 0 } }} // Make download button grow on xs
                 >
                   {isExportLoading ? (
-                    <ClipLoader size={20} color="#fff" />
+                    <AppLoader size="md" variant="inverse" />
                   ) : (
                     "Download"
                   )}

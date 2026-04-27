@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from "react-redux";
 import Papa from "papaparse";
 import { useParams } from "react-router-dom";
 import { addAttendees } from "../../../features/actions/attendees";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../../../components/AppLoader";
 import useAddUserActivity from "../../../hooks/useAddUserActivity";
 import { formatPhoneNumber, getBestHeaderMatch, successToast } from "../../../utils/extra";
 
@@ -857,7 +857,7 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
             <div className="w-96 mx-auto h-48 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center bg-slate-50">
               {isParsingFile ? (
                 <div className="flex flex-col items-center">
-                  <ClipLoader color="#3b82f6" size={30} />
+                  <AppLoader size="lg" />
                   <p className="mt-2 text-gray-700 text-sm">Parsing file...</p>
                 </div>
               ) : (
@@ -1139,7 +1139,7 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md text-center transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {overallLoading ? (
-                    <ClipLoader color="#fff" size={20} />
+                    <AppLoader size="md" variant="inverse" />
                   ) : (
                     "Import Attendees"
                   )}

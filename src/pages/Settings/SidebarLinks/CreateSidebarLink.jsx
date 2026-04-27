@@ -9,6 +9,7 @@ import {
   getAllSidebarLinks,
 } from "../../../features/actions/sidebarLink";
 import { globalButton } from "../../../utils/style";
+import HubSubpageShell from "../../../components/Layout/HubSubpageShell";
 
 const CreateSidebarLink = () => {
   const {
@@ -41,13 +42,10 @@ const CreateSidebarLink = () => {
   }, [roles]);
 
   return (
-    <div className="">
-      <div className="mt-14 ">
-        <div className=" flex justify-center"></div>
-        <div className="bg-white rounded-lg shadow-lg  sm:rounded-lg sm:max-w-5xl mt-8 mx-auto">
-          <h3 className="text-gray-700 text-base text-center bg-gray-100 font-medium sm:text-xl p-2 rounded-t-lg uppercase">
-            {" "}
-            Add Sidebar Link{" "}
+    <HubSubpageShell maxWidthClass="max-w-5xl">
+      <div className="mx-auto mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900/60 sm:rounded-3xl">
+          <h3 className="bg-gray-100 p-2 text-center text-base font-medium uppercase text-gray-700 dark:bg-slate-800 dark:text-slate-200 sm:text-xl">
+            Add Sidebar Link
           </h3>
           <form
             className="space-y-6 mx-8 sm:mx-2  p-4 py-6"
@@ -106,9 +104,8 @@ const CreateSidebarLink = () => {
               </button>
             </div>
           </form>
-        </div>
       </div>
-    </div>
+    </HubSubpageShell>
   );
 };
 

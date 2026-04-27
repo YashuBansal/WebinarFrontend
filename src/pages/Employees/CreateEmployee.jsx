@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -20,7 +20,7 @@ import {
   Chip,
   Box,
 } from "@mui/material";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../../components/AppLoader";
 import { clearSuccess } from "../../features/slices/employee";
 import { getRoleNameByID } from "../../utils/roles";
 import useAddUserActivity from "../../hooks/useAddUserActivity";
@@ -30,12 +30,18 @@ import tagsService from "../../services/tagsService";
 import { clearSingleClientData } from "../../features/slices/client";
 import ReactSelect from "react-select";
 import useUserSubscription from "../../hooks/useUserSubscription";
+import { useTheme } from "../../contexts/ThemeContext";
+import { ThemeProvider, createTheme } from "@mui/material/styles";
+import ScopedCssBaseline from "@mui/material/ScopedCssBaseline";
+
 const CreateEmployee = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
   const logUserActivity = useAddUserActivity();
   const [tagData, setTagData] = useState([]);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const {
     register,
@@ -149,16 +155,176 @@ useEffect(() => {
     });
   }, []);
 
+  const muiTheme = useMemo(
+    () =>
+      createTheme({
+        palette: {
+          mode: isDark ? "dark" : "light",
+          primary: { main: "#22B573" },
+          secondary: { main: "#FF6B35" },
+          background: {
+            default: isDark ? "#0f172a" : "#f8fafc",
+            paper: isDark ? "#1e293b" : "#ffffff",
+          },
+          text: {
+            primary: isDark ? "#f8fafc" : "#071028",
+            secondary: isDark ? "#94a3b8" : "#64748b",
+          },
+        },
+        shape: { borderRadius: 12 },
+        typography: {
+          fontFamily:
+            '"Inter", "Poppins", "Roboto", system-ui, sans-serif',
+        },
+        components: {
+          MuiOutlinedInput: {
+            styleOverrides: {
+              root: { borderRadius: 12 },
+              notchedOutline: {
+                borderColor: isDark
+                  ? "rgba(148, 163, 184, 0.35)"
+                  : "rgba(226, 232, 240, 1)",
+              },
+            },
+          },
+          MuiInputLabel: {
+            styleOverrides: {
+              root: { fontWeight: 500 },
+            },
+          },
+          MuiButton: {
+            styleOverrides: {
+              root: {
+                borderRadius: 12,
+                textTransform: "none",
+                fontWeight: 600,
+                paddingBlock: 12,
+              },
+              containedPrimary: {
+                boxShadow: "0 4px 14px rgba(34, 181, 115, 0.35)",
+              },
+            },
+          },
+        },
+      }),
+    [isDark]
+  );
+
+  const tagSelectStyles = useMemo(
+    () => ({
+      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+      control: (base, state) => ({
+        ...base,
+        minHeight: 54,
+        borderRadius: 12,
+        backgroundColor: isDark ? "#1e293b" : "#ffffff",
+        borderColor: state.isFocused
+          ? "#22B573"
+          : isDark
+            ? "#334155"
+            : "#e2e8f0",
+        boxShadow: state.isFocused
+          ? "0 0 0 2px rgba(34, 181, 115, 0.25)"
+          : "none",
+        "&:hover": { borderColor: "#22B573" },
+      }),
+      valueContainer: (base) => ({
+        ...base,
+        paddingTop: 8,
+        paddingBottom: 8,
+      }),
+      menu: (base) => ({
+        ...base,
+        borderRadius: 12,
+        backgroundColor: isDark ? "#1e293b" : "#ffffff",
+        border: `1px solid ${isDark ? "#334155" : "#e2e8f0"}`,
+        overflow: "hidden",
+      }),
+      option: (base, state) => ({
+        ...base,
+        cursor: "pointer",
+        backgroundColor: state.isFocused
+          ? isDark
+            ? "rgba(34, 181, 115, 0.18)"
+            : "rgba(34, 181, 115, 0.1)"
+          : "transparent",
+        color: isDark ? "#f8fafc" : "#071028",
+      }),
+      multiValue: (base) => ({
+        ...base,
+        borderRadius: 8,
+        backgroundColor: isDark ? "#334155" : "#e8f5ef",
+      }),
+      multiValueLabel: (base) => ({
+        ...base,
+        color: isDark ? "#e2e8f0" : "#065f46",
+        fontWeight: 500,
+      }),
+      multiValueRemove: (base) => ({
+        ...base,
+        color: isDark ? "#94a3b8" : "#047857",
+        ":hover": { backgroundColor: "rgba(255,107,53,0.15)", color: "#FF6B35" },
+      }),
+      placeholder: (base) => ({
+        ...base,
+        color: isDark ? "#64748b" : "#94a3b8",
+      }),
+      input: (base) => ({
+        ...base,
+        color: isDark ? "#f8fafc" : "#071028",
+      }),
+    }),
+    [isDark]
+  );
+
   return (
-    <div className="p-10">
-      <div className="mt-10">
-        <div className="flex justify-center"></div>
-        <div className="bg-white rounded-lg shadow-lg sm:rounded-lg sm:max-w-5xl mt-8 mx-auto">
-          <h3 className="text-gray-700 text-base text-center bg-gray-100 font-medium sm:text-xl p-2 rounded-t-lg uppercase">
-            {id ? "Update" : "Add"} Employee
-          </h3>
+    <ThemeProvider theme={muiTheme}>
+      <ScopedCssBaseline />
+      <div
+        className="min-h-[calc(100vh-4rem)] p-4 sm:p-6 lg:p-8 max-w-4xl mx-auto transition-all duration-300"
+        style={{
+          fontFamily: "Inter, Poppins, Roboto, system-ui, sans-serif",
+        }}
+      >
+        <div
+          className="rounded-2xl overflow-hidden border flex flex-col transition-all duration-300"
+          style={{
+            background: isDark
+              ? "rgba(30, 41, 59, 0.75)"
+              : "rgba(255, 255, 255, 0.88)",
+            backdropFilter: "blur(16px)",
+            borderColor: isDark
+              ? "rgba(255,255,255,0.06)"
+              : "rgba(255,255,255,0.55)",
+            boxShadow:
+              theme === "light"
+                ? "0 10px 40px rgba(7, 16, 40, 0.06)"
+                : "none",
+          }}
+        >
+          <div
+            className="p-5 sm:p-6 border-b"
+            style={{
+              borderColor: isDark ? "#334155" : "rgba(0,0,0,0.06)",
+            }}
+          >
+            <h2
+              className="text-2xl font-bold tracking-tight"
+              style={{ color: isDark ? "#f8fafc" : "#071028" }}
+            >
+              {id ? "Update employee" : "Add employee"}
+            </h2>
+            <p
+              className="text-sm mt-1"
+              style={{ color: isDark ? "#94a3b8" : "#64748b" }}
+            >
+              {id
+                ? "Change profile details, limits, tags, or password."
+                : "Set role, credentials, and contact limits for a new team member."}
+            </p>
+          </div>
           <form
-            className="space-y-6 mx-8 sm:mx-2 p-4 py-6"
+            className="space-y-6 p-5 sm:p-6"
             onSubmit={handleSubmit(onSubmit)}
           >
             <div className="sm:grid sm:grid-cols-2 sm:gap-6">
@@ -347,31 +513,7 @@ useEffect(() => {
                       placeholder="Tags"
                       menuPlacement="auto"
                       menuPortalTarget={document.body}
-                      styles={{
-                        // ensure the dropdown is above other elements
-                        menuPortal: (base) => ({
-                          ...base,
-                          zIndex: 9999,
-                        }),
-                        // increase height & round corners of the select box
-                        control: (base, state) => ({
-                          ...base,
-                          minHeight: "54px", // desired height
-                          borderRadius: "4px", // round corners
-                          boxShadow: state.isFocused
-                            ? "0 0 0 2px #2684FF"
-                            : base.boxShadow,
-                          "&:hover": {
-                            borderColor: "#2684FF",
-                          },
-                        }),
-                        // add some vertical padding inside the value container
-                        valueContainer: (base) => ({
-                          ...base,
-                          paddingTop: "8px",
-                          paddingBottom: "8px",
-                        }),
-                      }}
+                      styles={tagSelectStyles}
                     />
                   )}
                 />
@@ -477,27 +619,28 @@ useEffect(() => {
               </div>
             </div>
 
-            <div className="mt-6">
+            <div className="pt-2">
               <Button
                 type="submit"
                 variant="contained"
+                color="primary"
                 fullWidth
-                className="btn-grad"
+                size="large"
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <ClipLoader color="#fff" size={20} />
+                  <AppLoader size="md" variant="inverse" />
                 ) : id ? (
-                  "Update"
+                  "Save changes"
                 ) : (
-                  "Create"
+                  "Create employee"
                 )}
               </Button>
             </div>
           </form>
         </div>
       </div>
-    </div>
+    </ThemeProvider>
   );
 };
 

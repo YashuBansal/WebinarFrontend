@@ -1,5 +1,5 @@
 // src/components/AlarmPopup.js
-import React, { useEffect, useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { useSelector } from "react-redux";
 import { getUnAckAlarmData } from "../features/slices/alarm";
 import { useNavigate } from "react-router-dom";

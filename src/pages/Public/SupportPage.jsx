@@ -24,8 +24,8 @@ export default function SupportPage() {
           <section>
             <h2 className="font-semibold text-base mb-1">2. Response Time</h2>
             <p>
-              We usually respond within 1-2 business days depending on ticket volume
-              and issue severity.
+              We usually respond within 1-2 business days depending on ticket
+              volume and issue severity.
             </p>
           </section>
 
@@ -39,9 +39,15 @@ export default function SupportPage() {
         </div>
 
         <div className="mt-8 flex flex-wrap gap-4 text-sm">
-          <Link className="underline" to="/policy">Policy</Link>
-          <Link className="underline" to="/terms">Terms</Link>
-          <Link className="underline" to="/documentation">Documentation</Link>
+          <Link className="underline" to="/policy">
+            Policy
+          </Link>
+          <Link className="underline" to="/terms">
+            Terms
+          </Link>
+          <Link className="underline" to="/documentation">
+            Documentation
+          </Link>
         </div>
       </div>
     </div>

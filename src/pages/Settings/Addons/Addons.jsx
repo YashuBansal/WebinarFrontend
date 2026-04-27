@@ -14,6 +14,7 @@ import ComponentGuard from "../../../components/AccessControl/ComponentGuard";
 import useRoles from "../../../hooks/useRoles";
 import { useNavigate, useParams } from "react-router-dom";
 import AddonCard from "./AddonCard";
+import HubSubpageShell from "../../../components/Layout/HubSubpageShell";
 
 const AddOnsPage = () => {
   const dispatch = useDispatch();
@@ -76,13 +77,12 @@ const AddOnsPage = () => {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen px-6 pt-14">
-      <h1 className="text-2xl font-bold text-center mb-6">
-        {" "}
+    <HubSubpageShell>
+      <h1 className="mb-6 text-center text-2xl font-bold text-slate-900 dark:text-slate-100">
         {id ? "My" : ""} AddOns
       </h1>
 
-      <div className="flex justify-end mb-6">
+      <div className="mb-6 flex justify-end">
         <ComponentGuard allowedRoles={[roles.SUPER_ADMIN]}>
           <button
             onClick={() => setModalOpen(true)}
@@ -233,7 +233,7 @@ const AddOnsPage = () => {
           </div>
         </div>
       )}
-    </div>
+    </HubSubpageShell>
   );
 };
 

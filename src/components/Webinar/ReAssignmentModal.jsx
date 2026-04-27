@@ -17,7 +17,7 @@ import {
 import { resetReAssignSuccess } from "../../features/slices/reAssign.slice";
 import AssignedEmployeeTable from "./AssignedEmployeeTable";
 import { getAllEmployees } from "../../features/actions/employee";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../AppLoader";
 import { toast } from "sonner";
 import { clearEmployeeData } from "../../features/slices/employee";
 
@@ -270,7 +270,7 @@ const ReAssignmentModal = ({
             }
             variant="contained"
           >
-            {reassignLoading ? <ClipLoader color="#fff" size={20} /> : "Assign"}
+            {reassignLoading ? <AppLoader size="md" variant="inverse" /> : "Assign"}
           </Button>
         </div>
       </Box>

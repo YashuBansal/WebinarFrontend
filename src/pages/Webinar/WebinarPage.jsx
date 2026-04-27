@@ -28,13 +28,18 @@ import {
   clearWebinarPageData,
   resetWebinarSuccess,
 } from "../../features/slices/webinarContact";
-const WebinarFilterModal = lazy(() =>
-  import("../../components/Filter/WebinarFilterModal")
+const WebinarFilterModal = lazy(
+  () => import("../../components/Filter/WebinarFilterModal"),
 );
 const ExportModal = lazy(() => import("../../components/Export/ExportModal"));
 import { exportWebinarExcel } from "../../features/actions/export-excel";
 import { toast } from "sonner";
-import { DateFormat, formatDateAsNumber, NotifActionType, successToast } from "../../utils/extra";
+import {
+  DateFormat,
+  formatDateAsNumber,
+  NotifActionType,
+  successToast,
+} from "../../utils/extra";
 import { createPortal } from "react-dom";
 import { socket } from "../../socket";
 import ModalFallback from "../../components/Fallback/ModalFallback";
@@ -64,7 +69,7 @@ const Webinar = () => {
   const logUserActivity = useAddUserActivity();
 
   const { isLoading, isSuccess, webinarPageData, pagination } = useSelector(
-    (state) => state.webinarContact
+    (state) => state.webinarContact,
   );
 
   const { totalPages = 1, total = 0 } = pagination;
@@ -126,7 +131,7 @@ const Webinar = () => {
     function onNotification(data) {
       if (data.actionType === NotifActionType.ATTENDEE_REGISTRATION) {
         dispatch(
-          getAllWebinarsSilently({ page, limit: LIMIT, filters, silent: true })
+          getAllWebinarsSilently({ page, limit: LIMIT, filters, silent: true }),
         );
       }
     }
@@ -146,10 +151,10 @@ const Webinar = () => {
   const navigateItBaby = useCallback(
     (id) => {
       navigate(
-        `/webinarDetails/${id}?tabValue=postWebinar&page=1&subTabValue=reassignrequested`
+        `/webinarDetails/${id}?tabValue=postWebinar&page=1&subTabValue=reassignrequested`,
       );
     },
-    [navigate]
+    [navigate],
   );
 
   const tableData = useMemo(
@@ -158,9 +163,8 @@ const Webinar = () => {
       rows: webinarPageData,
       totalRecords: total,
     }),
-    [webinarPageData, total, webinarTableColumns]
+    [webinarPageData, total, webinarTableColumns],
   );
-  
 
   // ----------------------- Action Icons -----------------------
 
@@ -187,7 +191,7 @@ const Webinar = () => {
                 openModal({
                   modalName: createWebinarModalName,
                   data: item,
-                })
+                }),
               );
             },
           },
@@ -413,7 +417,7 @@ const Webinar = () => {
                         <div className="h-8 w-8 bg-gray-200 animate-pulse rounded-full"></div>
                       </td>
                     </tr>
-                  )
+                  ),
                 )
               ) : tableData?.rows?.length > 0 ? (
                 tableData?.rows?.map((row, index) => (
@@ -452,31 +456,29 @@ const Webinar = () => {
                               </span>
                             )
                           ) : (
-                            column.default ?? (
+                            (column.default ?? (
                               <span className="px-2 py-1 text-red-500">
                                 N/A
                               </span>
-                            )
+                            ))
                           ))}
                       </td>
                     ))}
                     {Array.isArray(actionIcons) && actionIcons.length > 0 && (
                       <td className="px-4 py-2 sticky right-0 bg-white border-l">
                         <div className="flex gap-2">
-                          {actionIcons.map((action, idx) =>
-                            (
-                                <div key={idx}>
-                                <button
-                                  disabled={action?.disabled ? true : false}
-                                  className="p-2 hover:bg-gray-100 rounded-full group"
-                                  onClick={() => action.onClick(row)}
-                                  title={action.tooltip}
-                                >
-                                  {action.icon(row)}
-                                </button>
-                              </div>
-                            )
-                          )}
+                          {actionIcons.map((action, idx) => (
+                            <div key={idx}>
+                              <button
+                                disabled={action?.disabled ? true : false}
+                                className="p-2 hover:bg-gray-100 rounded-full group"
+                                onClick={() => action.onClick(row)}
+                                title={action.tooltip}
+                              >
+                                {action.icon(row)}
+                              </button>
+                            </div>
+                          ))}
                         </div>
                       </td>
                     )}
@@ -485,9 +487,7 @@ const Webinar = () => {
               ) : (
                 <tr>
                   <td
-                    colSpan={
-                      tableData?.columns?.length + 1
-                    }
+                    colSpan={tableData?.columns?.length + 1}
                     className="px-4 py-8 text-center text-gray-500 italic"
                   >
                     No data available
@@ -536,7 +536,7 @@ const Webinar = () => {
       )}
       {createPortal(
         <CreateWebinar modalName={createWebinarModalName} />,
-        document.body
+        document.body,
       )}
 
       <Suspense fallback={<></>}>
@@ -560,7 +560,7 @@ const Webinar = () => {
                   limit,
                   columns,
                   filters: includeFilter ? filters : {},
-                })
+                }),
               );
             }}
           />

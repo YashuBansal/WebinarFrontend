@@ -10,7 +10,6 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { closeModal } from "../../features/slices/modalSlice";
 import { exportClientExcel } from "../../features/actions/export-excel";
-import { ClipLoader } from "react-spinners";
 
 const ExportClientExcelModal = ({ modalName, filters }) => {
   const defaultColumns = [

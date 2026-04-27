@@ -12,7 +12,12 @@ import { injectStoreInDateFormat } from "./utils/extra";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 function mountCharlaWidget() {
-  if (document.querySelector('script[src="https://app.charla.com/widget/widget.js"]')) return;
+  if (
+    document.querySelector(
+      'script[src="https://app.charla.com/widget/widget.js"]',
+    )
+  )
+    return;
   const widgetElement = document.createElement("charla-widget");
   widgetElement.setAttribute("p", "d962825c-a38f-4cd8-90ab-90616f476692");
   document.body.appendChild(widgetElement);
@@ -48,5 +53,5 @@ ReactDOM.createRoot(document.getElementById("root")).render(
         <App />
       </QueryClientProvider>
     </PersistGate>
-  </Provider>
+  </Provider>,
 );

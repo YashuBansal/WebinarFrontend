@@ -3,7 +3,7 @@ import tagsService from "../../../services/tagsService";
 import DialogHeader from "./components/DialogHeader";
 import CreateWebhookForm from "./components/CreateWebhookForm";
 import WebhookList from "./components/WebhookList";
-import LoadingSpinner from "./components/LoadingSpinner";
+import AppLoader from "../../../components/AppLoader";
 
 const WebinarWebhooksListDialog = ({ webinarId, onClose, isOpen, onRefresh }) => {
   const [webhooks, setWebhooks] = useState([]);
@@ -67,7 +67,9 @@ const WebinarWebhooksListDialog = ({ webinarId, onClose, isOpen, onRefresh }) =>
         />
 
         {loading ? (
-          <LoadingSpinner size="large" />
+          <div className="flex items-center justify-center py-20">
+            <AppLoader size="lg" />
+          </div>
         ) : (
           <>
             <CreateWebhookForm

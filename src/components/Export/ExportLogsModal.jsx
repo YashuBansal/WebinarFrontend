@@ -9,7 +9,6 @@ import {
 } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { closeModal } from "../../features/slices/modalSlice";
-import { ClipLoader } from "react-spinners";
 import { globalButton } from "../../utils/style";
 import useUserSubscription from "../../hooks/useUserSubscription";
 

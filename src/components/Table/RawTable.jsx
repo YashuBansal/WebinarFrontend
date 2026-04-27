@@ -8,6 +8,7 @@ import useRoles from "../../hooks/useRoles";
 import { getTagsData } from "../../features/slices/globalData";
 import { Link } from "react-router-dom";
 import useMediaQuery from "../../hooks/useMediaQuery";
+import { maskPiiDisplay } from "../../utils/maskPii";
 
 const CellRenderer = memo(
   ({ column, row, isTablesMasked, roles, employeesMap, tagSet }) => {
@@ -148,7 +149,7 @@ const CellRenderer = memo(
             column.key
           )
         ) {
-          return `${String(value).slice(0, 3)}***`;
+          return maskPiiDisplay(value, true);
         }
         return String(value);
     }

@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useProductsForAdmin, useBulkCreateEnrollments } from "../../hooks/useEnrollments";
-import TailwindLoader from "../TailwindLoader";
+import AppLoader from "../AppLoader";
 
 const BULK_ENROLL_MODAL_NAME = "BulkEnrollmentModal";
 
@@ -163,7 +163,7 @@ const BulkEnrollmentModal = ({
             className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-2 min-w-[100px] justify-center"
           >
             {isPending ? (
-              <TailwindLoader size={5} />
+              <AppLoader size="sm" variant="inverse" />
             ) : (
               "Create Enrollments"
             )}

@@ -6,8 +6,8 @@ import {
   MenuItem,
   Menu,
   IconButton,
-  CircularProgress,
 } from "@mui/material";
+import AppLoader from "../../components/AppLoader";
 import { MoreVert, Delete } from "@mui/icons-material";
 import { useTags, useUpdateAttendeeTag } from "../../hooks/useTags";
 import ComponentGuard from "../../components/AccessControl/ComponentGuard";
@@ -117,7 +117,7 @@ const TagsSection = ({ tags, email, onTagUpdate }) => {
         {/* Tags Display */}
         {isUpdating && (
           <div className="flex justify-center py-2">
-            <CircularProgress size={20} />
+            <AppLoader size="md" />
           </div>
         )}
         {currentTags.length > 0 ? (

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Select from "react-select";
 import { useDispatch, useSelector } from "react-redux";
 import { addNote } from "../../features/actions/assign";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../../components/AppLoader";
 import {
   createAttendeeProduct,
   getAllProductsByAdminId,
@@ -334,7 +334,7 @@ const AddNoteForm = (props) => {
         }
         className="bg-indigo-700 w-full hover:bg-indigo-800 my-2 text-white py-2 px-4 rounded-md"
       >
-        {isFormLoading ? <ClipLoader size={17} color="#c4c2c2" /> : "Add Note"}
+        {isFormLoading ? <AppLoader size="md" variant="muted" /> : "Add Note"}
       </button>
     </form>
   );

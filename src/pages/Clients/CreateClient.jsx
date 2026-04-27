@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../../components/AppLoader";
 import {
   Stepper,
   Step,
@@ -248,7 +248,7 @@ function CreateClient() {
                 color="primary"
                 disabled={isLoading}
               >
-                {isLoading ? <ClipLoader size={20} color="#fff" /> : "Next"}
+                {isLoading ? <AppLoader size="md" variant="inverse" /> : "Next"}
               </Button>
             </Box>
           </form>
@@ -309,7 +309,7 @@ function CreateClient() {
                 onClick={handleSubmit(onSubmit)}
                 disabled={isLoading}
               >
-                {isLoading ? <ClipLoader size={20} color="#fff" /> : "Submit"}
+                {isLoading ? <AppLoader size="md" variant="inverse" /> : "Submit"}
               </Button>
             </Box>
           </Box>

@@ -1,13 +1,5 @@
-import React, { useEffect, useState } from "react";
-import Modal from "@mui/material/Modal";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
-import Button from "@mui/material/Button";
-import Divider from "@mui/material/Divider";
-import SaveIcon from "@mui/icons-material/Save";
-import DeleteIcon from "@mui/icons-material/Delete";
-import CheckIcon from "@mui/icons-material/Check";
+import React, { useEffect, useMemo, useState } from "react";
+import { Edit, Trash2, X, Bookmark } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import {
   creattFilterPreset,
@@ -15,329 +7,250 @@ import {
   getFilterPreset,
 } from "../../features/actions/filter-preset";
 import { clearPreset } from "../../features/slices/filter-preset";
-import { errorToast, formatDateAsNumber, successToast } from "../../utils/extra";
+import { errorToast, successToast } from "../../utils/extra";
 import useAddUserActivity from "../../hooks/useAddUserActivity";
-import { getAllProductsByAdminId } from "../../features/actions/product";
-import { VisibilityIcon } from "../SVGs";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { Dialog, DialogContent } from "../ui/dialog";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const FilterPresetModal = ({
+  open,
   setIsPresetModalOpen,
   tableName = "",
   filters = {},
   setFilters,
 }) => {
+  const isOpen = open !== undefined ? open : true;
   const dispatch = useDispatch();
   const logUserActivity = useAddUserActivity();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const { filterPresets } = useSelector((state) => state.filterPreset);
+  const [selectedPresetId, setSelectedPresetId] = useState("");
+  const [isEditingPresetName, setIsEditingPresetName] = useState(false);
+  const [editingPresetNameValue, setEditingPresetNameValue] = useState("");
 
-  const { leadTypeData } = useSelector((state) => state.assign);
-  const { plansForDropdown } = useSelector((state) => state.pricePlans);
-  const { productDropdownData } = useSelector((state) => state.product);
-  const { employeeData } = useSelector((state) => state.employee);
-  console.log(employeeData)
+  useEffect(() => {
+    dispatch(getFilterPreset(tableName));
+    return () => dispatch(clearPreset());
+  }, [dispatch, tableName]);
 
-  const { filterPresets, isSuccess } = useSelector(
-    (state) => state.filterPreset
+  const presets = useMemo(
+    () => (Array.isArray(filterPresets) ? filterPresets : []),
+    [filterPresets]
   );
-  const [newPresetName, setNewPresetName] = useState("");
-  const [activePresetId, setActivePresetId] = useState(null);
 
-  const handleSavePreset = () => {
-    if (
-      filters &&
-      !Array.isArray(filters) &&
-      typeof filters === "object" &&
-      Object.keys(filters).length > 0
-    ) {
-      const payload = {
-        name: newPresetName,
-        tableName: tableName,
-        filters: filters,
-      };
-
-      dispatch(creattFilterPreset(payload));
-      logUserActivity({
-        action: "create",
-        type: `Filter Preset for Table - ${tableName}`,
-        detailItem: newPresetName,
-      });
-    } else {
-      errorToast("Please select at least one filter");
-    }
+  const handleClose = () => {
+    setIsPresetModalOpen(false);
+    setIsEditingPresetName(false);
   };
 
-  const onApplyPreset = (preset) => {
-    setFilters(preset.filters);
+  const handleLoadPreset = () => {
+    const preset = presets.find((p) => p._id === selectedPresetId);
+    if (!preset) return;
+    setFilters(preset.filters || {});
     successToast("Preset Applied Successfully");
-    setIsPresetModalOpen(false);
     logUserActivity({
       action: "filter",
       type: `Preset for Table - ${tableName}`,
       detailItem: preset?.name,
     });
+    handleClose();
   };
 
-  const onClose = () => {
-    setIsPresetModalOpen(false);
-    dispatch(clearPreset());
+  const handleDeletePreset = () => {
+    const preset = presets.find((p) => p._id === selectedPresetId);
+    if (!preset) return;
+    dispatch(deleteFilterPreset(selectedPresetId));
+    logUserActivity({
+      action: "delete",
+      type: `Filter Preset for Table - ${tableName}`,
+      detailItem: preset?.name,
+    });
+    setSelectedPresetId("");
   };
 
-  useEffect(() => {
-    if (tableName === "webinarAttendeesTable") {
-      dispatch(getAllProductsByAdminId());
+  const handleSaveEditedPresetName = () => {
+    const selectedPreset = presets.find((p) => p._id === selectedPresetId);
+    if (!selectedPreset) return;
+    if (!editingPresetNameValue.trim()) {
+      errorToast("Preset name is required");
+      return;
     }
+    dispatch(
+      creattFilterPreset({
+        name: editingPresetNameValue.trim(),
+        tableName,
+        filters: selectedPreset.filters || {},
+      })
+    );
+    dispatch(deleteFilterPreset(selectedPresetId));
+    setIsEditingPresetName(false);
+    setSelectedPresetId("");
+  };
 
-    dispatch(getFilterPreset(tableName));
-  }, []);
+  const panelStyle = {
+    backgroundColor: isDark ? "#1e293b" : "#ffffff",
+    border: `1px solid ${isDark ? "#334155" : "#e5e7eb"}`,
+  };
 
-  useEffect(() => {
-    if (isSuccess) {
-      setNewPresetName("");
-      dispatch(getFilterPreset(tableName));
-    }
-  }, [isSuccess]);
+  const inputStyle = {
+    backgroundColor: isDark ? "#0f172a" : "#ffffff",
+    border: `1px solid ${isDark ? "#334155" : "#e2e8f0"}`,
+    color: isDark ? "#f8fafc" : "#0f172a",
+  };
+
+  const labelColor = isDark ? "#cbd5e1" : "#334155";
+  const titleColor = isDark ? "#f8fafc" : "#0f172a";
 
   return (
-    <Modal open={true} onClose={onClose} disablePortal>
-      <Box
-        onClick={(e) => {
-          e.stopPropagation();
-          if (activePresetId) setActivePresetId(null);
-        }}
-        className="p-4 max-w-full w-96 sm:max-w-xl sm:w-full  bg-gray-50 rounded-lg shadow-xl absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
-      >
-        <Typography variant="h6" component="h2" gutterBottom>
-          Filter Presets
-        </Typography>
-        <Divider sx={{ mb: 2 }} />
+    <Dialog open={isOpen} onOpenChange={(v) => !v && handleClose()}>
+      <DialogContent className="max-w-sm border-0 bg-transparent p-0 shadow-none">
+        <div
+          className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col"
+          style={panelStyle}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-lg font-bold" style={{ color: titleColor }}>
+              Load Filter Preset
+            </h3>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
 
-        {/* Save Preset Section */}
-        <Typography variant="subtitle1" gutterBottom>
-          Save Current Filters
-        </Typography>
-        <Box display="flex" gap={2} mb={3}>
-          <TextField
-            fullWidth
-            variant="outlined"
-            size="small"
-            label="Preset Name"
-            value={newPresetName}
-            onChange={(e) => setNewPresetName(e.target.value)}
-          />
-          <Button
-            variant="contained"
-            startIcon={<SaveIcon />}
-            onClick={handleSavePreset}
-            disabled={!newPresetName.trim()}
-          >
-            Save
-          </Button>
-        </Box>
-
-        {/* Presets List */}
-        {Array.isArray(filterPresets) && filterPresets.length > 0 && (
-          <>
-            <Typography variant="subtitle1" gutterBottom>
-              Saved Presets
-            </Typography>
-            <div className="space-y-2">
-              {filterPresets.map((preset) => (
-                <div
-                  key={preset._id}
-                  className="flex justify-between items-center bg-gray-100 px-3 rounded-md"
-                >
-                  <span className="text-gray-700">{preset.name}</span>
-
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => onApplyPreset(preset)}
-                      className="flex items-center gap-1 px-2 py-1 text-sm bg-blue-100 hover:bg-blue-200 rounded-md text-blue-800"
-                    >
-                      <CheckIcon fontSize="small" />
-                      Apply
-                    </button>
-
-                    <div className="relative inline-block group">
-                      <button
-                        className="text-blue-600 p-2 hover:bg-blue-100 rounded-full"
-                        onClick={() =>
-                          setActivePresetId(
-                            preset._id === activePresetId ? null : preset._id
-                          )
-                        }
-                      >
-                        <img
-                          src={VisibilityIcon}
-                          alt="Bookmark"
-                          className="min-h-6 h-6 w-6 min-w-6"
-                        />
-                      </button>
-                      {activePresetId === preset._id && (
-                        <div
-                          className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 
-                                     bg-white p-4 rounded-lg shadow-xl border border-gray-200 
-                                     min-w-[200px] overflow-y-auto max-h-[200px]"
-                        >
-                          {Object.entries(preset.filters).map(
-                            ([key, value]) => {
-                              const formattedKey = key
-                                .replace(/([A-Z])/g, " $1")
-                                .replace(/^./, (str) => str.toUpperCase());
-                              let displayValue = value;
-
-                              if (
-                                typeof value === "object" &&
-                                !Array.isArray(value) &&
-                                value !== null
-                              ) {
-                                const parts = [];
-                                if (value.$gte || value.$gte === 0) {
-                                  const gteValue = value.$gte;
-                                  if (isNaN(gteValue)) {
-                                    const formattedGteDate =
-                                      formatDateAsNumber(gteValue);
-
-                                    parts.push(`Min: ${formattedGteDate}`);
-                                  } else {
-                                    parts.push(`Min: ${gteValue}`);
-                                  }
-                                }
-
-                                if (value.$lte || value.$lte === 0) {
-                                  const lteValue = value.$lte;
-
-                                  if (isNaN(lteValue)) {
-                                    const formattedLteDate =
-                                      formatDateAsNumber(lteValue);
-                                    parts.push(`Max: ${formattedLteDate}`);
-                                  } else {
-                                    parts.push(`Max: ${lteValue}`);
-                                  }
-                                }
-
-                                displayValue = parts.join(" - ");
-                              }
-
-                              if (key === "leadType" && !Array.isArray(value)) {
-                                displayValue =
-                                  leadTypeData.find(
-                                    (lead) => lead._id === value
-                                  )?.label || "N/A";
-                              }
-
-                              if (key === "assignedEmployee" && !Array.isArray(value)) {
-                                displayValue =
-                                  employeeData.find(
-                                    (emp) => emp._id === value
-                                  )?.userName || "N/A";
-                              }
-
-                              if (key === "toDate" || key === "fromDate") {
-                                  const formattedDate =
-                                    formatDateAsNumber(value);
-                                  displayValue = formattedDate;
-                              }
-
-                              if (key === "planName") {
-                                displayValue =
-                                  plansForDropdown.find(
-                                    (plan) => plan.value === value
-                                  )?.label || "N/A";
-                              }
-
-                              return (
-                                <div
-                                  key={key}
-                                  className="text-sm mb-2 last:mb-0 break-keep"
-                                >
-                                  <p className="font-semibold text-gray-700">
-                                    {formattedKey}
-                                  </p>
-                                  <p className="text-gray-600">
-                                    {" "}
-                                    {Array.isArray(value)
-                                      ? key === "enrollments" &&
-                                        Array.isArray(productDropdownData)
-                                        ? productDropdownData
-                                            .filter((product) =>
-                                              value.includes(product._id)
-                                            )
-                                            .map(
-                                              (product) =>
-                                                `${product.name} | Level - ${product.level}`
-                                            )
-                                            .join(", ")
-                                        : key === "leadType" &&
-                                          Array.isArray(leadTypeData)
-                                        ? leadTypeData
-                                            .filter((leadType) =>
-                                              value.includes(leadType._id)
-                                            )
-                                            .map((leadType) => leadType?.label)
-                                            .join(", ")
-                                        : key === "salesAssignedTo" &&
-                                          Array.isArray(employeeData)
-                                        ? employeeData
-                                            .filter((salesAssignedTo) =>
-                                              value.includes(
-                                                salesAssignedTo._id
-                                              )
-                                            )
-                                            .map(
-                                              (salesAssignedTo) =>
-                                                salesAssignedTo?.userName
-                                            )
-                                            .join(", ")
-                                        : key === "reminderAssignedTo" &&
-                                          Array.isArray(employeeData)
-                                        ? employeeData
-                                            .filter((reminderAssignedTo) =>
-                                              value.includes(
-                                                reminderAssignedTo._id
-                                              )
-                                            )
-                                            .map(
-                                              (reminderAssignedTo) =>
-                                                reminderAssignedTo?.userName
-                                            )
-                                            .join(", ")
-                                        : value.join(", ")
-                                      : displayValue}
-                                  </p>
-                                </div>
-                              );
-                            }
-                          )}
-                        </div>
-                      )}
-                    </div>
-
-                    <button
-                      onClick={() => {
-                        dispatch(deleteFilterPreset(preset._id));
-                        logUserActivity({
-                          action: "delete",
-                          type: `Filter Preset for Table - ${tableName}`,
-                          detailItem: preset.name,
-                        });
-                      }}
-                      className="text-red-600 p-2 hover:bg-red-100 rounded-full"
-                    >
-                      <DeleteIcon fontSize="small" />
-                    </button>
-                  </div>
-                </div>
-              ))}
+          <div className="mb-8">
+            <label
+              className="block text-sm font-medium mb-2"
+              style={{ color: labelColor }}
+            >
+              {isEditingPresetName ? "Rename Preset" : "Select Preset"}
+            </label>
+            <div className="relative">
+              {isEditingPresetName ? (
+                <>
+                  <Edit className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                  <Input
+                    autoFocus
+                    type="text"
+                    value={editingPresetNameValue}
+                    onChange={(e) => setEditingPresetNameValue(e.target.value)}
+                    className="pl-9 rounded-xl border-[#e2e8f0] dark:border-slate-600"
+                    style={inputStyle}
+                  />
+                </>
+              ) : (
+                <>
+                  <Bookmark className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none z-[1]" />
+                  <select
+                    value={selectedPresetId}
+                    onChange={(e) => setSelectedPresetId(e.target.value)}
+                    className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm appearance-none cursor-pointer border shadow-xs focus:outline-none focus:ring-2 focus:ring-slate-400/30"
+                    style={inputStyle}
+                  >
+                    <option value="" disabled>
+                      Select a preset...
+                    </option>
+                    {presets.map((p) => (
+                      <option key={p._id} value={p._id}>
+                        {p.name}
+                      </option>
+                    ))}
+                  </select>
+                </>
+              )}
             </div>
-          </>
-        )}
+          </div>
 
-        <Box mt={3} textAlign="right">
-          <Button onClick={onClose} variant="outlined">
-            Close
-          </Button>
-        </Box>
-      </Box>
-    </Modal>
+          {isEditingPresetName ? (
+            <div className="flex justify-end gap-3 mt-auto w-full">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsEditingPresetName(false)}
+                className="rounded-xl px-4 py-2.5 font-medium"
+                style={{
+                  backgroundColor: "transparent",
+                  borderColor: isDark ? "#475569" : "#cbd5e1",
+                  color: isDark ? "#cbd5e1" : "#475569",
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSaveEditedPresetName}
+                disabled={!editingPresetNameValue.trim()}
+                className="rounded-xl px-5 py-2.5 font-semibold hover:scale-[1.02] disabled:opacity-50 bg-[#3b82f6] text-white"
+              >
+                Save Name
+              </Button>
+            </div>
+          ) : (
+            <div className="flex justify-between items-center mt-auto w-full gap-2 flex-wrap">
+              <div className="flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const selected = presets.find(
+                      (p) => p._id === selectedPresetId
+                    );
+                    if (selected) {
+                      setEditingPresetNameValue(selected.name || "");
+                      setIsEditingPresetName(true);
+                    }
+                  }}
+                  disabled={!selectedPresetId}
+                  className="p-2.5 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-500/10 disabled:opacity-50 transition-colors group"
+                  title="Rename Preset"
+                >
+                  <Edit className="w-4 h-4 text-blue-500 group-disabled:text-gray-400" />
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeletePreset}
+                  disabled={!selectedPresetId}
+                  className="p-2.5 rounded-xl hover:bg-red-50 dark:hover:bg-red-500/10 disabled:opacity-50 transition-colors group"
+                  title="Delete Preset"
+                >
+                  <Trash2 className="w-4 h-4 text-red-500 group-disabled:text-gray-400" />
+                </button>
+              </div>
+              <div className="flex gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleClose}
+                  className="rounded-xl px-4 py-2.5 font-medium"
+                  style={{
+                    backgroundColor: "transparent",
+                    borderColor: isDark ? "#475569" : "#cbd5e1",
+                    color: isDark ? "#cbd5e1" : "#475569",
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleLoadPreset}
+                  disabled={!selectedPresetId}
+                  className="rounded-xl px-5 py-2.5 font-semibold hover:scale-[1.02] disabled:opacity-50 bg-[#22B573] text-white"
+                >
+                  Load Preset
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

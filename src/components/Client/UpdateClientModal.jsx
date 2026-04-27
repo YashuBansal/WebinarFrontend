@@ -17,7 +17,7 @@ import {
 import { updateClient } from "../../features/actions/client";
 import { useDispatch, useSelector } from "react-redux";
 import { resetClientState } from "../../features/slices/client";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../AppLoader";
 import { closeModal } from "../../features/slices/modalSlice";
 import useAddUserActivity from "../../hooks/useAddUserActivity";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -349,7 +349,7 @@ const UpdateClientModal = ({ modalName }) => {
           color="primary"
         >
           {isUpdating ? (
-            <ClipLoader color="#fff" className="mx-5" size={20} />
+            <AppLoader size="md" variant="inverse" className="mx-5" />
           ) : (
             "Update"
           )}

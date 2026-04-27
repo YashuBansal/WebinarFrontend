@@ -1,14 +1,93 @@
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* Design tokens aligned with frontend UI New (globals / shadcn-style); Tailwind v3-safe — no @theme/@import tailwind v4 blocks */
+:root {
+  --wlh-brand: #22b573;
+  --wlh-navy: #071028;
+  --font-size: 16px;
+  --radius: 0.625rem;
+  --background: #ffffff;
+  --foreground: #0f172a;
+  --border: rgba(0, 0, 0, 0.1);
+  --input-background: #f3f3f5;
+  --ring: hsl(214 100% 44%);
+
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --primary: var(--wlh-brand);
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: var(--foreground);
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #f1f5f9;
+  --accent-foreground: var(--foreground);
+  --destructive: #dc2626;
+  --destructive-foreground: #ffffff;
+  --input: rgba(0, 0, 0, 0.12);
+  --sidebar: var(--background);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--wlh-brand);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: var(--muted);
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+  --chart-1: #22b573;
+  --chart-2: #64748b;
+  --chart-3: #475569;
+  --chart-4: #071028;
+  --chart-5: #94a3b8;
+}
+
+.dark {
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --border: rgba(255, 255, 255, 0.12);
+  --input-background: #1e293b;
+  --ring: hsl(214 100% 58%);
+
+  --card: var(--background);
+  --card-foreground: var(--foreground);
+  --popover: var(--background);
+  --popover-foreground: var(--foreground);
+  --primary: var(--wlh-brand);
+  --primary-foreground: #ffffff;
+  --secondary: #1e293b;
+  --secondary-foreground: var(--foreground);
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8;
+  --accent: #1e293b;
+  --accent-foreground: var(--foreground);
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --input: rgba(255, 255, 255, 0.14);
+  --sidebar: #0f172a;
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--wlh-brand);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: var(--foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
+  --chart-1: #22b573;
+  --chart-2: #94a3b8;
+  --chart-3: #64748b;
+  --chart-4: #cbd5e1;
+  --chart-5: #475569;
+}
+
 .btn-grad {
-  background-image: linear-gradient(
-    to right,
-    #141e30 0%,
-    #243b55 51%,
-    #141e30 100%
-  );
+  background-image: linear-gradient(to right,
+      #141e30 0%,
+      #243b55 51%,
+      #141e30 100%);
   margin: 10px;
   padding: 13px 45px;
   text-align: center;
@@ -22,7 +101,8 @@
 }
 
 .btn-grad:hover {
-  background-position: right center; /* change the direction of the change here */
+  background-position: right center;
+  /* change the direction of the change here */
   color: #fff;
   text-decoration: none;
 }
@@ -80,20 +160,189 @@ input.dateTime-picker[type="datetime-local"]::-webkit-calendar-picker-indicator 
 
 /* add the code bellow */
 @layer utilities {
+
   /* Hide scrollbar for Chrome, Safari and Opera */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
+
   /* Hide scrollbar for IE, Edge and Firefox */
   .no-scrollbar {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
   }
 }
 
-
 /* Custom style for hover effect on date items */
 .react-datepicker__day:hover {
-  background-color: #2560a0!important; /* Set your desired hover color */
-  color: white; /* Optional: change text color on hover */
+  background-color: #2560a0 !important;
+  /* Set your desired hover color */
+  color: white;
+  /* Optional: change text color on hover */
+}
+
+/* Dashboard Phase 2 — icon motion (aligned with frontend UI New Dashboard.tsx) */
+@keyframes wlh-dashboard-float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes wlh-dashboard-wiggle {
+
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+
+  25% {
+    transform: rotate(-8deg);
+  }
+
+  75% {
+    transform: rotate(8deg);
+  }
+}
+
+@keyframes wlh-dashboard-bounce-subtle {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes wlh-dashboard-pulse-subtle {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.55;
+  }
+}
+
+.wlh-anim-float {
+  animation: wlh-dashboard-float 3s ease-in-out infinite;
+}
+
+.wlh-anim-wiggle {
+  animation: wlh-dashboard-wiggle 2s ease-in-out infinite;
+}
+
+.wlh-anim-bounce-subtle {
+  animation: wlh-dashboard-bounce-subtle 2s ease-in-out infinite;
+}
+
+.wlh-anim-pulse-subtle {
+  animation: wlh-dashboard-pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* frontend UI New Dashboard.tsx class names (same motion as above) */
+.animate-float {
+  animation: wlh-dashboard-float 3s ease-in-out infinite;
+}
+
+.animate-wiggle {
+  animation: wlh-dashboard-wiggle 2s ease-in-out infinite;
+}
+
+.animate-bounce-subtle {
+  animation: wlh-dashboard-bounce-subtle 2s ease-in-out infinite;
+}
+
+.animate-pulse-subtle {
+  animation: wlh-dashboard-pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes dashboard-dot-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+@keyframes dashboard-dot-ping {
+
+  75%,
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+/* frontend UI New — Dashboard.tsx + DashboardPage.tsx scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+.dashboard-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.dashboard-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dashboard-scrollbar::-webkit-scrollbar-thumb {
+  background: #64748b;
+  border-radius: 10px;
+}
+
+.dashboard-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+/* Firefox — match darker thumb */
+.custom-scrollbar,
+.dashboard-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #64748b transparent;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    outline-color: color-mix(in srgb, var(--ring) 50%, transparent);
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  html {
+    @apply font-sans;
+  }
 }

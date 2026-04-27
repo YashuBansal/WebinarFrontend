@@ -1,10 +1,11 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { formatCurrency, formatDate } from "../../utils/LeadType";
 import productRevenueService from "../../services/productRevenueService";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { exportProductRevenue } from "../../features/actions/export-excel";
 import useMediaQuery from "../../hooks/useMediaQuery";
+import { maskPiiDisplay } from "../../utils/maskPii";
 
 import RupeeICon from "../../components/SVGs/rupee-icon.svg";
 import ProductIcon from "../../components/SVGs/product.svg";
@@ -131,9 +132,8 @@ const ProductRevenue = () => {
     (state) => state.pageLimits[WEBINAR_PERFORMANCE] || 5
   );
 
-  console.log(topProductsLimit, topAttendeesLimit, webinarPerformaceLimit);
-
   const { isExportLoading } = useSelector((state) => state.export);
+  const maskProductSalesDetail = useSelector((s) => s.table.maskProductSalesDetail);
 
   const [metrics, setMetrics] = useState({
     totalRevenue: 0,
@@ -183,7 +183,6 @@ const ProductRevenue = () => {
       ]);
 
       if (totalRevenueRes?.success) {
-        console.log(totalRevenueRes);
         setMetrics((prev) => ({
           ...prev,
           totalRevenue: totalRevenueRes?.data?.totalRevenue || 0,
@@ -222,6 +221,43 @@ const ProductRevenue = () => {
       exportProductRevenue({ uniqueId: filename, startDate, endDate, limit })
     );
   };
+
+  const topCustomersColumns = useMemo(
+    () => [
+      {
+        header: "Email",
+        key: "email",
+        accessor: (item) => maskPiiDisplay(item._id, maskProductSalesDetail),
+      },
+      {
+        header: "Total Spent",
+        key: "spent",
+        accessor: (item) => formatCurrency(item.totalRevenue),
+      },
+      {
+        header: "Purchases",
+        key: "purchases",
+        accessor: (item) => item.totalPurchases,
+      },
+    ],
+    [maskProductSalesDetail],
+  );
+
+  const topCustomersCardRenderer = useCallback(
+    (item, index) => (
+      <DataListItemCard
+        key={index}
+        title={maskPiiDisplay(item._id, maskProductSalesDetail)}
+        metric1={{
+          label: "Total Spent",
+          value: formatCurrency(item.totalRevenue),
+        }}
+        metric2={{ label: "Purchases", value: item.totalPurchases }}
+        onClick={() => navigate(`/particularContact?email=${item._id}`)}
+      />
+    ),
+    [maskProductSalesDetail, navigate],
+  );
 
   const MetricCard = ({ icon: Icon, title, value, format = true }) => (
     <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-100">
@@ -447,31 +483,8 @@ const ProductRevenue = () => {
           onRowClick={(item) =>
             navigate(`/particularContact?email=${item._id}`)
           }
-          columns={[
-            { header: "Email", key: "email", accessor: (item) => item._id },
-            {
-              header: "Total Spent",
-              key: "spent",
-              accessor: (item) => formatCurrency(item.totalRevenue),
-            },
-            {
-              header: "Purchases",
-              key: "purchases",
-              accessor: (item) => item.totalPurchases,
-            },
-          ]}
-          cardRenderer={(item, index) => (
-            <DataListItemCard
-              key={index}
-              title={item._id}
-              metric1={{
-                label: "Total Spent",
-                value: formatCurrency(item.totalRevenue),
-              }}
-              metric2={{ label: "Purchases", value: item.totalPurchases }}
-              onClick={() => navigate(`/particularContact?email=${item._id}`)}
-            />
-          )}
+          columns={topCustomersColumns}
+          cardRenderer={topCustomersCardRenderer}
         />
       </div>
     </div>

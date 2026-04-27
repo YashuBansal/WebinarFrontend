@@ -6,7 +6,7 @@ import useAddUserActivity from "../../../hooks/useAddUserActivity";
 import { getAssignedEmployees } from "../../../features/actions/webinarContact";
 import AssignedEmployeeTable from "../../../components/Webinar/AssignedEmployeeTable";
 import { clearAssignedEmployees } from "../../../features/slices/webinarContact";
-import TailwindLoader from "../../../components/TailwindLoader";
+import AppLoader from "../../../components/AppLoader";
 import { errorToast } from "../../../utils/extra";
 
 function EmployeeAssignModal({
@@ -157,7 +157,7 @@ function EmployeeAssignModal({
           <div className="flex flex-col gap-2 justify-center items-center py-8">
             <p className="text-gray-600">Fetching Assigned Employees...</p>
             <div className=" h-10 w-10">
-              <TailwindLoader size={10} />
+              <AppLoader size="lg" variant="brand" />
             </div>
           </div>
         ) : options.length === 0 ? (
@@ -237,7 +237,7 @@ function EmployeeAssignModal({
             >
               {isLoading ? (
                 <div className=" h-5 w-5">
-                  <TailwindLoader size={5} />
+                  <AppLoader size="sm" variant="inverse" />
                 </div>
               ) : (
                 "Assign"

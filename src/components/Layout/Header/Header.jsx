@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { LayoutDashboard, Menu, Moon, Sun, Video, X } from "lucide-react";
 import { getRoleNameByID } from "../../../utils/roles";
 import { toggleSidebar } from "../../../features/slices/globalData";
 import Profile from "./profile.svg";
@@ -11,103 +12,313 @@ import usePlanExpiryWarning from "../../../hooks/usePlanExpiryWarning";
 import NotificationBell from "../../Notification/NotificationBell";
 import ImportExportNotifications from "../../Notification/ImportExportNotifications";
 import { formatDateAsNumber } from "../../../utils/extra";
-import useUserSubscription from "../../../hooks/useUserSubscription";
-const Header = ({ toggleButtonRef }) => {
+import useMediaQuery from "../../../hooks/useMediaQuery";
+
+const THEME_STORAGE_KEY = "wlh-theme";
+
+function readStoredTheme() {
+  try {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored === "dark" || stored === "light") return stored;
+  } catch {
+    /* ignore */
+  }
+  if (
+    typeof window !== "undefined" &&
+    window.matchMedia("(prefers-color-scheme: dark)").matches
+  ) {
+    return "dark";
+  }
+  return "light";
+}
+
+const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
   const [showExpiryNotice, setShowExpiryNotice] = useState(true);
+  const [theme, setTheme] = useState(readStoredTheme);
   const dispatch = useDispatch();
   const roles = useRoles();
-  const navigate = useNavigate(); // Initialize useNavigate for navigation
+  const navigate = useNavigate();
+  const location = useLocation();
   const { userData, HEADER_LABEL } = useSelector((state) => state.auth);
-  const { data: subscription } = useUserSubscription();
   const { employeeModeData } = useSelector((state) => state.employee);
+  const { isSidebarOpen } = useSelector((state) => state.globalData);
+  const isMdUp = useMediaQuery("(min-width: 768px)");
 
   const { showWarning, daysLeft, expiryDate } = usePlanExpiryWarning(15);
 
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === "dark") {
+      root.classList.add("dark");
+    } else {
+      root.classList.remove("dark");
+    }
+    try {
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    } catch {
+      /* ignore */
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((t) => (t === "light" ? "dark" : "light"));
+  };
+
   const handleProfileClick = () => {
-    // Navigate to the profile page
     navigate("/profile");
   };
+
   const onExit = useCallback(() => {
     navigate("/employees?page=1");
     dispatch(setEmployeeModeId());
   }, [navigate, dispatch]);
 
   useEffect(() => {
-    const handlePopState = (event) => {
-      // Check your condition here
+    const handlePopState = () => {
       if (employeeModeData) {
         onExit();
       }
     };
-
     window.addEventListener("popstate", handlePopState);
-
-    return () => {
-      window.removeEventListener("popstate", handlePopState);
-    };
+    return () => window.removeEventListener("popstate", handlePopState);
   }, [employeeModeData, onExit]);
+
+  const handleDrawerToggle = () => {
+    if (onMenuButtonClick) {
+      onMenuButtonClick();
+    } else {
+      dispatch(toggleSidebar());
+    }
+  };
+
+  const dashboardActive = location.pathname === "/";
+  const whatsappActive = location.pathname.startsWith("/whatsapp");
+  const zoomActive = location.pathname.startsWith("/zoom");
+  const isDark = theme === "dark";
 
   return (
     <>
-      <nav className="fixed top-0 z-50 w-full max-w-screen  bg-white border-b border-gray-200">
-        <div className="px-3 py-3 lg:px-5 lg:pl-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center justify-start rtl:justify-end">
-              <button
-                ref={toggleButtonRef}
-                data-drawer-target="logo-sidebar"
-                data-drawer-toggle="logo-sidebar"
-                aria-controls="logo-sidebar"
-                onClick={() => dispatch(toggleSidebar())}
-                type="button"
-                className="inline-flex items-center p-2 text-sm text-gray-500 rounded-lg hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
-              >
-                <span className="sr-only">Open sidebar</span>
-                <svg
-                  className="w-4 h-4 md:w-6 md:h-6"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                  xmlns="http://www.w3.org/2000/svg"
+      <header
+        className="fixed left-0 right-0 top-0 z-[60] h-16 border-b transition-colors duration-500"
+        style={{
+          backgroundColor: isDark ? "#1f2937" : "#ffffff",
+          borderColor: isDark ? "#374151" : "#e5e7eb",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+        }}
+      >
+        <div className="flex h-full items-center justify-between gap-1 px-2 sm:gap-2 sm:px-4 lg:gap-4 lg:px-6">
+          <div className="flex min-w-0 flex-shrink-0 items-center gap-1 sm:gap-2 lg:gap-4">
+            <button
+              ref={toggleButtonRef}
+              type="button"
+              aria-controls="app-sidebar"
+              {...(isMdUp ? {} : { "aria-expanded": !!isSidebarOpen })}
+              onClick={handleDrawerToggle}
+              className="md:hidden flex-shrink-0 rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-slate-100 dark:hover:bg-slate-700 sm:p-2"
+            >
+              <span className="sr-only">Open menu</span>
+              {!isMdUp && isSidebarOpen ? (
+                <X className="h-5 w-5 sm:h-6 sm:w-6" />
+              ) : (
+                <Menu className="h-5 w-5 sm:h-6 sm:w-6" />
+              )}
+            </button>
+            <div
+              className="flex min-w-0 cursor-pointer items-center gap-2 sm:gap-3"
+              onClick={() => navigate("/")}
+              role="presentation"
+            >
+              <img
+                src="/wlh-logo.png"
+                alt="Webinar Leads Hub Logo"
+                className="h-8 w-8 flex-shrink-0 object-contain sm:h-10 sm:w-10 lg:h-12 lg:w-12"
+              />
+              <div className="hidden flex-col leading-tight md:flex">
+                <h1
+                  className="tracking-wide"
+                  style={{
+                    color: isDark ? "#f8fafc" : "#000000",
+                    fontFamily: "Inter, sans-serif",
+                    fontSize: "15px",
+                    fontWeight: 600,
+                    letterSpacing: "0.5px",
+                    lineHeight: 1.2,
+                    WebkitFontSmoothing: "antialiased",
+                  }}
                 >
-                  <path
-                    clipRule="evenodd"
-                    fillRule="evenodd"
-                    d="M2 4.75A.75.75 0 012.75 4h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 4.75zm0 10.5a.75.75 0 01.75-.75h7.5a.75.75 0 010 1.5h-7.5a.75.75 0 01-.75-.75zM2 10a.75.75 0 01.75-.75h14.5a.75.75 0 010 1.5H2.75A.75.75 0 012 10z"
-                  ></path>
-                </svg>
-              </button>
-              <div className="flex ms-2 gap-1 justify-center md:me-24 items-center">
-                <Link href="/" className="flex  ">
-                  <img
-                    src="/logo-500.png"
-                    alt="Profile"
-                    className="md:h-10 md:max-h-10 h-8 max-h-8"
-                    style={{ fill: "#525252" }}
-                  />
-                </Link>
-                {HEADER_LABEL && <span className="text-neutral-500 text-xs md:text-[16px]">({HEADER_LABEL})</span>}
+                  <span className="block min-[800px]:inline">WEBINAR</span>
+                  <span className="block min-[800px]:inline min-[800px]:ml-1">
+                    LEADS{" "}
+                    <span style={{ color: "#21913c", fontWeight: 800 }}>HUB</span>
+                  </span>
+                </h1>
+                {HEADER_LABEL ? (
+                  <span className="mt-0.5 truncate text-[11px] font-medium uppercase tracking-wide text-neutral-500 dark:text-slate-400 sm:text-xs">
+                    ({HEADER_LABEL})
+                  </span>
+                ) : null}
               </div>
             </div>
+          </div>
+
+          <div className="custom-scrollbar-hide flex min-w-0 flex-shrink flex-1 items-center justify-center gap-1 overflow-x-auto px-2 py-3 sm:gap-2 md:gap-4 -mx-2 -my-3">
+            <Link
+              to="/"
+              className={`relative flex flex-shrink-0 flex-col items-center justify-center rounded-xl px-3 py-2 transition-all duration-300 md:px-6 md:py-2.5 ${
+                dashboardActive
+                  ? isDark
+                    ? "bg-orange-500/10 ring-1 ring-orange-500/50"
+                    : "bg-gradient-to-br from-white to-orange-50 ring-1 ring-orange-500/30"
+                  : isDark
+                    ? "hover:bg-slate-800"
+                    : "hover:bg-orange-50/80"
+              }`}
+              style={{
+                boxShadow:
+                  dashboardActive && !isDark
+                    ? "inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.9), 0 4px 15px rgba(249, 115, 22, 0.25), 0 0 0 1px rgba(249, 115, 22, 0.1)"
+                    : "none",
+              }}
+            >
+              <LayoutDashboard
+                className="mb-0 h-5 w-5 sm:h-6 sm:w-6 md:mb-1.5"
+                strokeWidth={1.5}
+                style={{
+                  color: dashboardActive ? "#f97316" : "#64748b",
+                }}
+              />
+              <span
+                className={`hidden text-[12px] md:block ${dashboardActive ? "font-semibold" : "font-medium"}`}
+                style={{
+                  color: dashboardActive ? "#f97316" : "#64748b",
+                  fontFamily: "Inter, sans-serif",
+                }}
+              >
+                Dashboard
+              </span>
+              {dashboardActive ? (
+                <div className="absolute right-1 top-1 h-1.5 w-1.5 animate-pulse rounded-full bg-orange-500 md:right-1.5 md:top-1.5 md:h-2 md:w-2" />
+              ) : null}
+            </Link>
+
+            <Link
+              to="/whatsapp"
+              className={`relative flex flex-shrink-0 flex-col items-center justify-center rounded-xl px-3 py-2 transition-all duration-300 md:px-6 md:py-2.5 ${
+                whatsappActive
+                  ? isDark
+                    ? "bg-green-500/10 ring-1 ring-green-500/50"
+                    : "bg-gradient-to-br from-white to-green-50 ring-1 ring-green-500/30"
+                  : isDark
+                    ? "hover:bg-slate-800"
+                    : "hover:bg-green-50/80"
+              }`}
+              style={{
+                boxShadow:
+                  whatsappActive && !isDark
+                    ? "inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.9), 0 4px 15px rgba(34, 197, 94, 0.25), 0 0 0 1px rgba(34, 197, 94, 0.1)"
+                    : "none",
+              }}
+            >
+              <svg
+                className="mb-0 h-5 w-5 sm:h-6 sm:w-6 md:mb-1.5"
+                viewBox="0 0 24 24"
+                fill="none"
+                aria-hidden
+              >
+                <path
+                  d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"
+                  fill={whatsappActive ? "#22c55e" : "#64748b"}
+                />
+              </svg>
+              <span
+                className={`hidden text-[12px] md:block ${whatsappActive ? "font-semibold" : "font-medium"}`}
+                style={{
+                  color: whatsappActive ? "#22c55e" : "#64748b",
+                  fontFamily: "Inter, sans-serif",
+                }}
+              >
+                WhatsApp
+              </span>
+              {whatsappActive ? (
+                <div className="absolute right-1 top-1 h-1.5 w-1.5 animate-pulse rounded-full bg-green-500 md:right-1.5 md:top-1.5 md:h-2 md:w-2" />
+              ) : null}
+            </Link>
+
+            <Link
+              to="/zoom"
+              className={`relative flex flex-shrink-0 flex-col items-center justify-center rounded-xl px-3 py-2 transition-all duration-300 md:px-6 md:py-2.5 ${
+                zoomActive
+                  ? isDark
+                    ? "bg-blue-500/10 ring-1 ring-blue-500/50"
+                    : "bg-gradient-to-br from-white to-blue-50 ring-1 ring-blue-500/30"
+                  : isDark
+                    ? "hover:bg-slate-800"
+                    : "hover:bg-blue-50/80"
+              }`}
+              style={{
+                boxShadow:
+                  zoomActive && !isDark
+                    ? "inset 2px 2px 5px rgba(0, 0, 0, 0.05), inset -2px -2px 5px rgba(255, 255, 255, 0.9), 0 4px 15px rgba(59, 130, 246, 0.25), 0 0 0 1px rgba(59, 130, 246, 0.1)"
+                    : "none",
+              }}
+            >
+              <Video
+                className="mb-0 h-5 w-5 sm:h-6 sm:w-6 md:mb-1.5"
+                strokeWidth={1.5}
+                style={{ color: zoomActive ? "#3b82f6" : "#64748b" }}
+              />
+              <span
+                className={`hidden text-[12px] md:block ${zoomActive ? "font-semibold" : "font-medium"}`}
+                style={{
+                  color: zoomActive ? "#3b82f6" : "#64748b",
+                  fontFamily: "Inter, sans-serif",
+                }}
+              >
+                Zoom
+              </span>
+              {zoomActive ? (
+                <div className="absolute right-1 top-1 h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500 md:right-1.5 md:top-1.5 md:h-2 md:w-2" />
+              ) : null}
+            </Link>
+          </div>
+
+          <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-2 lg:gap-3">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              title={
+                theme === "light" ? "Switch to dark mode" : "Switch to light mode"
+              }
+              className="flex h-8 w-8 items-center justify-center rounded-lg transition-all sm:h-9 sm:w-9 md:h-10 md:w-10"
+              style={{
+                backgroundColor: isDark ? "#1f2937" : "#f9fafb",
+                border: isDark ? "1px solid #374151" : "1px solid #e5e7eb",
+              }}
+            >
+              {theme === "light" ? (
+                <Moon className="h-4 w-4 text-slate-500 sm:h-5 sm:w-5" />
+              ) : (
+                <Sun className="h-4 w-4 text-amber-400 sm:h-5 sm:w-5" />
+              )}
+            </button>
 
             <ComponentGuard
               allowedRoles={[roles.ADMIN]}
               conditions={[employeeModeData ? true : false]}
             >
-              <div className="flex items-center gap-4 justify-between bg-gray-100 shadow-md py-1 px-3 rounded-md w-fit max-w-md">
-                {/* Employee Info */}
-                <div className="flex items-center space-x-4">
-                  <div className="text-sm">
-                    <p className="text-gray-600 font-medium">
-                      {employeeModeData?.userName}
-                    </p>
-                    <p className="text-gray-500">{employeeModeData?.role}</p>
-                  </div>
+              <div className="hidden max-w-[220px] items-center justify-between gap-3 rounded-md bg-gray-100 px-3 py-1 shadow-md dark:bg-slate-700/80 md:flex lg:max-w-md">
+                <div className="min-w-0 text-sm">
+                  <p className="truncate font-medium text-gray-600 dark:text-slate-200">
+                    {employeeModeData?.userName}
+                  </p>
+                  <p className="truncate text-gray-500 dark:text-slate-400">
+                    {employeeModeData?.role}
+                  </p>
                 </div>
-
-                {/* Exit Button */}
                 <button
+                  type="button"
                   onClick={onExit}
-                  className="bg-red-500 text-white px-4 py-2 rounded font-medium text-sm"
+                  className="shrink-0 rounded bg-red-500 px-3 py-1.5 text-sm font-medium text-white"
                 >
                   Exit
                 </button>
@@ -116,42 +327,29 @@ const Header = ({ toggleButtonRef }) => {
 
             <ComponentGuard
               allowedRoles={[roles.ADMIN]}
-              conditions={[
-                showWarning,
-                showExpiryNotice,
-              ]}
+              conditions={[showWarning, showExpiryNotice]}
             >
-              <div className="bg-red-50 border hidden border-red-200 rounded-lg px-4 py-2 mx-4 lg:flex gap-2 justify-between items-center">
+              <div className="mx-2 hidden items-center justify-between gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 dark:border-red-900/50 dark:bg-red-950/40 lg:flex">
                 <Link
                   to="/plans"
-                  className="text-red-600 whitespace-nowrap hover:text-red-700"
+                  className="whitespace-nowrap text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 >
                   Plan expiring in {daysLeft} days on{" "}
-                  {expiryDate && formatDateAsNumber(expiryDate)}
-                  , click to see plans.
+                  {expiryDate && formatDateAsNumber(expiryDate)}, click to see
+                  plans.
                 </Link>
                 <button
+                  type="button"
                   onClick={() => setShowExpiryNotice(false)}
-                  className="text-gray-400 hover:text-gray-500"
+                  className="text-gray-400 hover:text-gray-500 dark:text-slate-500 dark:hover:text-slate-400"
                   aria-label="Close notification"
                 >
-                  <svg
-                    className="w-5 h-5"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
+                  <span className="text-lg leading-none">×</span>
                 </button>
               </div>
             </ComponentGuard>
 
-            <div className="flex items-center">
+            <div className="flex items-center gap-0.5 sm:gap-1">
               <ComponentGuard allowedRoles={[roles.ADMIN, roles.SUPER_ADMIN]}>
                 <ImportExportNotifications userData={userData} roles={roles} />
               </ComponentGuard>
@@ -160,81 +358,78 @@ const Header = ({ toggleButtonRef }) => {
                 userData={userData}
                 roles={roles}
               />
-              {/* {!roles.isSuperAdmin() && ( */}
               <NotificationBell
                 important={false}
                 userData={userData}
                 roles={roles}
               />
-              {/* )} */}
-
-              <div
-                className="flex items-center ms-1 sm:ms-3 cursor-pointer"
+              <button
+                type="button"
+                className="ml-1 flex cursor-pointer items-center gap-2 rounded-lg py-1 pl-1 pr-0 hover:bg-slate-100 dark:hover:bg-slate-700/50 sm:ml-2 sm:gap-3 sm:pr-1"
                 onClick={handleProfileClick}
               >
-                <div className="flex items-center space-x-3">
-                  <div className=" text-black">
-                    <p className="text-sm font-medium">{userData?.userName}</p>
-                    <p className="text-gray-400 text-xs md:text-md whitespace-nowrap">
-                      {getRoleNameByID(userData?.role)}
-                    </p>
-                  </div>
-                  <div className="text-gray-500 rounded-full bg-indigo-500 p-1">
-                    {/* Use img tag for SVG */}
-                    <img
-                      src={Profile}
-                      alt="Profile"
-                      className="sm:min-w-8 sm:w-8 sm:min-h-8 sm:h-8 min-w-7 w-7 min-h-7 h-7"
-                      style={{ fill: "#525252" }}
-                    />
-                  </div>
+                <div className="hidden text-right sm:block">
+                  <p className="max-w-[120px] truncate text-sm font-medium text-slate-900 dark:text-slate-100 lg:max-w-[160px]">
+                    {userData?.userName}
+                  </p>
+                  <p className="max-w-[120px] truncate text-xs text-slate-500 dark:text-slate-400 lg:max-w-[160px]">
+                    {getRoleNameByID(userData?.role)}
+                  </p>
                 </div>
-              </div>
+                <div className="rounded-full bg-indigo-500 p-0.5 ring-2 ring-white shadow-sm dark:ring-slate-600">
+                  <img
+                    src={Profile}
+                    alt=""
+                    className="h-7 w-7 rounded-full object-cover sm:h-8 sm:w-8"
+                  />
+                </div>
+              </button>
             </div>
           </div>
         </div>
-      </nav>
+      </header>
 
       <ComponentGuard
         allowedRoles={[roles.ADMIN]}
-        conditions={[
-          showWarning,
-          showExpiryNotice,
-        ]}
+        conditions={[showWarning, showExpiryNotice]}
       >
-        <div className="bg-red-50 absolute top-20 left-1/2 -translate-x-1/2 z-50 border lg:hidden border-red-200 rounded-lg px-4 py-2 flex gap-2 justify-between items-center max-w-[90%]">
+        <div className="absolute left-1/2 top-[4.5rem] z-50 flex max-w-[90%] -translate-x-1/2 gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 dark:border-red-900/50 dark:bg-red-950/40 lg:hidden">
           <Link
             to="/plans"
-            className="text-red-600 hover:text-red-700 flex flex-col"
+            className="flex flex-col text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
           >
-            <span className="font-medium whitespace-nowrap">
+            <span className="whitespace-nowrap font-medium">
               Plan expiring in {daysLeft} days
             </span>
-            <span className="text-sm whitespace-nowrap">
-              on {expiryDate && formatDateAsNumber(expiryDate)},
-              click to see plans.
+            <span className="whitespace-nowrap text-sm">
+              on {expiryDate && formatDateAsNumber(expiryDate)}, click to see
+              plans.
             </span>
           </Link>
           <button
+            type="button"
             onClick={() => setShowExpiryNotice(false)}
-            className="text-gray-400 hover:text-gray-500"
+            className="text-gray-400 hover:text-gray-500 dark:text-slate-500 dark:hover:text-slate-400"
             aria-label="Close notification"
           >
-            <svg
-              className="w-5 h-5"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                fillRule="evenodd"
-                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                clipRule="evenodd"
-              />
-            </svg>
+            <span className="text-lg leading-none">×</span>
           </button>
         </div>
       </ComponentGuard>
+
+      {!isMdUp && isSidebarOpen ? (
+        <button
+          type="button"
+          aria-label="Close menu overlay"
+          className="fixed inset-0 top-16 z-[40] bg-black/50 backdrop-blur-sm"
+          onClick={() => dispatch(toggleSidebar())}
+        />
+      ) : null}
+
+      <style>{`
+        .custom-scrollbar-hide::-webkit-scrollbar { display: none; }
+        .custom-scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
     </>
   );
 };

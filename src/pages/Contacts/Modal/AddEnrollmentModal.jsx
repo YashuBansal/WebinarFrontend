@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { getAllProducts, getEnrollmentsByEmail } from "../../../features/actions/product";
 import { addEnrollment } from "../../../features/actions/attendees";
-import TailwindLoader from "../../../components/TailwindLoader";
+import AppLoader from "../../../components/AppLoader";
 import { clearProductData } from "../../../features/slices/product";
 import { formatDateAsNumber } from "../../../utils/extra";
 
@@ -113,7 +113,7 @@ const AddEnrollmentModal = ({ setModal, attendeeEmail, webinarData, logUserActiv
           >
           {
             loading ?
-            <TailwindLoader size={6} />
+            <AppLoader size="md" variant="inverse" />
             : "Submit"
           }
           </button>

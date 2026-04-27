@@ -9,6 +9,8 @@ const initialState = {
   isLoading: false,
   userActivities: [],
   totalPages: 1,
+  /** From API pagination.totalActivities | totalLogs — for table range text */
+  totalRecords: 0,
   isEmployee: false,
   employeeActivities: [],
 };
@@ -43,7 +45,10 @@ export const userActivitySlice = createSlice({
       .addCase(getUserActivity.fulfilled, (state, action) => {
         state.isLoading = false;
         state.userActivities = action.payload?.data || [];
-        state.totalPages = action.payload?.pagination?.totalPages || 1;
+        const p = action.payload?.pagination;
+        state.totalPages = p?.totalPages || 1;
+        const tr = Number(p?.totalActivities ?? p?.totalLogs ?? 0);
+        state.totalRecords = Number.isFinite(tr) ? tr : 0;
       })
       .addCase(getUserActivity.rejected, (state, action) => {
         state.isLoading = false;
@@ -51,14 +56,22 @@ export const userActivitySlice = createSlice({
       })
       .addCase(getUserActivitySilently.fulfilled, (state, action) => {
         state.userActivities = action.payload?.data || [];
-        state.totalPages = action.payload?.pagination?.totalPages || 1;
+        const p = action.payload?.pagination;
+        state.totalPages = p?.totalPages || 1;
+        const tr = Number(p?.totalActivities ?? p?.totalLogs ?? 0);
+        state.totalRecords = Number.isFinite(tr) ? tr : 0;
       })
       .addCase(getUserActivityOfEmployees.pending, (state) => {
         state.isLoading = true;
       })
       .addCase(getUserActivityOfEmployees.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.employeeActivities = action.payload || [];
+        const p = action.payload;
+        state.employeeActivities = Array.isArray(p)
+          ? p
+          : Array.isArray(p?.data)
+            ? p.data
+            : [];
       })
       .addCase(getUserActivityOfEmployees.rejected, (state, action) => {
         state.isLoading = false;

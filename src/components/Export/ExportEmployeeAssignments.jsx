@@ -20,7 +20,7 @@ import { closeModal } from "../../features/slices/modalSlice";
 import {
   exportEmployeeAssignmentsExcel,
 } from "../../features/actions/export-excel";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../AppLoader";
 import { attendeeTableColumns } from "../../utils/columnData";
 import { resetExportSuccess } from "../../features/slices/export-excel";
 import {
@@ -532,7 +532,7 @@ const ExportEmployeeAssignments = ({
                   disabled={isExportLoading || selectedColumns.length === 0} // Disable if no columns selected
                 >
                   {isExportLoading ? (
-                    <ClipLoader size={20} color="#fff" />
+                    <AppLoader size="md" variant="inverse" />
                   ) : (
                     "Download"
                   )}

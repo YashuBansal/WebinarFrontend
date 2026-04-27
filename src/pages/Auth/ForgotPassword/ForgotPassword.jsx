@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { generateOTP, validateOTP } from "../../../features/actions/auth";
 import { clearOTPGenerated } from "../../../features/slices/auth";
 import TextField from "@mui/material/TextField";
-import TailwindLoader from "../../../components/TailwindLoader";
+import AppLoader from "../../../components/AppLoader";
 
 const ForgotPasswordModal = ({ onClose }) => {
   const dispatch = useDispatch();
@@ -140,7 +140,7 @@ const ForgotPasswordModal = ({ onClose }) => {
               onClick={handleSendOtp}
               disabled={isSomethingStillLoading}
             >
-              {isSomethingStillLoading ? <TailwindLoader size={6} /> : "Send OTP"}
+              {isSomethingStillLoading ? <AppLoader size="md" variant="inverse" /> : "Send OTP"}
             </button>
           </div>
         ) : (
@@ -160,7 +160,7 @@ const ForgotPasswordModal = ({ onClose }) => {
               onClick={handleVerifyOtp}
               disabled={isSomethingStillLoading}
             >
-              {isSomethingStillLoading ? <TailwindLoader size={6} /> : "Verify OTP"}
+              {isSomethingStillLoading ? <AppLoader size="md" variant="inverse" /> : "Verify OTP"}
             </button>
 
             {/* Resend OTP Section */}

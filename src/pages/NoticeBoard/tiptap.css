@@ -1,7 +1,13 @@
 /* Preview content styling */
 .preview-content {
-    font-family: 'Arial', sans-serif;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
     font-size: 16px;
+    line-height: 1.7;
+    color: rgb(15 23 42);
+}
+
+.dark .preview-content {
+    color: rgb(241 245 249);
 }
 
 .preview-content h1, .preview-content h2, .preview-content h3, .preview-content h4, .preview-content h5, .preview-content h6 {
@@ -58,12 +64,21 @@
 
 /* Links */
 .preview-content a {
-    color: blue;
+    color: rgb(37 99 235);
     text-decoration: underline;
+    text-underline-offset: 3px;
 }
 
 .preview-content a:hover {
-    color: darkblue;
+    color: rgb(30 64 175);
+}
+
+.dark .preview-content a {
+    color: rgb(96 165 250);
+}
+
+.dark .preview-content a:hover {
+    color: rgb(191 219 254);
 }
 
 /* Styling for bold, italic, underline */
@@ -81,8 +96,33 @@
 
 /* ProseMirror (editor content) styling */
 .ProseMirror {
-    font-family: 'Arial', sans-serif;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
     font-size: 16px;
+    line-height: 1.7;
+    color: rgb(15 23 42);
+    outline: none;
+}
+
+.dark .ProseMirror {
+    color: rgb(241 245 249);
+}
+
+/* Modern editor “paper” surface (used in Update page) */
+.notice-editor-content.ProseMirror {
+    /* Start compact; height grows with content (no huge empty box). */
+    min-height: 6.5rem;
+    height: auto;
+    border-radius: 0.9rem;
+    border: 1px solid rgba(226, 232, 240, 1);
+    background-color: rgba(255, 255, 255, 0.85);
+    padding: 0.85rem 0.9rem;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+.dark .notice-editor-content.ProseMirror {
+    border-color: rgba(51, 65, 85, 1);
+    background-color: rgba(2, 6, 23, 0.35);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 /* Headings for editor (ProseMirror) */
@@ -136,12 +176,21 @@
 
 /* Links in editor */
 .ProseMirror a {
-    color: blue;
+    color: rgb(37 99 235);
     text-decoration: underline;
+    text-underline-offset: 3px;
 }
 
 .ProseMirror a:hover {
-    color: darkblue;
+    color: rgb(30 64 175);
+}
+
+.dark .ProseMirror a {
+    color: rgb(96 165 250);
+}
+
+.dark .ProseMirror a:hover {
+    color: rgb(191 219 254);
 }
 
 /* Bold, Italic, Underline in editor */

@@ -10,6 +10,7 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import Delete from "../../../components/ConfirmDeleteModal";
 import { VisibilityIcon } from "../../../components/SVGs";
 import { globalButton } from "../../../utils/style";
+import HubSubpageShell from "../../../components/Layout/HubSubpageShell";
 
 // --- New Reusable Components for Responsive View ---
 
@@ -26,10 +27,10 @@ const CardSkeleton = () => (
 
 // The responsive card component for displaying a single sidebar link.
 const SidebarLinkCard = ({ item, onView, onDelete }) => (
-  <div className="rounded-lg border bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
+  <div className="rounded-lg border border-slate-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-slate-600 dark:bg-slate-900/80">
     <div className="flex items-start justify-between gap-2">
       <div>
-        <h3 className="font-semibold text-gray-900">{item?.title}</h3>
+        <h3 className="font-semibold text-gray-900 dark:text-slate-100">{item?.title}</h3>
         <span className="mt-1 inline-block rounded-full bg-indigo-100 px-2.5 py-0.5 text-xs font-medium text-indigo-800">
           Role: {item?.role?.name ? item?.role?.name.split("_").join(" ") : "All"}
         </span>
@@ -47,7 +48,7 @@ const SidebarLinkCard = ({ item, onView, onDelete }) => (
         </Tooltip>
       </div>
     </div>
-    <p className="mt-3 break-all border-t pt-3 text-sm text-gray-600">
+    <p className="mt-3 break-all border-t pt-3 text-sm text-gray-600 dark:border-slate-600 dark:text-slate-300">
       {item?.link}
     </p>
   </div>
@@ -120,7 +121,7 @@ const ViewSidebarLinks = () => {
 
     if (!allSidebarLinks || allSidebarLinks.length === 0) {
       return (
-        <div className="col-span-full py-12 text-center text-gray-500">
+        <div className="col-span-full py-12 text-center text-gray-500 dark:text-slate-400">
           No sidebar links found.
         </div>
       );
@@ -144,8 +145,8 @@ const ViewSidebarLinks = () => {
     return (
       <tbody className="divide-y divide-gray-200">
         {allSidebarLinks.map((item) => (
-          <tr key={item._id} className="bg-white hover:bg-gray-50">
-            <td className="px-6 py-4 font-medium text-gray-900">{item?.title}</td>
+          <tr key={item._id} className="bg-white hover:bg-gray-50 dark:bg-slate-950/30 dark:hover:bg-slate-800/50">
+            <td className="px-6 py-4 font-medium text-gray-900 dark:text-slate-100">{item?.title}</td>
             <td className="px-6 py-4">{item?.role?.name ? item?.role?.name.split("_").join(" ") : "All"}</td>
             <td className="px-6 py-4 max-w-xs truncate" title={item?.link}>{item?.link}</td>
             <td className="px-6 py-4">
@@ -169,10 +170,12 @@ const ViewSidebarLinks = () => {
   };
 
   return (
-    <>
-      <div className="p-4 sm:p-6 md:p-10 mt-4">
-        <div className="flex flex-col md:flex-row items-center justify-between mb-6 gap-4">
-          <h1 className="text-2xl font-bold text-gray-800">Sidebar Links</h1>
+    <HubSubpageShell>
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/60 sm:rounded-3xl sm:p-6 md:p-8">
+        <div className="mb-6 flex flex-col items-center justify-between gap-4 md:flex-row">
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
+            Sidebar Links
+          </h1>
           <button
             onClick={() => navigate("/sidebarLinks/addSidebarLink")}
             className={globalButton}
@@ -184,9 +187,9 @@ const ViewSidebarLinks = () => {
         {isSmallScreen ? (
           renderContent()
         ) : (
-          <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-            <table className="w-full text-sm text-left text-gray-500">
-              <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+          <div className="relative overflow-x-auto rounded-lg shadow-md dark:shadow-none sm:rounded-lg">
+            <table className="w-full text-left text-sm text-gray-500 dark:text-slate-300">
+              <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-slate-800 dark:text-slate-200">
                 <tr>
                   <th scope="col" className="px-6 py-3">Title</th>
                   <th scope="col" className="px-6 py-3">Role</th>
@@ -228,7 +231,7 @@ const ViewSidebarLinks = () => {
           isLoading={isLoading}
         />
       )}
-    </>
+    </HubSubpageShell>
   );
 };
 
