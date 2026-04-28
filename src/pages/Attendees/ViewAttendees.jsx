@@ -7,7 +7,7 @@ import {
   fetchGroupedAttendeesSilently,
 } from "../../features/actions/attendees";
 import { getLeadType } from "../../features/actions/assign";
-import GroupedAttendeeFilterModal from "./Modal/GroupedAttendeeFilterModal";
+import AttendeesFilterModal from "../../components/Attendees/AttendeesFilterModal";
 import { createPortal } from "react-dom";
 import { clearAttendeeData } from "../../features/slices/attendees";
 import { socket } from "../../socket";
@@ -24,12 +24,14 @@ import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
 import { clearEmployeeData } from "../../features/slices/employee";
 import { getAllEmployees } from "../../features/actions/employee";
 import GroupedAttendeesExportModal from "./Modal/GroupedAttendeeExportModal";
+import GroupedAttendeeFilterModal from "./Modal/GroupedAttendeeFilterModal";
 import { baseURL } from "../../services/axiosInterceptor";
 import { useBulkApplyTagsToAllAttendees } from "../../hooks/useTags";
 import ApplyTagsModal from "../../components/Webinar/ApplyTagsModal";
 import { openModal } from "../../features/slices/modalSlice";
 import { setAllAttendeesFilters } from "../../features/slices/filters.slice";
 import FilterPresetModal from "../../components/Filter/FilterPresetModal";
+import PageLimitEditor from "../../components/PageLimitEditor";
 import { useTheme } from "../../contexts/ThemeContext";
 import { motion } from "framer-motion";
 import {
@@ -192,7 +194,7 @@ function getBadgeColor(status) {
   }
 }
 
-const WebinarAttendees = () => {
+const ViewAttendees = () => {
   const AttendeesFilterModalName = "ViewAttendeesFilterModal";
   const tableHeader = "All Attendees Table";
   const exportModalName = "ExportViewAttendeesExcel";
@@ -216,6 +218,7 @@ const WebinarAttendees = () => {
   const LIMIT = useSelector((state) => state.pageLimits[tableHeader] || 10);
   const modalState = useSelector((state) => state.modals.modals);
   const exportModalOpen = modalState[exportModalName] ? true : false;
+  const AttendeesFilterModalOpen = modalState[AttendeesFilterModalName] ? true : false;
   const [searchParams, setSearchParams] = useSearchParams();
   const [page, setPage] = useState(searchParams.get("page") || 1);
   const [deleteModal, setDeleteModal] = useState(false);
@@ -1078,13 +1081,20 @@ const WebinarAttendees = () => {
             backgroundColor: isDark ? "rgba(15,23,42,0.4)" : "#F9FAFB",
           }}
         >
-          <div
-            className="text-sm"
-            style={{ color: isDark ? "#94a3b8" : "#64748b" }}
-          >
-            Showing {startRow} to {endRow} of {total} entries
+          <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+            <div
+              className="text-sm"
+              style={{ color: isDark ? "#94a3b8" : "#64748b" }}
+            >
+              Showing {startRow} to {endRow} of {total} entries
+            </div>
+            <PageLimitEditor
+              setPage={setPage}
+              pageId={tableHeader}
+              label="Show"
+            />
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2 sm:justify-end">
             <Button
               type="button"
               disabled={Number(page) <= 1}
@@ -1099,6 +1109,33 @@ const WebinarAttendees = () => {
             >
               Previous
             </Button>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(5, totalPages || 1) }, (_, i) => {
+                let pageNum = i + 1;
+                if ((totalPages || 1) > 5) {
+                  if (Number(page) > 3) {
+                    pageNum = Number(page) - 3 + i;
+                    if (pageNum + (5 - i - 1) > (totalPages || 1)) {
+                      pageNum = (totalPages || 1) - 4 + i;
+                    }
+                  }
+                }
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-colors ${Number(page) === pageNum
+                      ? "bg-blue-600 text-white"
+                      : isDark
+                        ? "text-slate-400 hover:bg-white/5"
+                        : "text-[#0f172a] hover:bg-black/5"
+                      }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
             <Button
               type="button"
               disabled={Number(page) >= totalPages || totalPages === 0}
@@ -1212,12 +1249,16 @@ const WebinarAttendees = () => {
         />
       )}
 
+      {AttendeesFilterModalOpen &&
+        createPortal(
           <GroupedAttendeeFilterModal
             handleCopy={handleCopy}
             setPage={setPage}
             modalName={AttendeesFilterModalName}
-        onOpenPresetModal={() => setPresetModalOpen(true)}
-      />
+            onOpenPresetModal={() => setPresetModalOpen(true)}
+          />,
+          document.body
+        )}
       {exportModalOpen &&
         createPortal(
           <GroupedAttendeesExportModal
@@ -1249,17 +1290,17 @@ const WebinarAttendees = () => {
         applyTagsModalOpen &&
         createPortal(
           <Suspense fallback={<ModalFallback />}>
-              <ApplyTagsModal
-                onClose={() => setApplyTagsModalOpen(false)}
-                onSubmit={async (tag) => {
-                  await applyTagsToAllAttendees({
-                    filters: allAttendeesFilters,
+            <ApplyTagsModal
+              onClose={() => setApplyTagsModalOpen(false)}
+              onSubmit={async (tag) => {
+                await applyTagsToAllAttendees({
+                  filters: allAttendeesFilters,
                   sort: allAttendeesSortBy?.sortBy ? allAttendeesSortBy : DEFAULT_API_SORT,
-                    tag,
-                  });
-                }}
-                isLoading={isApplyingTags}
-              />
+                  tag,
+                });
+              }}
+              isLoading={isApplyingTags}
+            />
           </Suspense>,
           document.body
         )}
@@ -1267,4 +1308,4 @@ const WebinarAttendees = () => {
   );
 };
 
-export default WebinarAttendees;
+export default ViewAttendees;

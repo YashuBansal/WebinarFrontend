@@ -360,23 +360,23 @@ const Assignments = () => {
       ...(tabValue === AssignmentStatus.ACTIVE
         ? []
         : [
-            {
-              icon: () => (
-                <CancelIcon className="text-red-500 group-hover:text-red-600" />
-              ),
-              tooltip: "Cancel Re-Assignment Request",
-              onClick: (item) => {
-                dispatch(
-                  cancelRequestReAssignment({
-                    assignments: [item._id],
-                    attendeeEmails: [item?.email],
-                    webinarId: item?.webinar,
-                    requestReason: "cancelled",
-                  })
-                );
-              },
+          {
+            icon: () => (
+              <CancelIcon className="text-red-500 group-hover:text-red-600" />
+            ),
+            tooltip: "Cancel Re-Assignment Request",
+            onClick: (item) => {
+              dispatch(
+                cancelRequestReAssignment({
+                  assignments: [item._id],
+                  attendeeEmails: [item?.email],
+                  webinarId: item?.webinar,
+                  requestReason: "cancelled",
+                })
+              );
             },
-          ]),
+          },
+        ]),
     ];
 
     return icons;

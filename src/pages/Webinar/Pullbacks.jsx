@@ -82,47 +82,47 @@ const Pullbacks = (props) => {
   const actionIcons = [
     ...(userData?.isActive
       ? [
-          {
-            icon: () => (
-              <CheckCircle className="text-green-500 group-hover:text-green-600" />
-            ),
-            tooltip: "Accept Re-Assignment Request",
-            disabled: requestLoading,
-            hideCondition: (row) =>
-              row?.status !== AssignmentStatus.REASSIGN_APPROVED,
-            onClick: (item) => {
-              dispatch(
-                handleReAssigmentRequest({
-                  status: "approved",
-                  assignments: [item?._id],
-                  userId: item?.user,
-                  webinarId: item?.webinar,
-                  attendeeEmails: [item?.attendeeEmail],
-                })
-              );
-            },
+        {
+          icon: () => (
+            <CheckCircle className="text-green-500 group-hover:text-green-600" />
+          ),
+          tooltip: "Accept Re-Assignment Request",
+          disabled: requestLoading,
+          hideCondition: (row) =>
+            row?.status !== AssignmentStatus.REASSIGN_APPROVED,
+          onClick: (item) => {
+            dispatch(
+              handleReAssigmentRequest({
+                status: "approved",
+                assignments: [item?._id],
+                userId: item?.user,
+                webinarId: item?.webinar,
+                attendeeEmails: [item?.attendeeEmail],
+              })
+            );
           },
-          {
-            icon: () => (
-              <Cancel className="text-red-500 group-hover:text-red-600" />
-            ),
-            tooltip: "Reject Re-Assignment Request",
-            disabled: requestLoading,
-            hideCondition: (row) =>
-              row?.status !== AssignmentStatus.REASSIGN_APPROVED,
-            onClick: (item) => {
-              dispatch(
-                handleReAssigmentRequest({
-                  status: "rejected",
-                  assignments: [item?._id],
-                  userId: item?.user,
-                  webinarId: item?.webinar,
-                  attendeeEmails: [item?.attendeeEmail],
-                })
-              );
-            },
+        },
+        {
+          icon: () => (
+            <Cancel className="text-red-500 group-hover:text-red-600" />
+          ),
+          tooltip: "Reject Re-Assignment Request",
+          disabled: requestLoading,
+          hideCondition: (row) =>
+            row?.status !== AssignmentStatus.REASSIGN_APPROVED,
+          onClick: (item) => {
+            dispatch(
+              handleReAssigmentRequest({
+                status: "rejected",
+                assignments: [item?._id],
+                userId: item?.user,
+                webinarId: item?.webinar,
+                attendeeEmails: [item?.attendeeEmail],
+              })
+            );
           },
-        ]
+        },
+      ]
       : []),
     {
       icon: () => (

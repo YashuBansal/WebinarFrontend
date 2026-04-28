@@ -26,9 +26,14 @@ const AdminActivityLogs = () => {
   }, [page, userActivityLimit, filters]);
 
   const exportEmployeeActivityLogs = useCallback(
-    (limit, columns) => {
+    (limit, columns, exportFilters = filters) => {
       dispatch(
-        exportUserActivitiesByUser({ limit, columns, filters, userId: id })
+        exportUserActivitiesByUser({
+          limit,
+          columns,
+          filters: exportFilters,
+          userId: id,
+        })
       );
     },
     [dispatch, filters]

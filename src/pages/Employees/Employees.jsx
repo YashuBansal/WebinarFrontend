@@ -25,6 +25,7 @@ import ModalFallback from "../../components/Fallback/ModalFallback";
 import { useTheme } from "../../contexts/ThemeContext";
 import EmployeesTableShell from "../../components/Employees/EmployeesTableShell";
 import EmployeesCardGrid from "../../components/Employees/EmployeesCardGrid";
+import { getRoleNameByID } from "../../utils/roles";
 
 const VIEW_STORAGE_KEY = "employeesListViewMode";
 
@@ -136,7 +137,7 @@ const Employees = () => {
         row?.email,
         row?.userName,
         row?.phone,
-        row?.role,
+        getRoleNameByID(row?.role),
       ]
         .filter(Boolean)
         .join(" ")

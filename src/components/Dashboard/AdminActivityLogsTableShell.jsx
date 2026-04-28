@@ -40,6 +40,7 @@ export default function AdminActivityLogsTableShell({
   onPresetsClick,
   rowClick,
   isRowClickable,
+  hideHeader = false,
 }) {
   const logUserActivity = useAddUserActivity();
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -78,9 +79,8 @@ export default function AdminActivityLogsTableShell({
 
   const TableCard = (
     <div
-      className={`flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 ${
-        isFullscreen ? "min-h-0 flex-1 shadow-2xl" : ""
-      }`}
+      className={`flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 ${isFullscreen ? "min-h-0 flex-1 shadow-2xl" : ""
+        }`}
       style={{
         background: isFullscreen ? "#ffffff" : "rgba(255, 255, 255, 0.7)",
         backdropFilter: isFullscreen ? "none" : "blur(16px)",
@@ -104,10 +104,21 @@ export default function AdminActivityLogsTableShell({
           />
         </div>
         <div className="flex w-full flex-shrink-0 items-center justify-end gap-2 self-end sm:w-auto sm:self-auto">
+          {onExportClick && (
+            <button
+              type="button"
+              onClick={onExportClick}
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 transition-colors hover:bg-black/5 sm:flex-none"
+              style={inputStyle}
+            >
+              <Download className="h-4 w-4 text-gray-500" />
+              <span className="hidden sm:inline">Export</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={onPresetsClick}
-            className="flex flex-1 items-center gap-2 rounded-xl px-4 py-2 transition-colors hover:bg-black/5 sm:flex-none"
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 transition-colors hover:bg-black/5 sm:flex-none"
             style={inputStyle}
           >
             <Bookmark className="h-4 w-4 text-gray-500" />
@@ -139,9 +150,8 @@ export default function AdminActivityLogsTableShell({
       </div>
 
       <div
-        className={`custom-scrollbar overflow-x-auto ${
-          isFullscreen ? "min-h-0 flex-1 overflow-y-auto" : ""
-        }`}
+        className={`custom-scrollbar overflow-x-auto ${isFullscreen ? "min-h-0 flex-1 overflow-y-auto" : ""
+          }`}
       >
         <table className="w-full min-w-[800px] border-collapse text-left">
           <thead className={isFullscreen ? "sticky top-0 z-20" : ""}>
@@ -227,11 +237,10 @@ export default function AdminActivityLogsTableShell({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.03 }}
                     onClick={() => isRowClickable && rowClick?.(row)}
-                    className={`border-b transition-colors ${
-                      isRowClickable
-                        ? "cursor-pointer hover:bg-black/5"
-                        : "hover:bg-black/5"
-                    }`}
+                    className={`border-b transition-colors ${isRowClickable
+                      ? "cursor-pointer hover:bg-black/5"
+                      : "hover:bg-black/5"
+                      }`}
                     style={{ borderColor: "#e2e8f0" }}
                   >
                     <td
@@ -348,11 +357,10 @@ export default function AdminActivityLogsTableShell({
                       details: `User changed page For ${tableHeader} to ${pageNum} `,
                     });
                   }}
-                  className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-colors ${
-                    Number(page) === pageNum
-                      ? "bg-blue-600 text-white"
-                      : "text-[#0f172a] hover:bg-black/5"
-                  }`}
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-colors ${Number(page) === pageNum
+                    ? "bg-blue-600 text-white"
+                    : "text-[#0f172a] hover:bg-black/5"
+                    }`}
                 >
                   {pageNum}
                 </button>
@@ -406,49 +414,32 @@ export default function AdminActivityLogsTableShell({
   }
 
   return (
-    <div className="mx-auto w-full min-w-0 max-w-[1600px] space-y-6">
-      <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-3">
-          {typeof onBackClick === "function" && (
-            <button
-              type="button"
-              onClick={onBackClick}
-              className="rounded-xl p-2 text-slate-600 transition-colors hover:bg-gray-200"
-              aria-label="Go back"
+    <div className={`mx-auto w-full min-w-0 max-w-[1600px] ${!hideHeader ? "space-y-6" : ""}`}>
+      {!hideHeader && (
+        <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+          <div className="flex items-center gap-3">
+            {typeof onBackClick === "function" && (
+              <button
+                type="button"
+                onClick={onBackClick}
+                className="rounded-xl p-2 text-slate-600 transition-colors hover:bg-gray-200"
+                aria-label="Go back"
+              >
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+            )}
+            <h2
+              className="text-2xl font-bold tracking-tight"
+              style={{
+                color: "#071028",
+                fontFamily: "Inter, sans-serif",
+              }}
             >
-              <ChevronLeft className="h-5 w-5" />
-            </button>
-          )}
-          <h2
-            className="text-2xl font-bold tracking-tight"
-            style={{
-              color: "#071028",
-              fontFamily: "Inter, sans-serif",
-            }}
-          >
-            {tableHeader}
-          </h2>
+              {tableHeader}
+            </h2>
+          </div>
         </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={onExportClick}
-            className="flex items-center gap-2 rounded-xl px-4 py-2.5 transition-transform hover:scale-105"
-            style={{
-              backgroundColor: "white",
-              color: "#071028",
-              border: "1px solid #e2e8f0",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
-              fontFamily: "Inter, sans-serif",
-              fontSize: "13px",
-              fontWeight: 600,
-            }}
-          >
-            <Download className="h-4 w-4 text-gray-500" />
-            <span className="hidden sm:inline">Export Logs CSV</span>
-          </button>
-        </div>
-      </div>
+      )}
 
       {TableCard}
     </div>

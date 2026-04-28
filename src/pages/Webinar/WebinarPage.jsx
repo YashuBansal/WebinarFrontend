@@ -181,30 +181,30 @@ const Webinar = () => {
     },
     ...(userData?.isActive
       ? [
-          {
-            icon: () => (
-              <Edit className="text-blue-500 group-hover:text-blue-600" />
-            ),
-            tooltip: "Edit Attendee",
-            onClick: (item) => {
-              dispatch(
-                openModal({
-                  modalName: createWebinarModalName,
-                  data: item,
-                }),
-              );
-            },
+        {
+          icon: () => (
+            <Edit className="text-blue-500 group-hover:text-blue-600" />
+          ),
+          tooltip: "Edit Attendee",
+          onClick: (item) => {
+            dispatch(
+              openModal({
+                modalName: createWebinarModalName,
+                data: item,
+              }),
+            );
           },
-          {
-            icon: (item) => (
-              <Delete className="text-red-500 group-hover:text-red-600" />
-            ),
-            tooltip: "Delete Attendee",
-            onClick: (item) => {
-              handleDeleteModal(item?._id, item?.webinarName);
-            },
+        },
+        {
+          icon: (item) => (
+            <Delete className="text-red-500 group-hover:text-red-600" />
+          ),
+          tooltip: "Delete Attendee",
+          onClick: (item) => {
+            handleDeleteModal(item?._id, item?.webinarName);
           },
-        ]
+        },
+      ]
       : []),
   ];
 
@@ -264,11 +264,10 @@ const Webinar = () => {
         </button>
       </div>
       <div
-        className={`bg-gray-50 transition-all duration-300 ${
-          isMaximized
+        className={`bg-gray-50 transition-all duration-300 ${isMaximized
             ? "fixed top-0 left-0 inset-0 w-screen h-screen z-[100] overflow-auto p-6"
             : "relative p-6 rounded-lg"
-        }`}
+          }`}
       >
         <div className="flex gap-4 justify-between items-center">
           <h2 className="text-2xl font-bold text-gray-700">{tableHeader}</h2>
@@ -432,7 +431,7 @@ const Webinar = () => {
                       {sortByOrder === "asc"
                         ? (page - 1) * LIMIT + index + 1
                         : tableData?.totalRecords -
-                          ((page - 1) * LIMIT + index)}
+                        ((page - 1) * LIMIT + index)}
                     </td>
 
                     {tableData?.columns?.map((column, colIndex) => (
@@ -447,7 +446,7 @@ const Webinar = () => {
                           ))}
                         {column.type === "" &&
                           (row?.[column.key] !== undefined &&
-                          row?.[column.key] !== null ? (
+                            row?.[column.key] !== null ? (
                             row[column.key] || row[column.key] === 0 ? (
                               row[column.key]
                             ) : (

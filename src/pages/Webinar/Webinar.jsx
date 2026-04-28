@@ -66,7 +66,7 @@ const Webinar = () => {
   const [showWebinarLimitModal, setShowWebinarLimitModal] = useState(false);
   const baseWebinarLimit =
     Number(subscription?.webinarLimit ?? subscription?.plan?.webinarLimit ?? 0)
-      || 0;
+    || 0;
   const webinarLimitAddon = Number(subscription?.webinarLimitAddon ?? 0);
   const webinarLimit = baseWebinarLimit + webinarLimitAddon;
   const isWebinarLimitExceeded =

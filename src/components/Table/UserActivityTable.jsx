@@ -25,7 +25,7 @@ import { closeModal, openModal } from "../../features/slices/modalSlice";
 import { userActivityTableColumns } from "../../utils/columnData";
 import DataTable from "./DataTable"; // Adjust this import path as needed
 import { ActivityActions, filterTruthyValues } from "../../utils/extra";
-import ExportModal from "../Export/ExportLogsModal";
+import ExportWebinarAttendeesModal from "../Export/ExportWebinarAttendeesModal";
 import ModalFallback from "../Fallback/ModalFallback";
 import AdminActivityLogsTableShell from "../Dashboard/AdminActivityLogsTableShell";
 import AdminActivityLogsFilterModal from "../Dashboard/AdminActivityLogsFilterModal";
@@ -56,6 +56,7 @@ const UserActivityTable = (props) => {
     tableHeader,
     adminLogsUi2025 = false,
     onAdminLogsBack,
+    hideHeader = false,
   } = props;
 
   const [adminLogsPresetOpen, setAdminLogsPresetOpen] = useState(false);
@@ -115,9 +116,9 @@ const UserActivityTable = (props) => {
     [navigate, roles, userData]
   );
 
-  const handleExport = ({ limit, columns }) => {
+  const handleExport = ({ limit, columns, filters: exportFilters }) => {
     dispatch(closeModal(exportExcelModalName));
-    handleExportData(limit, columns);
+    handleExportData(limit, columns, exportFilters);
   };
 
   const legacyFilterModal = !adminLogsUi2025 && (
@@ -229,10 +230,15 @@ const UserActivityTable = (props) => {
       {legacyFilterModal}
       {adminLogsFilterModal}
 
-      <ExportModal
+      <ExportWebinarAttendeesModal
         modalName={exportExcelModalName}
+        open={Boolean(modals[exportExcelModalName])}
+        title="Export Excel Options"
+        filters={filters}
         defaultColumns={userActivityTableColumns}
-        handleExport={handleExport}
+        onSubmitExport={handleExport}
+        allowPresetsInSharedMode
+        presetTableName="viewUserActivitLogs"
       />
 
       {adminLogsUi2025 && adminLogsPresetOpen && (
@@ -273,6 +279,7 @@ const UserActivityTable = (props) => {
           isRowClickable={Boolean(
             userData && userData?.role === roles.ADMIN
           )}
+          hideHeader={hideHeader}
         />
         {sharedModals}
       </>
