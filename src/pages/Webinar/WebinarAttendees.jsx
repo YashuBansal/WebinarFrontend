@@ -21,7 +21,8 @@ import {
   Filter,
   Trash2,
   Save,
-  X
+  X,
+  Tag
 } from "lucide-react";
 
 const Pullbacks = lazy(() => import("./Pullbacks"));
@@ -191,6 +192,14 @@ const WebinarAttendees = () => {
           </div>
 
           <div className="flex items-center gap-3 w-full md:w-auto">
+            {tabValueRef.current === "postWebinar" && (
+              <Link
+                to={`/webinar-participants/${id}`}
+                className="flex-1 md:flex-none px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
+              >
+                Participants
+              </Link>
+            )}
             {tabValueRef.current !== "enrollments" && (
               <>
                 {tabValueRef.current === "preWebinar" && (
@@ -207,16 +216,15 @@ const WebinarAttendees = () => {
                 >
                   <Settings2 className="w-4 h-4" /> Settings
                 </button>
+                <button
+                  onClick={() => setApplyTagsModalOpen(true)}
+                  className="flex-1 md:flex-none px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <Tag className="w-4 h-4" /> Apply Tag
+                </button>
               </>
             )}
-            {tabValueRef.current === "postWebinar" && (
-              <Link
-                to={`/webinar-participants/${id}`}
-                className="flex-1 md:flex-none px-5 py-2.5 bg-[#071028] text-white rounded-xl text-sm font-bold hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-lg"
-              >
-                Participants
-              </Link>
-            )}
+
           </div>
         </div>
 
@@ -231,8 +239,8 @@ const WebinarAttendees = () => {
               key={tab.value}
               onClick={() => handleTabChange(tab.value)}
               className={`px-8 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${tabValueRef.current === tab.value
-                  ? "bg-white text-blue-600 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
+                ? "bg-white text-blue-600 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
                 }`}
             >
               {tab.label}
@@ -290,8 +298,8 @@ const WebinarAttendees = () => {
                   key={subTab.value}
                   onClick={() => handleSubTabChange(subTab.value)}
                   className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${subTabValueRef.current === subTab.value
-                      ? "bg-slate-900 text-white"
-                      : "text-slate-500 hover:bg-slate-50"
+                    ? "bg-slate-900 text-white"
+                    : "text-slate-500 hover:bg-slate-50"
                     }`}
                 >
                   {subTab.label}
@@ -343,51 +351,43 @@ const WebinarAttendees = () => {
       </div>
 
       {/* Modal Portals */}
-      <AnimatePresence>
+      <Suspense fallback={<ModalFallback />}>
         {reAssignModal && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setReAssignModal(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 16 }} className="relative z-10 w-full max-w-lg">
-              <Suspense fallback={<ModalFallback />}>
-                <ReAssignmentModal selectedRows={selectedRows} webinarid={id} tabValue={tabValueRef.current} isPullbackVisible={tabValueRef.current !== "enrollments" && subTabValueRef.current === "attendees"} isAttendee={true} setReAssignModal={setReAssignModal} />
-              </Suspense>
-            </motion.div>
-          </div>
+          <ReAssignmentModal 
+            selectedRows={selectedRows} 
+            webinarid={id} 
+            tabValue={tabValueRef.current} 
+            isPullbackVisible={tabValueRef.current !== "enrollments" && subTabValueRef.current === "attendees"} 
+            isAttendee={true} 
+            setReAssignModal={setReAssignModal} 
+          />
         )}
 
         {assignModal && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setAssignModal(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 16 }} className="relative z-10 w-full max-w-lg">
-              <Suspense fallback={<ModalFallback />}>
-                <EmployeeAssignModal tabValue={tabValueRef.current} selectedRows={selectedRows} setAssignModal={setAssignModal} webinarId={id} />
-              </Suspense>
-            </motion.div>
-          </div>
+          <EmployeeAssignModal 
+            tabValue={tabValueRef.current} 
+            selectedRows={selectedRows} 
+            setAssignModal={setAssignModal} 
+            webinarId={id} 
+          />
         )}
 
         {showModal && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowModal(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 16 }} className="relative z-10 w-full max-w-md">
-              <Suspense fallback={<ModalFallback />}>
-                <UpdateCsvXslxModal tabValue={tabValueRef.current} setModal={setShowModal} />
-              </Suspense>
-            </motion.div>
-          </div>
+          <UpdateCsvXslxModal 
+            tabValue={tabValueRef.current} 
+            setModal={setShowModal} 
+          />
         )}
 
         {webhookDialogOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setWebhookDialogOpen(false)} />
-            <motion.div initial={{ opacity: 0, scale: 0.95, y: 16 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 16 }} className="relative z-10 w-full max-w-4xl">
-              <Suspense fallback={<ModalFallback />}>
-                <WebinarWebhooksListDialog webinarId={id} isOpen={webhookDialogOpen} onClose={() => setWebhookDialogOpen(false)} onRefresh={fetchWebinarData} />
-              </Suspense>
-            </motion.div>
-          </div>
+          <WebinarWebhooksListDialog 
+            webinarId={id} 
+            isOpen={webhookDialogOpen} 
+            onClose={() => setWebhookDialogOpen(false)} 
+            onRefresh={fetchWebinarData} 
+          />
         )}
-      </AnimatePresence>
+      </Suspense>
 
       <AutoAssignmentModal webinarId={id} onClose={() => setSettingModalOpen(false)} isOpen={settingModalOpen} webinarData={webinarData} refetchWebinarData={fetchWebinarData} />
     </div>

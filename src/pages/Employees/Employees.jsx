@@ -2,7 +2,7 @@ import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react
 import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Search, UserPlus } from "lucide-react";
+import { Bookmark, Download, Search, UserPlus } from "lucide-react";
 import {
   getAllEmployees,
   getAllEmployeesSilently,
@@ -26,6 +26,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 import EmployeesTableShell from "../../components/Employees/EmployeesTableShell";
 import EmployeesCardGrid from "../../components/Employees/EmployeesCardGrid";
 import { getRoleNameByID } from "../../utils/roles";
+import FilterPresetModal from "../../components/Filter/FilterPresetModal";
 
 const VIEW_STORAGE_KEY = "employeesListViewMode";
 
@@ -44,6 +45,7 @@ const Employees = () => {
   const [filters, setFilters] = useState({});
   const [page, setPage] = useState(searchParams.get("page") || 1);
   const [searchQuery, setSearchQuery] = useState("");
+  const [presetModalOpen, setPresetModalOpen] = useState(false);
   const [listView, setListView] = useState(() => {
     try {
       const v = localStorage.getItem(VIEW_STORAGE_KEY);
@@ -186,39 +188,37 @@ const Employees = () => {
           </p>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-          <div className="relative w-full sm:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search employees..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all"
-              style={{
-                backgroundColor: isDark ? "#1e293b" : "#ffffff",
-                border: `1px solid ${isDark ? "#334155" : "#e2e8f0"}`,
-                color: isDark ? "#f8fafc" : "#0f172a",
-                boxShadow:
-                  theme === "light" ? "0 2px 4px rgba(0,0,0,0.02)" : "none",
-              }}
-            />
-          </div>
           {userData?.isActive && (
-            <button
-              type="button"
-              onClick={() => navigate("/createEmployee")}
-              className="rounded-xl flex items-center justify-center gap-2 px-4 py-2 shadow-sm font-semibold text-sm transition-transform hover:scale-[1.02] shrink-0"
-              style={{
-                backgroundColor: "#FF6B35",
-                color: "white",
-                border: "none",
-                boxShadow: "0 4px 10px rgba(255, 107, 53, 0.2)",
-              }}
-            >
-              <UserPlus className="w-4 h-4 shrink-0" />
-              <span className="hidden sm:inline">Add Employee</span>
-              <span className="sm:hidden">Add</span>
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={openExportModal}
+                className="rounded-xl flex items-center justify-center gap-2 px-4 py-2 shadow-sm font-semibold text-sm transition-transform hover:scale-[1.02] shrink-0 border"
+                style={{
+                  backgroundColor: isDark ? "#1e293b" : "#ffffff",
+                  color: isDark ? "#f8fafc" : "#0f172a",
+                  borderColor: isDark ? "#334155" : "#e2e8f0",
+                }}
+              >
+                <Download className="w-4 h-4 text-gray-500" />
+                <span>Export CSV</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/createEmployee")}
+                className="rounded-xl flex items-center justify-center gap-2 px-4 py-2 shadow-sm font-semibold text-sm transition-transform hover:scale-[1.02] shrink-0"
+                style={{
+                  backgroundColor: "#FF6B35",
+                  color: "white",
+                  border: "none",
+                  boxShadow: "0 4px 10px rgba(255, 107, 53, 0.2)",
+                }}
+              >
+                <UserPlus className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Add Employee</span>
+                <span className="sm:hidden">Add</span>
+              </button>
+            </div>
           )}
         </div>
       </motion.div>
@@ -258,6 +258,9 @@ const Employees = () => {
               })
             )
           }
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          onOpenPresets={() => setPresetModalOpen(true)}
         />
       ) : (
         <EmployeesCardGrid
@@ -294,6 +297,9 @@ const Employees = () => {
               })
             )
           }
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          onOpenPresets={() => setPresetModalOpen(true)}
         />
       )}
 
@@ -320,6 +326,16 @@ const Employees = () => {
                 })
               );
             }}
+          />
+        </Suspense>
+      )}
+      {presetModalOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <FilterPresetModal
+            tableName="employeesTable"
+            filters={filters}
+            setFilters={setFilters}
+            setIsPresetModalOpen={setPresetModalOpen}
           />
         </Suspense>
       )}

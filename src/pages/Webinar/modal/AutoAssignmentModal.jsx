@@ -1,6 +1,13 @@
-import { useMemo, useState, useEffect } from "react";
+import React, { useMemo, useState, useEffect, useCallback } from "react";
+import { X, Settings2, ShieldCheck, UserMinus, Save, AlertCircle } from "lucide-react";
 import tagsService from "../../../services/tagsService";
 import useRoles from "../../../hooks/useRoles";
+import { Button } from "../../../components/ui/button";
+import { Dialog, DialogContent } from "../../../components/ui/dialog";
+import { useTheme } from "../../../contexts/ThemeContext";
+import { cn } from "../../../lib/utils";
+
+const FONT = "Inter, sans-serif";
 
 const CheckIcon = (props) => (
   <svg
@@ -21,9 +28,9 @@ const CheckIcon = (props) => (
 const EmployeeListSkeleton = () => (
   <div className="space-y-3" aria-label="Loading employees...">
     {[...Array(4)].map((_, i) => (
-      <div key={i} className="flex items-center space-x-3 p-2">
-        <div className="w-5 h-5 bg-slate-200 rounded-sm animate-pulse"></div>
-        <div className="w-4/5 h-5 bg-slate-200 rounded-md animate-pulse"></div>
+      <div key={i} className="flex items-center space-x-3 p-3 bg-white/5 rounded-xl animate-pulse">
+        <div className="w-5 h-5 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
+        <div className="w-1/2 h-5 bg-slate-200 dark:bg-slate-700 rounded-lg"></div>
       </div>
     ))}
   </div>
@@ -33,221 +40,206 @@ const AutoAssignmentModal = ({
   webinarId,
   onClose,
   isOpen,
-  webinarData, // This prop is assumed to be null/undefined when data is loading
+  webinarData,
   refetchWebinarData,
 }) => {
   const roles = useRoles();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
-  // State for form controls
   const [autoAssignEnabled, setAutoAssignEnabled] = useState(true);
   const [blacklistedEmployeeIds, setBlacklistedEmployeeIds] = useState([]);
-  const [isSaving, setIsSaving] = useState(false); // New state to manage saving process
+  const [isSaving, setIsSaving] = useState(false);
 
-  // Effect to synchronize internal state with webinarData prop.
-  // This ensures that when the modal opens or webinarData updates,
-  // the internal form controls reflect the latest configuration.
   useEffect(() => {
     if (webinarData) {
-      // Auto-assignment is enabled if 'autoAssignmentDisabled' is explicitly false or not present.
-      // If autoAssignmentDisabled is true, then autoAssignEnabled should be false.
       setAutoAssignEnabled(!webinarData.autoAssignmentDisabled);
-      // Ensure excludedEmployees is an array, default to empty if null/undefined.
       setBlacklistedEmployeeIds(webinarData.excludedEmployees || []);
     } else {
-      // If webinarData is not yet loaded, set to a default initial state (e.g., enabled, no blacklisted employees)
-      // or clear previous settings if the modal is being reused for a different webinar.
       setAutoAssignEnabled(true);
       setBlacklistedEmployeeIds([]);
     }
-  }, [webinarData, isOpen]); // Added isOpen to re-sync when modal opens (if webinarData might not change reference but internal content does)
+  }, [webinarData, isOpen]);
 
-  // Memoized list of employees eligible for auto-assignment based on their role
   const assignedEmployees = useMemo(() => {
-    if (!webinarData?.assignedEmployees) {
-      return []; // Return empty array if no assigned employees data is available (e.g., still loading)
-    }
-
-    // Filter employees to include only those with the "EMPLOYEE REMINDER" role
+    if (!webinarData?.assignedEmployees) return [];
     return webinarData.assignedEmployees.filter((emp) => {
-      // Safely access emp.role and get its name, then compare
       return emp?.role && roles.getRoleNameById(emp.role) === "EMPLOYEE REMINDER";
     });
-  }, [webinarData, roles]); // Re-calculate only when webinarData or roles change
+  }, [webinarData, roles]);
 
-  // Determine if webinar data is currently loading from the parent component
   const isLoadingWebinarData = !webinarData;
 
-  const handleClose = () => {
-    if (onClose) {
-      onClose();
-    }
-  };
-
-  const handleSave = async () => {
-    setIsSaving(true); // Indicate that saving process has started
+  const handleSave = useCallback(async () => {
+    setIsSaving(true);
     try {
-      console.log("Saving Settings:", {
-        webinarId,
-        autoAssignEnabled,
-        blacklistedEmployeeIds,
-      });
-
-      // Call the service to update webinar settings
-      // Note: API expects `autoAssignmentDisabled`, which is the inverse of `autoAssignEnabled`
       await tagsService.updateWebinarSetting({
         webinarId: webinarId,
-        autoAssignmentDisabled: !autoAssignEnabled, // Invert the boolean for API payload
+        autoAssignmentDisabled: !autoAssignEnabled,
         excludedEmployees: blacklistedEmployeeIds,
       });
-
-      // If a refetch function is provided, call it to update the parent component's data
-      if (refetchWebinarData) {
-        await refetchWebinarData();
-      }
-
-      handleClose(); // Close the modal upon successful save
+      if (refetchWebinarData) await refetchWebinarData();
+      onClose();
     } catch (error) {
-      console.error("Failed to save auto-assignment settings:", error);
-      // Optionally, implement user-facing error notification here (e.g., a toast message)
+      console.error("Failed to save settings:", error);
     } finally {
-      setIsSaving(false); // Reset saving state regardless of success or failure
+      setIsSaving(false);
     }
-  };
+  }, [webinarId, autoAssignEnabled, blacklistedEmployeeIds, refetchWebinarData, onClose]);
 
   const toggleEmployee = (employeeId) => {
     setBlacklistedEmployeeIds((prev) =>
       prev.includes(employeeId)
-        ? prev.filter((id) => id !== employeeId) // Remove employee if already blacklisted
-        : [...prev, employeeId] // Add employee if not blacklisted
+        ? prev.filter((id) => id !== employeeId)
+        : [...prev, employeeId]
     );
   };
 
-  if (!isOpen) return null; // Render nothing if the modal is not open
+  const shellBorder = isDark ? "#334155" : "#e5e7eb";
+  const titleColor = isDark ? "#f8fafc" : "#0f172a";
+  const footerBg = isDark ? "rgba(15,23,42,0.85)" : "#F9FAFB";
+
+  const cancelBtn = {
+    backgroundColor: "transparent",
+    border: "none",
+    color: isDark ? "#94a3b8" : "#64748b",
+  };
+  const applyBtn = {
+    backgroundColor: "#22B573",
+    color: "#ffffff",
+    border: "none",
+    boxShadow: "0 4px 10px rgba(34, 181, 115, 0.25)",
+  };
+
+  const labelStyle = {
+    fontFamily: FONT,
+    fontSize: "10px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+    color: isDark ? "#94a3b8" : "#64748b",
+    marginBottom: "4px",
+    display: "block",
+  };
 
   return (
-    <div className="fixed inset-0 bg-slate-900 bg-opacity-50 flex items-center justify-center z-50 p-4 transition-opacity duration-300">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-lg transform transition-all">
-        <div className="flex justify-between items-start mb-6">
-          <div>
-            <h2 className="text-3xl font-bold text-slate-800">
-              Auto Assignment
-            </h2>
-            <p className="text-slate-500 mt-1">
-              Configure settings for automatic task distribution.
-            </p>
-          </div>
-          <button
-            onClick={handleClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
-            aria-label="Close settings"
-            type="button" // Explicitly define type to prevent accidental form submission
-            disabled={isSaving} // Disable close button while saving
-          >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            </svg>
-          </button>
-        </div>
-
-        <div className="border-b border-slate-200 pb-6 mb-6">
-          <label className="flex items-center justify-between cursor-pointer">
-            <div>
-              <span className="text-lg font-medium text-slate-700">
-                Enable Auto Assignment
-              </span>
-              <p className="text-sm text-slate-500">
-                New tasks will be assigned to available employees.
-              </p>
-            </div>
-            <button
-              className={`relative inline-flex items-center h-7 w-14 rounded-full transition-colors duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500 ${
-                autoAssignEnabled ? "bg-indigo-600" : "bg-slate-300"
-              }`}
-              onClick={() => setAutoAssignEnabled(!autoAssignEnabled)}
-              type="button" // Important: ensures button doesn't submit a form if wrapped in one
-              disabled={isSaving} // Disable the toggle during saving
-            >
-              <span
-                className={`inline-block w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300 ${
-                  autoAssignEnabled ? "translate-x-8" : "translate-x-1"
-                }`}
-              ></span>
-            </button>
-          </label>
-        </div>
-
-        <div className="mb-8">
-          <label className="block text-lg font-medium text-slate-700 mb-3">
-            Exclude Employees
-          </label>
-          <p className="text-sm text-slate-500 mb-4">
-            Selected employees will not receive automatically assigned tasks.
-          </p>
-          <div className="min-h-[150px] max-h-56 overflow-y-auto border border-slate-200 bg-slate-50 p-3 rounded-lg">
-            {isLoadingWebinarData ? ( // Show skeleton while webinar data is loading
-              <EmployeeListSkeleton />
-            ) : assignedEmployees.length > 0 ? (
-              assignedEmployees.map((emp) => (
-                <label
-                  key={emp._id}
-                  className="flex items-center space-x-3 p-2 rounded-md cursor-pointer transition-colors hover:bg-slate-200/70"
-                >
-                  <input
-                    type="checkbox"
-                    checked={blacklistedEmployeeIds.includes(emp._id)}
-                    onChange={() => toggleEmployee(emp._id)}
-                    className="absolute h-0 w-0 appearance-none peer"
-                    disabled={isSaving} // Disable checkboxes during saving
-                  />
-                  <div className="w-5 h-5 border-2 border-slate-400 rounded-sm flex-shrink-0 flex items-center justify-center transition-all peer-checked:bg-indigo-600 peer-checked:border-indigo-600">
-                    <CheckIcon className="w-4 h-4 text-white opacity-0 transition-opacity peer-checked:opacity-100" />
-                  </div>
-                  <span className="text-slate-700 transition-colors peer-checked:text-slate-400 peer-checked:line-through">
-                    {emp.userName}
-                  </span>
-                </label>
-              ))
-            ) : (
-              // Display a message if no eligible employees are found after loading
-              <div className="flex items-center justify-center h-full text-slate-500 p-8">
-                No employees are assigned to this webinar.
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-[550px] p-0 overflow-hidden rounded-2xl shadow-2xl border" style={{ backgroundColor: isDark ? "#1e293b" : "#ffffff", borderColor: shellBorder }}>
+        <div className="flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b flex-shrink-0" style={{ borderColor: shellBorder }}>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-50 dark:bg-blue-500/10 rounded-xl">
+                <Settings2 className="w-5 h-5 text-blue-600 dark:text-blue-400" />
               </div>
-            )}
+              <div>
+                <h3 className="text-lg font-bold" style={{ fontFamily: FONT, color: titleColor }}>
+                  Webinar Settings
+                </h3>
+                <p className="text-xs text-slate-500">Configure auto-assignment and exclusions</p>
+              </div>
+            </div>
+            <button type="button" onClick={onClose} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+
+          {/* Content */}
+          <div className="p-6 space-y-8">
+            {/* Auto Assign Toggle */}
+            <div className="flex items-center justify-between p-4 rounded-2xl border bg-slate-50/50 dark:bg-slate-800/30" style={{ borderColor: shellBorder }}>
+              <div className="flex gap-4 items-center">
+                <div className={cn("p-2 rounded-lg", autoAssignEnabled ? "bg-green-500/10 text-green-500" : "bg-slate-500/10 text-slate-500")}>
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-bold text-slate-900 dark:text-slate-100">Auto Assignment</h4>
+                  <p className="text-xs text-slate-500">Automatically distribute new leads</p>
+                </div>
+              </div>
+              <button
+                className={`relative inline-flex items-center h-7 w-14 rounded-full transition-all duration-300 ${
+                  autoAssignEnabled ? "bg-[#22B573]" : "bg-slate-300 dark:bg-slate-700"
+                }`}
+                onClick={() => setAutoAssignEnabled(!autoAssignEnabled)}
+                disabled={isSaving}
+              >
+                <span className={cn(
+                  "inline-block w-5 h-5 bg-white rounded-full shadow-md transform transition-transform duration-300",
+                  autoAssignEnabled ? "translate-x-8" : "translate-x-1"
+                )} />
+              </button>
+            </div>
+
+            {/* Exclusions */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span style={labelStyle}>Excluded Employees</span>
+                  <p className="text-xs text-slate-500">Selected staff will not receive auto-leads</p>
+                </div>
+                <UserMinus className="w-4 h-4 text-slate-400" />
+              </div>
+
+              <div className="min-h-[200px] max-h-[300px] overflow-y-auto custom-scrollbar border rounded-2xl p-2" style={{ backgroundColor: isDark ? "rgba(0,0,0,0.2)" : "rgba(0,0,0,0.02)", borderColor: shellBorder }}>
+                {isLoadingWebinarData ? (
+                  <EmployeeListSkeleton />
+                ) : assignedEmployees.length > 0 ? (
+                  <div className="grid grid-cols-1 gap-1">
+                    {assignedEmployees.map((emp) => {
+                      const isExcluded = blacklistedEmployeeIds.includes(emp._id);
+                      return (
+                        <button
+                          key={emp._id}
+                          onClick={() => toggleEmployee(emp._id)}
+                          className={cn(
+                            "flex items-center gap-3 p-3 rounded-xl transition-all text-left",
+                            isExcluded ? "bg-red-500/5 text-red-500" : "hover:bg-white dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                          )}
+                          disabled={isSaving}
+                        >
+                          <div className={cn(
+                            "w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all",
+                            isExcluded ? "bg-red-500 border-red-500" : "border-slate-300 dark:border-slate-600"
+                          )}>
+                            {isExcluded && <CheckIcon className="w-3.5 h-3.5 text-white" />}
+                          </div>
+                          <span className={cn("text-sm font-medium", isExcluded && "line-through opacity-70")}>
+                            {emp.userName}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-10 gap-3 text-slate-500">
+                    <AlertCircle className="w-8 h-8 opacity-20" />
+                    <p className="text-sm font-medium">No assigned employees found</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="p-4 border-t flex-shrink-0" style={{ backgroundColor: footerBg, borderColor: shellBorder }}>
+            <div className="flex justify-end gap-2">
+              <Button onClick={onClose} style={cancelBtn} className="rounded-xl h-10 px-6">
+                Cancel
+              </Button>
+              <Button
+                onClick={handleSave}
+                disabled={isSaving || isLoadingWebinarData}
+                style={applyBtn}
+                className="rounded-xl h-10 px-8 font-bold transition-all hover:scale-105"
+              >
+                {isSaving ? "Saving..." : "Save Settings"}
+              </Button>
+            </div>
           </div>
         </div>
-
-        {/* Action Buttons */}
-        <div className="flex justify-end space-x-4">
-          <button
-            className="px-6 py-2.5 rounded-lg font-semibold text-slate-700 bg-white border border-slate-300 hover:bg-slate-50 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-slate-400"
-            onClick={handleClose}
-            type="button"
-            disabled={isSaving} // Disable cancel button while saving
-          >
-            Cancel
-          </button>
-          <button
-            className="px-6 py-2.5 rounded-lg font-semibold text-white bg-indigo-600 hover:bg-indigo-700 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-indigo-500"
-            onClick={handleSave}
-            type="button"
-            disabled={isSaving} // Disable save button while saving
-          >
-            {isSaving ? "Saving..." : "Save Settings"} {/* Change button text based on saving state */}
-          </button>
-        </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

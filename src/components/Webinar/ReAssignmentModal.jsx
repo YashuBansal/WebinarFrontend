@@ -1,13 +1,4 @@
 import React, { useEffect, useState } from "react";
-import {
-  Box,
-  RadioGroup,
-  FormControlLabel,
-  Radio,
-  Button,
-  Checkbox,
-  Modal,
-} from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import {
   changeAssignment,
@@ -20,6 +11,13 @@ import { getAllEmployees } from "../../features/actions/employee";
 import AppLoader from "../AppLoader";
 import { toast } from "sonner";
 import { clearEmployeeData } from "../../features/slices/employee";
+import { Dialog, DialogContent } from "../ui/dialog";
+import { useTheme } from "../../contexts/ThemeContext";
+import { X, UserPlus, AlertCircle, MoveRight } from "lucide-react";
+import { Button } from "../ui/button";
+import { cn } from "../../lib/utils";
+
+const FONT = "Inter, sans-serif";
 
 const ReAssignmentModal = ({
   tabValue,
@@ -30,12 +28,15 @@ const ReAssignmentModal = ({
   setReAssignModal,
 }) => {
   const dispatch = useDispatch();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
   const [assignmentType, setAssignmentType] = useState("temporary");
   const [selectedEmployee, setSelectedEmployee] = useState("");
-
   const [forceAssign, setForceAssign] = useState(false);
   const [moveToPullbacks, setMoveToPullbacks] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
   const {
     reAssignData,
     isSuccess,
@@ -65,7 +66,6 @@ const ReAssignmentModal = ({
           webinarId: webinarid,
           attendees: selectedRows,
         };
-        // Dispatch your specific action for "Move to Pullbacks"
         dispatch(moveAttendeesToPullbacks(payload));
       } else {
         const employee = options.find(
@@ -98,7 +98,6 @@ const ReAssignmentModal = ({
       }
     } else {
       const employee = options.find((item) => item.value === selectedEmployee);
-      console.log("employee ---- > ", employee);
       if (!employee) {
         toast.error("Please select an employee to assign.");
         return;
@@ -144,10 +143,7 @@ const ReAssignmentModal = ({
     dispatch(
       getAllEmployees({ page: 1, limit: 100, filters: { isActive: "active" } })
     );
-
-    return () => {
-      dispatch(clearEmployeeData());
-    };
+    return () => { dispatch(clearEmployeeData()); };
   }, []);
 
   useEffect(() => {
@@ -161,12 +157,7 @@ const ReAssignmentModal = ({
         })
       );
     }
-
-    return () => {
-      if (isSuccess) {
-        dispatch(resetReAssignSuccess());
-      }
-    };
+    return () => { if (isSuccess) { dispatch(resetReAssignSuccess()); } };
   }, [isSuccess]);
 
   useEffect(() => {
@@ -179,102 +170,150 @@ const ReAssignmentModal = ({
     }
   }, [reassignLoading]);
 
+  const shellBorder = isDark ? "#334155" : "#e5e7eb";
+  const titleColor = isDark ? "#f8fafc" : "#0f172a";
+  const footerBg = isDark ? "rgba(15,23,42,0.85)" : "#F9FAFB";
+  const labelStyle = {
+    fontFamily: FONT,
+    fontSize: "10px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+    color: isDark ? "#94a3b8" : "#64748b",
+    marginBottom: "4px",
+    display: "block",
+  };
+
+  const cancelBtn = {
+    backgroundColor: "transparent",
+    border: "none",
+    color: isDark ? "#94a3b8" : "#64748b",
+  };
+  const applyBtn = {
+    backgroundColor: "#22B573",
+    color: "#ffffff",
+    border: "none",
+    boxShadow: "0 4px 10px rgba(34, 181, 115, 0.25)",
+  };
+
   return (
-    <Modal open={true} onClose={handleCancel} disablePortal>
-      <Box
-        className="bg-white rounded-lg shadow-lg p-6 max-w-lg mx-auto mt-20"
-        sx={{ outline: "none" }}
-      >
-        <h2 className="text-lg font-bold mb-4 border-b">Re-Assign Attendee</h2>
-
-        {/* Move to Pullbacks */}
-        {isPullbackVisible && (
-          <div className="mb-4">
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={moveToPullbacks}
-                  onChange={(e) => setMoveToPullbacks(e.target.checked)}
-                />
-              }
-              label="Move to Pullbacks"
-            />
+    <Dialog open={true} onOpenChange={handleCancel}>
+      <DialogContent className="max-w-[550px] p-0 overflow-hidden rounded-2xl shadow-2xl border" style={{ backgroundColor: isDark ? "#1e293b" : "#ffffff", borderColor: shellBorder }}>
+        <div className="flex flex-col">
+          <div className="flex items-center justify-between p-4 border-b flex-shrink-0" style={{ borderColor: shellBorder }}>
+            <h3 className="text-lg font-bold flex items-center gap-2" style={{ fontFamily: FONT, color: titleColor }}>
+              <UserPlus className="w-5 h-5 text-blue-500 shrink-0" />
+              Re-Assign Attendees
+            </h3>
+            <button type="button" onClick={handleCancel} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
           </div>
-        )}
 
-        {/* Assignment Type */}
-        <div className="mb-4">
-          <label className="block font-medium mb-2">
-            Select Assignment Type
-          </label>
-          <RadioGroup
-            value={assignmentType}
-            onChange={(e) => setAssignmentType(e.target.value)}
-            className="flex flex-col space-y-2"
-          >
-            <FormControlLabel
-              value="temporary"
-              control={<Radio />}
-              label="Temporary"
-              disabled={moveToPullbacks}
-            />
-            <FormControlLabel
-              value="permanent"
-              control={<Radio />}
-              label="Permanent"
-              disabled={moveToPullbacks}
-            />
-          </RadioGroup>
-        </div>
+          <div className="p-6 space-y-6 overflow-y-auto custom-scrollbar max-h-[60vh]">
+            <div className="flex items-center justify-between p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
+              <span className="text-xs font-medium text-slate-500">Selected Attendees:</span>
+              <span className="text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-500/10 px-2 py-1 rounded-lg">
+                {selectedRows?.length || 0}
+              </span>
+            </div>
 
-        {/* Employees */}
-        <AssignedEmployeeTable
-          options={options}
-          selectedEmployee={selectedEmployee}
-          setSelectedEmployee={setSelectedEmployee}
-          moveToPullbacks={moveToPullbacks}
-          forceAssign={forceAssign}
-        />
-        <div className="flex items-center mt-2">
-          <label className="inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              value=""
-              className="sr-only peer"
-              checked={forceAssign}
-              onChange={() => setForceAssign(!forceAssign)}
-            />
-            <div className="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all  peer-checked:bg-blue-600"></div>
-            <span className="ms-3 text-sm font-medium text-gray-900">
-              Force Assign
-            </span>
-          </label>
-          {forceAssign && (
-            <span className="text-xs text-orange-500 ml-2">
-              This will bypass daily limit restrictions
-            </span>
-          )}
-        </div>
+            {isPullbackVisible && (
+              <div className="flex items-center justify-between p-4 rounded-xl border border-dashed border-slate-200 dark:border-slate-700">
+                <div className="flex gap-3">
+                  <div className="p-2 bg-orange-500/10 rounded-lg">
+                    <MoveRight className="w-5 h-5 text-orange-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Move to Pullbacks</p>
+                    <p className="text-[10px] text-slate-500">Release these attendees back into the pool</p>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    className="sr-only peer"
+                    checked={moveToPullbacks}
+                    onChange={(e) => setMoveToPullbacks(e.target.checked)}
+                  />
+                  <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                </label>
+              </div>
+            )}
 
-        {/* Actions */}
-        <div className="flex justify-end space-x-2">
-          <Button onClick={handleCancel} variant="outlined" color="secondary">
-            Cancel
-          </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={
-              (!selectedEmployee && !moveToPullbacks) ||
-              isLoading ||
-              reassignLoading
-            }
-            variant="contained"
-          >
-            {reassignLoading ? <AppLoader size="md" variant="inverse" /> : "Assign"}
-          </Button>
+            {!moveToPullbacks && (
+              <>
+                <div>
+                  <span style={labelStyle}>Assignment Type</span>
+                  <div className="grid grid-cols-2 gap-3">
+                    {["temporary", "permanent"].map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => setAssignmentType(type)}
+                        className={cn(
+                          "flex items-center justify-center gap-2 p-3 rounded-xl border transition-all font-bold text-sm capitalize",
+                          assignmentType === type 
+                            ? "border-blue-500 bg-blue-500/5 text-blue-600 dark:text-blue-400" 
+                            : "border-slate-200 dark:border-slate-700 text-slate-500 hover:bg-slate-50 dark:hover:bg-white/5"
+                        )}
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <AssignedEmployeeTable
+                  options={options}
+                  selectedEmployee={selectedEmployee}
+                  setSelectedEmployee={setSelectedEmployee}
+                  moveToPullbacks={moveToPullbacks}
+                  isLabel={true}
+                  forceAssign={forceAssign}
+                />
+
+                <div className="flex items-center justify-between p-4 rounded-xl bg-orange-500/5 border border-orange-500/20">
+                  <div className="flex gap-3">
+                    <div className="p-2 bg-orange-500/10 rounded-lg">
+                      <AlertCircle className="w-5 h-5 text-orange-500" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-slate-700 dark:text-slate-200">Force Assign</p>
+                      <p className="text-[10px] text-slate-500">Bypass employee daily limit restrictions</p>
+                    </div>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input
+                      type="checkbox"
+                      className="sr-only peer"
+                      checked={forceAssign}
+                      onChange={() => setForceAssign(!forceAssign)}
+                    />
+                    <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+                  </label>
+                </div>
+              </>
+            )}
+          </div>
+
+          <div className="p-4 border-t flex-shrink-0" style={{ backgroundColor: footerBg, borderColor: shellBorder }}>
+            <div className="flex gap-3">
+              <Button onClick={handleCancel} style={cancelBtn} className="flex-1 rounded-xl h-11">
+                Cancel
+              </Button>
+              <Button
+                disabled={(!selectedEmployee && !moveToPullbacks) || isLoading || reassignLoading}
+                onClick={handleSubmit}
+                style={applyBtn}
+                className="flex-1 rounded-xl h-11 font-bold transition-all hover:scale-105"
+              >
+                {reassignLoading ? <AppLoader size="sm" variant="inverse" /> : "Confirm Assignment"}
+              </Button>
+            </div>
+          </div>
         </div>
-      </Box>
-    </Modal>
+      </DialogContent>
+    </Dialog>
   );
 };
 

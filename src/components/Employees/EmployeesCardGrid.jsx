@@ -11,6 +11,8 @@ import {
   Power,
   TrendingUp,
   Table2,
+  Search,
+  Bookmark,
 } from "lucide-react";
 import AppLoader from "../AppLoader";
 import { Button } from "../ui/button";
@@ -54,6 +56,9 @@ export default function EmployeesCardGrid({
   onDashboard,
   onEdit,
   onToggleStatus,
+  searchQuery,
+  setSearchQuery,
+  onOpenPresets,
 }) {
   const [selectedIds, setSelectedIds] = useState(() => new Set());
 
@@ -117,11 +122,20 @@ export default function EmployeesCardGrid({
           className="p-4 border-b flex flex-col sm:flex-row items-center justify-between gap-4"
           style={{ borderColor: isDark ? "#334155" : "rgba(0,0,0,0.05)" }}
         >
-          <div
-            className="text-sm font-medium"
-            style={{ color: isDark ? "#94a3b8" : "#64748b" }}
-          >
-            Employee roster
+          <div className="relative w-full sm:w-64">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search employees..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-9 pr-4 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 transition-all"
+              style={{
+                backgroundColor: isDark ? "rgba(15, 23, 42, 0.5)" : "#ffffff",
+                border: `1px solid ${isDark ? "#334155" : "#e2e8f0"}`,
+                color: isDark ? "#f8fafc" : "#0f172a",
+              }}
+            />
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {!isLoading && rows.length > 0 && (
@@ -154,10 +168,10 @@ export default function EmployeesCardGrid({
                 color: isDark ? "#f8fafc" : "#071028",
                 border: `1px solid ${isDark ? "#334155" : "#e2e8eb"}`,
               }}
-              onClick={onOpenExport}
+              onClick={onOpenPresets}
             >
-              <Download className="w-4 h-4 text-gray-500" />
-              <span className="hidden sm:inline">Export</span>
+              <Bookmark className="w-4 h-4 text-gray-500" />
+              Presets
             </Button>
             <Button
               type="button"

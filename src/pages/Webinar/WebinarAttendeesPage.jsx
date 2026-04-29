@@ -20,6 +20,7 @@ import {
 } from "../../features/actions/attendees";
 import { attendeeTableColumns } from "../../utils/columnData";
 import { DynamicLeadsTable } from "../../components/Webinar/DynamicLeadsTable";
+import WebinarAttendeesTableShell from "../../components/Attendees/WebinarAttendeesTableShell";
 import { setPageLimit } from "../../features/slices/pageLimits";
 
 const AttendeesFilterModal = lazy(
@@ -65,6 +66,7 @@ import {
   ChevronRight,
   ArrowUpDown,
   Upload,
+  Tag,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
@@ -151,7 +153,7 @@ const WebinarAttendeesPage = (props) => {
     () => [
       {
         key: "serialNo",
-        label: "Sr No",
+        label: "S.No",
         dataKey: "serialNo",
         widthKey: "serialNo",
         sortable: false,
@@ -424,15 +426,27 @@ const WebinarAttendeesPage = (props) => {
   };
 
   const handleSort = (column) => {
-    const isAsc =
-      sortByOption?.sortBy === column && sortByOption?.sortOrder === "asc";
-    const newSortOrder = isAsc ? "desc" : "asc";
+    const currentSortBy = sortByOption?.sortBy;
+    const currentSortOrder = sortByOption?.sortOrder;
+
+    let newSortBy = column;
+    let newSortOrder = "desc";
+
+    if (currentSortBy === column) {
+      if (currentSortOrder === "desc") {
+        newSortOrder = "asc";
+      } else {
+        // Third click: clear sorting
+        newSortBy = "";
+        newSortOrder = "";
+      }
+    }
 
     dispatch(
       setWebinarAttendeesFilters({
         recordType: tabValue,
         sortBy: {
-          sortBy: column,
+          sortBy: newSortBy,
           sortOrder: newSortOrder,
         },
       }),
@@ -473,451 +487,179 @@ const WebinarAttendeesPage = (props) => {
   return (
     <div className="space-y-4">
       {/* Table Container Card */}
-      <div
-        className={`rounded-2xl overflow-hidden border flex flex-col transition-all duration-300 ${isFullScreen ? "fixed inset-0 z-[100] rounded-none bg-white" : ""}`}
-        style={{
-          background: cardBg,
-          backdropFilter: "blur(16px)",
-          borderColor: cardBorder,
-          boxShadow: "0 10px 40px rgba(7,16,40,0.05)",
-          minHeight: isFullScreen ? "100vh" : "600px",
-        }}
+      <WebinarAttendeesTableShell
+        theme={theme}
+        isDark={theme === "dark"}
+        tabValue={tabValue}
+        total={total}
+        selectedActivity={selectedActivity}
+        setSelectedActivity={setSelectedActivity}
+        selectedAssignmentType={selectedAssignmentType}
+        setSelectedAssignmentType={setSelectedAssignmentType}
+        isFullScreen={isFullScreen}
+        setIsFullScreen={setIsFullScreen}
+        onOpenFilters={() =>
+          dispatch({
+            type: "modals/openModal",
+            payload: AttendeesFilterModalName,
+          })
+        }
+        onOpenExport={() =>
+          dispatch({
+            type: "modals/openModal",
+            payload: exportExcelModalName,
+          })
+        }
+        setApplyTagsModalOpen={setApplyTagsModalOpen}
+        page={page}
+        setPage={setPage}
+        totalPages={totalPages}
+        limit={LIMIT}
+        tableHeader={tableHeader}
       >
-        {/* Controls Bar */}
-        <div
-          className="p-4 border-b flex flex-col sm:flex-row items-center justify-between gap-4"
-          style={{ borderColor: dividerColor }}
-        >
-          <div className="flex flex-col">
-            <h3 className="text-lg font-bold" style={{ color: textPrimary }}>
-              {tabValue === "preWebinar" ? "Reminder Leads" : "Sales Leads"}
-            </h3>
-            <p className="text-xs mt-0.5" style={{ color: textMuted }}>
-              Total Records:{" "}
-              <span style={{ color: "#3b82f6", fontWeight: 700 }}>{total}</span>
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setIsFullScreen(!isFullScreen)}
-              className="p-2.5 rounded-xl border hover:bg-black/5 transition-colors"
-              style={inputStyle}
-            >
-              {isFullScreen ? (
-                <Minimize className="w-4 h-4" />
-              ) : (
-                <Maximize className="w-4 h-4" />
-              )}
-            </button>
-            <button
-              onClick={() => { }}
-              className="p-2.5 rounded-xl border hover:bg-black/5 transition-colors"
-              style={inputStyle}
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
-            <button
-              onClick={() => { }}
-              className="p-2.5 rounded-xl border hover:bg-black/5 transition-colors"
-              style={inputStyle}
-            >
-              <Settings2 className="w-4 h-4" />
-            </button>
-          </div>
-        </div>
-
-        {/* Filter Bar */}
-        <div
-          className="p-4 border-b flex items-center justify-between gap-4 flex-wrap"
-          style={{ borderColor: dividerColor }}
-        >
-          <div className="flex items-center gap-3">
-            <div className="flex flex-col gap-1">
-              <label style={labelStyle}>Activity</label>
-              <select
-                className="px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 cursor-pointer appearance-none"
-                style={inputStyle}
-                value={selectedActivity}
-                onChange={(e) => {
-                  setSelectedActivity(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="All">All</option>
-                <option value="Worked">Worked</option>
-                <option value="Pending">Pending</option>
-              </select>
-            </div>
-            <div className="flex flex-col gap-1">
-              <label style={labelStyle}>Assignment</label>
-              <select
-                className="px-3 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 cursor-pointer appearance-none"
-                style={inputStyle}
-                value={selectedAssignmentType}
-                onChange={(e) => {
-                  setSelectedAssignmentType(e.target.value);
-                  setPage(1);
-                }}
-              >
-                <option value="All">All</option>
-                <option value="Assigned">Assigned</option>
-                <option value="Not Assigned">Not Assigned</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() =>
-                dispatch({
-                  type: "modals/openModal",
-                  payload: AttendeesFilterModalName,
-                })
-              }
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border hover:bg-black/5 transition-colors text-sm font-semibold"
-              style={inputStyle}
-            >
-              <Filter className="w-4 h-4" /> Filters
-            </button>
-            <button
-              onClick={() =>
-                dispatch({
-                  type: "modals/openModal",
-                  payload: exportExcelModalName,
-                })
-              }
-              className="flex items-center gap-2 px-4 py-2 rounded-xl border hover:bg-black/5 transition-colors text-sm font-semibold"
-              style={inputStyle}
-            >
-              <Upload className="w-4 h-4" /> Export
-            </button>
-          </div>
-        </div>
-
-        {/* Table Area */}
-        <div className="flex-1 overflow-auto custom-scrollbar relative">
-          <table className="w-full text-left border-collapse" style={{ minWidth: "2000px" }}>
-            <DynamicLeadsTable
-              columns={ALL_COLUMNS.map((col) => ({
-                ...col,
-                onViewClick: (item) =>
-                  navigate(
-                    `/particularContact?email=${item?.email}&attendeeId=${item?._id}`,
-                  ),
-                onDeleteClick: (item) => setDeleteModal(item),
-              }))}
-              selectedRows={selectedRows}
-              onToggleSelect={(id) => {
-                setSelectedRows(prev => {
-                  if (prev.includes(id)) return prev.filter(rowId => rowId !== id);
-                  return [...prev, id];
-                });
-              }}
-              onToggleSelectAll={(checked, allIds) => {
-                if (checked) setSelectedRows(allIds);
-                else setSelectedRows([]);
-              }}
-              attendees={attendeeData}
-              columnWidths={columnWidths}
-              columnVisibility={columnVisibility}
-              sortColumn={sortByOption?.sortBy}
-              sortDirection={sortByOption?.sortOrder}
-              resizingColumn={null}
-              theme={theme}
-              indexOfFirstItem={indexOfFirstItem}
-              sortedAttendees={attendeeData}
-              onSort={handleSort}
-              onResizeStart={() => { }}
-              onResizeDoubleClick={() => { }}
-              onDeleteClick={() => { }}
-            />
-          </table>
-          {isLoading && (
-            <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] flex items-center justify-center z-50">
-              <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          )}
-        </div>
-
-        {/* Pagination Footer */}
-        <div
-          className="p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 flex-shrink-0"
-          style={{
-            borderColor: dividerColor,
-            backgroundColor:
-              theme === "dark" ? "rgba(15,23,42,0.4)" : "#F9FAFB",
+        <DynamicLeadsTable
+          columns={ALL_COLUMNS.map((col) => ({
+            ...col,
+            onViewClick: (item) =>
+              navigate(
+                `/particularContact?email=${item?.email}&attendeeId=${item?._id}`,
+              ),
+            onDeleteClick: (item) => setDeleteModal(item),
+          }))}
+          selectedRows={selectedRows}
+          onToggleSelect={(id) => {
+            setSelectedRows(prev => {
+              if (prev.includes(id)) return prev.filter(rowId => rowId !== id);
+              return [...prev, id];
+            });
           }}
-        >
-          <div className="flex items-center gap-4">
-            <span className="text-sm" style={{ color: textMuted }}>
-              Showing{" "}
-              <span className="font-bold" style={{ color: textPrimary }}>
-                {total > 0 ? indexOfFirstItem + 1 : 0}
-              </span>{" "}
-              to{" "}
-              <span className="font-bold" style={{ color: textPrimary }}>
-                {indexOfLastItem}
-              </span>{" "}
-              of{" "}
-              <span className="font-bold" style={{ color: textPrimary }}>
-                {total}
-              </span>{" "}
-              entries
-            </span>
-            <div className="flex items-center gap-2">
-              <span className="text-sm" style={{ color: textMuted }}>
-                Show:
-              </span>
-              <input
-                type="number"
-                value={LIMIT}
-                onChange={(e) => {
-                  const val = parseInt(e.target.value);
-                  if (val > 0)
-                    dispatch(setPageLimit({ key: tableHeader, limit: val }));
-                }}
-                className="w-16 px-2 py-1.5 rounded-xl text-sm text-center border focus:outline-none focus:ring-2 focus:ring-blue-500/30"
-                style={inputStyle}
-              />
-            </div>
+          onToggleSelectAll={(checked, allIds) => {
+            if (checked) setSelectedRows(allIds);
+            else setSelectedRows([]);
+          }}
+          attendees={attendeeData}
+          columnWidths={columnWidths}
+          columnVisibility={columnVisibility}
+          sortColumn={sortByOption?.sortBy}
+          sortDirection={sortByOption?.sortOrder}
+          resizingColumn={null}
+          theme={theme}
+          indexOfFirstItem={indexOfFirstItem}
+          sortedAttendees={attendeeData}
+          onSort={handleSort}
+          onResizeStart={() => { }}
+          onResizeDoubleClick={() => { }}
+          onDeleteClick={() => { }}
+        />
+        {isLoading && (
+          <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] flex items-center justify-center z-50">
+            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
-
-          <div className="flex gap-2">
-            <button
-              disabled={page === 1}
-              onClick={() => setPage(page - 1)}
-              className="px-4 py-2 rounded-xl border text-sm font-semibold transition-all disabled:opacity-50 hover:bg-black/5"
-              style={inputStyle}
-            >
-              Previous
-            </button>
-            <button
-              disabled={page === totalPages || totalPages === 0}
-              onClick={() => setPage(page + 1)}
-              className="px-4 py-2 rounded-xl border text-sm font-semibold transition-all disabled:opacity-50 hover:bg-black/5"
-              style={inputStyle}
-            >
-              Next
-            </button>
-          </div>
-        </div>
-      </div>
+        )}
+      </WebinarAttendeesTableShell>
 
       {/* Modals */}
-      <AnimatePresence>
-        {AttendeesFilterModalOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() =>
-                dispatch({
-                  type: "modals/closeModal",
-                  payload: AttendeesFilterModalName,
-                })
-              }
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 16 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 16 }}
-              className="relative z-10 w-full max-w-4xl"
-            >
-              <Suspense fallback={<ModalFallback />}>
-                <AttendeesFilterModal
-                  modalName={AttendeesFilterModalName}
-                  setPage={setPage}
-                  tabValue={tabValue}
-                  notAllowed={notAllowedFields}
-                  handleCopy={() => { }}
-                />
-              </Suspense>
-            </motion.div>
-          </div>
-        )}
+      {AttendeesFilterModalOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <AttendeesFilterModal
+            modalName={AttendeesFilterModalName}
+            setPage={setPage}
+            tabValue={tabValue}
+            notAllowed={notAllowedFields}
+            handleCopy={() => {}}
+          />
+        </Suspense>
+      )}
 
-        {exportModalOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() =>
-                dispatch({
-                  type: "modals/closeModal",
-                  payload: exportExcelModalName,
-                })
-              }
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 16 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 16 }}
-              className="relative z-10 w-full max-w-2xl"
-            >
-              <Suspense fallback={<ModalFallback />}>
-                <ExportWebinarAttendeesModal
-                  modalName={exportExcelModalName}
-                  filters={webinarAttendeesFilters}
-                  sort={sortByOption}
-                  webinarId={id}
-                  webinarName={webinarName}
-                  isAttended={tabValue === "postWebinar"}
-                  validCall={
-                    selectedActivity === "All" ? undefined : selectedActivity
-                  }
-                  assignmentType={
-                    selectedAssignmentType === "All"
-                      ? undefined
-                      : selectedAssignmentType
-                  }
-                />
-              </Suspense>
-            </motion.div>
-          </div>
-        )}
+      {exportModalOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <ExportWebinarAttendeesModal
+            modalName={exportExcelModalName}
+            filters={webinarAttendeesFilters}
+            isAttended={tabValue === "postWebinar"}
+            webinarId={id}
+            webinarName={webinarName}
+            sort={sortByOption}
+            validCall={selectedActivity === "All" ? undefined : selectedActivity}
+            assignmentType={selectedAssignmentType === "All" ? undefined : selectedAssignmentType}
+          />
+        </Suspense>
+      )}
 
-        {isSwapOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setSwapOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 16 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 16 }}
-              className="relative z-10 w-full max-w-lg"
-            >
-              <Suspense fallback={<ModalFallback />}>
-                <SwapAttendeeFieldsModal
-                  onClose={() => setSwapOpen(false)}
-                  onSubmit={handleColumnSwap}
-                />
-              </Suspense>
-            </motion.div>
-          </div>
-        )}
+      {isSwapOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <SwapAttendeeFieldsModal
+            onClose={() => setSwapOpen(false)}
+            attendees={selectedRows}
+            total={total}
+            onSubmit={(field1, field2, attendees) => {
+              dispatch(
+                swapAttendeeFields({
+                  webinarId: id,
+                  field1,
+                  field2,
+                  attendees,
+                  filters: webinarAttendeesFilters || {},
+                  isAttended: tabValue === "preWebinar" ? false : true,
+                }),
+              );
+            }}
+          />
+        </Suspense>
+      )}
 
-        {deleteModal && (
-          <div className="fixed inset-0 z-[300] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setDeleteModal(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 16 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 16 }}
-              className="relative z-10 w-full max-w-sm"
-            >
-              <Suspense fallback={<ModalFallback />}>
-                <ConfirmDeleteModal
-                  setModal={setDeleteModal}
-                  triggerDelete={() =>
-                    dispatch(
-                      deleteWebinarAttendees({
-                        attendees: [deleteModal?._id],
-                        webinarId: id,
-                      }),
-                    )
-                  }
-                  isLoading={isDeleting}
-                />
-              </Suspense>
-            </motion.div>
-          </div>
-        )}
+      {applyTagsModalOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <ApplyTagsModal
+            onClose={() => setApplyTagsModalOpen(false)}
+            onSubmit={async (tag) => {
+              await bulkApplyTags({
+                webinarId: id,
+                tag,
+                isAttended: tabValue === "preWebinar" ? false : true,
+                filters: webinarAttendeesFilters,
+              });
+            }}
+            isLoading={isApplyingTags}
+          />
+        </Suspense>
+      )}
 
-        {applyTagsModalOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setApplyTagsModalOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 16 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 16 }}
-              className="relative z-10 w-full max-w-md"
-            >
-              <Suspense fallback={<ModalFallback />}>
-                <ApplyTagsModal
-                  onClose={() => setApplyTagsModalOpen(false)}
-                  onSubmit={(tag) =>
-                    applyTagsByFilters({
-                      webinarId: id,
-                      isAttended: tabValue === "postWebinar",
-                      filters: webinarAttendeesFilters,
-                      validCall:
-                        selectedActivity === "All"
-                          ? undefined
-                          : selectedActivity,
-                      assignmentType:
-                        selectedAssignmentType === "All"
-                          ? undefined
-                          : selectedAssignmentType,
-                      tag,
-                    })
-                  }
-                  isLoading={isApplyingTags}
-                />
-              </Suspense>
-            </motion.div>
-          </div>
-        )}
+      {bulkEnrollOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <BulkEnrollmentModal
+            onClose={() => setBulkEnrollOpen(false)}
+            webinarId={id}
+            isAttended={tabValue === "preWebinar" ? false : true}
+            selectedRows={selectedRows}
+            total={total}
+            filters={webinarAttendeesFilters}
+            onSuccess={() => {
+              setBulkEnrollOpen(false);
+              setSelectedRows([]);
+            }}
+          />
+        </Suspense>
+      )}
 
-        {bulkEnrollOpen && (
-          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-              onClick={() => setBulkEnrollOpen(false)}
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 16 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 16 }}
-              className="relative z-10 w-full max-w-4xl"
-            >
-              <Suspense fallback={<ModalFallback />}>
-                <BulkEnrollmentModal
-                  onClose={() => setBulkEnrollOpen(false)}
-                  webinarId={id}
-                  isAttended={tabValue === "postWebinar"}
-                  selectedRows={selectedRows}
-                  total={total}
-                  filters={webinarAttendeesFilters}
-                  validCall={
-                    selectedActivity === "All" ? undefined : selectedActivity
-                  }
-                  assignmentType={
-                    selectedAssignmentType === "All"
-                      ? undefined
-                      : selectedAssignmentType
-                  }
-                  onSuccess={() => fetchAttendees(1)}
-                />
-              </Suspense>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+      {deleteModal && (
+        <Suspense fallback={<ModalFallback />}>
+          <ConfirmDeleteModal
+            setModal={setDeleteModal}
+            triggerDelete={() => {
+              dispatch(
+                deleteWebinarAttendees({
+                  webinarId: id,
+                  attendees: selectedRows,
+                  isAttended: tabValue === "preWebinar" ? false : true,
+                  filters: webinarAttendeesFilters,
+                }),
+              );
+            }}
+            isLoading={isDeleting}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

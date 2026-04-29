@@ -4,7 +4,7 @@ import { format } from 'date-fns';
 import { formatDateAsNumber } from '../../utils/extra';
 import { motion } from 'framer-motion';
 import { Checkbox } from '../ui/checkbox';
-import { Button } from '@mui/material';
+import { Button } from '../ui/button';
 
 export const DynamicLeadsTable = ({
   columns,
@@ -47,25 +47,25 @@ export const DynamicLeadsTable = ({
         return (
           <div className="flex items-center justify-center gap-1">
             <Button
-              variant="text"
-              size="small"
+              variant="ghost"
+              size="icon"
               onClick={(e) => {
                 e.stopPropagation();
                 if (col.onViewClick) col.onViewClick(item);
               }}
-              className="!min-w-0 !p-2"
+              className="h-8 w-8 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-500/10"
               title="View Contact"
             >
               <Eye className="w-4 h-4 text-purple-500" />
             </Button>
             <Button
-              variant="text"
-              size="small"
+              variant="ghost"
+              size="icon"
               onClick={(e) => {
                 e.stopPropagation();
                 if (col.onDeleteClick) col.onDeleteClick(item);
               }}
-              className="!min-w-0 !p-2"
+              className="h-8 w-8 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10"
               title="Delete Contact"
             >
               <Trash2 className="w-4 h-4 text-red-500" />
