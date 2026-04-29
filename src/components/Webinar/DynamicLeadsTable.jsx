@@ -23,6 +23,7 @@ export const DynamicLeadsTable = ({
   selectedRows = [],
   onToggleSelect,
   onToggleSelectAll,
+  isLoading,
 }) => {
   const isDark = theme === 'dark';
   const textPrimary = isDark ? '#f8fafc' : '#071028';
@@ -82,13 +83,19 @@ export const DynamicLeadsTable = ({
       case 'assignedTo':
         return item.isAssigned ? (item.assignedEmployee?.name || 'Assigned') : 'Not Assigned';
       case 'tags':
+        if (!item.tags || item.tags.length === 0) return '-';
         return (
-          <div className="flex flex-wrap gap-1">
-            {item.tags && item.tags.length > 0 ? item.tags.map((tag, i) => (
-              <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-[10px] font-medium rounded-md whitespace-nowrap">
+          <div className="flex items-center gap-1 whitespace-nowrap">
+            {item.tags.slice(0, 2).map((tag, i) => (
+              <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-[10px] font-medium rounded-md truncate max-w-[80px]">
                 {tag.name || tag}
               </span>
-            )) : '-'}
+            ))}
+            {item.tags.length > 2 && (
+              <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md shrink-0">
+                +{item.tags.length - 2}
+              </span>
+            )}
           </div>
         );
       case 'pastWebinarDuration':
@@ -96,6 +103,15 @@ export const DynamicLeadsTable = ({
       case 'registeredWebinars':
       case 'attendedWebinars':
         return item[col.dataKey] || 0;
+      case 'enrollments':
+        const enrollmentVal = item[col.dataKey];
+        if (!enrollmentVal) return '-';
+        if (Array.isArray(enrollmentVal)) {
+          if (enrollmentVal.length === 0) return '-';
+          const names = enrollmentVal.map(e => e.name || e).join(', ');
+          return <div className="whitespace-nowrap overflow-hidden truncate max-w-[200px]" title={names}>{names}</div>;
+        }
+        return <div className="whitespace-nowrap">{String(enrollmentVal)}</div>;
       default:
         const val = item[col.dataKey];
         return val !== undefined && val !== null ? String(val) : '-';
@@ -131,17 +147,17 @@ export const DynamicLeadsTable = ({
             return (
               <th
                 key={col.key}
-                className={`p-4 font-semibold text-xs uppercase tracking-wider text-gray-500 hover:bg-black/5 transition-colors select-none group relative ${
+                className={`font-semibold text-xs uppercase tracking-wider text-gray-500 hover:bg-black/5 transition-colors select-none group relative ${
                   isActions ? 'text-center sticky right-0 z-30' : 'text-left'
-                }`}
+                } ${col.sortable ? 'cursor-pointer' : ''}`}
                 style={{
                   width: columnWidths[col.widthKey],
                   backgroundColor: isActions ? (isDark ? '#1e293b' : '#F9FAFB') : undefined,
                 }}
+                onClick={() => col.sortable && onSort(col.key)}
               >
                 <div
-                  className={`flex items-center ${isActions ? 'justify-center' : 'gap-2'} ${col.sortable ? 'cursor-pointer' : ''}`}
-                  onClick={() => col.sortable && onSort(col.key)}
+                  className={`p-4 flex items-center ${isActions ? 'justify-center' : 'gap-2'}`}
                 >
                   {col.label}
                   {col.sortable && (
@@ -171,7 +187,19 @@ export const DynamicLeadsTable = ({
         </tr>
       </thead>
       <tbody>
-        {sortedAttendees && sortedAttendees.length > 0 ? (
+        {isLoading && (!sortedAttendees || sortedAttendees.length === 0) ? (
+          <tr>
+            <td
+              colSpan={visibleColumns.length + 1}
+              className="px-6 py-20 text-center"
+            >
+              <div className="flex flex-col items-center gap-3">
+                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-sm font-medium text-gray-400">Loading attendees...</p>
+              </div>
+            </td>
+          </tr>
+        ) : sortedAttendees && sortedAttendees.length > 0 ? (
           sortedAttendees.map((item, index) => {
             const rowId = item._id;
             const isSelected = Boolean(rowId && selectedIds.has(rowId));

@@ -163,7 +163,7 @@ const WebinarAttendees = () => {
     <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 space-y-6 font-sans">
       {/* Glassmorphic Header Card */}
       <div
-        className="rounded-3xl p-6 border transition-all duration-300"
+        className="rounded-2xl p-6 border transition-all duration-300"
         style={{
           background: cardBg,
           backdropFilter: 'blur(20px)',
@@ -270,7 +270,7 @@ const WebinarAttendees = () => {
                 </button>
                 <button
                   onClick={() => setBulkEnrollOpen(true)}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-bold hover:bg-blue-700 transition-all shadow-md shadow-blue-200"
+                  className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
                 >
                   Create Enrollments
                 </button>
@@ -353,38 +353,38 @@ const WebinarAttendees = () => {
       {/* Modal Portals */}
       <Suspense fallback={<ModalFallback />}>
         {reAssignModal && (
-          <ReAssignmentModal 
-            selectedRows={selectedRows} 
-            webinarid={id} 
-            tabValue={tabValueRef.current} 
-            isPullbackVisible={tabValueRef.current !== "enrollments" && subTabValueRef.current === "attendees"} 
-            isAttendee={true} 
-            setReAssignModal={setReAssignModal} 
+          <ReAssignmentModal
+            selectedRows={selectedRows}
+            webinarid={id}
+            tabValue={tabValueRef.current}
+            isPullbackVisible={tabValueRef.current !== "enrollments" && subTabValueRef.current === "attendees"}
+            isAttendee={true}
+            setReAssignModal={setReAssignModal}
           />
         )}
 
         {assignModal && (
-          <EmployeeAssignModal 
-            tabValue={tabValueRef.current} 
-            selectedRows={selectedRows} 
-            setAssignModal={setAssignModal} 
-            webinarId={id} 
+          <EmployeeAssignModal
+            tabValue={tabValueRef.current}
+            selectedRows={selectedRows}
+            setAssignModal={setAssignModal}
+            webinarId={id}
           />
         )}
 
         {showModal && (
-          <UpdateCsvXslxModal 
-            tabValue={tabValueRef.current} 
-            setModal={setShowModal} 
+          <UpdateCsvXslxModal
+            tabValue={tabValueRef.current}
+            setModal={setShowModal}
           />
         )}
 
         {webhookDialogOpen && (
-          <WebinarWebhooksListDialog 
-            webinarId={id} 
-            isOpen={webhookDialogOpen} 
-            onClose={() => setWebhookDialogOpen(false)} 
-            onRefresh={fetchWebinarData} 
+          <WebinarWebhooksListDialog
+            webinarId={id}
+            isOpen={webhookDialogOpen}
+            onClose={() => setWebhookDialogOpen(false)}
+            onRefresh={fetchWebinarData}
           />
         )}
       </Suspense>

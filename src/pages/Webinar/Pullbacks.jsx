@@ -48,6 +48,12 @@ const Pullbacks = (props) => {
 
   const portalTarget = typeof document !== "undefined" ? document.body : null;
 
+  const inputStyle = {
+    backgroundColor: isDark ? "#0f172a" : "#ffffff",
+    border: `1px solid ${isDark ? "#334155" : "rgba(0,0,0,0.1)"}`,
+    color: isDark ? "#f8fafc" : "#0f172a",
+  };
+
   useEffect(() => {
     function fetchData() {
       dispatch(
@@ -133,7 +139,7 @@ const Pullbacks = (props) => {
   const TableUI = (
     <motion.div
       className={cn(
-        "rounded-[2rem] overflow-hidden border flex flex-col transition-all duration-500 ease-in-out shadow-2xl shadow-slate-900/10",
+        "rounded-2xl overflow-hidden border flex flex-col transition-all duration-500 ease-in-out shadow-2xl shadow-slate-900/10",
         isFullScreen ? "flex-1 h-full" : ""
       )}
       initial={{ opacity: 0, scale: 0.98, y: 20 }}
@@ -162,17 +168,19 @@ const Pullbacks = (props) => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 w-full xl:w-auto justify-end">
-            <div className={cn("flex items-center gap-1.5 p-1 rounded-xl border", isDark ? "bg-slate-900 border-slate-800" : "bg-slate-100 border-slate-200")}>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsFullScreen(!isFullScreen)}
-                className={cn("h-8 w-8 rounded-lg transition-all", isDark ? "hover:bg-slate-800 text-slate-500" : "hover:bg-white text-slate-500")}
-                title={isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
-              >
-                {isFullScreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-              </Button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setIsFullScreen(!isFullScreen)}
+              className="rounded-xl flex items-center justify-center p-2.5 flex-shrink-0 hover:bg-black/5 transition-all"
+              style={inputStyle}
+              title={isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
+            >
+              {isFullScreen ? (
+                <Minimize className="w-4 h-4 text-gray-500" />
+              ) : (
+                <Maximize className="w-4 h-4 text-gray-500" />
+              )}
+            </button>
           </div>
         </div>
       </div>

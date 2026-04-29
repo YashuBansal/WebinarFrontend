@@ -45,7 +45,7 @@ const CellRenderer = memo(
         return (
           <div
             title={sortedTags.join(", ")}
-            className="flex  gap-1 md:flex-nowrap flex-wrap"
+            className="flex items-center gap-1 flex-nowrap overflow-hidden"
           >
             {sortedTags.slice(0, 2).map((tag, idx) => (
               <span
@@ -76,7 +76,7 @@ const CellRenderer = memo(
         return (
           <div
             title={filteredChips.join(", ")}
-            className="flex gap-1 md:flex-nowrap flex-wrap"
+            className="flex items-center gap-1 flex-nowrap overflow-hidden"
           >
             {filteredChips.slice(0, 2).map((chip, idx) => (
               <span

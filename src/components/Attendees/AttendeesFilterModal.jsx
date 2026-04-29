@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useState, useMemo, useCallback } from "react";
+import React, { memo, useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { X, Filter, CalendarDays, ChevronDown, RotateCcw, Save, Copy } from "lucide-react";
 import { useForm, Controller } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
@@ -29,6 +29,8 @@ import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { useTheme } from "../../contexts/ThemeContext";
+
+import AttendeeConditionalLogicPanel from "../Filter/AttendeeConditionalLogicPanel";
 
 const FONT = "Inter, sans-serif";
 
@@ -61,13 +63,17 @@ const AttendeesFilterModal = ({
   const pickerDateFormat = userData?.dateFormat || DateFormat.MM_DD_YYYY;
 
   const { customOptionsForFilters } = useSelector((state) => state.globalData);
-  const { control, handleSubmit, reset, watch } = useForm();
+  const { control, handleSubmit, reset, watch, setValue, getValues } = useForm();
   const {
     webinarAttendeesFilters,
     webinarAttendeesSortBy,
     salesAttendeesSortBy,
   } = useSelector((state) => state.filters);
   const { productDropdownData } = useSelector((state) => state.product);
+
+  const [filterTab, setFilterTab] = useState("simple");
+  const [conditionalMeta, setConditionalMeta] = useState({ hasOr: false });
+  const conditionalSanitizeRef = useRef((d) => d);
 
   const sortByOption =
     tabValue === "preWebinar"
@@ -99,6 +105,12 @@ const AttendeesFilterModal = ({
         label: item?.userName,
       })), [assignedEmployees, selectedType]
   );
+
+  const handleConditionalChainMeta = useCallback((meta) => {
+    setConditionalMeta({
+      hasOr: Boolean(meta?.hasOr),
+    });
+  }, []);
 
   const isFilterEnabled = useCallback(
     (key) => !notAllowed.includes(key) && tableConfig?.[key]?.filterable !== false,
@@ -166,7 +178,17 @@ const AttendeesFilterModal = ({
   );
 
   const onSubmit = (data) => {
-    const filterData = filterTruthyValues(data);
+    if (filterTab === "advanced") {
+      if (conditionalMeta.hasOr) {
+        toast.message(
+          "OR between conditions is not supported by the API yet; filters were applied as AND."
+        );
+      }
+    }
+
+    const payload = filterTab === "advanced" ? conditionalSanitizeRef.current(data) : data;
+    const filterData = filterTruthyValues(payload);
+
     if (Object.keys(filterData).length) {
       successToast("Filters Applied");
     }
@@ -203,6 +225,7 @@ const AttendeesFilterModal = ({
 
   const resetForm = (e) => {
     e.preventDefault();
+    setFilterTab("simple");
     reset({
       email: "",
       firstName: "",
@@ -220,6 +243,9 @@ const AttendeesFilterModal = ({
       tags: [],
       enrollments: [],
       lastAssignedTo: "",
+      status: "",
+      source: "",
+      leadType: "",
     });
   };
 
@@ -299,170 +325,338 @@ const AttendeesFilterModal = ({
             </button>
           </div>
 
+          {/* Tabs */}
+          <div className="flex gap-2 px-4 pt-2 border-b flex-shrink-0" style={{ borderColor: shellBorder }}>
+            <button
+              type="button"
+              onClick={() => setFilterTab("simple")}
+              className="px-4 py-2 transition-all duration-300 relative"
+              style={{
+                fontFamily: FONT,
+                fontSize: "13px",
+                fontWeight: 600,
+                color: filterTab === "simple" ? "#22B573" : (isDark ? "#94a3b8" : "#64748b"),
+              }}
+            >
+              Simple Filters
+              {filterTab === "simple" && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#22B573] rounded-t-full" />
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterTab("advanced")}
+              className="px-4 py-2 transition-all duration-300 relative"
+              style={{
+                fontFamily: FONT,
+                fontSize: "13px",
+                fontWeight: 600,
+                color: filterTab === "advanced" ? "#22B573" : (isDark ? "#94a3b8" : "#64748b"),
+              }}
+            >
+              Conditional Logic
+              {filterTab === "advanced" && (
+                <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#22B573] rounded-t-full" />
+              )}
+            </button>
+          </div>
+
           {/* Content */}
           <div className="p-6 overflow-y-auto custom-scrollbar flex-1 min-h-0">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
-              {isFilterEnabled("email") && (
-                <div>
-                  <span style={labelStyle}>Email</span>
-                  <Controller
-                    name="email"
-                    control={control}
-                    render={({ field }) => (
-                      <Input {...field} placeholder="example@mail.com" style={inputStyle} className="rounded-xl h-10" />
-                    )}
-                  />
-                </div>
-              )}
+            {filterTab === "simple" ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-x-6 gap-y-4">
+                {isFilterEnabled("email") && (
+                  <div>
+                    <span style={labelStyle}>Email</span>
+                    <Controller
+                      name="email"
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} placeholder="example@mail.com" style={inputStyle} className="rounded-xl h-10" />
+                      )}
+                    />
+                  </div>
+                )}
 
-              {isFilterEnabled("firstName") && (
-                <div>
-                  <span style={labelStyle}>First Name</span>
-                  <Controller
-                    name="firstName"
-                    control={control}
-                    render={({ field }) => (
-                      <Input {...field} placeholder="John" style={inputStyle} className="rounded-xl h-10" />
-                    )}
-                  />
-                </div>
-              )}
+                {isFilterEnabled("firstName") && (
+                  <div>
+                    <span style={labelStyle}>First Name</span>
+                    <Controller
+                      name="firstName"
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} placeholder="John" style={inputStyle} className="rounded-xl h-10" />
+                      )}
+                    />
+                  </div>
+                )}
 
-              {isFilterEnabled("lastName") && (
-                <div>
-                  <span style={labelStyle}>Last Name</span>
-                  <Controller
-                    name="lastName"
-                    control={control}
-                    render={({ field }) => (
-                      <Input {...field} placeholder="Doe" style={inputStyle} className="rounded-xl h-10" />
-                    )}
-                  />
-                </div>
-              )}
+                {isFilterEnabled("lastName") && (
+                  <div>
+                    <span style={labelStyle}>Last Name</span>
+                    <Controller
+                      name="lastName"
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} placeholder="Doe" style={inputStyle} className="rounded-xl h-10" />
+                      )}
+                    />
+                  </div>
+                )}
 
-              {isFilterEnabled("phone") && (
-                <div>
-                  <span style={labelStyle}>Phone</span>
-                  <Controller
-                    name="phone"
-                    control={control}
-                    render={({ field }) => (
-                      <Input {...field} placeholder="1234567890" style={inputStyle} className="rounded-xl h-10" />
-                    )}
-                  />
-                </div>
-              )}
+                {isFilterEnabled("phone") && (
+                  <div>
+                    <span style={labelStyle}>Phone</span>
+                    <Controller
+                      name="phone"
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} placeholder="1234567890" style={inputStyle} className="rounded-xl h-10" />
+                      )}
+                    />
+                  </div>
+                )}
 
-              {isFilterEnabled("location") && (
-                <div>
-                  <span style={labelStyle}>Location</span>
-                  <Controller
-                    name="location"
-                    control={control}
-                    render={({ field }) => (
-                      <Input {...field} placeholder="City/State" style={inputStyle} className="rounded-xl h-10" />
-                    )}
-                  />
-                </div>
-              )}
+                {isFilterEnabled("location") && (
+                  <div>
+                    <span style={labelStyle}>Location</span>
+                    <Controller
+                      name="location"
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} placeholder="City/State" style={inputStyle} className="rounded-xl h-10" />
+                      )}
+                    />
+                  </div>
+                )}
 
-              {isFilterEnabled("profession") && (
-                <div>
-                  <span style={labelStyle}>Profession</span>
-                  <Controller
-                    name="profession"
-                    control={control}
-                    render={({ field }) => (
-                      <Input {...field} placeholder="Developer" style={inputStyle} className="rounded-xl h-10" />
-                    )}
-                  />
-                </div>
-              )}
+                {isFilterEnabled("profession") && (
+                  <div>
+                    <span style={labelStyle}>Profession</span>
+                    <Controller
+                      name="profession"
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} placeholder="Developer" style={inputStyle} className="rounded-xl h-10" />
+                      )}
+                    />
+                  </div>
+                )}
 
-              {isFilterEnabled("tags") && (
-                <div>
-                  <span style={labelStyle}>Tags</span>
-                  <Controller
-                    name="tags"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        isMulti
-                        options={tagData}
-                        value={tagData.filter(o => field.value?.includes(o.value))}
-                        onChange={(val) => field.onChange(val.map(v => v.value))}
-                        styles={rsStyles}
-                        placeholder="Select Tags"
-                        menuPortalTarget={document.body}
-                      />
-                    )}
-                  />
-                </div>
-              )}
+                {isFilterEnabled("tags") && (
+                  <div>
+                    <span style={labelStyle}>Tags</span>
+                    <Controller
+                      name="tags"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          isMulti
+                          options={tagData}
+                          value={tagData.filter(o => field.value?.includes(o.value))}
+                          onChange={(val) => field.onChange(val.map(v => v.value))}
+                          styles={rsStyles}
+                          placeholder="Select Tags"
+                          menuPortalTarget={document.body}
+                        />
+                      )}
+                    />
+                  </div>
+                )}
 
-              {isFilterEnabled("enrollments") && (
-                <div>
-                  <span style={labelStyle}>Enrollments</span>
-                  <Controller
-                    name="enrollments"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        isMulti
-                        options={(productDropdownData || []).map(p => ({ label: p.name, value: p._id }))}
-                        value={(productDropdownData || []).filter(p => field.value?.includes(p._id)).map(p => ({ label: p.name, value: p._id }))}
-                        onChange={(val) => field.onChange(val.map(v => v.value))}
-                        styles={rsStyles}
-                        placeholder="Select Products"
-                        menuPortalTarget={document.body}
-                      />
-                    )}
-                  />
-                </div>
-              )}
+                {isFilterEnabled("enrollments") && (
+                  <div>
+                    <span style={labelStyle}>Enrollments</span>
+                    <Controller
+                      name="enrollments"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          isMulti
+                          options={(productDropdownData || []).map(p => ({ label: p.name, value: p._id }))}
+                          value={(productDropdownData || []).filter(p => field.value?.includes(p._id)).map(p => ({ label: p.name, value: p._id }))}
+                          onChange={(val) => field.onChange(val.map(v => v.value))}
+                          styles={rsStyles}
+                          placeholder="Select Products"
+                          menuPortalTarget={document.body}
+                        />
+                      )}
+                    />
+                  </div>
+                )}
 
-              {isFilterEnabled("lastAssignedTo") && (
-                <div>
-                  <span style={labelStyle}>Assigned To</span>
-                  <Controller
-                    name="lastAssignedTo"
-                    control={control}
-                    render={({ field }) => (
-                      <Select
-                        options={employeeOptions}
-                        value={employeeOptions.find(o => o.value === field.value)}
-                        onChange={(val) => field.onChange(val?.value)}
-                        styles={rsStyles}
-                        placeholder="Select Employee"
-                        isClearable
-                        menuPortalTarget={document.body}
-                      />
-                    )}
-                  />
-                </div>
-              )}
+                {isFilterEnabled("lastAssignedTo") && (
+                  <div>
+                    <span style={labelStyle}>Assigned To</span>
+                    <Controller
+                      name="lastAssignedTo"
+                      control={control}
+                      render={({ field }) => (
+                        <Select
+                          options={employeeOptions}
+                          value={employeeOptions.find(o => o.value === field.value)}
+                          onChange={(val) => field.onChange(val?.value)}
+                          styles={rsStyles}
+                          placeholder="Select Employee"
+                          isClearable
+                          menuPortalTarget={document.body}
+                        />
+                      )}
+                    />
+                  </div>
+                )}
 
-              <div>
-                <span style={labelStyle}>Time In Session (mins)</span>
-                <div className="flex gap-2">
-                  <Controller
-                    name="timeInSession.$gte"
-                    control={control}
-                    render={({ field }) => (
-                      <Input {...field} type="number" placeholder="Min" style={inputStyle} className="rounded-xl h-10" />
-                    )}
-                  />
-                  <Controller
-                    name="timeInSession.$lte"
-                    control={control}
-                    render={({ field }) => (
-                      <Input {...field} type="number" placeholder="Max" style={inputStyle} className="rounded-xl h-10" />
-                    )}
-                  />
+                <div>
+                  <span style={labelStyle}>Time In Session (mins)</span>
+                  <div className="flex gap-2">
+                    <Controller
+                      name="timeInSession.$gte"
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} type="number" placeholder="Min" style={inputStyle} className="rounded-xl h-10" />
+                      )}
+                    />
+                    <Controller
+                      name="timeInSession.$lte"
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} type="number" placeholder="Max" style={inputStyle} className="rounded-xl h-10" />
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {isFilterEnabled("gender") && (
+                  <div>
+                    <span style={labelStyle}>Gender</span>
+                    <Controller
+                      name="gender"
+                      control={control}
+                      render={({ field }) => (
+                        <select {...field} style={inputStyle} className="w-full h-10 rounded-xl px-3 border focus:ring-2 cursor-pointer">
+                          <option value="">All</option>
+                          <option value="Male">Male</option>
+                          <option value="Female">Female</option>
+                          <option value="Other">Other</option>
+                        </select>
+                      )}
+                    />
+                  </div>
+                )}
+
+                {isFilterEnabled("status") && (
+                  <div>
+                    <span style={labelStyle}>Status</span>
+                    <Controller
+                      name="status"
+                      control={control}
+                      render={({ field }) => (
+                        <select {...field} style={inputStyle} className="w-full h-10 rounded-xl px-3 border focus:ring-2 cursor-pointer">
+                          <option value="">All</option>
+                          {(customOptionsForFilters?.status || []).map(o => (
+                            <option key={o} value={o}>{o}</option>
+                          ))}
+                        </select>
+                      )}
+                    />
+                  </div>
+                )}
+
+                {isFilterEnabled("source") && (
+                  <div>
+                    <span style={labelStyle}>Source</span>
+                    <Controller
+                      name="source"
+                      control={control}
+                      render={({ field }) => (
+                        <select {...field} style={inputStyle} className="w-full h-10 rounded-xl px-3 border focus:ring-2 cursor-pointer">
+                          <option value="">All</option>
+                          {(customOptionsForFilters?.source || []).map(o => (
+                            <option key={o} value={o}>{o}</option>
+                          ))}
+                        </select>
+                      )}
+                    />
+                  </div>
+                )}
+
+                {isFilterEnabled("leadType") && (
+                  <div>
+                    <span style={labelStyle}>Lead Type</span>
+                    <Controller
+                      name="leadType"
+                      control={control}
+                      render={({ field }) => (
+                        <select {...field} style={inputStyle} className="w-full h-10 rounded-xl px-3 border focus:ring-2 cursor-pointer">
+                          <option value="">All</option>
+                          {leadTypeOptions.map(o => (
+                            <option key={o.value} value={o.value}>{o.label}</option>
+                          ))}
+                        </select>
+                      )}
+                    />
+                  </div>
+                )}
+
+                <div>
+                  <span style={labelStyle}>Registered Count</span>
+                  <div className="flex gap-2">
+                    <Controller
+                      name="registeredCount.$gte"
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} type="number" placeholder="Min" style={inputStyle} className="rounded-xl h-10" />
+                      )}
+                    />
+                    <Controller
+                      name="registeredCount.$lte"
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} type="number" placeholder="Max" style={inputStyle} className="rounded-xl h-10" />
+                      )}
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <span style={labelStyle}>Attended Count</span>
+                  <div className="flex gap-2">
+                    <Controller
+                      name="attendedCount.$gte"
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} type="number" placeholder="Min" style={inputStyle} className="rounded-xl h-10" />
+                      )}
+                    />
+                    <Controller
+                      name="attendedCount.$lte"
+                      control={control}
+                      render={({ field }) => (
+                        <Input {...field} type="number" placeholder="Max" style={inputStyle} className="rounded-xl h-10" />
+                      )}
+                    />
+                  </div>
                 </div>
               </div>
-            </div>
+            ) : (
+              <AttendeeConditionalLogicPanel
+                active={filterTab === "advanced"}
+                control={control}
+                setValue={setValue}
+                getValues={getValues}
+                tagOptions={tagData}
+                productOptions={(productDropdownData || []).map(p => ({ label: p.name, value: p._id }))}
+                employeeOptions={employeeOptions}
+                statusOptions={(customOptionsForFilters?.status || []).map(o => ({ label: o, value: o }))}
+                sourceOptions={(customOptionsForFilters?.source || []).map(o => ({ label: o, value: o }))}
+                leadTypeOptions={leadTypeOptions}
+                onChainMeta={handleConditionalChainMeta}
+                sanitizerRef={conditionalSanitizeRef}
+                inputStyle={inputStyle}
+                rsStyles={rsStyles}
+                isDark={isDark}
+              />
+            )}
           </div>
 
           {/* Footer */}

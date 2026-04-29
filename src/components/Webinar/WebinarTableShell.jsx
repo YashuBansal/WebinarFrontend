@@ -153,9 +153,8 @@ export default function WebinarTableShell({
 
   const tableUI = (
     <motion.div
-      className={`rounded-2xl overflow-hidden border flex flex-col transition-all duration-300 ${
-        isFullscreen ? "flex-1 h-full min-h-0 shadow-2xl" : ""
-      }`}
+      className={`rounded-2xl overflow-hidden border flex flex-col transition-all duration-300 ${isFullscreen ? "flex-1 h-full min-h-0 shadow-2xl" : ""
+        }`}
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, delay: 0.08 }}
@@ -244,9 +243,8 @@ export default function WebinarTableShell({
       </div>
 
       <div
-        className={`hidden lg:block overflow-x-auto custom-scrollbar ${
-          isFullscreen ? "flex-1 overflow-y-auto min-h-0" : ""
-        }`}
+        className={`hidden lg:block overflow-x-auto custom-scrollbar ${isFullscreen ? "flex-1 overflow-y-auto min-h-0" : ""
+          }`}
       >
         <table className="w-full min-w-[1180px] text-left border-collapse">
           <thead className={isFullscreen ? "sticky top-0 z-20" : ""}>
@@ -386,9 +384,8 @@ export default function WebinarTableShell({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.03 }}
-                    className={`group border-b transition-all duration-200 ${
-                      isSelected ? "" : "hover:bg-black/5"
-                    }`}
+                    className={`group border-b transition-all duration-200 ${isSelected ? "" : "hover:bg-black/5"
+                      }`}
                     style={{
                       borderColor: "rgba(0,0,0,0.05)",
                       backgroundColor: cellBg,
@@ -558,9 +555,8 @@ export default function WebinarTableShell({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03 }}
-                className={`rounded-xl border p-4 border-gray-200 ${
-                  isSelected ? "bg-green-50/80 ring-1 ring-[#22B573]/25" : "bg-white"
-                }`}
+                className={`rounded-xl border p-4 border-gray-200 ${isSelected ? "bg-green-50/80 ring-1 ring-[#22B573]/25" : "bg-white"
+                  }`}
               >
                 <div className="flex items-start justify-between mb-3 gap-2">
                   <div className="flex items-start gap-2 min-w-0 flex-1">
@@ -711,11 +707,10 @@ export default function WebinarTableShell({
                       details: `User changed page For ${tableHeader} to ${pageNum} `,
                     });
                   }}
-                  className={`w-8 h-8 rounded-lg text-sm flex items-center justify-center transition-colors ${
-                    Number(page) === pageNum
+                  className={`w-8 h-8 rounded-lg text-sm flex items-center justify-center transition-colors ${Number(page) === pageNum
                       ? "bg-blue-600 text-white"
                       : "hover:bg-black/5"
-                  }`}
+                    }`}
                   style={{
                     color: Number(page) !== pageNum ? "#0f172a" : undefined,
                   }}
@@ -786,7 +781,7 @@ export default function WebinarTableShell({
             className="rounded-xl flex items-center gap-2 px-4 py-2 text-sm font-medium transition-transform hover:scale-105 bg-white border border-slate-200 text-[#071028]"
           >
             <Download className="w-4 h-4 text-gray-500" />
-            <span className="hidden sm:inline">Export CSV</span>
+            <span className="hidden sm:inline">Export</span>
           </button>
           <button
             onClick={onCreateWebinar}
@@ -873,15 +868,14 @@ export default function WebinarTableShell({
 
       {isFullscreen && portalTarget
         ? createPortal(
-            <div
-              className={`fixed inset-0 z-[100] p-4 sm:p-6 flex flex-col ${
-                isDark ? "bg-[#0f172a]" : "bg-[#F2F4F6]"
+          <div
+            className={`fixed inset-0 z-[100] p-4 sm:p-6 flex flex-col ${isDark ? "bg-[#0f172a]" : "bg-[#F2F4F6]"
               }`}
-            >
-              {tableUI}
-            </div>,
-            portalTarget
-          )
+          >
+            {tableUI}
+          </div>,
+          portalTarget
+        )
         : tableUI}
     </div>
   );

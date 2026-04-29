@@ -35,6 +35,12 @@ const Enrollments = (props) => {
 
   const portalTarget = typeof document !== "undefined" ? document.body : null;
 
+  const inputStyle = {
+    backgroundColor: isDark ? "#0f172a" : "#ffffff",
+    border: `1px solid ${isDark ? "#334155" : "rgba(0,0,0,0.1)"}`,
+    color: isDark ? "#f8fafc" : "#0f172a",
+  };
+
   const modalState = useSelector((state) => state.modals.modals);
   const exportModalOpen = modalState[exportModalName] ? true : false;
 
@@ -93,7 +99,7 @@ const Enrollments = (props) => {
   const TableUI = (
     <motion.div
       className={cn(
-        "rounded-[2rem] overflow-hidden border flex flex-col transition-all duration-500 ease-in-out shadow-2xl shadow-slate-900/10",
+        "rounded-2xl overflow-hidden border flex flex-col transition-all duration-500 ease-in-out shadow-2xl shadow-slate-900/10",
         isFullScreen ? "flex-1 h-full" : ""
       )}
       initial={{ opacity: 0, scale: 0.98, y: 20 }}
@@ -143,26 +149,29 @@ const Enrollments = (props) => {
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 w-full xl:w-auto justify-end">
-            <Button
-              variant="outline"
+            <button
+              type="button"
               onClick={() => dispatch(openModal(exportModalName))}
-              className={cn("h-10 px-4 rounded-xl border transition-all active:scale-95", isDark ? "border-slate-800 bg-slate-900 text-slate-200 hover:bg-slate-800" : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50")}
+              className="rounded-xl flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium hover:bg-black/5 transition-all flex-1 sm:flex-none"
+              style={inputStyle}
             >
-              <Upload className="w-4 h-4 mr-2 text-slate-400" />
+              <Download className="w-4 h-4 text-gray-500" />
               <span className="hidden sm:inline">Export</span>
-            </Button>
+            </button>
 
-            <div className={cn("flex items-center gap-1.5 p-1 rounded-xl border", isDark ? "bg-slate-900 border-slate-800" : "bg-slate-100 border-slate-200")}>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsFullScreen(!isFullScreen)}
-                className={cn("h-8 w-8 rounded-lg transition-all", isDark ? "hover:bg-slate-800 text-slate-500" : "hover:bg-white text-slate-500")}
-                title={isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
-              >
-                {isFullScreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-              </Button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setIsFullScreen(!isFullScreen)}
+              className="rounded-xl flex items-center justify-center p-2.5 flex-shrink-0 hover:bg-black/5 transition-all"
+              style={inputStyle}
+              title={isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
+            >
+              {isFullScreen ? (
+                <Minimize className="w-4 h-4 text-gray-500" />
+              ) : (
+                <Maximize className="w-4 h-4 text-gray-500" />
+              )}
+            </button>
           </div>
         </div>
       </div>

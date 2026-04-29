@@ -201,14 +201,14 @@ const Employees = () => {
                 }}
               >
                 <Download className="w-4 h-4 text-gray-500" />
-                <span>Export CSV</span>
+                <span>Export</span>
               </button>
               <button
                 type="button"
                 onClick={() => navigate("/createEmployee")}
                 className="rounded-xl flex items-center justify-center gap-2 px-4 py-2 shadow-sm font-semibold text-sm transition-transform hover:scale-[1.02] shrink-0"
                 style={{
-                  backgroundColor: "#FF6B35",
+                  backgroundColor: "#1877F2",
                   color: "white",
                   border: "none",
                   boxShadow: "0 4px 10px rgba(255, 107, 53, 0.2)",

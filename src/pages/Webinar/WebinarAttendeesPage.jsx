@@ -40,6 +40,9 @@ const ApplyTagsModal = lazy(
 const BulkEnrollmentModal = lazy(
   () => import("../../components/Webinar/BulkEnrollmentModal"),
 );
+const FilterPresetModal = lazy(
+  () => import("../../components/Filter/FilterPresetModal"),
+);
 import { createPortal } from "react-dom";
 import ModalFallback from "../../components/Fallback/ModalFallback";
 import { setWebinarAttendeesFilters } from "../../features/slices/filters.slice";
@@ -127,6 +130,7 @@ const WebinarAttendeesPage = (props) => {
   const [selectedActivity, setSelectedActivity] = useState("All");
   const [deleteModal, setDeleteModal] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [presetModalOpen, setPresetModalOpen] = useState(false);
 
   const {
     webinarAttendeesSortBy,
@@ -244,7 +248,7 @@ const WebinarAttendeesPage = (props) => {
         label: "Tags",
         dataKey: "tags",
         widthKey: "tags",
-        sortable: false,
+        sortable: true,
         locked: false,
       },
       {
@@ -252,7 +256,7 @@ const WebinarAttendeesPage = (props) => {
         label: "Enrollments",
         dataKey: "enrollments",
         widthKey: "enrollments",
-        sortable: false,
+        sortable: true,
         locked: false,
       },
       {
@@ -453,6 +457,33 @@ const WebinarAttendeesPage = (props) => {
     );
   };
 
+  const handleCopyApi = useCallback((filters) => {
+    const params = {
+      page,
+      limit: LIMIT,
+      filters,
+      fieldName: "attendeeTableConfig",
+      webinarId: id,
+      isAttended: tabValue === "postWebinar",
+      validCall: selectedActivity === "All" ? undefined : selectedActivity,
+      assignmentType: selectedAssignmentType === "All" ? undefined : selectedAssignmentType,
+      sort: sortByOption?.sortBy ? sortByOption : undefined,
+    };
+
+    const flattened = flattenObjectForURLSearchParams(params);
+    const searchParams = new URLSearchParams();
+    flattened.forEach(([key, value]) => {
+      searchParams.append(key, value);
+    });
+
+    const url = `${baseURL}/attendees/webinar?${searchParams.toString()}`;
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success("API URL copied to clipboard!");
+    }).catch(() => {
+      toast.error("Failed to copy API URL");
+    });
+  }, [id, page, LIMIT, tabValue, selectedActivity, selectedAssignmentType, sortByOption]);
+
   // UI Styling Helpers
   const textPrimary = theme === "dark" ? "#f8fafc" : "#071028";
   const textMuted = theme === "dark" ? "#94a3b8" : "#64748b";
@@ -510,6 +541,8 @@ const WebinarAttendeesPage = (props) => {
             payload: exportExcelModalName,
           })
         }
+        onOpenPresets={() => setPresetModalOpen(true)}
+        filters={webinarAttendeesFilters}
         setApplyTagsModalOpen={setApplyTagsModalOpen}
         page={page}
         setPage={setPage}
@@ -550,12 +583,8 @@ const WebinarAttendeesPage = (props) => {
           onResizeStart={() => { }}
           onResizeDoubleClick={() => { }}
           onDeleteClick={() => { }}
+          isLoading={isLoading}
         />
-        {isLoading && (
-          <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px] flex items-center justify-center z-50">
-            <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-          </div>
-        )}
       </WebinarAttendeesTableShell>
 
       {/* Modals */}
@@ -566,7 +595,7 @@ const WebinarAttendeesPage = (props) => {
             setPage={setPage}
             tabValue={tabValue}
             notAllowed={notAllowedFields}
-            handleCopy={() => { }}
+            handleCopy={handleCopyApi}
           />
         </Suspense>
       )}
@@ -657,6 +686,24 @@ const WebinarAttendeesPage = (props) => {
               );
             }}
             isLoading={isDeleting}
+          />
+        </Suspense>
+      )}
+
+      {presetModalOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <FilterPresetModal
+            open={presetModalOpen}
+            setIsPresetModalOpen={setPresetModalOpen}
+            tableName={tabValue === "preWebinar" ? "preWebinarAttendeesTable" : "postWebinarAttendeesTable"}
+            filters={webinarAttendeesFilters}
+            setFilters={(next) => {
+              dispatch(setWebinarAttendeesFilters({ 
+                recordType: tabValue,
+                filters: next || {} 
+              }));
+              setPage(1);
+            }}
           />
         </Suspense>
       )}

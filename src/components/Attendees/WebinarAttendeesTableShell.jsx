@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 import { createPortal } from "react-dom";
-import { Filter, Upload, Maximize, Minimize, Settings2, Tag, ChevronDown, Activity, UserCheck } from "lucide-react";
+import { Filter, Download, Bookmark, Maximize, Minimize, Settings2, Tag, ChevronDown, Activity, UserCheck } from "lucide-react";
 import PageLimitEditor from "../PageLimitEditor";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
@@ -18,6 +18,8 @@ export default function WebinarAttendeesTableShell({
   setIsFullScreen,
   onOpenFilters,
   onOpenExport,
+  onOpenPresets,
+  filters,
   setApplyTagsModalOpen,
   page,
   setPage,
@@ -28,11 +30,17 @@ export default function WebinarAttendeesTableShell({
 }) {
   const cardBorder = isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.4)";
   const cardBg = isDark ? "rgba(15, 23, 42, 0.7)" : "rgba(255, 255, 255, 0.8)";
-  
+
   const portalTarget = typeof document !== "undefined" ? document.body : null;
 
   const startRow = total > 0 ? (Number(page) - 1) * limit + 1 : 0;
   const endRow = Math.min((Number(page) - 1) * limit + (total > limit ? limit : total), total);
+
+  const inputStyle = {
+    backgroundColor: isDark ? "#0f172a" : "#ffffff",
+    border: `1px solid ${isDark ? "#334155" : "rgba(0,0,0,0.1)"}`,
+    color: isDark ? "#f8fafc" : "#0f172a",
+  };
 
   const selectClasses = cn(
     "px-3 h-10 rounded-xl text-sm font-medium transition-all outline-none appearance-none cursor-pointer pr-10",
@@ -44,7 +52,7 @@ export default function WebinarAttendeesTableShell({
   const TableUI = (
     <motion.div
       className={cn(
-        "rounded-[2rem] overflow-hidden border flex flex-col transition-all duration-500 ease-in-out shadow-2xl shadow-slate-900/10",
+        "rounded-2xl overflow-hidden border flex flex-col transition-all duration-500 ease-in-out shadow-2xl shadow-slate-900/10",
         isFullScreen ? "flex-1 h-full" : ""
       )}
       initial={{ opacity: 0, scale: 0.98, y: 20 }}
@@ -115,35 +123,51 @@ export default function WebinarAttendeesTableShell({
 
           {/* Right: Action Buttons */}
           <div className="flex flex-wrap items-center gap-2.5 w-full xl:w-auto justify-end">
-            <Button
-              variant="outline"
-              onClick={onOpenFilters}
-              className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-all active:scale-95"
-            >
-              <Filter className="w-4 h-4 mr-2 text-slate-400" />
-              <span>Filters</span>
-            </Button>
-
-            <Button
-              variant="outline"
+            <button
+              type="button"
               onClick={onOpenExport}
-              className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 transition-all active:scale-95"
+              className="rounded-xl flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium hover:bg-black/5 transition-all flex-1 sm:flex-none"
+              style={inputStyle}
             >
-              <Upload className="w-4 h-4 mr-2 text-slate-400" />
+              <Download className="w-4 h-4 text-gray-500" />
               <span className="hidden sm:inline">Export</span>
-            </Button>
-
-            <div className="flex items-center gap-1.5 p-1 bg-slate-100 dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => setIsFullScreen(!isFullScreen)}
-                className="h-8 w-8 rounded-lg hover:bg-white dark:hover:bg-slate-800 text-slate-500 transition-all"
-                title={isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
-              >
-                {isFullScreen ? <Minimize className="w-4 h-4" /> : <Maximize className="w-4 h-4" />}
-              </Button>
-            </div>
+            </button>
+            <button
+              type="button"
+              onClick={onOpenPresets}
+              className="rounded-xl flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium hover:bg-black/5 transition-all flex-1 sm:flex-none"
+              style={inputStyle}
+            >
+              <Bookmark className="w-4 h-4 text-gray-500" />
+              <span className="hidden sm:inline">Presets</span>
+            </button>
+            <button
+              type="button"
+              onClick={onOpenFilters}
+              className="rounded-xl flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium hover:bg-black/5 transition-all flex-1 sm:flex-none relative"
+              style={inputStyle}
+            >
+              <Filter className="w-4 h-4 text-gray-500" />
+              <span className="hidden sm:inline">Filters</span>
+              {Object.keys(filters || {}).length > 0 && (
+                <span className="ml-1 bg-blue-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">
+                  {Object.keys(filters).length}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsFullScreen(!isFullScreen)}
+              className="rounded-xl flex items-center justify-center p-2.5 flex-shrink-0 hover:bg-black/5 transition-all"
+              style={inputStyle}
+              title={isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
+            >
+              {isFullScreen ? (
+                <Minimize className="w-4 h-4 text-gray-500" />
+              ) : (
+                <Maximize className="w-4 h-4 text-gray-500" />
+              )}
+            </button>
           </div>
         </div>
       </div>

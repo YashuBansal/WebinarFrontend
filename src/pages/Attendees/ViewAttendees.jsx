@@ -1001,17 +1001,24 @@ const ViewAttendees = () => {
                         </div>
                       </td>
                       <td className="p-4 whitespace-nowrap group-hover:bg-black/5 dark:group-hover:bg-white/5 transition-colors max-w-[260px]">
-                        <div className="flex gap-1.5 flex-wrap">
+                        <div className="flex items-center gap-1.5 flex-nowrap overflow-hidden">
                           {Array.isArray(row?.tags) && row.tags.length ? (
-                            row.tags.map((t, i) => (
-                              <span
-                                key={`${rowId}-tag-${i}`}
-                                className="px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-slate-600 inline-flex items-center gap-1"
-                              >
-                                <Tag className="w-2.5 h-2.5 shrink-0" />
-                                {t}
-                              </span>
-                            ))
+                            <>
+                              {row.tags.slice(0, 2).map((t, i) => (
+                                <span
+                                  key={`${rowId}-tag-${i}`}
+                                  className="px-2 py-0.5 rounded text-[11px] font-medium bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-300 border border-gray-200 dark:border-slate-600 inline-flex items-center gap-1 truncate max-w-[100px]"
+                                >
+                                  <Tag className="w-2.5 h-2.5 shrink-0" />
+                                  {t}
+                                </span>
+                              ))}
+                              {row.tags.length > 2 && (
+                                <span className="px-2 py-0.5 rounded text-[11px] font-bold bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50 shrink-0">
+                                  +{row.tags.length - 2}
+                                </span>
+                              )}
+                            </>
                           ) : (
                             <span
                               className="text-sm italic"
@@ -1202,7 +1209,7 @@ const ViewAttendees = () => {
             }}
           >
             <Download className="w-4 h-4 text-gray-500" />{" "}
-            <span className="hidden sm:inline">Export CSV</span>
+            <span className="hidden sm:inline">Export</span>
           </Button>
           {userData?.isActive && (
             <Button
