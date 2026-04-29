@@ -566,7 +566,7 @@ const WebinarAttendeesPage = (props) => {
             setPage={setPage}
             tabValue={tabValue}
             notAllowed={notAllowedFields}
-            handleCopy={() => {}}
+            handleCopy={() => { }}
           />
         </Suspense>
       )}

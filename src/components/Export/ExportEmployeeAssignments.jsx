@@ -22,13 +22,11 @@ const ExportEmployeeAssignments = ({
   const { data: subscription } = useUserSubscription();
   const tableConfig = subscription?.plan?.attendeeTableConfig || {};
   const defaultColumns = useMemo(() => {
-    const notAllowed = ["isAssigned", "enrollments"];
-    const availableColumns = attendeeTableColumns.filter(
-      (col) =>
-        col.key in tableConfig &&
-        tableConfig[col.key].downloadable &&
-        !notAllowed.includes(col.key)
-    );
+    const notAllowed = ["isAssigned", "enrollments", "registeredCount", "attendedCount"];
+    const availableColumns = attendeeTableColumns.filter((col) => {
+      const isDownloadable = col.key in tableConfig ? tableConfig[col.key].downloadable : true;
+      return isDownloadable && !notAllowed.includes(col.key);
+    });
     if (
       tableConfig.leadType?.downloadable &&
       !availableColumns.some((col) => col.key === "leadType")

@@ -25,6 +25,10 @@ import {
   Minimize,
   RotateCcw,
   Download,
+  Clock,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
 } from "lucide-react";
 
 import {
@@ -134,6 +138,19 @@ const ViewEmployee = () => {
     tags: '', dateFrom: '', dateTo: '',
     sortBy: 'Time in Session', sortOrder: 'Z - A'
   });
+
+  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
+  const handleSort = (key) => {
+    let direction = 'asc';
+    if (sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    } else if (sortConfig.key === key && sortConfig.direction === 'desc') {
+      setSortConfig({ key: null, direction: 'asc' });
+      return;
+    }
+    setSortConfig({ key, direction });
+  };
 
   const handleApplyFilters = () => {
     // Yahan aap apne Redux mein filters bhej sakte hain
@@ -302,24 +319,24 @@ const ViewEmployee = () => {
   }, [webinarData, currentWebinar]);
 
   const notAllowedColumns = useMemo(
-    () =>
-      role === "EMPLOYEE_SALES" || role === roles.EMPLOYEE_SALES
-        ? ["enrollments", "isAssigned", "attendedCount", "registeredCount"]
-        : [
-          "enrollments",
-          "isAssigned",
-          "attendedCount",
-          "registeredCount",
-          "timeInSession",
-        ],
-    [role, roles],
+    () => [
+      "enrollments",
+      "isAssigned",
+      "attendedCount",
+      "registeredCount",
+    ],
+    [],
   );
 
   const tableData = useMemo(() => {
     return {
-      columns: attendeeTableColumns.filter(
-        (column) => !notAllowedColumns.includes(column.key),
-      ),
+      columns: attendeeTableColumns
+        .filter((column) => !notAllowedColumns.includes(column.key))
+        .map((column) =>
+          column.key === "timeInSession"
+            ? { ...column, header: "Total Time" }
+            : column
+        ),
       totalRecords: total,
       rows: assignData.map((row) => ({
         ...row,
@@ -330,24 +347,50 @@ const ViewEmployee = () => {
 
   const filteredAssignmentRows = useMemo(() => {
     const query = assignmentSearchValue.trim().toLowerCase();
-    if (!query) return tableData.rows || [];
-    return (tableData.rows || []).filter((row) => {
-      const blob = tableData.columns
-        .map((column) => {
-          const value = row?.[column.key];
-          if (value == null) return "";
-          if (typeof value === "object") {
-            if (value?.name) return String(value.name);
-            if (value?.userName) return String(value.userName);
-            return "";
-          }
-          return String(value);
-        })
-        .join(" ")
-        .toLowerCase();
-      return blob.includes(query);
-    });
-  }, [assignmentSearchValue, tableData]);
+    let rows = [...(tableData.rows || [])];
+
+    if (query) {
+      rows = rows.filter((row) => {
+        const blob = tableData.columns
+          .map((column) => {
+            const value = row?.[column.key];
+            if (value == null) return "";
+            if (typeof value === "object") {
+              if (value?.name) return String(value.name);
+              if (value?.userName) return String(value.userName);
+              return "";
+            }
+            return String(value);
+          })
+          .join(" ")
+          .toLowerCase();
+        return blob.includes(query);
+      });
+    }
+
+    if (sortConfig.key) {
+      rows.sort((a, b) => {
+        let aVal = a[sortConfig.key];
+        let bVal = b[sortConfig.key];
+        
+        if (typeof aVal === "object" && aVal !== null) aVal = aVal.name || aVal.userName || "";
+        if (typeof bVal === "object" && bVal !== null) bVal = bVal.name || bVal.userName || "";
+
+        if (!isNaN(Number(aVal)) && !isNaN(Number(bVal)) && aVal !== "" && bVal !== "") {
+           return sortConfig.direction === "asc" ? Number(aVal) - Number(bVal) : Number(bVal) - Number(aVal);
+        }
+
+        const aStr = String(aVal || "").toLowerCase();
+        const bStr = String(bVal || "").toLowerCase();
+        
+        if (aStr < bStr) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aStr > bStr) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+
+    return rows;
+  }, [assignmentSearchValue, tableData, sortConfig]);
 
   const { mutateAsync: applyTagsForEmployee, isPending: isApplyingTags } =
     useApplyTagsToEmployeeAssignments(id, () => {
@@ -490,6 +533,15 @@ const ViewEmployee = () => {
   }, [profileBadgeLabel, theme]);
 
   const renderAssignmentCell = (row, column) => {
+    if (column.key === "timeInSession") {
+      return (
+        <div className="flex items-center gap-1.5">
+          <Clock className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+          {row?.timeInSession ?? "—"}
+        </div>
+      );
+    }
+
     const value = row?.[column.key];
     if (value == null || value === "") {
       return <span className="italic text-red-400">N/A</span>;
@@ -561,7 +613,7 @@ const ViewEmployee = () => {
           )}
           <button
             type="button"
-            onClick={() => setExportModalOpen(true)}
+            onClick={() => dispatch(openModal(exportExcelModalName))}
             className="rounded-xl flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium hover:bg-black/5 transition-all flex-1 sm:flex-none"
             style={inputStyle}
           >
@@ -627,10 +679,22 @@ const ViewEmployee = () => {
               {tableData.columns.map((column) => (
                 <th
                   key={column.key}
-                  className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 hover:bg-black/5 transition-colors whitespace-nowrap"
+                  className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 hover:bg-black/5 transition-colors whitespace-nowrap cursor-pointer select-none"
                   style={{ color: mutedText }}
+                  onClick={() => handleSort(column.key)}
                 >
-                  {column.header}
+                  <div className="flex items-center gap-1.5">
+                    {column.header}
+                    {sortConfig.key === column.key ? (
+                      sortConfig.direction === "asc" ? (
+                        <ArrowUp className="w-3.5 h-3.5" style={{ color: "#3b82f6" }} />
+                      ) : (
+                        <ArrowDown className="w-3.5 h-3.5" style={{ color: "#3b82f6" }} />
+                      )
+                    ) : (
+                      <ArrowUpDown className="w-3.5 h-3.5 opacity-30 group-hover:opacity-100" />
+                    )}
+                  </div>
                 </th>
               ))}
               <th
@@ -759,8 +823,8 @@ const ViewEmployee = () => {
                   key={pageNum}
                   onClick={() => setPage(pageNum)}
                   className={`w-8 h-8 rounded-lg text-sm flex items-center justify-center transition-colors ${Number(page) === pageNum
-                      ? "bg-blue-600 text-white"
-                      : "hover:bg-black/5"
+                    ? "bg-blue-600 text-white"
+                    : "hover:bg-black/5"
                     }`}
                   style={{
                     color: Number(page) !== pageNum ? (theme === "dark" ? "#f8fafc" : "#0f172a") : undefined,

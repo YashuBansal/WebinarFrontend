@@ -122,8 +122,8 @@ const ExportWebinarAttendeesModal = ({
         return true;
       });
     } else {
-      newAvailableColumns = attendeeTableColumns.filter(
-        (col) => col.key in tableConfig && tableConfig[col.key].downloadable
+      newAvailableColumns = attendeeTableColumns.filter((col) =>
+        col.key in tableConfig ? tableConfig[col.key].downloadable : true
       );
       if (
         tableConfig.leadType?.downloadable &&

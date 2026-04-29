@@ -1,4 +1,5 @@
 import { motion } from "framer-motion";
+import { createPortal } from "react-dom";
 import { Filter, Upload, Maximize, Minimize, Settings2, Tag, ChevronDown, Activity, UserCheck } from "lucide-react";
 import PageLimitEditor from "../PageLimitEditor";
 import { Button } from "../ui/button";
@@ -28,30 +29,32 @@ export default function WebinarAttendeesTableShell({
   const cardBorder = isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.4)";
   const cardBg = isDark ? "rgba(15, 23, 42, 0.7)" : "rgba(255, 255, 255, 0.8)";
   
+  const portalTarget = typeof document !== "undefined" ? document.body : null;
+
   const startRow = total > 0 ? (Number(page) - 1) * limit + 1 : 0;
   const endRow = Math.min((Number(page) - 1) * limit + (total > limit ? limit : total), total);
 
   const selectClasses = cn(
     "px-3 h-10 rounded-xl text-sm font-medium transition-all outline-none appearance-none cursor-pointer pr-10",
-    isDark 
-      ? "bg-slate-900 border-slate-800 text-slate-200 focus:ring-blue-500/20" 
+    isDark
+      ? "bg-slate-900 border-slate-800 text-slate-200 focus:ring-blue-500/20"
       : "bg-white border-slate-200 text-slate-700 focus:ring-blue-500/10 shadow-sm"
   );
 
-  return (
+  const TableUI = (
     <motion.div
       className={cn(
         "rounded-[2rem] overflow-hidden border flex flex-col transition-all duration-500 ease-in-out shadow-2xl shadow-slate-900/10",
-        isFullScreen ? "fixed inset-0 z-[100] rounded-none bg-white dark:bg-slate-950" : ""
+        isFullScreen ? "flex-1 h-full" : ""
       )}
       initial={{ opacity: 0, scale: 0.98, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       style={{
-        background: cardBg,
-        backdropFilter: "blur(24px)",
+        background: isFullScreen ? (isDark ? "#1e293b" : "#ffffff") : cardBg,
+        backdropFilter: isFullScreen ? "none" : "blur(24px)",
         borderColor: cardBorder,
-        minHeight: isFullScreen ? "100vh" : "600px",
+        minHeight: isFullScreen ? "auto" : "600px",
       }}
     >
       {/* Controls Bar */}
@@ -134,24 +137,6 @@ export default function WebinarAttendeesTableShell({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => setApplyTagsModalOpen(true)}
-                className="h-8 w-8 rounded-lg hover:bg-white dark:hover:bg-slate-800 text-slate-500 hover:text-blue-500 transition-all"
-                title="Apply Tags"
-              >
-                <Tag className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg hover:bg-white dark:hover:bg-slate-800 text-slate-500 transition-all"
-                title="Settings"
-              >
-                <Settings2 className="w-4 h-4" />
-              </Button>
-              <div className="w-px h-4 bg-slate-300 dark:bg-slate-700 mx-1" />
-              <Button
-                variant="ghost"
-                size="icon"
                 onClick={() => setIsFullScreen(!isFullScreen)}
                 className="h-8 w-8 rounded-lg hover:bg-white dark:hover:bg-slate-800 text-slate-500 transition-all"
                 title={isFullScreen ? "Exit Fullscreen" : "Fullscreen"}
@@ -203,4 +188,20 @@ export default function WebinarAttendeesTableShell({
       </div>
     </motion.div>
   );
+
+  if (isFullScreen && portalTarget) {
+    return createPortal(
+      <div
+        className={cn(
+          "fixed inset-0 z-[100] p-4 sm:p-6 flex flex-col",
+          isDark ? "bg-[#0f172a]" : "bg-[#F2F4F6]"
+        )}
+      >
+        {TableUI}
+      </div>,
+      portalTarget
+    );
+  }
+
+  return TableUI;
 }

@@ -99,8 +99,8 @@ const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
       { header: "Phone", key: "phone", width: 20, type: "" },
     ];
 
-    const newAvailableColumns = allColumns.filter(
-      (col) => col.key in tableConfig && tableConfig[col.key].downloadable
+    const newAvailableColumns = allColumns.filter((col) =>
+      col.key in tableConfig ? tableConfig[col.key].downloadable : true
     );
     if (tableConfig["leadType"]?.downloadable) {
       if (!newAvailableColumns.some((col) => col.key === "leadType")) {
