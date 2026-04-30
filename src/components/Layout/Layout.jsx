@@ -12,7 +12,7 @@ import FallbackPage from "../Fallback/FallbackPage";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import AlarmBanner from "../AlarmBanner";
-import alarm from "/alarm.wav";
+
 import { insertUnAckAlarm, resetAlarmData } from "../../features/slices/alarm";
 import { socket } from "../../socket";
 import { toggleSidebar } from "../../features/slices/globalData";
@@ -22,7 +22,7 @@ const Layout = () => {
   const { isUserLoggedIn } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const audioRef = useRef(new Audio(alarm));
+  const audioRef = useRef(new Audio("https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3"));
   const [bannerOpen, setBannerOpen] = useState(false);
   const [bannerData, setBannerData] = useState(null);
   const toggleRef = useRef();

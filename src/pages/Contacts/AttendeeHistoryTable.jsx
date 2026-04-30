@@ -1,17 +1,15 @@
-import IconButton from "@mui/material/IconButton";
-import OpenInNew from "@mui/icons-material/OpenInNew";
-import { EditIcon } from "../../components/SVGs";
+import { Edit2, Calendar, User, Phone, MapPin, Briefcase, Clock, FileText, ShieldCheck, Bell, History, Globe, Layers, ExternalLink, Pencil } from "lucide-react";
 import ComponentGuard from "../../components/AccessControl/ComponentGuard";
 import { useEffect, useMemo, useRef } from "react";
 import useMediaQuery from "../../hooks/useMediaQuery";
+import { motion } from "framer-motion";
+import { formatDateAsNumber } from "../../utils/extra";
+import { useTheme } from "../../contexts/ThemeContext";
 
-// A helper function to format the full name cleanly
 const formatFullName = (item) => {
   const firstName = item?.firstName;
   const rawLastName = item?.lastName;
-  // Clean up the smiley face artifact if it exists
   const lastName = rawLastName?.includes(":-)") ? "" : rawLastName;
-
   if (firstName && lastName) return `${firstName} ${lastName}`;
   if (firstName) return firstName;
   if (lastName) return lastName;
@@ -19,20 +17,33 @@ const formatFullName = (item) => {
 };
 
 const HistoryHeader = ({ counts, onOpenNewPage }) => (
-  <div className="flex flex-col md:flex-row items-center justify-between gap-4 p-4 bg-neutral-100 rounded-t-lg">
-    <span className="font-semibold text-xl text-neutral-800">Attendee History</span>
-    <div className="flex items-center justify-between md:justify-end gap-4 w-full md:w-auto">
-      <div className="flex items-center gap-x-6 gap-y-2 text-sm">
-        <span>
-          Registered: <span className="text-indigo-500 text-lg font-bold">{counts.registeredWebinarCount}</span>
-        </span>
-        <span>
-          Attended: <span className="text-indigo-500 text-lg font-bold">{counts.attendedWebinarCount}</span>
-        </span>
+  <div className="flex flex-col md:flex-row items-center justify-between gap-6 p-6 bg-slate-50/50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700/50">
+    <div className="flex items-center gap-3">
+      <div className="p-2 bg-orange-50 dark:bg-orange-900/30 rounded-xl">
+        <Calendar className="w-5 h-5 text-[#FF6B35] dark:text-[#FF8C61]" />
       </div>
-      <IconButton onClick={onOpenNewPage} aria-label="Open history in new page">
-        <OpenInNew />
-      </IconButton>
+      <div>
+        <h3 className="text-xl font-bold text-slate-800 dark:text-slate-200">Webinar Participation</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Historical attendance and registration data</p>
+      </div>
+    </div>
+
+    <div className="flex items-center gap-4">
+      <div className="px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center min-w-[100px]">
+        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Registered</span>
+        <span className="text-xl font-black text-[#FF6B35]">{counts.registeredWebinarCount}</span>
+      </div>
+      <div className="px-4 py-2 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm flex flex-col items-center min-w-[100px]">
+        <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Attended</span>
+        <span className="text-xl font-black text-emerald-600 dark:text-emerald-400">{counts.attendedWebinarCount}</span>
+      </div>
+      <button
+        onClick={onOpenNewPage}
+        className="p-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-xl transition-all group"
+        title="Full History"
+      >
+        <ExternalLink className="w-5 h-5 text-slate-400 group-hover:text-[#FF6B35]" />
+      </button>
     </div>
   </div>
 );
@@ -44,223 +55,211 @@ const AttendeeHistoryTable = ({
   employeeModeData,
   userData,
   setEditModalData,
-  formatDateAsNumber,
   selectedAttendee,
 }) => {
-  const shouldShowNoRecord =
-    !Array.isArray(attendeeHistoryData) || attendeeHistoryData.length <= 0;
-
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const scrollRef = useRef(null);
-
-  const isSmallScreen = useMediaQuery("(max-width: 768px)");
+  const isSmallScreen = useMediaQuery("(max-width: 1024px)");
 
   const counts = useMemo(() => {
-    const countsData = {
-      registeredWebinarCount: 0,
-      attendedWebinarCount: 0,
-    };
-
-    if (
-      Array.isArray(selectedAttendee) &&
-      selectedAttendee.length > 0 &&
-      Array.isArray(selectedAttendee[0]?.data)
-    ) {
+    const countsData = { registeredWebinarCount: 0, attendedWebinarCount: 0 };
+    if (Array.isArray(selectedAttendee) && selectedAttendee.length > 0 && Array.isArray(selectedAttendee[0]?.data)) {
       const data = selectedAttendee[0]?.data;
       data.forEach((item) => {
-        if (!item.isAttended) {
-          countsData.registeredWebinarCount += 1;
-        } else if (item.isAttended && item.timeInSession > 0) {
-          countsData.attendedWebinarCount += 1;
-        }
+        if (!item.isAttended) countsData.registeredWebinarCount += 1;
+        else if (item.isAttended && item.timeInSession > 0) countsData.attendedWebinarCount += 1;
       });
     }
     return countsData;
   }, [selectedAttendee]);
 
-
-  // Scroll to bottom when noteData updates
   useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
+    if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [attendeeHistoryData]);
 
+  const shouldShowNoRecord = !Array.isArray(attendeeHistoryData) || attendeeHistoryData.length <= 0;
+
   return (
-    <div className="mt-12 shadow-lg rounded-lg overflow-x-auto ">
+    <div className="w-full bg-white dark:bg-slate-800/50 rounded-2xl border border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden">
+      <HistoryHeader
+        counts={counts}
+        onOpenNewPage={() => navigate(`/particularContact/attendee-History?email=${email}`)}
+      />
+
       {shouldShowNoRecord ? (
-        <div className="text-lg p-2 flex justify-center w-full">
-          No record found
+        <div className="flex flex-col items-center justify-center py-20 text-slate-400 space-y-4">
+          <History className="w-16 h-16 opacity-10" />
+          <p className="text-lg font-bold italic">No participation history found</p>
         </div>
       ) : (
-        <div className="p-2 bg-neutral-100 rounded-lg shadow-md">
-           <HistoryHeader
-            counts={counts}
-            onOpenNewPage={() => navigate(`/particularContact/attendee-History?email=${email}`)}
-          />
-          {isSmallScreen ? (
-            // --- CARD VIEW for Small Screens ---
-            <div  ref={scrollRef} className="w-full max-h-[70dvh] overflow-y-auto space-y-4 p-4 bg-gray-50" >
+        <div className="flex flex-col">
+          <div ref={scrollRef} className={`overflow-auto custom-scrollbar ${isSmallScreen ? 'p-4' : ''}`}>
+            {isSmallScreen ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {attendeeHistoryData.map((item, idx) => (
-                    <HistoryCard 
-                        key={item._id || idx}
-                        item={item}
-                        index={idx}
-                        onEdit={setEditModalData}
-                        formatDate={formatDateAsNumber}
-                        showEditButton={!employeeModeData && userData?.isActive}
-                    />
+                  <HistoryCard
+                    key={item._id || idx}
+                    item={item}
+                    index={idx}
+                    totalCount={attendeeHistoryData.length}
+                    onEdit={setEditModalData}
+                    showEditButton={!employeeModeData && userData?.isActive}
+                  />
                 ))}
-            </div>
-          ):(
-          <div ref={scrollRef} className="w-full max-h-96 overflow-y-auto">
-            <table className="w-full table-auto text-sm text-center whitespace-nowrap">
-              <thead className="bg-gray-50 text-gray-600 font-medium border-b">
-                <tr>
-                  <th className="py-3 px-1">S No.</th>
-                  <th className="py-3 px-1">Webinar</th>
-                  <th className="py-3 px-1">Reminder</th>
-                  <th className="py-3 px-1">Sales</th>
-                  <th className="py-3 px-1">Type</th>
-                  <th className="py-3 px-1">Phone</th>
-                  <th className="py-3 px-1 min-w-[150px]">Full Name</th>
-                  <th className="py-3 px-1 min-w-[150px]">Gender</th>
-                  <th className="py-3 min-w-[200px]">Webinar Minutes</th>
-                  <th className="py-3 px-1">Location</th>
-                  <th className="py-3 px-1 min-w-[120px]">Profession</th>
-                  <th className="py-3 px-1 min-w-[150px]">Webinar Date</th>
-                  <ComponentGuard
-                    conditions={[!employeeModeData, userData?.isActive]}
-                  >
-                    <th className="py-3 px-1 stickyFieldRight">Action</th>
-                  </ComponentGuard>
-                </tr>
-              </thead>
-              <tbody className="text-gray-600 divide-y">
-                {attendeeHistoryData?.map((item, idx) => (
-                  <tr key={idx}>
-                    <td className="px-3 py-4">{idx + 1}</td>
-                    <td className="px-2 py-4">
-                      {Array.isArray(item?.webinar) && item.webinar.length > 0
-                        ? item.webinar[0].webinarName
-                        : "-"}
-                    </td>
-                    <td className="px-2 py-4">
-                      {item?.reminderAssignedTo || "N/A"}
-                    </td>
-                    <td className="px-2 py-4">
-                      {item?.assignedToUserName || "N/A"}
-                    </td>
-                    <td className="px-2 py-4">
-                      {item?.isAttended ? "Sales" : "Reminder"}
-                    </td>
-                    <td className="px-2 py-4">{item?.phone || "N/A"}</td>
-                    <td className="px-2 py-4">
-                      {(() => {
-                        const firstName = item?.firstName;
-                        const rawLastName = item?.lastName;
-                        const lastName = rawLastName?.match(/:-\)/)
-                          ? ""
-                          : rawLastName;
-                        if (firstName)
-                          return `${firstName} ${lastName || ""}`.trim();
-                        else if (lastName) return lastName;
-                        return "-";
-                      })()}
-                    </td>
-                    <td className="px-2 py-4">{item?.gender || "N/A"}</td>
-                    <td className="py-4 text-center">{item?.timeInSession}</td>
-                    <td className="py-4 text-center capitalize">
-                      {item?.location || "N/A"}
-                    </td>
-                    <td className="px-2 py-4">{item?.profession || "N/A"}</td>
-                    <td className="px-3 py-4">
-                      {Array.isArray(item?.webinar) && item.webinar.length > 0
-                        ? formatDateAsNumber(item.webinar[0].webinarDate)
-                        : "-"}
-                    </td>
-                    <ComponentGuard
-                      conditions={[!employeeModeData, userData?.isActive]}
-                    >
-                      <td className="px-3 stickyFieldRight">
-                        <button
-                          className="p-2 rounded-full hover:bg-neutral-200"
-                          onClick={() => setEditModalData(item)}
-                        >
-                          <img
-                            src={EditIcon}
-                            alt="Edit"
-                            className="h-6 w-6 min-h-6 min-w-6"
-                          />
-                        </button>
-                      </td>
+              </div>
+            ) : (
+              <table className="w-full text-left border-collapse min-w-[1600px]">
+                <thead>
+                  <tr className="bg-slate-50/50 dark:bg-slate-900/30 text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 border-b border-slate-100 dark:border-slate-800">
+                    <th className="py-4 px-6 w-16">S.No</th>
+                    <th className="py-4 px-2 min-w-[120px]">Webinar Details</th>
+                    <th className="py-4 px-2">Type</th>
+                    <th className="py-4 px-2">Full Name</th>
+                    <th className="py-4 px-2">Phone</th>
+                    <th className="py-4 px-2">Gender</th>
+                    <th className="py-4 px-2">Assignments</th>
+                    <th className="py-4 px-2">Duration</th>
+                    <th className="py-4 px-2">Location</th>
+                    <th className="py-4 px-2">Profession</th>
+                    <th className="py-4 px-2">Source</th>
+                    <ComponentGuard conditions={[!employeeModeData, userData?.isActive]}>
+                      <th className="py-4 px-2 text-center sticky right-0 bg-white dark:bg-slate-900 z-10 w-[70px]">Actions</th>
                     </ComponentGuard>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>)}
+                </thead>
+                <tbody className="divide-y divide-slate-50 dark:divide-slate-800">
+                  {attendeeHistoryData.map((item, idx) => {
+                    const webinar = Array.isArray(item?.webinar) && item.webinar.length > 0 ? item.webinar[0] : null;
+                    return (
+                      <tr key={idx} className="bg-slate-50/40 dark:bg-slate-900/20 hover:bg-slate-100/50 dark:hover:bg-slate-800/80 transition-colors group">
+                        <td className="py-3 px-6 text-sm font-bold text-slate-400">{idx + 1}</td>
+                        <td className="py-3 px-2">
+                          <div className="flex flex-col">
+                            <span className="text-sm font-bold text-slate-700 dark:text-slate-200">
+                              {webinar?.webinarName || "-"}
+                            </span>
+                            <span className="text-[11px] text-[#FF6B35] font-bold">
+                              {webinar ? formatDateAsNumber(webinar.webinarDate) : "-"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-2">
+                          <span className={`px-2 py-1 rounded-lg text-[9px] font-black uppercase tracking-wider ${item?.isAttended ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30' : 'bg-orange-100 text-[#FF6B35] dark:bg-orange-900/30'}`}>
+                            {item?.isAttended ? "Sales" : "Reminder"}
+                          </span>
+                        </td>
+                        <td className="py-4 px-2 text-sm font-bold text-slate-700 dark:text-slate-300">
+                          {formatFullName(item)}
+                        </td>
+                        <td className="py-4 px-2 text-sm font-bold text-slate-500 dark:text-slate-400">
+                          {item?.phone || "N/A"}
+                        </td>
+                        <td className="py-4 px-2 text-sm font-bold text-slate-400 dark:text-slate-500 capitalize">
+                          {item?.gender || "N/A"}
+                        </td>
+                        <td className="py-4 px-2">
+                          <div className="flex flex-col gap-1">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[9px] font-black text-slate-400 uppercase w-10">Sales:</span>
+                              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{item?.assignedToUserName || "N/A"}</span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[9px] font-black text-slate-400 uppercase w-10">Rem:</span>
+                              <span className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{item?.reminderAssignedTo || "N/A"}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-4 px-2">
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5 text-orange-400" />
+                            <span className="text-sm font-bold text-slate-600 dark:text-slate-300">{item?.timeInSession} <span className="text-[10px] font-normal text-slate-400 italic">mins</span></span>
+                          </div>
+                        </td>
+                        <td className="py-4 px-2 text-[12px] font-bold text-slate-600 dark:text-slate-400 capitalize">
+                          {item?.location || "N/A"}
+                        </td>
+                        <td className="py-4 px-2 text-[12px] font-bold text-slate-600 dark:text-slate-400">
+                          {item?.profession || "N/A"}
+                        </td>
+                        <td className="py-4 px-2 text-[12px] font-bold text-slate-400">
+                          {item?.source || "N/A"}
+                        </td>
+                        <ComponentGuard conditions={[!employeeModeData, userData?.isActive]}>
+                          <td className="py-4 px-2 text-center sticky right-0 bg-white dark:bg-slate-900 group-hover:bg-white dark:group-hover:bg-slate-950 transition-colors shadow-[-10px_0_15px_-5px_rgba(0,0,0,0.05)] w-[60px]">
+                            <button
+                              onClick={() => setEditModalData(item)}
+                              className="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-[#FF6B35] hover:text-white rounded-lg transition-all"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                          </td>
+                        </ComponentGuard>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       )}
     </div>
   );
 };
 
-export default AttendeeHistoryTable;
-
-
-export const StatRow = ({ label, value, valueClassName = "text-gray-800" }) => (
-  <div className="flex justify-between border-t border-gray-100 py-2">
-    <dt className="text-sm text-gray-500">{label}</dt>
-    <dd className={`text-sm font-medium text-right ${valueClassName}`}>{value}</dd>
+export const StatRow = ({ icon: Icon, label, value, color }) => (
+  <div className="flex justify-between items-center py-2 border-b border-slate-50 dark:border-slate-800 last:border-0">
+    <div className="flex items-center gap-2">
+      <Icon className={`w-3.5 h-3.5 ${color || 'text-slate-300'}`} />
+      <dt className="text-[11px] font-black text-slate-400 uppercase tracking-wider">{label}</dt>
+    </div>
+    <dd className="text-xs font-bold text-slate-700 dark:text-slate-200 text-right capitalize">{value}</dd>
   </div>
 );
 
-const HistoryCard = ({ item, index, onEdit, formatDate, showEditButton }) => {
-  const webinarName = Array.isArray(item?.webinar) && item.webinar.length > 0
-    ? item.webinar[0].webinarName
-    : "-";
-  const webinarDate = Array.isArray(item?.webinar) && item.webinar.length > 0
-    ? formatDate(item.webinar[0].webinarDate)
-    : "-";
+const HistoryCard = ({ item, index, totalCount, onEdit, showEditButton }) => {
+  const webinar = Array.isArray(item?.webinar) && item.webinar.length > 0 ? item.webinar[0] : null;
 
   return (
-    <div className="rounded-lg border bg-white p-4 shadow-sm">
-      {/* Card Header */}
-      <div className="flex items-start justify-between gap-4 border-b pb-3 mb-3">
-        <div>
-          <p className="font-semibold text-gray-900 text-center">
-            <span className="font-mono text-gray-400 mr-2">#{index + 1}</span>
-            {webinarName}
-          </p>
-
-          <p className="text-sm text-gray-500">
-            <span className="font-mono text-gray-400 mr-2">Date: </span>
-            {webinarDate}</p>
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all group"
+    >
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div className="flex items-center gap-3">
+          <div className="w-8 h-8 bg-orange-100 dark:bg-[#FF6B35]/20 rounded-xl flex items-center justify-center text-xs font-black text-[#FF6B35]">
+            {index + 1}
+          </div>
+          <div>
+            <h4 className="font-bold text-slate-800 dark:text-slate-200 leading-tight line-clamp-1">{webinar?.webinarName || "-"}</h4>
+            <span className="text-[10px] font-black text-[#FF6B35] uppercase tracking-widest">{webinar ? formatDateAsNumber(webinar.webinarDate) : "-"}</span>
+          </div>
         </div>
         {showEditButton && (
           <button
             onClick={() => onEdit(item)}
-            className="rounded-full p-2 transition-colors hover:bg-neutral-100 flex-shrink-0"
-            aria-label="Edit History"
+            className="p-2 bg-slate-50 dark:bg-slate-700 hover:bg-[#FF6B35] hover:text-white rounded-xl transition-all"
           >
-            <img src={EditIcon} alt="Edit" className="h-6 w-6" />
+            <Pencil className="w-4 h-4" />
           </button>
         )}
       </div>
 
-      {/* Card Body - Details */}
-      <dl className="space-y-1">
-        <StatRow label="Full Name" value={formatFullName(item)} />
-        <StatRow label="Phone" value={item?.phone || "N/A"} />
-        <StatRow label="Sales Rep" value={item?.assignedToUserName || "N/A"} />
-        <StatRow label="Reminder Rep" value={item?.reminderAssignedTo || "N/A"} />
-        <StatRow label="Type" value={item?.isAttended ? "Sales" : "Reminder"} />
-        <StatRow label="Gender" value={item?.gender || "N/A"}/>
-        <StatRow label="Webinar Mins" value={item?.timeInSession || "0"} />
-        <StatRow label="Location" value={item?.location || "N/A"} valueClassName="capitalize" />
-        <StatRow label="Profession" value={item?.profession || "N/A"} />
+      <dl className="space-y-1 pt-2 border-t border-slate-50 dark:border-slate-800">
+        <StatRow icon={User} label="Name" value={formatFullName(item)} />
+        <StatRow icon={Phone} label="Phone" value={item?.phone || "N/A"} />
+        <StatRow icon={ShieldCheck} label="Sales" value={item?.assignedToUserName || "N/A"} color="text-emerald-400" />
+        <StatRow icon={Bell} label="Reminder" value={item?.reminderAssignedTo || "N/A"} color="text-blue-400" />
+        <StatRow icon={Clock} label="Duration" value={`${item?.timeInSession || "0"} mins`} color="text-orange-400" />
+        <StatRow icon={Layers} label="Type" value={item?.isAttended ? "Sales" : "Reminder"} color="text-purple-400" />
+        <StatRow icon={MapPin} label="Location" value={item?.location || "N/A"} color="text-rose-400" />
+        <StatRow icon={Briefcase} label="Profession" value={item?.profession || "N/A"} color="text-amber-400" />
+        <StatRow icon={Globe} label="Source" value={item?.source || "N/A"} color="text-indigo-400" />
       </dl>
-      
-    </div>
+    </motion.div>
   );
 };
+
+export default AttendeeHistoryTable;

@@ -24,7 +24,7 @@ ChartJS.register(
 );
 
 const PlanPopularityChart = () => {
-  // Dummy data for the plans and their respective subscription counts
+  // Plan popularity and subscription counts
   const { plansGraphData = [] } = useSelector((state) => state.globalData);
 
   const data = {

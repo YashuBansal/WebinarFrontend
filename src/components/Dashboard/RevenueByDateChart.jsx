@@ -24,7 +24,7 @@ ChartJS.register(
 );
 
 const RevenueByDateChart = () => {
-  // Dummy revenue data for 30 days
+  // Revenue data trends
   const { revenueGraphData = [] } = useSelector((state) => state.globalData);
 
   // Extract labels (dates) and data (revenue) for the chart

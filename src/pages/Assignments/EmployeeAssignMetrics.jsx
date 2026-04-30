@@ -1,10 +1,9 @@
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, Suspense, useMemo } from "react";
 import multiService from "../../services/multiService";
 import { errorToast, formatDateAsNumber } from "../../utils/extra";
 import useRoles from "../../hooks/useRoles";
 import { useDispatch, useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   getAllWebinars,
   getEmployeeWebinars,
@@ -15,10 +14,38 @@ import EmpAssignModal from "./EmpAssignModal";
 import { VisibilityIcon } from "../../components/SVGs";
 import useMediaQuery from "../../hooks/useMediaQuery";
 import useUserSubscription from "../../hooks/useUserSubscription";
+import { useTheme } from "../../contexts/ThemeContext";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  BarChart,
+  CheckCircle,
+  Clock,
+  Calendar,
+  ChevronDown,
+  Filter,
+  ArrowLeft,
+  ArrowRight,
+  LayoutGrid,
+  List,
+  Search,
+  Download,
+  Eye,
+  Activity,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
+  RotateCcw
+} from "lucide-react";
+import { Button } from "../../components/ui/button";
+import { Badge } from "../../components/ui/badge";
+import AppLoader from "../../components/AppLoader";
 
 const EmployeeAssignMetrics = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const roles = useRoles();
   const { userData } = useSelector((state) => state.auth);
@@ -48,10 +75,11 @@ const EmployeeAssignMetrics = () => {
     webinarInQuery ? webinarInQuery : "all"
   );
   const [selectedData, setSelectedData] = useState(null);
+  const [isTableView, setIsTableView] = useState(true);
+
   const fetchMetrics = async (webinarId) => {
     try {
       setLoading(true);
-      // Create adjusted end date
       const adjustEndDate = (dateString) => {
         const date = new Date(dateString);
         date.setDate(date.getDate() + 1);
@@ -133,7 +161,9 @@ const EmployeeAssignMetrics = () => {
       errorToast("End date cannot be before start date");
       return;
     }
-    fetchMetrics();
+    const webinarId =
+      currentWebinar && currentWebinar !== "all" ? currentWebinar : undefined;
+    fetchMetrics(webinarId);
   };
 
   const isSmallScreen = useMediaQuery("(max-width: 768px)");
@@ -146,8 +176,6 @@ const EmployeeAssignMetrics = () => {
 
   useEffect(() => {
     if (!webinarData.length) {
-      console.log("employeeId", employeeId, role, roles.isEmployeeId(role));
-
       if (roles.isEmployeeId(role) || employeeModeData) {
         dispatch(getEmployeeWebinars({ employeeId }));
       } else dispatch(getAllWebinars({}));
@@ -166,199 +194,374 @@ const EmployeeAssignMetrics = () => {
     };
   }, [searchParams]);
 
-  // Calculate max value for scaling
-  // const maxAssignments = Math.max(...stats.daily.map((d) => d.count), 1);
   const assignmentMetrics = subscription?.plan?.assignmentMetrics || false;
   if (!assignmentMetrics) {
     return null;
   }
 
+  // --- STYLING HELPERS ---
+  const panelBg = isDark ? "#1e293b" : "#ffffff";
+  const panelBorder = isDark ? "#334155" : "#e5e7eb";
+  const textColor = isDark ? "#f8fafc" : "#0f172a";
+  const mutedText = isDark ? "#94a3b8" : "#64748b";
+  const glassBg = isDark ? "rgba(30, 41, 59, 0.7)" : "rgba(255, 255, 255, 0.7)";
+
+  const inputStyle = {
+    backgroundColor: isDark ? "#0f172a" : "#ffffff",
+    border: `1px solid ${panelBorder}`,
+    color: textColor,
+  };
+
   return (
-    <div className="p-8 max-w-7xl mt-10 mx-auto">
-      <div className="mb-8">
-        <div className="flex justify-between flex-col sm:flex-row items-center gap-4">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Assignment Metrics
-          </h1>
-          <FormControl className=" w-full md:w-40">
-            <InputLabel id="webinar-label">Webinar</InputLabel>
-            <Select
-              labelId="webinar-label"
-              label="Webinar"
-              value={currentWebinar}
-              onChange={(e) => {
-                const webinarId = e.target.value;
-                const webinar = webinarData.find(
-                  (web) => web._id === webinarId
-                );
-                console.log(webinar);
-                if (webinar) {
-                  setStartDate(
-                    new Date(webinar.webinarDate).toISOString().split("T")[0]
-                  );
-                }
-                setCurrentWebinar(webinarId);
-                setSearchParams({ webinarId });
+    <div className="px-6 md:px-10 pt-12">
+      <div className="mx-auto">
+        {/* Header Section */}
+        <div className="mb-8 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2.5 rounded-xl transition-all hover:scale-105 border flex-shrink-0"
+              style={{
+                backgroundColor: panelBg,
+                borderColor: panelBorder,
+                color: textColor,
               }}
             >
-              <MenuItem value="all">All Webinars</MenuItem>
-              {webinarData.map((webinar, index) => (
-                <MenuItem key={index} value={webinar._id}>
-                  {webinar?.webinarName} -{" "}
-                  {formatDateAsNumber(webinar?.webinarDate)}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </div>
-        <div className="flex flex-col md:flex-row gap-4 mt-4">
-          <div className="flex gap-4 justify-between items-center">
-            <div className="flex items-center gap-2 flex-col md:flex-row ">
-            <label className="text-sm text-gray-600">From:</label>
-            <input
-              type="date"
-              value={startDate}
-              max={endDate}
-              onChange={(e) => setStartDate(e.target.value)}
-              className="px-3 py-2 border rounded-md text-sm"
-            />
+              <ArrowLeft className="w-5 h-5" />
+            </button>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight" style={{ color: textColor }}>
+                Assignment Metrics
+              </h1>
+              <p className="mt-1 text-sm" style={{ color: mutedText }}>
+                Monitor and analyze assignment completion rates and performance.
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2 flex-col md:flex-row">
-            <label className="text-sm text-gray-600">To:</label>
-            <input
-              type="date"
-              value={endDate}
-              min={startDate}
-              max={new Date().toISOString().split("T")[0]}
-              onChange={(e) => setEndDate(e.target.value)}
-              className="px-3 py-2 border rounded-md text-sm"
-            />
-          </div>
-          </div>
-
-          <button
-            onClick={handleDateApply}
-            disabled={loading}
-            className="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-          >
-            {loading ? "Applying..." : "Apply Dates"}
-          </button>
-        </div>
-
-        {/* <p className="text-gray-500 mt-4">
-          Showing data from {formatDateAsNumber(startDate)} to {formatDateAsNumber(endDate)}
-        </p> */}
-
-        {loading ? (
-          <></>
-        ) : (
-          <>
-            {/* Summary Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 my-8">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-700">
-                  Total Assignments
-                </h3>
-                <p className="text-3xl font-bold text-indigo-600 mt-2">
-                  {stats.total}
-                </p>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="relative group">
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                <Activity className="w-4 h-4 text-gray-400 group-focus-within:text-blue-500 transition-colors" />
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-700">
-                  Completed
-                </h3>
-                <p className="text-3xl font-bold text-green-600 mt-2">
-                  {stats.completed}
-                </p>
+              <select
+                value={currentWebinar}
+                onChange={(e) => {
+                  const webinarId = e.target.value;
+                  const webinar = webinarData.find((web) => web._id === webinarId);
+                  if (webinar) {
+                    setStartDate(new Date(webinar.webinarDate).toISOString().split("T")[0]);
+                  }
+                  setCurrentWebinar(webinarId);
+                  setSearchParams({ webinarId });
+                }}
+                className="pl-10 pr-10 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 appearance-none cursor-pointer font-medium transition-all hover:border-blue-400 w-full sm:w-64"
+                style={inputStyle}
+              >
+                <option value="all">All Webinars</option>
+                {webinarData.map((webinar, index) => (
+                  <option key={index} value={webinar._id}>
+                    {webinar?.webinarName} - {formatDateAsNumber(webinar?.webinarDate)}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-gray-400" />
+            </div>
+
+            <div className="flex items-center gap-1 p-1 rounded-xl bg-black/5 dark:bg-white/5 border border-black/5 dark:border-white/10">
+              <button
+                onClick={() => setIsTableView(true)}
+                className={`p-2 rounded-lg transition-all ${isTableView ? "bg-white dark:bg-slate-800 shadow-sm text-blue-500" : "text-gray-500 hover:text-gray-700"}`}
+                title="Table View"
+              >
+                <List className="w-4 h-4" />
+              </button>
+              <button
+                onClick={() => setIsTableView(false)}
+                className={`p-2 rounded-lg transition-all ${!isTableView ? "bg-white dark:bg-slate-800 shadow-sm text-blue-500" : "text-gray-500 hover:text-gray-700"}`}
+                title="Grid View"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Date Filter Bar */}
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 p-4 rounded-2xl border flex flex-col md:flex-row items-center gap-6"
+          style={{
+            background: glassBg,
+            backdropFilter: "blur(16px)",
+            borderColor: panelBorder,
+          }}
+        >
+          <div className="flex flex-col sm:flex-row items-center gap-6 w-full md:w-auto">
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+                <Calendar className="w-4 h-4" />
               </div>
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-100">
-                <h3 className="text-lg font-semibold text-gray-700">Pending</h3>
-                <p className="text-3xl font-bold text-amber-600 mt-2">
-                  {stats.active}
-                </p>
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase font-bold tracking-wider" style={{ color: mutedText }}>From</span>
+                <input
+                  type="date"
+                  value={startDate}
+                  max={endDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="bg-transparent border-none p-0 text-sm focus:ring-0 cursor-pointer font-medium"
+                  style={{ color: textColor }}
+                />
               </div>
             </div>
 
-            {isSmallScreen ? (
-              // --- CARD VIEW for Small Screens ---
-              <div className="space-y-4">
-                {stats.daily.map((day) => (
-                  <DailyStatCard
-                    key={day.date}
-                    day={day}
-                    onViewDetails={setSelectedData}
-                    showViewButton={
-                      !roles.isEmployeeId(role) && !employeeModeData
-                    }
-                  />
-                ))}
+            <div className="h-8 w-px bg-gray-200 dark:bg-gray-700 hidden sm:block"></div>
+
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <div className="p-2 rounded-lg bg-purple-500/10 text-purple-500">
+                <Calendar className="w-4 h-4" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase font-bold tracking-wider" style={{ color: mutedText }}>To</span>
+                <input
+                  type="date"
+                  value={endDate}
+                  min={startDate}
+                  max={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="bg-transparent border-none p-0 text-sm focus:ring-0 cursor-pointer font-medium"
+                  style={{ color: textColor }}
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1"></div>
+
+          <Button
+            onClick={handleDateApply}
+            disabled={loading}
+            className="w-full md:w-auto rounded-xl bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 h-auto font-semibold shadow-lg shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50"
+          >
+            {loading ? (
+              <div className="flex items-center gap-2">
+                <RotateCcw className="w-4 h-4 animate-spin" />
+                <span>Applying...</span>
               </div>
             ) : (
-              // --- TABLE VIEW for Larger Screens (Your Original Code) ---
-              <div className="rounded-lg border border-gray-100 bg-white shadow-sm">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="pr-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                        Date
-                      </th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                        Total
-                      </th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                        Completed
-                      </th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                        Pending
-                      </th>
-                      <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">
-                        Completion Rate
-                      </th>
-                      {!roles.isEmployeeId(role) && <th className="py-3"></th>}
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4" />
+                <span>Apply Dates</span>
+              </div>
+            )}
+          </Button>
+        </motion.div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <motion.div
+            whileHover={{ y: -5 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="p-6 rounded-2xl border flex items-center gap-5 shadow-sm"
+            style={{
+              background: glassBg,
+              backdropFilter: "blur(16px)",
+              borderColor: panelBorder,
+            }}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-500">
+              <BarChart className="w-7 h-7" />
+            </div>
+            <div>
+              <p className="text-sm font-medium" style={{ color: mutedText }}>Total Assignments</p>
+              <h3 className="text-3xl font-bold mt-1" style={{ color: textColor }}>{loading ? "..." : stats.total}</h3>
+            </div>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ y: -5 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="p-6 rounded-2xl border flex items-center gap-5 shadow-sm"
+            style={{
+              background: glassBg,
+              backdropFilter: "blur(16px)",
+              borderColor: panelBorder,
+            }}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500">
+              <CheckCircle className="w-7 h-7" />
+            </div>
+            <div>
+              <p className="text-sm font-medium" style={{ color: mutedText }}>Completed</p>
+              <h3 className="text-3xl font-bold mt-1 text-emerald-600">{loading ? "..." : stats.completed}</h3>
+            </div>
+          </motion.div>
+
+          <motion.div
+            whileHover={{ y: -5 }}
+            transition={{ type: "spring", stiffness: 300 }}
+            className="p-6 rounded-2xl border flex items-center gap-5 shadow-sm"
+            style={{
+              background: glassBg,
+              backdropFilter: "blur(16px)",
+              borderColor: panelBorder,
+            }}
+          >
+            <div className="w-14 h-14 rounded-2xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+              <Clock className="w-7 h-7" />
+            </div>
+            <div>
+              <p className="text-sm font-medium" style={{ color: mutedText }}>Pending</p>
+              <h3 className="text-3xl font-bold mt-1 text-amber-600">{loading ? "..." : stats.active}</h3>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Data View Section */}
+        <AnimatePresence mode="wait">
+          {loading ? (
+            <motion.div
+              key="loader"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="py-20 flex flex-col items-center justify-center"
+            >
+              <AppLoader size="xl" />
+              <p className="mt-4 text-sm font-medium text-gray-500">Loading performance data...</p>
+            </motion.div>
+          ) : isTableView && !isSmallScreen ? (
+            <motion.div
+              key="table-view"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="rounded-2xl border overflow-hidden shadow-sm transition-all"
+              style={{
+                background: glassBg,
+                backdropFilter: "blur(16px)",
+                borderColor: panelBorder,
+              }}
+            >
+              <div className="overflow-x-auto custom-scrollbar">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr style={{ backgroundColor: isDark ? "rgba(15, 23, 42, 0.5)" : "rgba(249, 250, 251, 0.5)" }}>
+                      <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest" style={{ color: mutedText }}>Date</th>
+                      <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-center" style={{ color: mutedText }}>Total</th>
+                      <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-center" style={{ color: mutedText }}>Completed</th>
+                      <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-center" style={{ color: mutedText }}>Pending</th>
+                      <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-center" style={{ color: mutedText }}>Completion Rate</th>
+                      {!roles.isEmployeeId(role) && !employeeModeData && (
+                        <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-right" style={{ color: mutedText }}>Actions</th>
+                      )}
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-200 bg-white">
-                    {stats.daily.map((day) => (
-                      <tr key={day.date}>
-                        <td className="pr-6 py-4 text-center whitespace-nowrap">
-                          {day.date}
+                  <tbody className="divide-y" style={{ borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }}>
+                    {stats.daily.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-6 py-20 text-center">
+                          <div className="flex flex-col items-center opacity-40">
+                            <Search className="w-10 h-10 mb-3" />
+                            <p className="text-sm font-medium">No metrics data found for the selected range.</p>
+                          </div>
                         </td>
-                        <td className="px-6 py-4 text-center whitespace-nowrap">
-                          {day.count}
-                        </td>
-                        <td className="px-6 py-4 text-center whitespace-nowrap text-green-600">
-                          {day.completed}
-                        </td>
-                        <td className="px-6 py-4 text-center whitespace-nowrap text-amber-600">
-                          {day.count - day.completed}
-                        </td>
-                        <td className="px-6 py-4 text-center whitespace-nowrap">
-                          {((day.completed / day.count) * 100 || 0).toFixed(1)}%
-                        </td>
-                        {!roles.isEmployeeId(role) && !employeeModeData && (
-                          <td className="whitespace-nowrap px-4">
-                            <button
-                              onClick={() => setSelectedData(day)}
-                              className="rounded-full px-2 py-2 hover:bg-neutral-200"
-                            >
-                              <img
-                                src={VisibilityIcon}
-                                alt="Bookmark"
-                                className="h-6 w-6 min-h-6 min-w-6"
-                              />
-                            </button>
-                          </td>
-                        )}
                       </tr>
-                    ))}
+                    ) : (
+                      stats.daily.map((day, idx) => (
+                        <motion.tr
+                          key={day.date}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ delay: idx * 0.05 }}
+                          className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors group"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{ color: textColor }}>
+                            {day.date}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center font-semibold" style={{ color: textColor }}>
+                            {day.count}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                            <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 hover:bg-emerald-500/20 rounded-lg px-3 py-1">
+                              {day.completed}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-center">
+                            <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 hover:bg-amber-500/20 rounded-lg px-3 py-1">
+                              {day.count - day.completed}
+                            </Badge>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex flex-col items-center gap-1.5">
+                              <span className="text-xs font-bold" style={{ color: textColor }}>
+                                {((day.completed / day.count) * 100 || 0).toFixed(1)}%
+                              </span>
+                              <div className="w-32 h-1.5 rounded-full bg-black/5 dark:bg-white/10 overflow-hidden">
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: `${(day.completed / day.count) * 100 || 0}%` }}
+                                  className={`h-full rounded-full ${(day.completed / day.count) >= 0.8 ? "bg-emerald-500" :
+                                    (day.completed / day.count) >= 0.5 ? "bg-blue-500" : "bg-amber-500"
+                                    }`}
+                                />
+                              </div>
+                            </div>
+                          </td>
+                          {!roles.isEmployeeId(role) && !employeeModeData && (
+                            <td className="px-6 py-4 text-right">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => setSelectedData(day)}
+                                className="rounded-xl hover:bg-blue-500/10 text-blue-500 hover:text-blue-600 transition-all"
+                              >
+                                <Eye className="w-5 h-5" />
+                              </Button>
+                            </td>
+                          )}
+                        </motion.tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
-            )}
-          </>
-        )}
+            </motion.div>
+          ) : (
+            <motion.div
+              key="grid-view"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            >
+              {stats.daily.length === 0 ? (
+                <div className="col-span-full py-20 flex flex-col items-center opacity-40">
+                  <Search className="w-10 h-10 mb-3" />
+                  <p className="text-sm font-medium">No metrics data found for the selected range.</p>
+                </div>
+              ) : (
+                stats.daily.map((day, idx) => (
+                  <DailyStatCard
+                    key={day.date}
+                    idx={idx}
+                    day={day}
+                    onViewDetails={setSelectedData}
+                    showViewButton={!roles.isEmployeeId(role) && !employeeModeData}
+                    isDark={isDark}
+                    panelBorder={panelBorder}
+                    glassBg={glassBg}
+                    textColor={textColor}
+                    mutedText={mutedText}
+                  />
+                ))
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
+
       <Suspense fallback={<ModalFallback />}>
         {selectedData && (
           <EmpAssignModal
@@ -373,65 +576,88 @@ const EmployeeAssignMetrics = () => {
 
 export default EmployeeAssignMetrics;
 
-const StatRow = ({ label, value, valueClassName = "" }) => (
-  <div className="flex items-center justify-between">
-    <p className="text-sm text-gray-500">{label}</p>
-    <p className={`text-sm font-medium text-gray-800 ${valueClassName}`}>
-      {value}
-    </p>
-  </div>
-);
-
-// The main card component
-const DailyStatCard = ({ day, onViewDetails, showViewButton }) => {
+const DailyStatCard = ({
+  day,
+  idx,
+  onViewDetails,
+  showViewButton,
+  isDark,
+  panelBorder,
+  glassBg,
+  textColor,
+  mutedText
+}) => {
   const pendingCount = day.count - day.completed;
   const completionRate = (day.completed / day.count) * 100 || 0;
 
   return (
-    <div className="rounded-xl border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md">
-      {/* Card Header */}
-      <div className="mb-4 flex items-center justify-between border-b border-gray-100 pb-3">
-        <p className="font-bold text-gray-800">{day.date}</p>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: idx * 0.05 }}
+      whileHover={{ scale: 1.02 }}
+      className="rounded-2xl border p-5 shadow-sm transition-all"
+      style={{
+        background: glassBg,
+        backdropFilter: "blur(16px)",
+        borderColor: panelBorder,
+      }}
+    >
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
+            <Calendar className="w-4 h-4" />
+          </div>
+          <p className="font-bold text-sm" style={{ color: textColor }}>{day.date}</p>
+        </div>
         {showViewButton && (
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => onViewDetails(day)}
-            className="rounded-full p-2 transition-colors hover:bg-neutral-100"
-            title="View Details"
+            className="rounded-xl h-8 w-8 hover:bg-blue-500/10 text-blue-500 transition-all"
           >
-            <img src={VisibilityIcon} alt="View Details" className="h-6 w-6" />
-          </button>
+            <Eye className="w-4 h-4" />
+          </Button>
         )}
       </div>
 
-      {/* Card Body with Stats */}
-      <div className="space-y-3">
-        <StatRow label="Total" value={day.count} />
-        <StatRow
-          label="Completed"
-          value={day.completed}
-          valueClassName="text-green-600"
-        />
-        <StatRow
-          label="Pending"
-          value={pendingCount}
-          valueClassName="text-amber-600"
-        />
-        {/* Completion Rate with a visual progress bar */}
-        <div>
-          <div className="mb-1 flex items-center justify-between">
-            <p className="text-sm text-gray-500">Completion Rate</p>
-            <p className="text-sm font-medium text-gray-800">
-              {completionRate.toFixed(1)}%
-            </p>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium" style={{ color: mutedText }}>Total Assignments</span>
+          <span className="text-sm font-bold" style={{ color: textColor }}>{day.count}</span>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium" style={{ color: mutedText }}>Completed</span>
+          <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20 rounded-lg px-2 py-0.5 text-[10px]">
+            {day.completed}
+          </Badge>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-xs font-medium" style={{ color: mutedText }}>Pending</span>
+          <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20 rounded-lg px-2 py-0.5 text-[10px]">
+            {pendingCount}
+          </Badge>
+        </div>
+
+        <div className="pt-2 border-t" style={{ borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }}>
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-xs font-bold" style={{ color: textColor }}>Progress</span>
+            <span className="text-xs font-bold text-blue-500">{completionRate.toFixed(1)}%</span>
           </div>
-          <div className="h-2 w-full rounded-full bg-gray-200">
-            <div
-              className="h-2 rounded-full bg-blue-500"
-              style={{ width: `${completionRate}%` }}
+          <div className="h-2 w-full rounded-full bg-black/5 dark:bg-white/10 overflow-hidden">
+            <motion.div
+              initial={{ width: 0 }}
+              animate={{ width: `${completionRate}%` }}
+              className={`h-full rounded-full ${completionRate >= 80 ? "bg-emerald-500" :
+                completionRate >= 50 ? "bg-blue-500" : "bg-amber-500"
+                }`}
             />
           </div>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };

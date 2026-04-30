@@ -25,7 +25,7 @@ ChartJS.register(
 );
 
 const UserGrowthByDate = () => {
-  // Dummy data: User sign-ups with specific dates
+  // User sign-ups growth data
   const { usersGraphData = [] } = useSelector((state) => state.globalData);
 
   // Prepare data for the chart

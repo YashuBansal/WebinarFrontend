@@ -5,12 +5,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { addNote } from "../../features/actions/assign";
 import AppLoader from "../../components/AppLoader";
 import {
-  createAttendeeProduct,
   getAllProductsByAdminId,
 } from "../../features/actions/product";
 import { getCustomOptions } from "../../features/actions/globalData";
 import { resetFormSuccess } from "../../features/slices/assign";
 import { getUnAckAlarmData, removeAckAlarm } from "../../features/slices/alarm";
+import { Phone, CheckCircle2, Clock, FileText, Send, AlertCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 
 const AddNoteForm = (props) => {
   const { customOptions } = useSelector((state) => state.globalData);
@@ -26,10 +27,8 @@ const AddNoteForm = (props) => {
     userData,
   } = props;
   const [selectedStatus, setSelectedStatus] = useState(null);
-  const [selectedFile, setSelectedFile] = useState(null);
   const [isNoteRequired, setNoteRequired] = useState(false);
   const [IsNumberInValid, setNumberInvalid] = useState(false);
-  const { productDropdownData } = useSelector((state) => state.product);
   const [isAckPending, setAckPending] = useState(false);
 
   const {
@@ -58,7 +57,6 @@ const AddNoteForm = (props) => {
     }
   }, []);
 
-  // Updated useEffect to correctly set and reset isAckPending state
   useEffect(() => {
     if (userData && email && Array.isArray(unAcknowledgedData)) {
       const hasPendingAlarm = unAcknowledgedData.some(
@@ -68,7 +66,6 @@ const AddNoteForm = (props) => {
     }
   }, [unAcknowledgedData, email, userData]);
 
-  // New useEffect to handle form state when an alarm is pending
   useEffect(() => {
     if (isAckPending) {
       const ackStatusValue = "Alarm Acknowledgement";
@@ -91,7 +88,6 @@ const AddNoteForm = (props) => {
         image: null,
       });
       setSelectedStatus(null);
-      setSelectedFile(null);
       dispatch(resetFormSuccess());
     }
   }, [isFormSuccess, reset, attendeeId, email, dispatch]);
@@ -117,7 +113,6 @@ const AddNoteForm = (props) => {
     }
 
     dispatch(addNote(data)).then((res) => {
-      console.log(res);
       if (res?.meta?.requestStatus === "fulfilled") {
         setNoteRequired(false);
         addUserActivityLog({
@@ -126,7 +121,6 @@ const AddNoteForm = (props) => {
           detailItem: data?.email,
           activityItem: data?.email,
         });
-        console.log('isAckPending', isAckPending)
         if (isAckPending) {
           dispatch(removeAckAlarm(email));
           setAckPending(false);
@@ -135,37 +129,50 @@ const AddNoteForm = (props) => {
     });
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    setSelectedFile(file);
-    setValue("image", file);
-  };
-
   const handleInput = (e, maxValue, numAllowed = 2) => {
     let value = e.target.value;
-
     value = value.replace(/[^0-9]/g, "");
-    if (value.length > numAllowed) {
-      value = value.slice(0, numAllowed);
-    }
-
+    if (value.length > numAllowed) value = value.slice(0, numAllowed);
     const num = Number(value);
-
-    if (num > maxValue) {
-      value = maxValue.toString().padStart(2, "0");
-    }
-
+    if (num > maxValue) value = maxValue.toString().padStart(2, "0");
     e.target.value = value;
+  };
+
+  const customSelectStyles = {
+    control: (provided, state) => ({
+      ...provided,
+      borderRadius: '12px',
+      padding: '4px',
+      border: state.isFocused ? '2px solid #FF6B35' : '1px solid #E2E8F0',
+      boxShadow: 'none',
+      backgroundColor: state.isDisabled ? '#F1F5F9' : 'white',
+      '&:hover': { border: '1px solid #CBD5E1' }
+    }),
+    option: (provided, state) => ({
+      ...provided,
+      backgroundColor: state.isSelected ? '#FF6B35' : state.isFocused ? '#FFF4F0' : 'white',
+      color: state.isSelected ? 'white' : '#1E293B',
+      fontWeight: '600',
+      fontSize: '14px',
+      padding: '10px 15px'
+    }),
+    placeholder: (provided) => ({ ...provided, color: '#94A3B8', fontWeight: '500' }),
+    singleValue: (provided) => ({ ...provided, fontWeight: '700', color: '#1E293B' })
   };
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="px-5 flex flex-col h-full"
+      className="p-4 space-y-4 flex flex-col h-full"
     >
-      <div className=" flex-1">
-        <div className="w-full bg-inherit">
-          <label className="font-medium text-sm">Phone Number</label>
+      <div className="space-y-4 flex-grow">
+
+        {/* Phone Number Field */}
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <Phone className="w-3.5 h-3.5 text-[#FF6B35]" />
+            <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Phone</label>
+          </div>
           <Controller
             name="phone"
             control={control}
@@ -177,73 +184,44 @@ const AddNoteForm = (props) => {
                   value: phone,
                   label: phone,
                 }))}
-                className="mt-1 text-sm shadow bg-gray-200"
-                placeholder="Choose Phone Number"
-                value={
-                  field.value
-                    ? { value: field.value, label: field.value }
-                    : null
-                }
-                onChange={(selected) => {
-                  field.onChange(selected.value);
-                }}
-                styles={{
-                  control: (provided) => ({
-                    ...provided,
-                    border: errors.phone
-                      ? "1px solid #EF4444"
-                      : "1px solid #CBD5E1",
-                  }),
-                  placeHolder: (provided) => ({
-                    ...provided,
-                    color: "#9CA3AF",
-                  }),
-                }}
+                className="text-xs"
+                placeholder="Select phone..."
+                value={field.value ? { value: field.value, label: field.value } : null}
+                onChange={(selected) => field.onChange(selected.value)}
+                styles={customSelectStyles}
               />
             )}
           />
-          {errors.phone && (
-            <span className="text-red-500">Phone Number is required</span>
-          )}
         </div>
 
         {/* Status Select */}
-        <div className="pt-2">
-          <div className="font-medium">Status</div>
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-1.5 mb-0.5">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+            <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Status</label>
+          </div>
           <Controller
             name="status"
             control={control}
             rules={{ required: "Status is required" }}
             render={({ field }) => {
-              // Conditionally set options based on isAckPending
               const statusOptions = isAckPending
-                ? [
-                    {
-                      value: "Alarm Acknowledgement",
-                      label: "Alarm Acknowledgement",
-                      isWorked: true, // Prevents note field from showing
-                      isInvalid: false,
-                    },
-                  ]
+                ? [{ value: "Alarm Acknowledgement", label: "Alarm Acknowledgement", isWorked: true, isInvalid: false }]
                 : customOptions.map((option) => ({
-                    value: option?.label,
-                    label: option?.label,
-                    isWorked: option?.isWorked,
-                    isInvalid: option?.isInvalid,
-                  }));
+                  value: option?.label,
+                  label: option?.label,
+                  isWorked: option?.isWorked,
+                  isInvalid: option?.isInvalid,
+                }));
 
               return (
                 <Select
                   {...field}
-                  isDisabled={isAckPending} // Disable the select if alarm is pending
+                  isDisabled={isAckPending}
                   options={statusOptions}
-                  className="mt-1 text-sm shadow bg-gray-200"
-                  placeholder="Choose Status"
-                  value={
-                    field.value
-                      ? { value: field.value, label: field.value }
-                      : null
-                  }
+                  className="text-xs"
+                  placeholder="Set result..."
+                  value={field.value ? { value: field.value, label: field.value } : null}
                   onChange={(selected) => {
                     field.onChange(selected.value);
                     setSelectedStatus(selected.value);
@@ -251,91 +229,89 @@ const AddNoteForm = (props) => {
                     setNumberInvalid(selected.isInvalid);
                   }}
                   menuPortalTarget={document.body}
-                  styles={{
-                    menuPortal: (base) => ({ ...base, zIndex: 9999 }),
-                    control: (provided, state) => ({
-                      ...provided,
-                      border: errors.status
-                        ? "1px solid #EF4444"
-                        : "1px solid #CBD5E1",
-                      // Style for disabled state
-                      backgroundColor:
-                        state.isDisabled && !selectedStatus
-                          ? "#e9ecef"
-                          : provided.backgroundColor,
-                    }),
-                    placeHolder: (provided) => ({
-                      ...provided,
-                      color: "#9CA3AF",
-                    }),
-                  }}
+                  styles={customSelectStyles}
                 />
               );
             }}
           />
-
-          {errors.status && (
-            <span className="text-red-500 text-sm mt-1">
-              {errors.status.message}
-            </span>
-          )}
         </div>
 
-        {isNoteRequired && (
-          <>
-            <div className="w-full flex mt-2 gap-5 items-center">
-              <label className="font-medium text-sm">
-                Call Duration{" "}
-                <span className="font-normal text-xs">(min : sec)</span>
-              </label>
-              <div className="mt-1 flex items-center">
+        <div className="space-y-4">
+          {/* Call Duration */}
+          <div className={`p-3 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between transition-all ${!isNoteRequired ? 'opacity-40 pointer-events-none grayscale-[0.5]' : ''}`}>
+            <div className="flex items-center gap-2">
+              <div className="p-1.5 bg-orange-50 dark:bg-orange-900/30 rounded-lg">
+                <Clock className="w-3.5 h-3.5 text-[#FF6B35]" />
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider">Duration</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1">
+                <span className="text-[9px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-tighter">min</span>
                 <input
                   {...register("callDuration.min")}
                   type="text"
-                  placeholder={"00"}
-                  className="w-12 h-10 rounded-lg border focus:border-teal-500 outline-none text-center text-xl"
-                  maxLength={3}
+                  disabled={!isNoteRequired}
+                  placeholder="00"
+                  className="w-9 h-8 rounded-lg border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 text-center font-black text-[11px] text-slate-700 dark:text-slate-200 focus:border-[#FF6B35] outline-none disabled:bg-slate-100 dark:disabled:bg-slate-950 transition-colors"
                   onInput={(e) => handleInput(e, 150, 3)}
                   onClick={(e) => e.target.select()}
                 />
-                <span className="font-light px-1">:</span>
+              </div>
+              
+              <span className="font-black text-slate-400 dark:text-slate-600 text-[10px]">:</span>
+              
+              <div className="flex items-center gap-1">
+                <span className="text-[9px] font-black text-slate-600 dark:text-slate-400 uppercase tracking-tighter">sec</span>
                 <input
                   {...register("callDuration.sec")}
                   type="text"
-                  placeholder={"00"}
-                  className="w-10 h-10 rounded-lg border focus:border-teal-500 outline-none text-center text-xl"
-                  maxLength={2}
+                  disabled={!isNoteRequired}
+                  placeholder="00"
+                  className="w-9 h-8 rounded-lg border border-slate-200 bg-white dark:bg-slate-800 dark:border-slate-700 text-center font-black text-[11px] text-slate-700 dark:text-slate-200 focus:border-[#FF6B35] outline-none disabled:bg-slate-100 dark:disabled:bg-slate-950 transition-colors"
                   onInput={(e) => handleInput(e, 59)}
                   onClick={(e) => e.target.select()}
                 />
               </div>
             </div>
+          </div>
 
-            <div className="pt-2">
-              <label className="font-medium text-sm">Note</label>
-              <textarea
-                {...register("note", { required: true })}
-                className="w-full mt-1 px-5 py-2 text-gray-500 border-slate-300 bg-transparent outline-none border focus:border-teal-400 shadow-sm rounded-lg"
-              />
-              {errors.note && (
-                <span className="text-red-500">Note is required</span>
-              )}
+          {/* Note Textarea */}
+          <div className={`space-y-1.5 transition-all ${!isNoteRequired ? 'opacity-40 pointer-events-none grayscale-[0.5]' : ''}`}>
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <FileText className="w-3.5 h-3.5 text-amber-500" />
+              <label className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Discussion</label>
             </div>
-          </>
-        )}
+            <textarea
+              {...register("note", { required: isNoteRequired })}
+              disabled={!isNoteRequired}
+              placeholder={isNoteRequired ? "Interaction highlights..." : "Note not required for this status"}
+              rows={3}
+              className="w-full p-3 text-xs font-semibold text-slate-700 dark:text-slate-200 bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl focus:ring-2 focus:ring-[#FF6B35] outline-none transition-all resize-none disabled:bg-slate-100 dark:disabled:bg-slate-950"
+            />
+          </div>
+        </div>
       </div>
 
-      <button
-        type="submit"
-        disabled={
-          isFormLoading || employeeModeData
-            ? true
-            : false || !userData?.isActive
-        }
-        className="bg-indigo-700 w-full hover:bg-indigo-800 my-2 text-white py-2 px-4 rounded-md"
-      >
-        {isFormLoading ? <AppLoader size="md" variant="muted" /> : "Add Note"}
-      </button>
+      {/* Submit Button */}
+      <div className="pt-2">
+        <button
+          type="submit"
+          disabled={isFormLoading || employeeModeData || !userData?.isActive}
+          className="group w-full h-11 bg-[#FF6B35] hover:bg-[#e85a24] disabled:bg-slate-200 text-white font-black rounded-xl transition-all shadow-md shadow-[#FF6B35]/20 flex items-center justify-center gap-2"
+        >
+          {isFormLoading ? (
+            <AppLoader size="sm" variant="muted" />
+          ) : (
+            <>
+              <span className="text-xs">SAVE NOTE</span>
+              <Send className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </>
+          )}
+        </button>
+      </div>
     </form>
   );
 };
