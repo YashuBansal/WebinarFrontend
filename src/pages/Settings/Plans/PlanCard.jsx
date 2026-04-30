@@ -44,11 +44,46 @@ const PlanCard = (props) => {
           const selectedPlanDoc = payload?.planData;
           if (!order?.id || !selectedPlanDoc?._id) return;
 
+          const envMode = import.meta.env.VITE_REACT_APP_WORKING_ENVIRONMENT;
           const callbackBase =
-            import.meta.env.VITE_REACT_APP_WORKING_ENVIRONMENT === "development"
+            envMode === "development"
               ? import.meta.env.VITE_REACT_APP_API_BASE_URL_DEVELOPMENT
               : import.meta.env.VITE_REACT_APP_API_BASE_URL_MAIN_PRODUCTION;
+          if (
+            typeof callbackBase !== "string" ||
+            callbackBase.trim().length === 0
+          ) {
+            errorToast(
+              "Callback URL is not configured. Please verify API base URL env settings."
+            );
+            return;
+          }
+          if (!userData?._id) {
+            errorToast("Unable to start checkout: missing user context.");
+            return;
+          }
+          if (
+            typeof import.meta.env.VITE_RAZORPAY_KEY_ID !== "string" ||
+            import.meta.env.VITE_RAZORPAY_KEY_ID.trim().length === 0
+          ) {
+            errorToast(
+              "Razorpay key is missing. Please verify frontend environment configuration."
+            );
+            return;
+          }
           const callbackUrl = `${callbackBase}/razorpay/payment-success?planId=${selectedPlanDoc._id}&adminId=${userData?._id}&durationType=${billingData?.durationType}`;
+
+          const isSubscription =
+            payload?.checkoutMode === "subscription" ||
+            order?.entity === "subscription" ||
+            (typeof order?.id === "string" && order.id.startsWith("sub_"));
+
+          if (!isSubscription) {
+            errorToast(
+              "Recurring checkout is required. This plan duration is not configured for Razorpay subscriptions."
+            );
+            return;
+          }
 
           const options = {
             key: import.meta.env.VITE_RAZORPAY_KEY_ID,

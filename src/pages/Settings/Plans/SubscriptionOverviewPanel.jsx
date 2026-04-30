@@ -115,6 +115,10 @@ export default function SubscriptionOverviewPanel({
     typeof subscription.razorpaySubscriptionId === "string"
       ? subscription.razorpaySubscriptionId
       : "";
+  const razorpayShortUrl =
+    typeof subscription.razorpaySubscriptionShortUrl === "string"
+      ? subscription.razorpaySubscriptionShortUrl
+      : "";
   const isRecurring = Boolean(razorpayId);
   const rzpStatus = formatRazorpayStatus(
     subscription.razorpaySubscriptionStatus
@@ -211,6 +215,16 @@ export default function SubscriptionOverviewPanel({
                   >
                     Copy
                   </button>
+                  {razorpayShortUrl ? (
+                    <a
+                      href={razorpayShortUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-semibold text-indigo-600 hover:text-indigo-800"
+                    >
+                      Open link
+                    </a>
+                  ) : null}
                 </>
               ) : (
                 <span className="text-gray-600">Not on recurring billing</span>

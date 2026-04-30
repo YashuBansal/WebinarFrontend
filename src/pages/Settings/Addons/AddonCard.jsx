@@ -1,7 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { checkoutAddon } from "../../../features/actions/razorpay";
 import ComponentGuard from "../../../components/AccessControl/ComponentGuard";
-import { copyToClipboard, errorToast, formatDateAsNumber } from "../../../utils/extra";
+import { errorToast, formatDateAsNumber } from "../../../utils/extra";
 import { getGSTStateValue } from "../../../features/slices/auth";
 import { formatRazorpayStatus } from "../Plans/subscriptionStatusUtils";
 
@@ -18,7 +18,7 @@ function entitlementBadgeClass(status) {
   return "bg-gray-100 text-gray-700 ring-gray-500/10";
 }
 
-function formatEntitlementStatus(status) {
+function formatEntitlementStatus(status, showExpiryDate = false) {
   const s = String(status || "")
     .toUpperCase()
     .trim();
@@ -29,6 +29,9 @@ function formatEntitlementStatus(status) {
     PENDING: "Access pending",
     FAILED: "Access failed",
   };
+  if (!s) {
+    return showExpiryDate ? "Available" : "Unknown";
+  }
   return labels[s] || (s ? s.charAt(0) + s.slice(1).toLowerCase() : "Unknown");
 }
 
@@ -57,6 +60,8 @@ const AddonCard = ({
   const dispatch = useDispatch();
   const { userData } = useSelector((state) => state.auth);
   const GST_VALUE = useSelector(getGSTStateValue);
+  const razorpaySubscriptionLink =
+    addon?.providerRazorpaySubscriptionShortUrl || "";
 
   const handleAddonSelection = (addonId) => {
     dispatch(checkoutAddon({ addon: addonId }))
@@ -101,13 +106,15 @@ const AddonCard = ({
             {addon.addonName}
           </h2>
           <div className="mt-2 flex flex-wrap items-center gap-2">
-            <span
-              className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${entitlementBadgeClass(
-                addon.status
-              )}`}
-            >
-              {formatEntitlementStatus(addon.status)}
-            </span>
+            {!showExpiryDate ? (
+              <span
+                className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${entitlementBadgeClass(
+                  addon.status
+                )}`}
+              >
+                {formatEntitlementStatus(addon.status, showExpiryDate)}
+              </span>
+            ) : null}
             {addon.providerRazorpaySubscriptionId ? (
               <span
                 className={`inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold ring-1 ring-inset ${razorpayBillingBadgeClass(
@@ -214,26 +221,17 @@ const AddonCard = ({
             <div>
               <div className="font-semibold text-gray-700">Razorpay subscription</div>
               <div className="mt-1 flex flex-wrap items-center gap-2">
-                <code className="rounded bg-white px-2 py-1 font-mono text-[11px] text-gray-800 ring-1 ring-gray-200">
-                  {addon.providerRazorpaySubscriptionId}
-                </code>
-                <button
-                  type="button"
-                  className="rounded-md bg-white px-2 py-1 text-[11px] font-semibold text-indigo-700 ring-1 ring-indigo-200 hover:bg-indigo-50"
-                  onClick={() =>
-                    copyToClipboard(
-                      addon.providerRazorpaySubscriptionId,
-                      "Razorpay subscription"
-                    )
-                  }
-                >
-                  Copy
-                </button>
+                {razorpaySubscriptionLink ? (
+                  <a
+                    href={razorpaySubscriptionLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="rounded-md bg-white px-2 py-1 text-[11px] font-semibold text-indigo-700 ring-1 ring-indigo-200 hover:bg-indigo-50"
+                  >
+                    Open link
+                  </a>
+                ) : null}
               </div>
-              <p className="mt-2 leading-relaxed text-gray-600">
-                Recurring billing runs in Razorpay until you cancel this add-on
-                subscription in the Razorpay dashboard or customer portal.
-              </p>
             </div>
           ) : null}
           {addon.validityInDays ? (

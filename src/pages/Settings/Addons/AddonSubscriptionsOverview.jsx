@@ -49,7 +49,7 @@ export default function AddonSubscriptionsOverview({
       ? tier === "expired"
         ? "Your organization subscription has expired. Add-ons may not renew until the plan is active again."
         : daysRemaining != null && tier !== "unknown"
-          ? `Organization plan renews in about ${daysRemaining} day${daysRemaining === 1 ? "" : "s"}. Add-on periods are capped by that date.`
+          ? null
           : "Add-on capacity is added on top of your organization subscription."
       : showOrgContext && subscriptionLoading
         ? "Loading organization subscription context…"
@@ -72,11 +72,6 @@ export default function AddonSubscriptionsOverview({
         >
           My add-ons
         </h2>
-        <p className="mt-2 text-sm text-gray-600 max-w-3xl">
-          Active add-ons extend your limits for the current term. Purchases billed
-          through Razorpay subscriptions renew automatically until canceled in
-          Razorpay, similar to your main plan.
-        </p>
         {orgLine && (
           <p className="mt-3 text-sm text-indigo-900/90 max-w-3xl">{orgLine}</p>
         )}

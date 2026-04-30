@@ -114,11 +114,6 @@ const MyAddOns = () => {
             <h1 className="text-3xl font-bold text-gray-900 tracking-tight">
               Add-ons &amp; billing
             </h1>
-            <p className="mt-2 text-gray-600 max-w-3xl text-sm sm:text-base">
-              Review purchased add-ons, current term dates, and Razorpay
-              subscription ids. Buy more from the add-ons catalog when you need
-              extra capacity.
-            </p>
           </header>
         )}
 
