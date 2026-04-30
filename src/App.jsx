@@ -67,6 +67,7 @@ import {
   ClientBillingHistories,
   WebhookSetup,
   MessageCounts,
+  UniqueEmailCounts,
   InterestPoolPage,
   PolicyPage,
   TermsPage,
@@ -297,6 +298,14 @@ const App = () => {
           element: (
             <RouteGuard roleNames={["SUPER_ADMIN"]}>
               <MessageCounts />
+            </RouteGuard>
+          ),
+        },
+        {
+          path: "/unique-email-counts",
+          element: (
+            <RouteGuard roleNames={["SUPER_ADMIN"]}>
+              <UniqueEmailCounts />
             </RouteGuard>
           ),
         },
