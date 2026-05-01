@@ -78,6 +78,7 @@ const PolicyPage = lazy(() => import("./Public/PolicyPage"));
 const TermsPage = lazy(() => import("./Public/TermsPage"));
 const SupportPage = lazy(() => import("./Public/SupportPage"));
 const DocumentationPage = lazy(() => import("./Public/DocumentationPage"));
+const PaymentFailed = lazy(() => import("./Public/PaymentFailed"));
 
 export {
   CalendarPage,
@@ -139,4 +140,5 @@ export {
   TermsPage,
   SupportPage,
   DocumentationPage,
+  PaymentFailed,
 };
