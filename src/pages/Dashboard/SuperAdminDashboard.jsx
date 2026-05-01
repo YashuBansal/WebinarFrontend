@@ -40,24 +40,6 @@ const SuperAdminDashboard = () => {
       : import.meta.env.VITE_REACT_APP_API_BASE_URL_MAIN_PRODUCTION
   }`;
 
-  const {
-    data: uniqueEmailMetrics,
-    isPending: isUniqueEmailPending,
-    refetch: refetchUniqueAttendeeEmails,
-  } = useQuery({
-    queryKey: ["uniqueAttendeeEmailsSuperAdmin"],
-    queryFn: async () => {
-      const response = await fetch(
-        `${apiUrl}/attendees/metrics/unique-email-count`,
-        { credentials: "include" }
-      );
-      if (!response.ok) {
-        throw new Error("Failed to fetch unique attendee email count");
-      }
-      return response.json();
-    },
-  });
-
   const cardData = useMemo(
     () => [
       {
@@ -127,15 +109,8 @@ const SuperAdminDashboard = () => {
         }`,
         color: "secondary",
       },
-      {
-        label: "Unique attendee emails",
-        value: isUniqueEmailPending
-          ? "…"
-          : uniqueEmailMetrics?.uniqueEmailCount ?? 0,
-        color: "primary",
-      },
     ],
-    [dashBoardCardsData, isUniqueEmailPending, uniqueEmailMetrics]
+    [dashBoardCardsData]
   );
 
   const [startDate, setStartDate] = useState(null);
@@ -149,7 +124,6 @@ const SuperAdminDashboard = () => {
     "Total Admins",
     "Total Employees",
     "Contacts",
-    "Unique attendee emails",
   ]);
 
   // All your hooks and handlers remain the same.
@@ -253,7 +227,6 @@ const SuperAdminDashboard = () => {
       dispatch(getDashboardUsersData({ startDate, endDate }));
       dispatch(getDashboardRevenueData({ startDate, endDate }));
     }
-    refetchUniqueAttendeeEmails();
   };
 
   return (

@@ -111,6 +111,13 @@ const Sidebar = ({ toggleButtonRef }) => {
           label: "Message Counts",
           icon: <img src={WhatsappIcon} width={30} height={30} alt="Message Counts" />,
         },
+        {
+          path: "/unique-email-counts",
+          label: "Unique Email Counts",
+          icon: (
+            <img src={WhatsappIcon} width={30} height={30} alt="Unique Email Counts" />
+          ),
+        },
       ],
     },
     {
