@@ -93,7 +93,7 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
         icon: Briefcase,
       }))
     : isConfigured
-    ? allNavItems
+    ? allNavItems.filter((item) => item.name !== "Configuration")
     : allNavItems.filter((item) => item.name === "Configuration");
   const isDisabled = false; // Never disable the project list itself
 
@@ -232,7 +232,7 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
               }`}
               style={{ fontFamily: "Inter, sans-serif" }}
             >
-              <span className="flex flex-wrap items-center gap-2">{item.name}</span>
+              <span className="truncate whitespace-nowrap">{item.name}</span>
             </Link>
           </li>
         );

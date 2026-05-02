@@ -251,12 +251,12 @@ const DashboardSidebar = ({
                     }`}
                 >
                   <NavGlyph Icon={Icon} active={active} />
-                  <span className="flex flex-wrap items-center gap-2">
+                  <span className="truncate whitespace-nowrap">
                     {item.label}
                     {item.label === "Notice Board" &&
                       isUpdated &&
                       roles.isEmployeeId(role) && (
-                        <span className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-800">
+                        <span className="ml-2 inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-800">
                           New
                         </span>
                       )}
@@ -272,12 +272,12 @@ const DashboardSidebar = ({
                     }`}
                 >
                   <NavGlyph Icon={Icon} active={active} />
-                  <span className="flex flex-wrap items-center gap-2">
+                  <span className="truncate whitespace-nowrap">
                     {item.label}
                     {item.label === "Notice Board" &&
                       isUpdated &&
                       roles.isEmployeeId(role) && (
-                        <span className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-800">
+                        <span className="ml-2 inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-800">
                           New
                         </span>
                       )}
@@ -355,12 +355,12 @@ const DashboardSidebar = ({
                     }`}
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
-                  <span className="flex flex-wrap items-center gap-2">
+                  <span className="truncate whitespace-nowrap">
                     {item.label}
                     {item.label === "Notice Board" &&
                       isUpdated &&
                       roles.isEmployeeId(role) && (
-                        <span className="inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-800">
+                        <span className="ml-2 inline-flex items-center rounded-full bg-rose-100 px-2 py-0.5 text-xs font-medium text-rose-800">
                           New
                         </span>
                       )}
@@ -382,9 +382,9 @@ const DashboardSidebar = ({
             onClick={toggleImportantLinks}
             className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left font-medium text-gray-700 hover:bg-gray-50"
           >
-            <span className="flex items-center gap-3">
-              <Link2 className="h-5 w-5 text-slate-500" strokeWidth={2} />
-              Important Links
+            <span className="flex items-center gap-3 min-w-0">
+              <Link2 className="h-5 w-5 text-slate-500 shrink-0" strokeWidth={2} />
+              <span className="truncate whitespace-nowrap">Important Links</span>
             </span>
             <ChevronDown
               className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${showImportantLinks ? "rotate-180" : ""
@@ -478,7 +478,7 @@ const DashboardSidebar = ({
             className="flex w-full items-center justify-between rounded-lg px-2 py-2.5 text-left text-sm font-medium text-slate-800 hover:bg-black/[0.04]"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
-            Important Links
+            <span className="truncate whitespace-nowrap">Important Links</span>
             <ChevronDown
               className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${showImportantLinks ? "rotate-180" : ""
                 }`}

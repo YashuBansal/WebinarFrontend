@@ -75,26 +75,35 @@ const Sidebar = ({
 
     if (!rail || !panel) return;
 
+    let isScrollingRail = false;
+    let isScrollingPanel = false;
+
     const handleRailScroll = () => {
+      if (isScrollingPanel) return;
+      isScrollingRail = true;
       if (panel.scrollTop !== rail.scrollTop) {
         panel.scrollTop = rail.scrollTop;
       }
+      setTimeout(() => { isScrollingRail = false; }, 50);
     };
 
     const handlePanelScroll = () => {
+      if (isScrollingRail) return;
+      isScrollingPanel = true;
       if (rail.scrollTop !== panel.scrollTop) {
         rail.scrollTop = panel.scrollTop;
       }
+      setTimeout(() => { isScrollingPanel = false; }, 50);
     };
 
-    rail.addEventListener("scroll", handleRailScroll);
-    panel.addEventListener("scroll", handlePanelScroll);
+    rail.addEventListener("scroll", handleRailScroll, { passive: true });
+    panel.addEventListener("scroll", handlePanelScroll, { passive: true });
 
     return () => {
       rail.removeEventListener("scroll", handleRailScroll);
       panel.removeEventListener("scroll", handlePanelScroll);
     };
-  }, [activeHeaderSection]);
+  }, [activeHeaderSection, railScrollRef.current, panelScrollRef.current]);
 
   useEffect(() => {
     if (isSmallScreen) {
@@ -323,7 +332,7 @@ const Sidebar = ({
                   {renderContextualSidebar("mobile", "bottom")}
                </div>
             ) : (
-               <div className="flex-1 overflow-y-auto py-4 custom-scrollbar">
+               <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
                   <ul className="space-y-2 px-3">{renderContextualSidebar("mobile")}</ul>
                </div>
             )}
@@ -375,7 +384,7 @@ const Sidebar = ({
                   {renderContextualSidebar("rail", "bottom")}
                </div>
             ) : (
-               <div className="flex-1 overflow-y-auto py-4 no-scrollbar" ref={railScrollRef}>
+                <div className="flex-1 overflow-y-auto py-2 no-scrollbar" ref={railScrollRef}>
                   <ul className="space-y-2 px-3">{renderContextualSidebar("rail")}</ul>
                </div>
             )}
@@ -431,7 +440,7 @@ const Sidebar = ({
                   {renderContextualSidebar("panel", "bottom")}
                </div>
             ) : (
-               <div className="flex-1 overflow-y-auto py-4 custom-scrollbar" ref={panelScrollRef}>
+                <div className="flex-1 overflow-y-auto py-2 custom-scrollbar" ref={panelScrollRef}>
                   <ul className="space-y-2 px-3">{renderContextualSidebar("panel")}</ul>
                </div>
             )}
