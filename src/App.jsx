@@ -67,6 +67,7 @@ import {
   TermsPage,
   SupportPage,
   DocumentationPage,
+  WhatsAppWrapper,
 } from "./pages";
 import RouteGuard from "./components/AccessControl/RouteGuard";
 
@@ -90,6 +91,15 @@ import { getNoticeBoard } from "./features/actions/noticeBoard";
 import WebinarParticipants from "./pages/Webinar/Participants/WebinarParticipants";
 import { getUnAcknowledgedAlarms } from "./features/actions/alarm";
 import ErrorFallback from "./components/Fallback/ErrorFallback";
+
+const RedirectToExternal = ({ url }) => {
+  useEffect(() => {
+    if (url) {
+      window.location.href = url;
+    }
+  }, [url]);
+  return null;
+};
 
 const App = () => {
   const dispatch = useDispatch();
@@ -691,10 +701,10 @@ const App = () => {
           ),
         },
         {
-          path: "/whatsapp",
+          path: "/whatsapp/*",
           element: (
             <RouteGuard roleNames={["ADMIN"]}>
-              <ComingSoon />
+              <WhatsAppWrapper />
             </RouteGuard>
           ),
         },
