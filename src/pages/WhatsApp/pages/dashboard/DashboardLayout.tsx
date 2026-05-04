@@ -22,6 +22,16 @@ export default function DashboardLayout() {
     window.location.href = dashboardBaseUrl;
   }, [isLoggedOut, dashboardBaseUrl]);
 
+  // Scroll to top on route change
+  useEffect(() => {
+    const el = document.querySelector(".custom-scrollbar.absolute");
+    if (el) {
+      el.scrollTop = 0;
+    } else {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, [location.pathname]);
+
   useEffect(() => {
     if (isLoggedOut && !dashboardBaseUrl?.trim()) {
       navigate("/whatsapp", { replace: true });

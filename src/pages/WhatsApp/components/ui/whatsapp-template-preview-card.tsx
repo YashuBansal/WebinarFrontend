@@ -1,6 +1,21 @@
 import React from 'react';
 import { Card, CardContent } from './card';
 import { Badge } from './badge';
+import {
+  ChevronLeft,
+  Video,
+  Phone as PhoneIcon,
+  MoreVertical,
+  Camera,
+  Mic,
+  Plus,
+  Smile,
+  Signal,
+  Wifi,
+  BatteryFull,
+  SendHorizontal,
+  Info
+} from 'lucide-react';
 import type { CampaignTemplate, VariableMapping, CampaignContact } from '@/schemas/campaignSchema';
 
 interface MediaAsset {
@@ -35,9 +50,6 @@ const CONTACT_FIELD_LABELS: Record<string, string> = {
   '$attendedCount': 'Attended Webinar Count',
 };
 
-/**
- * Resolves variables in template body text
- */
 const resolveTemplateBody = (
   templateBody: string,
   mappings: VariableMapping[],
@@ -53,15 +65,12 @@ const resolveTemplateBody = (
     let value = '';
 
     if (mapping.isDynamic) {
-      // Use contact field value
-      const contactField = mapping.contactField.replace('$', ''); // Remove $ prefix
+      const contactField = mapping.contactField.replace('$', '');
       value = sampleContact ? (sampleContact as any)[contactField] || placeholder : placeholder;
     } else {
-      // Use static value
       value = mapping.staticValue || placeholder;
     }
 
-    // Escape special regex characters in placeholder
     const escapedPlaceholder = placeholder.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     message = message.replace(new RegExp(escapedPlaceholder, 'g'), value);
   });
@@ -81,227 +90,213 @@ export function WhatsAppTemplatePreviewCard({
 }: WhatsAppTemplatePreviewCardProps) {
   if (!template) {
     return (
-      <Card className={className} style={style}>
-        <CardContent className="p-4">
-          <p className="text-sm text-muted-foreground">No template selected</p>
+      <Card className={`${className} overflow-hidden border-none shadow-xl bg-white/50 backdrop-blur-md`} style={style}>
+        <CardContent className="p-8 flex flex-col items-center justify-center min-h-[400px]">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+            <Info className="w-8 h-8 text-gray-400" />
+          </div>
+          <p className="text-lg font-medium text-gray-500">No template selected</p>
+          <p className="text-sm text-gray-400 mt-1">Select a template to see how it looks on a real phone</p>
         </CardContent>
       </Card>
     );
   }
 
-  // Extract template components
   const headerComponent = template.components?.find((c) => c.type === 'HEADER');
   const bodyComponent = template.components?.find((c) => c.type === 'BODY');
   const footerComponent = template.components?.find((c) => c.type === 'FOOTER');
   const buttonComponents = template.components?.filter((c) => c.type === 'BUTTONS');
 
-  // Resolve body text with variables
   const resolvedBodyText = bodyComponent?.text
     ? resolveTemplateBody(bodyComponent.text, variableMappings, sampleContact)
     : '';
 
-  // Get header format
   const headerFormat = headerComponent ? (headerComponent as any).format : null;
   const headerText = headerComponent && headerFormat === 'TEXT' ? headerComponent.text : null;
 
   return (
-    <Card className={className} style={style}>
-      <CardContent className="p-4 space-y-4">
-        {/* Sample Contact */}
-        {showSampleContact && sampleContact && (
-          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <div className="text-sm text-muted-foreground mb-2">Sample Contact:</div>
-            <div className="text-sm">
-              <strong>
-                {sampleContact.firstName || ''} {sampleContact.lastName || ''}
-              </strong>
-              <br />
-              {sampleContact.email && sampleContact.phone
-                ? `${sampleContact.email} • ${sampleContact.phone}`
-                : sampleContact.email || sampleContact.phone || 'No contact info'}
-            </div>
-          </div>
-        )}
-
-        {/* WhatsApp Message Preview */}
-        <div className="flex justify-center">
-          <div className="max-w-[85%] md:max-w-[75%]">
-            {/* WhatsApp message bubble */}
-            <div className="bg-[#DCF8C6] dark:bg-[#056162] rounded-2xl shadow-sm overflow-hidden">
-              {/* Header Image */}
-              {headerFormat === 'IMAGE' && (
-                <div className="w-full">
-                  {headerMediaAsset?.filePath ? (
-                    <img
-                      src={headerMediaAsset.filePath}
-                      alt={headerMediaAsset.fileName || 'Header image'}
-                      className="w-full h-auto object-cover max-h-96"
-                    />
-                  ) : (
-                    <div className="w-full h-64 bg-gray-200  px-4 dark:bg-gray-700 flex items-center justify-center">
-                      <div className="text-center">
-                        <svg className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 ">Image placeholder</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Header Video */}
-              {headerFormat === 'VIDEO' && (
-                <div className="w-full">
-                  {headerMediaAsset?.filePath ? (
-                    <video
-                      src={headerMediaAsset.filePath}
-                      controls
-                      className="w-full h-auto object-cover max-h-96"
-                      preload="metadata"
-                    >
-                      Your browser does not support the video tag.
-                    </video>
-                  ) : (
-                    <div className="w-full h-64 px-4 bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                      <div className="text-center">
-                        <svg className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                        </svg>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">Video placeholder</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Header Document */}
-              {headerFormat === 'DOCUMENT' && (
-                <div className="w-full bg-gray-100 dark:bg-gray-800 p-4">
-                  {headerMediaAsset?.filePath ? (
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-blue-500 rounded-lg flex items-center justify-center">
-                        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                          {headerMediaAsset.fileName || 'Document'}
-                        </p>
-                        <p className="text-xs text-gray-500 dark:text-gray-400">
-                          {headerMediaAsset.fileSize ? `${(headerMediaAsset.fileSize / 1024 / 1024).toFixed(2)} MB` : 'Document file'}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 bg-gray-300 dark:bg-gray-600 rounded-lg flex items-center justify-center">
-                        <svg className="w-6 h-6 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                        </svg>
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Document placeholder</p>
-                        <p className="text-xs text-gray-400 dark:text-gray-500">Select a document file</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Header Text */}
-              {headerText && (
-                <div className={`px-4 ${headerFormat === 'IMAGE' || headerFormat === 'VIDEO' || headerFormat === 'DOCUMENT' ? 'pt-3 pb-1' : 'pt-3 pb-1'}`}>
-                  <div className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                    {headerText}
-                  </div>
-                </div>
-              )}
-
-              {/* Body */}
-              {resolvedBodyText && (
-                <div className={`px-4 ${headerText || headerFormat === 'IMAGE' || headerFormat === 'VIDEO' || headerFormat === 'DOCUMENT' ? 'py-2' : 'pt-3 pb-2'}`}>
-                  <div className="text-sm text-gray-900 dark:text-gray-100 whitespace-pre-wrap leading-relaxed">
-                    {resolvedBodyText}
-                  </div>
-                </div>
-              )}
-
-              {/* Footer */}
-              {footerComponent?.text && (
-                <div className={`px-4 ${resolvedBodyText || headerText || headerFormat === 'IMAGE' || headerFormat === 'VIDEO' || headerFormat === 'DOCUMENT' ? 'pb-3' : 'pt-2 pb-3'}`}>
-                  <div className="text-xs text-gray-700 dark:text-gray-300 font-medium">
-                    {footerComponent.text}
-                  </div>
-                </div>
-              )}
-
-              {/* Buttons */}
-              {buttonComponents && buttonComponents.length > 0 && (
-                <div className="px-2 pb-3 pt-2 space-y-2">
-                  {buttonComponents.map((button: any, index: number) => (
-                    <div key={index} className="space-y-2">
-                      {button.buttons?.map((btn: any, btnIndex: number) => (
-                        <div
-                          key={btnIndex}
-                          className="bg-white dark:bg-gray-800 text-[#075E54] dark:text-[#DCF8C6] px-4 py-2.5 rounded-lg text-sm font-medium text-center border-0 shadow-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
-                          style={{
-                            boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
-                          }}
-                        >
-                          {btn.type === 'QUICK_REPLY' ? btn.text : btn.text || 'N/A'}
-                        </div>
-                      ))}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+    <div className={`flex flex-col gap-6 ${className}`} style={style}>
+      {/* iPhone 16 Mockup */}
+      <div className="relative mx-auto w-[270px] h-[550px] bg-[#1a1a1a] rounded-[45px] p-[10px] shadow-[0_0_0_2px_#333,0_15px_40px_rgba(0,0,0,0.25)] ring-1 ring-white/10 overflow-hidden">
+        {/* Dynamic Island */}
+        <div className="absolute top-[14px] left-1/2 -translate-x-1/2 w-[80px] h-[24px] bg-black rounded-[20px] z-50 flex items-center justify-center">
+          <div className="w-[35px] h-[3px] bg-white/10 rounded-full"></div>
         </div>
 
-        {/* Variable Mappings */}
-        {showVariableMappings && variableMappings.length > 0 && (
-          <div>
-            <h3 className="font-semibold mb-3 text-gray-900 dark:text-gray-100">Variable Mappings</h3>
-            <div className="p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
-              <div className="space-y-2 text-sm">
-                {variableMappings.map((mapping, index) => (
-                  <div key={index} className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
-                      {mapping.variable}
-                    </Badge>
-                    <span className="text-blue-700 dark:text-blue-300">
-                      {mapping.isDynamic ? (
-                        <>
-                          Dynamic → {CONTACT_FIELD_LABELS[mapping.contactField] || mapping.contactField.replace('$', '')}
-                          {mapping.fallbackValue && (
-                            <span className="text-gray-500 dark:text-gray-400">
-                              {' '}(fallback: &quot;{mapping.fallbackValue}&quot;)
-                            </span>
-                          )}
-                        </>
-                      ) : (
-                        <>Static → &quot;{mapping.staticValue || 'empty'}&quot;</>
-                      )}
-                    </span>
-                  </div>
-                ))}
+        {/* Inner Content Container (Screen) */}
+        <div className="relative w-full h-full bg-[#f8fafc] rounded-[36px] overflow-hidden flex flex-col">
+          {/* Status Bar */}
+          <div className="h-[38px] px-6 flex items-center justify-between z-40 bg-white">
+            <div className="text-[12px] font-bold text-black">1:11</div>
+            <div className="flex items-center gap-1.5 text-black">
+              <Wifi size={14} strokeWidth={3} />
+              <div className="relative w-5 h-2.5 border-[1.5px] border-black rounded-[3px] flex items-center p-[1px]">
+                <div className="w-full h-full bg-black rounded-[2px]"></div>
+                <div className="absolute -right-[3px] top-1/2 -translate-y-1/2 w-[2px] h-[3px] bg-black rounded-r-[1px]"></div>
               </div>
             </div>
           </div>
-        )}
 
-        {showVariableMappings && variableMappings.length === 0 && (
-          <div className="p-3 bg-gray-50 dark:bg-gray-800 rounded-lg">
-            <p className="text-sm text-muted-foreground">No variable mappings defined</p>
+          {/* WhatsApp Header */}
+          <div className="bg-white border-b border-gray-200/80 px-2 py-2 flex items-center gap-1.5 z-40 shadow-sm">
+            <div className="flex items-center text-slate-900 hover:opacity-70 transition-opacity">
+              <ChevronLeft size={20} />
+            </div>
+            <div className="flex-1 flex items-center gap-2 ml-0.5">
+              <div className="w-8 h-8 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
+                <img
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${sampleContact?.firstName || 'Business'}`}
+                  alt="Avatar"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[14px] font-bold text-black leading-tight truncate">
+                  {sampleContact?.firstName ? `${sampleContact.firstName} ${sampleContact.lastName || ''}` : 'Profile'}
+                </div>
+                <div className="text-[10px] text-gray-500 leading-tight">online</div>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 text-slate-900">
+              <Video size={18} />
+              <PhoneIcon size={16} />
+            </div>
           </div>
-        )}
-      </CardContent>
-    </Card>
+
+          {/* Chat Background with Image (Synced with ChatWindow) */}
+          <div className="flex-1 relative overflow-hidden">
+            <div
+              className="absolute inset-0 opacity-[0.06] pointer-events-none bg-repeat bg-[url('/whatsapp-bg.png')] z-0"
+              style={{ backgroundSize: '400px' }}
+            ></div>
+
+            <div className="absolute inset-0 overflow-y-auto z-10 custom-scrollbar">
+              <div className="px-3 pt-2 pb-4">
+                {/* Date Tag */}
+                <div className="flex justify-center mb-3">
+                  <div className="bg-white/90 backdrop-blur-sm text-[10px] font-bold text-gray-500 px-3 py-1 rounded-lg shadow-sm border border-gray-100 uppercase tracking-wider">
+                    TODAY
+                  </div>
+                </div>
+
+                {/* Message Bubble - Synced with MessagesList Inbound Style */}
+                <div className="flex justify-start mb-4 max-w-[85%] relative group">
+                  {/* Message Notch (Tail) */}
+                  <div className="absolute top-0 -left-[6px] w-0 h-0 border-t-[10px] border-t-white border-l-[10px] border-l-transparent z-10 drop-shadow-[0_1px_1px_rgba(0,0,0,0.05)]"></div>
+
+                  <div className="bg-white border border-slate-100 rounded-2xl rounded-tl-none shadow-sm overflow-hidden relative z-20">
+                    {/* Header Asset */}
+                    {headerFormat === 'IMAGE' && (
+                      <div className="w-full border-b border-gray-50">
+                        {headerMediaAsset?.filePath ? (
+                          <img
+                            src={headerMediaAsset.filePath}
+                            alt="Header content"
+                            className="w-full h-auto object-cover max-h-60"
+                          />
+                        ) : (
+                          <div className="w-full h-40 bg-gray-50 flex items-center justify-center">
+                            <div className="text-center p-4">
+                              <Camera className="w-8 h-8 mx-auto text-gray-300 mb-2" />
+                              <p className="text-[11px] text-gray-400">Image placeholder</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {headerFormat === 'VIDEO' && (
+                      <div className="w-full border-b border-gray-100">
+                        {headerMediaAsset?.filePath ? (
+                          <video
+                            src={headerMediaAsset.filePath}
+                            className="w-full h-auto object-cover max-h-60"
+                            poster="https://via.placeholder.com/320x180?text=Video+Preview"
+                          />
+                        ) : (
+                          <div className="w-full h-40 bg-gray-50 flex items-center justify-center">
+                            <div className="text-center p-4">
+                              <Video className="w-8 h-8 mx-auto text-gray-300 mb-2" />
+                              <p className="text-[11px] text-gray-400">Video placeholder</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Body Content */}
+                    <div className="p-2.5">
+                      {headerText && (
+                        <div className="text-[12px] font-bold text-gray-900 mb-1 leading-tight">
+                          {headerText}
+                        </div>
+                      )}
+                      {resolvedBodyText && (
+                        <div className="text-[12px] text-gray-800 whitespace-pre-wrap leading-normal">
+                          {resolvedBodyText}
+                        </div>
+                      )}
+                      {footerComponent?.text && (
+                        <div className="text-[11px] text-gray-500 mt-1 font-medium italic">
+                          {footerComponent.text}
+                        </div>
+                      )}
+
+                      {/* Message Meta (Time) */}
+                      <div className="flex justify-end mt-1">
+                        <span className="text-[10px] text-gray-400 font-medium">1:11 PM</span>
+                      </div>
+                    </div>
+
+                    {/* Buttons (Inside Bubble but styled as list) */}
+                    {buttonComponents && buttonComponents.length > 0 && (
+                      <div className="border-t border-gray-100 bg-white/50">
+                        {buttonComponents.map((buttonComp: any, idx: number) => (
+                          <div key={idx}>
+                            {buttonComp.buttons?.map((btn: any, btnIdx: number) => (
+                              <div
+                                key={btnIdx}
+                                className="flex items-center justify-center py-2 border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors cursor-pointer"
+                              >
+                                <span className="text-[#007AFF] text-[12px] font-medium truncate px-4">
+                                  {btn.text || 'Action Button'}
+                                </span>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* WhatsApp Footer (Input Bar) */}
+          <div className="flex-shrink-0 bg-[#F6F6F6] border-t border-gray-200 px-3 pt-1.5 pb-8 z-40">
+            <div className="flex items-center gap-2">
+              <Plus className="text-slate-900 flex-shrink-0" size={20} />
+              <div className="flex-1 h-8 bg-white border border-gray-300 rounded-full px-3 flex items-center justify-between">
+                <span className="text-transparent">|</span>
+                <Smile className="text-gray-400" size={18} />
+              </div>
+              <div className="flex items-center gap-2 text-slate-900">
+                <Camera size={20} />
+                <Mic size={20} />
+              </div>
+            </div>
+          </div>
+
+          {/* iOS Home Indicator */}
+          <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 w-24 h-[4px] bg-black/20 rounded-full z-50"></div>
+        </div>
+      </div>
+
+    </div>
   );
 }
 
 export default WhatsAppTemplatePreviewCard;
+
 

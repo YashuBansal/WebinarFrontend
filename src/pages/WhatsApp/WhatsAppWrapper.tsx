@@ -52,6 +52,16 @@ function WabaTemplatesSyncOnFirstProjectOpen() {
     syncTemplatesMutation.mutateAsync,
   ]);
 
+  // Scroll to top on route change
+  useEffect(() => {
+    const el = document.querySelector(".custom-scrollbar.absolute");
+    if (el) {
+      el.scrollTop = 0;
+    } else {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+  }, [location.pathname]);
+
   return null;
 }
 

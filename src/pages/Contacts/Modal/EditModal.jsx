@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { addLocation } from "../../../features/actions/location";
 import Select from "react-select";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, User, Phone, MapPin, Briefcase, Users, Save, AlertCircle, Info, VenusAndMars } from "lucide-react";
+import { X, User, Phone, MapPin, Briefcase, Users, Save, AlertCircle, Info } from "lucide-react";
 import tagsService from "../../../services/tagsService";
 import AppLoader from "../../../components/AppLoader";
 import AddRequestLocation from "../../Location/Modal/AddRequestLocation";
@@ -129,7 +129,7 @@ const EditModal = ({
               />
             </InputWrapper>
 
-            <InputWrapper icon={VenusAndMars} label="Gender">
+            <InputWrapper icon={Users} label="Gender">
               <select
                 {...register("gender")}
                 className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-bold text-slate-700 dark:text-slate-200 focus:border-[#FF6B35] outline-none transition-all appearance-none cursor-pointer"

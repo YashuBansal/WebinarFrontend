@@ -542,34 +542,29 @@ export default function TemplateSelectionForm({
 
             {showPreview && selectedTemplate ? (
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="overflow-hidden rounded-[32px] border-4 border-slate-900/10 shadow-2xl bg-white"
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="flex justify-center"
               >
-                <div className="h-6 w-full bg-slate-100 flex items-center justify-center border-b">
-                  <div className="h-1.5 w-12 bg-slate-300 rounded-full" />
-                </div>
-                <div className="p-0 overflow-y-auto max-h-[600px] custom-scrollbar">
-                  {(() => {
-                    const previewMappings = (variableMappings || []).map((vm) => ({
-                      variable: vm.variable,
-                      contactField: vm.contactField ?? contactFieldOptions[0]?.value ?? "$firstName",
-                      isDynamic: vm.isDynamic,
-                      staticValue: vm.staticValue ?? "",
-                      fallbackValue: vm.fallbackValue ?? "",
-                    }));
-                    return (
-                      <WhatsAppTemplatePreviewCard
-                        template={selectedTemplate}
-                        variableMappings={previewMappings}
-                        showSampleContact={false}
-                        showVariableMappings={false}
-                        headerMediaAsset={selectedMediaAsset}
-                        className="border-none shadow-none"
-                      />
-                    );
-                  })()}
-                </div>
+                {(() => {
+                  const previewMappings = (variableMappings || []).map((vm) => ({
+                    variable: vm.variable,
+                    contactField: vm.contactField ?? contactFieldOptions[0]?.value ?? "$firstName",
+                    isDynamic: vm.isDynamic,
+                    staticValue: vm.staticValue ?? "",
+                    fallbackValue: vm.fallbackValue ?? "",
+                  }));
+                  return (
+                    <WhatsAppTemplatePreviewCard
+                      template={selectedTemplate}
+                      variableMappings={previewMappings}
+                      showSampleContact={true}
+                      showVariableMappings={true}
+                      headerMediaAsset={selectedMediaAsset}
+                      className="w-full"
+                    />
+                  );
+                })()}
               </motion.div>
             ) : (
               <div className="h-[400px] rounded-[32px] border-4 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center p-8 text-center">

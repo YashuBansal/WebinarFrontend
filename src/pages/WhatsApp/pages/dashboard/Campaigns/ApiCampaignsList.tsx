@@ -322,13 +322,10 @@ const ApiCampaignsList = () => {
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <div className="h-12 w-12 rounded-2xl bg-[#22B573]/10 flex items-center justify-center text-[#22B573]">
-              <Code className="h-6 w-6" />
-            </div>
-            <div className="space-y-0.5">
-              <div className="flex items-center gap-2 text-[#22B573] font-bold text-xs uppercase tracking-widest">
-                <Zap className="h-3.5 w-3.5" />
-                Live Sync Active
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-[#22B573] font-bold text-xs uppercase tracking-widest mb-0.5">
+                <Sparkles className="h-3.5 w-3.5" />
+                API Hub
               </div>
               <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
                 API Campaigns
@@ -340,24 +337,45 @@ const ApiCampaignsList = () => {
           </div>
 
           <div className="flex items-center gap-3">
+            <div className="flex flex-col items-end mr-2 hidden sm:flex">
+              {lastRefreshTime && (
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Last Updated: {lastRefreshTime.toLocaleTimeString()}
+                </span>
+              )}
+              {autoRefreshEnabled && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Live Sync Active</span>
+                </div>
+              )}
+            </div>
+
             <Button
               onClick={handleRefresh}
               variant="outline"
               disabled={isRefreshing}
-              className="h-11 px-5 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">{isRefreshing ? 'Syncing...' : 'Sync'}</span>
+              {isRefreshing ? 'Syncing...' : 'Sync Now'}
             </Button>
 
             <Button
               onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
-              variant={autoRefreshEnabled ? "default" : "outline"}
-              className={`h-11 px-5 rounded-xl flex items-center gap-2 font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${autoRefreshEnabled ? 'bg-[#22B573]/10 text-[#22B573] border-[#22B573]/20 hover:bg-[#22B573]/15 shadow-none' : ''
-                }`}
+              className={`h-11 px-6 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                autoRefreshEnabled 
+                  ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/10' 
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
             >
-              <Clock className={`h-4 w-4 ${autoRefreshEnabled ? 'animate-pulse' : ''}`} />
-              <span className="hidden sm:inline">{autoRefreshEnabled ? 'Auto-Sync' : 'Manual Sync'}</span>
+              <motion.div
+                animate={autoRefreshEnabled ? { rotate: 360 } : { rotate: 0 }}
+                transition={autoRefreshEnabled ? { repeat: Infinity, duration: 4, ease: "linear" } : { duration: 0.5 }}
+              >
+                <Clock className="h-4 w-4" />
+              </motion.div>
+              {autoRefreshEnabled ? 'Live' : 'Manual'}
             </Button>
 
             <Link to={`/whatsapp/dashboard/${resolvedProjectId}/api-campaigns/create`}>

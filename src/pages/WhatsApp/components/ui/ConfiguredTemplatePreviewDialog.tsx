@@ -94,54 +94,27 @@ export function ConfiguredTemplatePreviewDialog({
         </DialogHeader>
 
         <div className="space-y-6">
-          <Card>
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-3 text-gray-900">Configured Template Preview</h3>
-              {baseTemplate ? (
-                <WhatsAppTemplatePreviewCard
-                  template={baseTemplate as any}
-                  variableMappings={(configuredTemplate?.variableMappings || []).map((vm) => ({
-                    variable: vm.variable,
-                    contactField: (vm as any).dynamicField ?? '$firstName',
-                    isDynamic: vm.isDynamic,
-                    staticValue: vm.staticValue ?? '',
-                    fallbackValue: vm.fallbackValue ?? '',
-                  }))}
-                  showSampleContact={false}
-                  showVariableMappings={false}
-                />
-              ) : (
-                <div className="bg-gray-50 rounded-lg p-4 text-sm text-gray-600">Base template not found</div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Variable Mappings Summary */}
-          <Card>
-            <CardContent className="p-4">
-              <h3 className="font-semibold mb-3 text-gray-900">Variable Mappings</h3>
-              <div className="space-y-2 text-sm">
-                {(configuredTemplate?.variableMappings || []).map((m, idx) => (
-                  <div key={idx} className="flex flex-wrap items-center gap-2">
-                    <Badge variant="outline">{m.variable}</Badge>
-                    {m.isDynamic ? (
-                      <span className="text-gray-700">
-                        Dynamic → {CONTACT_FIELD_LABELS[m.dynamicField || ''] || m.dynamicField}
-                        {m.fallbackValue ? (
-                          <span className="text-gray-500"> (fallback: "{m.fallbackValue}")</span>
-                        ) : null}
-                      </span>
-                    ) : (
-                      <span className="text-gray-700">Static → {m.staticValue || '—'}</span>
-                    )}
-                  </div>
-                ))}
-                {(!configuredTemplate?.variableMappings || configuredTemplate.variableMappings.length === 0) && (
-                  <div className="text-gray-600">No variables defined</div>
-                )}
+          <div className="bg-white/40 rounded-3xl p-6 border border-white shadow-inner">
+            {baseTemplate ? (
+              <WhatsAppTemplatePreviewCard
+                template={baseTemplate as any}
+                variableMappings={(configuredTemplate?.variableMappings || []).map((vm) => ({
+                  variable: vm.variable,
+                  contactField: (vm as any).dynamicField ?? '$firstName',
+                  isDynamic: vm.isDynamic,
+                  staticValue: vm.staticValue ?? '',
+                  fallbackValue: vm.fallbackValue ?? '',
+                }))}
+                showSampleContact={true}
+                showVariableMappings={true}
+                className="scale-[0.95] origin-top"
+              />
+            ) : (
+              <div className="bg-gray-50 rounded-lg p-8 text-center text-sm text-gray-500 font-medium">
+                Base WhatsApp template not found
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-end pt-4">

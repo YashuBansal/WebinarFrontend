@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useProjectContext } from "../context/ProjectContext";
 import { useNavigate } from "react-router-dom";
+import { toastUtils } from "../lib/utils";
 import {
   PlusCircle,
   FolderOpen,
@@ -15,7 +16,8 @@ import {
   MessageCircle,
   Calendar,
   Settings,
-  LayoutGrid
+  LayoutGrid,
+  X
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -41,7 +43,7 @@ import { useProjects, useProjectMutations } from "../hooks/useProjects";
 import { Input } from "../components/ui/input";
 import { formatDate12 } from "../lib/date";
 import { useAuth } from "../hooks/useAuth";
-import { ConfirmationDialog } from "../components/ui/ConfirmationDialog";
+import ConfirmDeleteModal from "../../../components/ConfirmDeleteModal";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -138,8 +140,12 @@ export default function ProjectsPage() {
       },
       {
         onSuccess: () => {
+          toastUtils.success("Project renamed successfully");
           closeRenameDialog();
         },
+        onError: (err) => {
+          toastUtils.error(err, "Failed to rename project");
+        }
       }
     );
   };
@@ -196,7 +202,7 @@ export default function ProjectsPage() {
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button 
+                <Button
                   className="h-12 px-6 rounded-2xl flex items-center justify-center gap-2 text-white shadow-xl shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
                   style={{
                     backgroundColor: "#22B573",
@@ -283,12 +289,12 @@ export default function ProjectsPage() {
                   >
                     {/* Hover Glow Effect */}
                     <div className="absolute top-0 right-0 -mr-16 -mt-16 h-40 w-40 rounded-full bg-green-500/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
-                    
+
                     <div className="flex items-start justify-between mb-4 relative z-10">
                       <div className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white transition-all duration-300 shadow-sm">
                         <MessageCircle className="h-6 w-6" />
                       </div>
-                      
+
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                           <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
@@ -296,11 +302,23 @@ export default function ProjectsPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="rounded-2xl border-slate-200 shadow-2xl p-2 min-w-[160px]">
-                          <DropdownMenuItem onClick={() => openRenameDialog(project)} className="gap-3 px-4 py-3 rounded-xl cursor-pointer font-medium">
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openRenameDialog(project);
+                            }}
+                            className="gap-3 px-4 py-3 rounded-xl cursor-pointer font-medium"
+                          >
                             <Edit3 className="h-4 w-4 text-blue-500" />
                             <span>Rename</span>
                           </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleDeleteProject(project)} className="gap-3 px-4 py-3 rounded-xl text-red-600 cursor-pointer focus:text-red-600 font-medium">
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteProject(project);
+                            }}
+                            className="gap-3 px-4 py-3 rounded-xl text-red-600 cursor-pointer focus:text-red-600 font-medium"
+                          >
                             <Trash2 className="h-4 w-4" />
                             <span>Delete Project</span>
                           </DropdownMenuItem>
@@ -323,7 +341,7 @@ export default function ProjectsPage() {
                         <Calendar className="h-3 w-3" />
                         {formatDate12(project.createdAt)}
                       </div>
-                      
+
                       <div className="flex items-center gap-1.5 text-green-600 text-xs font-black opacity-0 group-hover:opacity-100 -translate-x-3 group-hover:translate-x-0 transition-all duration-300">
                         OPEN <ArrowRight className="h-4 w-4" />
                       </div>
@@ -337,34 +355,31 @@ export default function ProjectsPage() {
       </main>
 
       {/* Delete Project Confirmation */}
-      <ConfirmationDialog
-        isOpen={isDeleteDialogOpen}
-        onClose={() => {
-          if (isDeleting) return;
-          setIsDeleteDialogOpen(false);
-          setDeleteDialogProject(null);
-        }}
-        onConfirm={() => {
-          if (!deleteDialogProject?._id) return;
-          deleteProject(deleteDialogProject._id, {
-            onSuccess: () => {
+      {isDeleteDialogOpen && deleteDialogProject && (
+        <ConfirmDeleteModal
+          setModal={(val) => {
+            if (!val) {
               setIsDeleteDialogOpen(false);
               setDeleteDialogProject(null);
-            },
-          } as any);
-        }}
-        title="Delete project"
-        description={
-          deleteDialogProject
-            ? `This will disable all campaigns, API campaigns, auto-messages, sequences, and Zoom event configs linked to "${deleteDialogProject.projectName}".`
-            : "This will disable all campaigns, API campaigns, auto-messages, sequences, and Zoom event configs linked to this project."
-        }
-        confirmText="Delete project"
-        cancelText="Cancel"
-        variant="destructive"
-        isLoading={isDeleting}
-        requireOtpMatch
-      />
+            }
+          }}
+          triggerDelete={() => {
+            if (!deleteDialogProject?._id) return;
+            deleteProject(deleteDialogProject._id, {
+              onSuccess: () => {
+                toastUtils.success("Project deleted successfully");
+                setIsDeleteDialogOpen(false);
+                setDeleteDialogProject(null);
+              },
+              onError: (err) => {
+                toastUtils.error(err, "Failed to delete project");
+              }
+            });
+          }}
+          isLoading={isDeleting}
+          itemName={deleteDialogProject.projectName}
+        />
+      )}
 
       {/* Rename Project Dialog */}
       <Dialog
@@ -372,40 +387,61 @@ export default function ProjectsPage() {
         onOpenChange={(open) => !open && closeRenameDialog()}
       >
         <DialogContent
-          className="sm:max-w-[425px] rounded-[32px] p-8 border-none shadow-2xl"
+          className="max-w-sm border-0 bg-transparent p-0 shadow-none outline-none"
           onPointerDownOutside={(e) => e.preventDefault()}
+          showCloseButton={false}
         >
-          <DialogHeader>
-            <DialogTitle className="text-2xl font-black">Rename Project</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-6 pt-6">
-            <div className="space-y-3">
-              <label className="text-sm font-black text-slate-800 uppercase tracking-widest">New Project Name</label>
-              <Input
-                value={renameProjectName}
-                onChange={(e) => setRenameProjectName(e.target.value)}
-                placeholder="Enter new project name"
-                className="rounded-2xl border-slate-200 focus:ring-green-500/20 py-7 px-5 text-lg font-medium shadow-sm"
-              />
+          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white border border-slate-200">
+            <div className="flex items-center justify-between mb-5">
+              <h3 className="text-lg font-bold text-slate-900">
+                Rename Project
+              </h3>
+              <button
+                type="button"
+                onClick={closeRenameDialog}
+                className="p-1.5 rounded-lg hover:bg-black/5 transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
             </div>
-            <div className="flex justify-end gap-3 pt-2">
+
+            <div className="mb-8">
+              <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">
+                New Project Name
+              </label>
+              <div className="relative">
+                <Edit3 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none z-[1]" />
+                <Input
+                  autoFocus
+                  type="text"
+                  value={renameProjectName}
+                  onChange={(e) => setRenameProjectName(e.target.value)}
+                  placeholder="Enter new project name"
+                  className="pl-9 rounded-xl border-slate-200 focus:ring-green-500/20 py-6 text-base font-medium shadow-sm bg-white"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-3 mt-auto w-full">
               <Button
+                type="button"
                 variant="outline"
                 onClick={closeRenameDialog}
                 disabled={isRenaming}
-                className="rounded-xl px-8 h-12 font-bold"
+                className="rounded-xl px-4 py-2.5 font-medium border-slate-200 text-slate-600 hover:bg-slate-50"
               >
                 Cancel
               </Button>
               <Button
+                type="button"
                 onClick={submitRename}
                 disabled={isRenaming || renameProjectName.trim().length < 3}
-                className="bg-green-600 hover:bg-green-700 text-white rounded-xl px-8 h-12 font-bold shadow-lg shadow-green-600/20"
+                className="rounded-xl px-6 py-2.5 font-bold hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 bg-[#22B573] hover:bg-[#1da467] text-white shadow-lg shadow-green-600/20"
               >
-                {isRenaming && (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                )}
-                Save
+                {isRenaming ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
+                Save Changes
               </Button>
             </div>
           </div>
