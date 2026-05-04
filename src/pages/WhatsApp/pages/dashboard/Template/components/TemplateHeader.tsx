@@ -1,9 +1,11 @@
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { 
   RefreshCw,
   Plus,
   ArrowDownUp,
-  Clock
+  Clock,
+  LayoutGrid
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -48,48 +50,72 @@ export function TemplateHeader({ projectName, projectId, isLoading, isSyncing, i
   };
 
   return (
-    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8">
-      <div className="min-w-0 flex-1">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Templates</h1>
-        <p className="text-gray-600 mt-2 text-sm sm:text-base">
-          Manage your WhatsApp message templates for {projectName}
-        </p>
-        {lastSyncedAt && (
-          <div className="flex items-center gap-1 mt-1 text-xs text-gray-500">
-            <Clock className="w-3 h-3" />
-            <span>Last synced: {formatLastSynced(lastSyncedAt)}</span>
+    <motion.div
+      className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      style={{
+        backgroundColor: "#ffffff",
+        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+      }}
+    >
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-1">
+            <LayoutGrid className="h-3.5 w-3.5" />
+            Message Templates
           </div>
-        )}
-      </div>
-      <div className="flex flex-col sm:flex-row gap-3">
-        <Button
-          variant="outline"
-          onClick={onRefresh}
-          disabled={isLoading || isRefreshing}
-          className="w-full sm:w-auto"
-        >
-          <RefreshCw className={`w-4 h-4 mr-2 ${(isLoading || isRefreshing) ? 'animate-spin' : ''}`} />
-          Refresh
-        </Button>
-        {onSync && (
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            Template Library
+          </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <p className="text-slate-500 text-xs font-medium">
+              Manage your identity and message flow for <span className="text-slate-900 font-bold">{projectName}</span>
+            </p>
+            {lastSyncedAt && (
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-50 border border-slate-100 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                <Clock className="w-3 h-3" />
+                <span>Synced: {formatLastSynced(lastSyncedAt)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
           <Button
             variant="outline"
-            onClick={onSync}
-            disabled={isSyncing || isLoading}
-            className="w-full sm:w-auto"
+            onClick={onRefresh}
+            disabled={isLoading || isRefreshing}
+            className="h-10 px-4 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-xs transition-all hover:bg-slate-50"
           >
-            <ArrowDownUp className={`w-4 h-4 mr-2 ${isSyncing ? 'animate-spin' : ''}`} />
-            Sync from Meta
+            <RefreshCw className={`w-3.5 h-3.5 ${(isLoading || isRefreshing) ? 'animate-spin' : ''}`} />
+            Refresh
           </Button>
-        )}
-        <Link to={`/whatsapp/dashboard/${projectId}/templates/create`} className="w-full sm:w-auto">
-          <Button className="bg-teal-600 hover:bg-teal-700 w-full sm:w-auto">
-            <Plus className="w-4 h-4 mr-2" />
-            Create Template
-          </Button>
-        </Link>
+          
+          {onSync && (
+            <Button
+              variant="outline"
+              onClick={onSync}
+              disabled={isSyncing || isLoading}
+              className="h-10 px-4 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-xs transition-all hover:bg-slate-50"
+            >
+              <ArrowDownUp className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+              Meta Sync
+            </Button>
+          )}
+
+          <Link to={`/whatsapp/dashboard/${projectId}/templates/create`}>
+            <Button 
+              className="h-10 px-6 rounded-xl flex items-center gap-2 text-white font-bold text-xs shadow-xl shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{ backgroundColor: "#22B573" }}
+            >
+              <Plus className="w-4 h-4" />
+              Create Template
+            </Button>
+          </Link>
+        </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

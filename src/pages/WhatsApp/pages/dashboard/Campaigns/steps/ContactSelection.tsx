@@ -14,7 +14,6 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Table,
   TableBody,
@@ -31,18 +30,31 @@ import {
   Loader2,
   Mail,
   Phone,
+  Filter,
+  CheckCircle2,
+  AlertCircle,
+  UserCheck,
 } from "lucide-react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type {
   CampaignContact,
   WlhAttendeeFilterState,
 } from "@/schemas/campaignSchema";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion, AnimatePresence } from "framer-motion";
+import { Tags } from "lucide-react";
 import WLHContacts from "./WLHContacts";
 
 const NO_TAGS_FILTER_VALUE = "__no_tags__";
 
 /** Same as ContactsTable row virtualizer estimate */
-const CONTACT_ROW_ESTIMATE_PX = 48;
+const CONTACT_ROW_ESTIMATE_PX = 64;
 
 const TABLE_COL_SPAN = 6;
 
@@ -58,57 +70,71 @@ const CampaignContactTableRow = memo(function CampaignContactTableRow({
   onToggle,
 }: CampaignContactTableRowProps) {
   const displayTags = useMemo(
-    () => (contact.tags || []).slice(0, 3),
+    () => (contact.tags || []).slice(0, 2),
     [contact.tags]
   );
   const extraTagCount = (contact.tags?.length || 0) - displayTags.length;
 
   return (
-    <TableRow data-state={isSelected ? "selected" : undefined}>
-      <TableCell>
+    <TableRow 
+      data-state={isSelected ? "selected" : undefined}
+      className={`group transition-colors ${isSelected ? 'bg-[#22B573]/5 hover:bg-[#22B573]/10' : 'hover:bg-slate-50/80'}`}
+    >
+      <TableCell className="pl-4">
         <Checkbox
           checked={isSelected}
           onCheckedChange={(checked) =>
             onToggle(contact, checked === true)
           }
+          className={`transition-colors ${isSelected ? 'border-[#22B573] data-[state=checked]:bg-[#22B573]' : ''}`}
         />
       </TableCell>
       <TableCell>
-        <span className="font-semibold">{contact.firstName || "-"}</span>
-      </TableCell>
-      <TableCell>
-        <span className="text-muted-foreground">
-          {contact.lastName || "-"}
-        </span>
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-1 min-w-0">
-          <Mail className="h-3 w-3 shrink-0 text-muted-foreground" />
-          <span className="truncate">{contact.email || "-"}</span>
+        <div className="flex flex-col">
+          <span className="font-bold text-slate-700">{contact.firstName || "-"}</span>
+          <span className="text-[10px] font-medium text-slate-400 uppercase tracking-tight">First Name</span>
         </div>
       </TableCell>
       <TableCell>
-        <div className="flex items-center gap-1 min-w-0">
-          <Phone className="h-3 w-3 shrink-0 text-muted-foreground" />
-          <span className="truncate">{contact.phone || "-"}</span>
+        <div className="flex flex-col">
+          <span className="font-bold text-slate-700">{contact.lastName || "-"}</span>
+          <span className="text-[10px] font-medium text-slate-400 uppercase tracking-tight">Last Name</span>
         </div>
       </TableCell>
       <TableCell>
+        <div className="flex items-center gap-2 group/info">
+          <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 group-hover/info:bg-blue-100 transition-colors">
+            <Mail className="h-4 w-4 text-blue-500" />
+          </div>
+          <span className="text-sm font-medium text-slate-600 truncate max-w-[150px]">{contact.email || "-"}</span>
+        </div>
+      </TableCell>
+      <TableCell>
+        <div className="flex items-center gap-2 group/info">
+          <div className="h-8 w-8 rounded-lg bg-[#22B573]/5 flex items-center justify-center shrink-0 group-hover/info:bg-[#22B573]/10 transition-colors">
+            <Phone className="h-4 w-4 text-[#22B573]" />
+          </div>
+          <span className="text-sm font-bold text-slate-700">{contact.phone || "-"}</span>
+        </div>
+      </TableCell>
+      <TableCell className="pr-4">
         {contact.tags && contact.tags.length > 0 ? (
-          <div className="flex flex-wrap gap-1">
+          <div className="flex flex-wrap gap-1.5 justify-end">
             {displayTags.map((tag, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
+              <Badge key={index} variant="secondary" className="bg-slate-100 text-slate-600 border-none hover:bg-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-md">
                 {tag}
               </Badge>
             ))}
             {extraTagCount > 0 && (
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="secondary" className="bg-[#22B573]/10 text-[#22B573] border-none text-[10px] font-bold px-2 py-0.5 rounded-md">
                 +{extraTagCount}
               </Badge>
             )}
           </div>
         ) : (
-          <span className="text-sm text-muted-foreground">No tags</span>
+          <div className="text-right">
+             <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">Untagged</span>
+          </div>
         )}
       </TableCell>
     </TableRow>
@@ -206,9 +232,9 @@ const ContactSelection = ({
   useEffect(() => {
     setSelectAll(
       filteredContacts.length > 0 &&
-        filteredContacts.every((contact) =>
-          selectedIdSet.has(contact._id)
-        )
+      filteredContacts.every((contact) =>
+        selectedIdSet.has(contact._id)
+      )
     );
   }, [selectedContacts, filteredContacts, selectedIdSet]);
 
@@ -225,184 +251,275 @@ const ContactSelection = ({
   const paddingBottom =
     virtualItems.length > 0
       ? rowVirtualizer.getTotalSize() -
-        virtualItems[virtualItems.length - 1].end
+      virtualItems[virtualItems.length - 1].end
       : 0;
 
-  const canProceed = selectedContacts.length > 0;
+  const canProceed = contactType === 'whatsapp' ? selectedContacts.length > 0 : wlhAttendeeFilters.contactCount > 0;
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin" />
+      <div className="flex flex-col items-center justify-center h-96 gap-4">
+        <div className="relative">
+          <div className="h-16 w-16 rounded-full border-4 border-slate-100 border-t-[#22B573] animate-spin" />
+          <Users className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-[#22B573]" />
+        </div>
+        <p className="text-sm font-black uppercase tracking-widest text-slate-400">Syncing Audience Data...</p>
       </div>
     );
   }
 
   return (
-    <div className="">
+    <div className="space-y-6">
       <Tabs
         value={contactType}
         onValueChange={setContactType}
         className="w-full"
       >
-        <TabsList>
-          <TabsTrigger value="whatsapp">Contacts</TabsTrigger>
-          <TabsTrigger value="wlh">WLH Contacts</TabsTrigger>
-        </TabsList>
-        <TabsContent value="whatsapp">
-          <div className="space-y-6 ">
-            <div className="space-y-4">
-              <div className="flex gap-4">
-                <div className="flex-1">
-                  <Label htmlFor="search">Search Contacts</Label>
-                  <div className="relative">
-                    <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+        <div className="flex items-center justify-between mb-6">
+          <TabsList className="h-12 p-1 bg-slate-100 rounded-xl border border-slate-200">
+            <TabsTrigger 
+              value="whatsapp" 
+              className="px-6 rounded-lg font-bold text-sm data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm transition-all"
+            >
+              Contact Directory
+            </TabsTrigger>
+            <TabsTrigger 
+              value="wlh"
+              className="px-6 rounded-lg font-bold text-sm data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm transition-all"
+            >
+              WLH Analytics
+            </TabsTrigger>
+          </TabsList>
+          
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex flex-col items-end">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Target Audience</span>
+              <span className="text-sm font-bold text-slate-900">
+                {contactType === 'whatsapp' 
+                  ? `${selectedContacts.length} / ${filteredContacts.length} Selected` 
+                  : `${wlhAttendeeFilters.contactCount} Recipients`}
+              </span>
+            </div>
+            <div className="h-10 w-10 rounded-xl bg-[#22B573]/10 flex items-center justify-center">
+               <UserCheck className="h-5 w-5 text-[#22B573]" />
+            </div>
+          </div>
+        </div>
+
+        <AnimatePresence mode="wait">
+          <TabsContent value="whatsapp" className="m-0 focus-visible:outline-none focus-visible:ring-0">
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              className="space-y-6"
+            >
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+                <div className="md:col-span-8 space-y-2">
+                  <Label htmlFor="search" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Search Database</Label>
+                  <div className="relative group">
+                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-[#22B573] transition-colors" />
                     <Input
                       id="search"
-                      placeholder="Search by name, email, or phone..."
+                      placeholder="Search by name, email, or phone number..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="pl-10"
+                      className="h-12 pl-12 rounded-2xl border-slate-200 bg-slate-50/50 text-sm font-medium focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all"
                     />
                   </div>
                 </div>
 
-                <div className="w-48">
-                  <Label htmlFor="tag-filter">Filter by Tag</Label>
-                  <select
-                    id="tag-filter"
-                    value={selectedTag}
-                    onChange={(e) => setSelectedTag(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary"
+                <div className="md:col-span-4 space-y-2">
+                  <Label htmlFor="tag-filter" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Segment Filter</Label>
+                  <Select
+                    value={selectedTag || "all"}
+                    onValueChange={(value) => setSelectedTag(value === "all" ? "" : value)}
                   >
-                    <option value="">All Tags</option>
-                    <option value={NO_TAGS_FILTER_VALUE}>No Tags</option>
-                    {availableTags.map((tag) => (
-                      <option key={tag} value={tag}>
-                        {tag}
-                      </option>
-                    ))}
-                  </select>
+                    <SelectTrigger 
+                      id="tag-filter"
+                      className="h-12 pl-12 rounded-2xl border-slate-200 bg-slate-50/50 text-sm font-medium focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all relative group"
+                    >
+                      <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus:text-[#22B573] transition-colors" />
+                      <SelectValue placeholder="All Segments" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-2xl border-slate-200 shadow-xl p-1">
+                      <SelectItem value="all" className="rounded-xl py-3 focus:bg-[#22B573]/5 focus:text-[#22B573] transition-colors">
+                        <div className="flex items-center gap-2">
+                          <Filter className="h-3.5 w-3.5" />
+                          <span className="font-bold">All Segments</span>
+                        </div>
+                      </SelectItem>
+                      <SelectItem value={NO_TAGS_FILTER_VALUE} className="rounded-xl py-3 focus:bg-[#22B573]/5 focus:text-[#22B573] transition-colors">
+                        <div className="flex items-center gap-2">
+                          <Tags className="h-3.5 w-3.5" />
+                          <span className="font-bold">Unsegmented</span>
+                        </div>
+                      </SelectItem>
+                      {availableTags.map((tag) => (
+                        <SelectItem key={tag} value={tag} className="rounded-xl py-3 focus:bg-[#22B573]/5 focus:text-[#22B573] transition-colors">
+                          <div className="flex items-center gap-2">
+                            <div className="h-1.5 w-1.5 rounded-full bg-[#22B573]" />
+                            <span className="font-bold">{tag}</span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
               </div>
 
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
-                  <Users className="h-4 w-4 text-muted-foreground" />
-                  <span className="text-sm text-muted-foreground">
-                    {selectedContacts.length} of {filteredContacts.length}{" "}
-                    contacts selected
-                  </span>
+                  <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center">
+                    <Users className="h-4 w-4 text-slate-500" />
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-xs font-bold text-slate-700">Database View</span>
+                    <span className="text-[10px] font-medium text-slate-400">
+                      Showing {filteredContacts.length} matching contacts in your directory
+                    </span>
+                  </div>
                 </div>
 
                 {selectedContacts.length > 0 && (
-                  <Badge variant="secondary">
-                    {selectedContacts.length} selected
-                  </Badge>
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="flex items-center gap-2 px-3 py-1.5 bg-[#22B573]/10 rounded-lg"
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5 text-[#22B573]" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#22B573]">
+                      {selectedContacts.length} Contacts Selected
+                    </span>
+                  </motion.div>
                 )}
               </div>
-            </div>
 
-            <div className="space-y-4">
-              {filteredContacts.length === 0 ? (
-                <Alert>
-                  <AlertDescription>
-                    {searchTerm || selectedTag
-                      ? "No contacts match your search criteria."
-                      : "No contacts available. Please add contacts first."}
-                  </AlertDescription>
-                </Alert>
-              ) : (
-                <div
-                  ref={scrollRef}
-                  className="h-96 overflow-y-auto rounded-md border"
-                >
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-12">
-                          <Checkbox
-                            checked={selectAll}
-                            onCheckedChange={(c) =>
-                              handleSelectAll(c === true)
-                            }
-                          />
-                        </TableHead>
-                        <TableHead>First Name</TableHead>
-                        <TableHead>Last Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Phone</TableHead>
-                        <TableHead>Tags</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {paddingTop > 0 && (
-                        <TableRow>
-                          <TableCell
-                            colSpan={TABLE_COL_SPAN}
-                            style={{ height: `${paddingTop}px` }}
-                            className="p-0"
-                          />
+              <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+                {filteredContacts.length === 0 ? (
+                  <div className="p-12 flex flex-col items-center justify-center text-center space-y-4">
+                    <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center">
+                      <Search className="h-8 w-8 text-slate-300" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-base font-bold text-slate-900">No contacts found</p>
+                      <p className="text-sm text-slate-500 max-w-[280px]">Adjust your search or filters to find the right audience for this campaign.</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div
+                    ref={scrollRef}
+                    className="h-[450px] overflow-y-auto custom-scrollbar"
+                  >
+                    <Table>
+                      <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-md">
+                        <TableRow className="hover:bg-transparent border-b-slate-200">
+                          <TableHead className="w-12 pl-4">
+                            <Checkbox
+                              checked={selectAll}
+                              onCheckedChange={(c) =>
+                                handleSelectAll(c === true)
+                              }
+                              className={`transition-colors ${selectAll ? 'border-[#22B573] data-[state=checked]:bg-[#22B573]' : ''}`}
+                            />
+                          </TableHead>
+                          <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 py-4">First Name</TableHead>
+                          <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 py-4">Last Name</TableHead>
+                          <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 py-4">Email Address</TableHead>
+                          <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 py-4">Phone</TableHead>
+                          <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 py-4 text-right pr-4">Tags</TableHead>
                         </TableRow>
-                      )}
+                      </TableHeader>
+                      <TableBody>
+                        {paddingTop > 0 && (
+                          <TableRow className="hover:bg-transparent border-none">
+                            <TableCell
+                              colSpan={TABLE_COL_SPAN}
+                              style={{ height: `${paddingTop}px` }}
+                              className="p-0"
+                            />
+                          </TableRow>
+                        )}
 
-                      {virtualItems.map((virtualRow) => {
-                        const contact = filteredContacts[virtualRow.index];
-                        if (!contact) return null;
-                        return (
-                          <CampaignContactTableRow
-                            key={contact._id}
-                            contact={contact}
-                            isSelected={selectedIdSet.has(contact._id)}
-                            onToggle={handleContactSelect}
-                          />
-                        );
-                      })}
+                        {virtualItems.map((virtualRow) => {
+                          const contact = filteredContacts[virtualRow.index];
+                          if (!contact) return null;
+                          return (
+                            <CampaignContactTableRow
+                              key={contact._id}
+                              contact={contact}
+                              isSelected={selectedIdSet.has(contact._id)}
+                              onToggle={handleContactSelect}
+                            />
+                          );
+                        })}
 
-                      {paddingBottom > 0 && (
-                        <TableRow>
-                          <TableCell
-                            colSpan={TABLE_COL_SPAN}
-                            style={{ height: `${paddingBottom}px` }}
-                            className="p-0"
-                          />
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </div>
+                        {paddingBottom > 0 && (
+                          <TableRow className="hover:bg-transparent border-none">
+                            <TableCell
+                              colSpan={TABLE_COL_SPAN}
+                              style={{ height: `${paddingBottom}px` }}
+                              className="p-0"
+                            />
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </TabsContent>
 
-            <div className="flex justify-between">
-              <Button
-                variant="outline"
-                onClick={onPrevious}
-                className="flex items-center gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Previous
-              </Button>
+          <TabsContent value="wlh" className="m-0 focus-visible:outline-none focus-visible:ring-0">
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <WLHContacts
+                onNext={onNext}
+                onPrevious={onPrevious}
+                wlhAttendeeFilters={wlhAttendeeFilters}
+                setWlhAttendeeFilters={setWlhAttendeeFilters}
+              />
+            </motion.div>
+          </TabsContent>
+        </AnimatePresence>
 
-              <Button
-                onClick={onNext}
-                disabled={!canProceed}
-                className="flex items-center gap-2"
-              >
-                Next
-                <ArrowRight className="h-4 w-4" />
-              </Button>
-            </div>
+        <div className="flex items-center justify-between pt-8 border-t border-slate-100 mt-4">
+          <Button
+            variant="ghost"
+            onClick={onPrevious}
+            className="h-12 px-6 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 transition-all"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Previous Step
+          </Button>
+
+          <div className="flex items-center gap-4">
+            {canProceed ? (
+              <div className="hidden sm:flex items-center gap-1.5 text-[#22B573]">
+                <CheckCircle2 className="h-4 w-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Audience Selected</span>
+              </div>
+            ) : (
+              <div className="hidden sm:flex items-center gap-1.5 text-slate-400">
+                <AlertCircle className="h-4 w-4" />
+                <span className="text-[10px] font-black uppercase tracking-widest">Selection Required</span>
+              </div>
+            )}
+            
+            <Button
+              onClick={onNext}
+              disabled={!canProceed}
+              className="h-12 px-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30 group"
+            >
+              Proceed to Content
+              <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Button>
           </div>
-        </TabsContent>
-        <TabsContent value="wlh">
-          <WLHContacts
-            onNext={onNext}
-            onPrevious={onPrevious}
-            wlhAttendeeFilters={wlhAttendeeFilters}
-            setWlhAttendeeFilters={setWlhAttendeeFilters}
-          />
-        </TabsContent>
+        </div>
       </Tabs>
     </div>
   );

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { 
   ArrowLeft, 
   MessageSquare, 
@@ -15,21 +16,45 @@ import {
   RefreshCw,
   Loader2,
   FileText,
-  Download
+  Download,
+  Calendar,
+  ChevronRight,
+  TrendingUp,
+  LayoutGrid,
+  Users,
+  Search,
+  PieChart,
+  Target,
+  Trophy,
+  History,
+  Phone,
+  Eye,
+  CheckCircle2,
+  XCircle,
+  Clock4,
+  Settings2
 } from 'lucide-react';
-import { useCampaignById,  } from '@/hooks/useCampaigns';
+import { useCampaignById } from '@/hooks/useCampaigns';
 import { useCampaignMessages } from '@/hooks/useCampaignMessages';
 import { formatDateTime12 } from '@/lib/date';
 import { toastUtils } from '@/lib/utils';
 import { campaignApi } from '@/api/modules/campaignAPI';
 import { Label } from '@/components/ui/label';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationEllipsis, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from '@/components/ui/pagination';
 import { useProjectContext } from '@/context/ProjectContext';
 
 const CampaignDetails = () => {
   const { campaignId, projectId } = useParams<{ campaignId: string; projectId: string }>();
-  const {selectedProject} = useProjectContext();
+  const navigate = useNavigate();
+  const { selectedProject } = useProjectContext();
   const [showReport, setShowReport] = useState(false);
   const [reportPage, setReportPage] = useState(1);
   const [isDownloadingReport, setIsDownloadingReport] = useState(false);
@@ -73,27 +98,17 @@ const CampaignDetails = () => {
     return () => clearInterval(interval);
   }, [autoRefreshEnabled, selectedProject?._id, refetch, refetchMessages, showReport]);
   
-  // const executeCampaignMutation = useExecuteCampaign();
-
   const handleExecuteCampaign = async () => {
     if (!campaign) return;
-    
-    if (window.confirm('Are you sure you want to execute this campaign? This will send messages to all selected contacts.')) {
-      try {
-        // This would need the contacts data - for now, we'll show a placeholder
-        toastUtils.info('Campaign execution requires contact data. This feature will be implemented with the contacts integration.');
-      } catch (error) {
-        console.error('Failed to execute campaign:', error);
-      }
-    }
+    toastUtils.info('Campaign execution requires contact data. This feature will be implemented with the contacts integration.');
   };
 
   const handleRefresh = async () => {
     try {
       setIsRefreshing(true);
-      await refetch(); // Always refresh campaign analytics
+      await refetch();
       if (showReport) {
-        await refetchMessages(); // Only refresh report data if visible
+        await refetchMessages();
       }
       setLastRefreshTime(new Date());
       toastUtils.success('Campaign data refreshed successfully');
@@ -107,11 +122,16 @@ const CampaignDetails = () => {
 
   const handleShowReport = () => {
     setShowReport(!showReport);
-    setReportPage(1); // Reset to first page when toggling
+    setReportPage(1);
   };
 
   const handleReportPageChange = (page: number) => {
     setReportPage(page);
+    // Scroll to the report section
+    const reportElement = document.getElementById('campaign-report-section');
+    if (reportElement) {
+      reportElement.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const handleDownloadReport = async () => {
@@ -183,502 +203,529 @@ const CampaignDetails = () => {
     return csvRows.join('\n');
   };
 
-  // Transform API data for display
-  const reportData = campaignMessagesData ? {
-    messages: campaignMessagesData.wabaMessages,
-    pagination: {
-      page: campaignMessagesData.page,
-      limit: campaignMessagesData.limit,
-      totalCount: campaignMessagesData.total,
-      totalPages: campaignMessagesData.totalPages,
-      hasNextPage: campaignMessagesData.page < campaignMessagesData.totalPages,
-      hasPrevPage: campaignMessagesData.page > 1,
-    }
-  } : null;
-
-  const getStatusBadge = (status: string) => {
+  const getStatusStyles = (status: string) => {
     switch (status) {
       case 'completed':
-        return <Badge variant="default" className="bg-green-500">Completed</Badge>;
+        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
       case 'in-progress':
-        return <Badge variant="default" className="bg-blue-500">In Progress</Badge>;
+        return 'bg-blue-50 text-blue-600 border-blue-100';
       case 'failed':
-        return <Badge variant="destructive">Failed</Badge>;
+        return 'bg-red-50 text-red-600 border-red-100';
       case 'draft':
-        return <Badge variant="secondary">Draft</Badge>;
+        return 'bg-slate-50 text-slate-600 border-slate-100';
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return 'bg-amber-50 text-amber-600 border-amber-100';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="h-5 w-5 text-green-500" />;
+        return <CheckCircle className="h-4 w-4" />;
       case 'in-progress':
-        return <Clock className="h-5 w-5 text-blue-500" />;
+        return <RefreshCw className="h-4 w-4 animate-spin-slow" />;
       case 'failed':
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
+        return <AlertCircle className="h-4 w-4" />;
       case 'draft':
-        return <MessageSquare className="h-5 w-5 text-gray-500" />;
+        return <Clock className="h-4 w-4" />;
       default:
-        return <MessageSquare className="h-5 w-5 text-gray-500" />;
+        return <MessageSquare className="h-4 w-4" />;
     }
+  };
+
+  const getMessageStatusIcon = (status: string) => {
+    switch (status) {
+      case 'sent':
+        return <CheckCircle className="h-4 w-4" />;
+      case 'delivered':
+        return <CheckCircle2 className="h-4 w-4" />;
+      case 'read':
+        return <Eye className="h-4 w-4" />;
+      case 'failed':
+        return <XCircle className="h-4 w-4" />;
+      default:
+        return <Clock4 className="h-4 w-4" />;
+    }
+  };
+
+  const renderPagination = () => {
+    if (!campaignMessagesData) return null;
+
+    const { page, totalPages } = campaignMessagesData;
+    const hasPrevPage = page > 1;
+    const hasNextPage = page < totalPages;
+
+    return (
+      <div className="flex justify-center pt-8">
+        <Pagination>
+          <PaginationContent className="gap-2">
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (hasPrevPage) handleReportPageChange(page - 1);
+                }}
+                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasPrevPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+              />
+            </PaginationItem>
+
+            {page > 3 && (
+              <>
+                <PaginationItem>
+                  <PaginationLink
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleReportPageChange(1);
+                    }}
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                  >
+                    1
+                  </PaginationLink>
+                </PaginationItem>
+                {page > 4 && <PaginationItem><PaginationEllipsis /></PaginationItem>}
+              </>
+            )}
+
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const startPage = Math.max(1, page - 2);
+              const pageNum = startPage + i;
+              if (pageNum > totalPages) return null;
+
+              return (
+                <PaginationItem key={pageNum}>
+                  <PaginationLink
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleReportPageChange(pageNum);
+                    }}
+                    isActive={pageNum === page}
+                    className={`cursor-pointer h-10 w-10 rounded-xl font-bold transition-all ${
+                      pageNum === page 
+                        ? 'bg-[#22B573] text-white border-[#22B573] shadow-lg shadow-green-600/20' 
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {pageNum}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+
+            {page < totalPages - 2 && (
+              <>
+                {page < totalPages - 3 && <PaginationItem><PaginationEllipsis /></PaginationItem>}
+                <PaginationItem>
+                  <PaginationLink
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleReportPageChange(totalPages);
+                    }}
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                  >
+                    {totalPages}
+                  </PaginationLink>
+                </PaginationItem>
+              </>
+            )}
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (hasNextPage) handleReportPageChange(page + 1);
+                }}
+                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasNextPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    );
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-[400px] flex flex-col items-center justify-center py-24 text-slate-400">
+        <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+          <Loader2 className="h-8 w-8 animate-spin text-[#22B573]" />
+        </div>
+        <p className="font-bold text-sm uppercase tracking-widest">Loading Details...</p>
       </div>
     );
   }
 
   if (error || !campaign) {
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Failed to load campaign: {(error as any)?.response?.data?.message || 'Campaign not found'}
-        </AlertDescription>
-      </Alert>
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+          <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
+          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Campaign Not Found</AlertTitle>
+          <AlertDescription className="text-slate-500 font-medium">
+            Failed to load campaign: {(error as any)?.response?.data?.message || 'The requested campaign could not be found.'}
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
+  const deliveryRate = campaign.analyticsSummary.total > 0 
+    ? Math.round((campaign.analyticsSummary.delivered / campaign.analyticsSummary.total) * 100)
+    : 0;
+  
+  const readRate = campaign.analyticsSummary.delivered > 0 
+    ? Math.round((campaign.analyticsSummary.read / campaign.analyticsSummary.delivered) * 100)
+    : 0;
+
+  const failureRate = campaign.analyticsSummary.total > 0 
+    ? Math.round((campaign.analyticsSummary.failed / campaign.analyticsSummary.total) * 100)
+    : 0;
+
   return (
-    <div className="h-full flex flex-col space-y-6 overflow-y-auto">
-      {/* Header */}
-      <div className="space-y-4">
-        {/* Main Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
-            <Link to={`/whatsapp/dashboard/${projectId}/campaigns`}>
-              <Button variant="outline" size="sm">
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Back to Campaigns
-              </Button>
-            </Link>
-            
-            <div className="flex items-center gap-2">
-              {getStatusIcon(campaign.status)}
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                {campaign.name}
-              </h1>
-              {getStatusBadge(campaign.status)}
-            </div>
-          </div>
-
-          {/* Project Info */}
-          <div className="text-sm text-muted-foreground">
-            <div className="font-medium">Project: {selectedProject?.projectName || 'Unknown'}</div>
-            {lastRefreshTime && (
-              <div className="text-xs text-muted-foreground">
-                Last updated: {lastRefreshTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Controls Row */}
-        <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 ${autoRefreshEnabled ? 'justify-between' : 'justify-end'}`}>
-          {/* Auto-refresh indicator */}
-          {autoRefreshEnabled && (
-            <div className="flex items-center gap-2 text-sm text-green-600">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>Auto-refresh active</span>
-            </div>
-          )}
-          
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-          <Button 
-            onClick={handleRefresh} 
-            variant="outline" 
-            size="sm"
-            disabled={isRefreshing}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-            <span className="hidden sm:inline">{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
-          </Button>
-          
-          <Button 
-            onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
-            variant={autoRefreshEnabled ? "default" : "outline"}
-            size="sm"
-            className="flex items-center gap-2 w-32"
-          >
-            <Clock className="h-4 w-4" />
-            <span className="hidden sm:inline">{autoRefreshEnabled ? 'Disable Auto' : 'Enable Auto'}</span>
-          </Button>
-          
-          <Button 
-            onClick={handleShowReport} 
-            variant="outline" 
-            size="sm"
-            className="flex items-center gap-2"
-          >
-            <FileText className="h-4 w-4" />
-            {showReport ? 'Hide Report' : 'View Report'}
-          </Button>
-
-          <Button 
-            onClick={handleDownloadReport} 
-            variant="outline" 
-            size="sm"
-            disabled={isDownloadingReport}
-            className="flex items-center gap-2"
-          >
-            {isDownloadingReport ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Download className="h-4 w-4" />
-            )}
-            {isDownloadingReport ? 'Downloading...' : 'Download Report'}
-          </Button>
-          
-          {campaign?.status === 'draft' && (
-            <Button onClick={handleExecuteCampaign} className="flex items-center gap-2">
-              <Send className="h-4 w-4" />
-              Execute Campaign
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(`/whatsapp/dashboard/${projectId}/campaigns`)}
+              className="h-10 w-10 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100 transition-all text-slate-500"
+            >
+              <ArrowLeft className="h-5 w-5" />
             </Button>
-          )}
-        </div>
-      </div>
-    </div>
-
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Campaign Details */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
-              Campaign Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Campaign Name</Label>
-                <p className="text-sm">{campaign.name}</p>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-[#22B573] font-bold text-xs uppercase tracking-widest mb-0.5">
+                <Target className="h-3.5 w-3.5" />
+                Campaign Intel
               </div>
-              
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Template</Label>
-                <p className="text-sm">{campaign.messageTemplate.templateName}</p>
+              <div className="flex items-center gap-3">
+                <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+                  {campaign.name}
+                </h1>
+                <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-none shadow-sm ${getStatusStyles(campaign.status)}`}>
+                  {campaign.status}
+                </Badge>
               </div>
-              
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Status</Label>
-                <div className="flex items-center gap-2">
-                  {getStatusIcon(campaign.status)}
-                  {getStatusBadge(campaign.status)}
-                </div>
-              </div>
-              
-              <div>
-                <Label className="text-sm font-medium text-muted-foreground">Created</Label>
-                <p className="text-sm">{formatDateTime12(campaign.createdAt)}</p>
-              </div>
-              
-              {campaign.scheduledAt && (
-                <div>
-                  <Label className="text-sm font-medium text-muted-foreground">Scheduled</Label>
-                  <p className="text-sm">{formatDateTime12(campaign.scheduledAt)}</p>
-                </div>
-              )}
-              
-              {campaign.completedAt && (
-                <div>
-                  <Label className="text-sm font-medium text-muted-foreground">Completed</Label>
-                  <p className="text-sm">{formatDateTime12(campaign.completedAt)}</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Analytics Summary */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="h-5 w-5" />
-              Analytics Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Total Messages</span>
-                <span className="font-semibold">{campaign.analyticsSummary.total}</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Sent</span>
-                <span className="font-semibold text-green-600">{campaign.analyticsSummary.sent}</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Delivered</span>
-                <span className="font-semibold text-blue-600">{campaign.analyticsSummary.delivered}</span>
-              </div>
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Read</span>
-                <span className="font-semibold text-purple-600">{campaign.analyticsSummary.read}</span>
-              </div>
-              
-              {/* <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Clicked</span>
-                <span className="font-semibold text-orange-600">{campaign.analyticsSummary.clicked}</span>
-              </div> */}
-              
-              <div className="flex items-center justify-between">
-                <span className="text-sm text-muted-foreground">Failed</span>
-                <span className="font-semibold text-red-600">{campaign.analyticsSummary.failed}</span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Performance Metrics - Full Width */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <RefreshCw className="h-5 w-5" />
-            Performance Metrics
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid gap-6 md:grid-cols-4">
-            <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">
-                {campaign.analyticsSummary.total > 0 
-                  ? Math.round((campaign.analyticsSummary.delivered / campaign.analyticsSummary.total) * 100)
-                  : 0}%
-              </div>
-              <div className="text-sm text-muted-foreground">Delivery Rate</div>
-            </div>
-            
-            <div className="text-center">
-              <div className="text-2xl font-bold text-purple-600">
-                {campaign.analyticsSummary.delivered > 0 
-                  ? Math.round((campaign.analyticsSummary.read / campaign.analyticsSummary.delivered) * 100)
-                  : 0}%
-              </div>
-              <div className="text-sm text-muted-foreground">Read Rate</div>
-            </div>
-            
-            <div className="text-center">
-              <div className="text-2xl font-bold text-orange-600">
-                {campaign.analyticsSummary.read > 0 
-                  ? Math.round((campaign.analyticsSummary.clicked / campaign.analyticsSummary.read) * 100)
-                  : 0}%
-              </div>
-              <div className="text-sm text-muted-foreground">Click Rate</div>
-            </div>
-            
-            <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">
-                {campaign.analyticsSummary.total > 0 
-                  ? Math.round((campaign.analyticsSummary.failed / campaign.analyticsSummary.total) * 100)
-                  : 0}%
-              </div>
-              <div className="text-sm text-muted-foreground">Failure Rate</div>
+              <p className="text-slate-500 text-xs font-medium">
+                Deep analytics for <span className="text-slate-900 font-bold">{campaign.messageTemplate.templateName}</span>
+              </p>
             </div>
           </div>
-        </CardContent>
-      </Card>
 
-      {/* Campaign Report Table */}
-      {showReport && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              Campaign Report
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {messagesLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-6 w-6 animate-spin mr-2" />
-                Loading campaign messages...
-              </div>
-            ) : messagesError ? (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>
-                  Failed to load campaign messages. Please try again.
-                </AlertDescription>
-              </Alert>
-            ) : !reportData || reportData.messages.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                No messages found for this campaign.
-              </div>
-            ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Phone Number</TableHead>
-                      <TableHead>Template Name</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Message Type</TableHead>
-                      <TableHead>Created At</TableHead>
-                      <TableHead>Sent At</TableHead>
-                      <TableHead>Delivered At</TableHead>
-                      <TableHead>Read At</TableHead>
-                      <TableHead>Error</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {reportData.messages.map((message) => (
-                      <TableRow key={message._id}>
-                        <TableCell className="font-medium">{message.phoneNumber}</TableCell>
-                        <TableCell className="font-medium">{message.templateName}</TableCell>
-                        <TableCell>
-                          <Badge 
-                            variant={
-                              message.status === 'delivered' || message.status === 'read' ? 'default' :
-                              message.status === 'sent' ? 'secondary' :
-                              message.status === 'failed' ? 'destructive' : 'outline'
-                            }
-                            className={
-                              message.status === 'delivered' ? 'bg-green-500' :
-                              message.status === 'read' ? 'bg-blue-500' :
-                              message.status === 'sent' ? 'bg-yellow-500' : ''
-                            }
-                          >
-                            {message.status.toUpperCase()}
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={handleRefresh}
+              variant="outline"
+              disabled={isRefreshing}
+              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Syncing...' : 'Sync Data'}
+            </Button>
+
+            <Button
+              onClick={handleDownloadReport}
+              disabled={isDownloadingReport}
+              className="h-11 px-6 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-slate-900/10 bg-slate-900 hover:bg-slate-800 text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {isDownloadingReport ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              Report
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+
+      <main className="container mx-auto space-y-6 pb-12">
+        {/* Analytics Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left: General Info */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:col-span-1 space-y-6"
+          >
+            <Card className="rounded-[24px] border-slate-200 shadow-sm overflow-hidden h-full">
+              <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+                  <Settings2 className="h-4 w-4 text-[#22B573]" />
+                  Campaign Settings
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-6 space-y-6">
+                <div className="space-y-4">
+                  {[
+                    { label: "Template Name", value: campaign.messageTemplate.templateName, icon: FileText },
+                    { label: "Status", value: campaign.status, icon: History, badge: true },
+                    { label: "Created On", value: formatDateTime12(campaign.createdAt), icon: Calendar },
+                    { label: "Completion Time", value: campaign.completedAt ? formatDateTime12(campaign.completedAt) : 'N/A', icon: CheckCircle },
+                    { label: "Scheduled For", value: campaign.scheduledAt ? formatDateTime12(campaign.scheduledAt) : 'Immediate', icon: Clock },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-start gap-4 group">
+                      <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-[#22B573] group-hover:border-[#22B573]/20 transition-all">
+                        <item.icon className="h-5 w-5" />
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.label}</p>
+                        {item.badge ? (
+                          <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-none shadow-sm ${getStatusStyles(item.value as string)}`}>
+                            {item.value}
                           </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <Badge variant="outline">{message.messageType}</Badge>
-                        </TableCell>
-                        <TableCell>{formatDateTime12(message.createdAt)}</TableCell>
-                        <TableCell>
-                          {message.sentAt ? formatDateTime12(message.sentAt) : '-'}
-                        </TableCell>
-                        <TableCell>
-                          {message.deliveredAt ? formatDateTime12(message.deliveredAt) : '-'}
-                        </TableCell>
-                        <TableCell>
-                          {message.readAt ? formatDateTime12(message.readAt) : '-'}
-                        </TableCell>
-                        <TableCell className="text-red-600">
-                          {message.failureReason || '-'}
-                        </TableCell>
-                      </TableRow>
+                        ) : (
+                          <p className="text-sm font-bold text-slate-900">{item.value}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {campaign.status === 'draft' && (
+                  <Button 
+                    onClick={handleExecuteCampaign}
+                    className="w-full h-12 rounded-xl bg-[#22B573] hover:bg-[#1da467] text-white font-black uppercase tracking-widest text-xs shadow-lg shadow-green-600/20 transition-all hover:scale-[1.02]"
+                  >
+                    <Send className="h-4 w-4 mr-2" />
+                    Launch Campaign
+                  </Button>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          {/* Right: Stats Summary */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="lg:col-span-2 space-y-6"
+          >
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                { label: "Total Target", value: campaign.analyticsSummary.total, icon: Users, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
+                { label: "Successfully Sent", value: campaign.analyticsSummary.sent, icon: Send, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100" },
+                { label: "Total Delivered", value: campaign.analyticsSummary.delivered, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
+                { label: "Total Read", value: campaign.analyticsSummary.read, icon: Eye, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-100" },
+              ].map((stat, i) => (
+                <Card key={i} className={`rounded-2xl border ${stat.border} ${stat.bg} shadow-sm group hover:shadow-md transition-all duration-300`}>
+                  <CardContent className="p-5 flex flex-col items-center text-center gap-3">
+                    <div className={`h-12 w-12 rounded-xl bg-white border ${stat.border} flex items-center justify-center ${stat.color} shadow-sm group-hover:scale-110 transition-transform`}>
+                      <stat.icon className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">{stat.label}</p>
+                      <h4 className={`text-2xl font-black ${stat.color}`}>{stat.value}</h4>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Performance Visualizer */}
+            <Card className="rounded-[24px] border-slate-200 shadow-sm overflow-hidden">
+              <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+                  <TrendingUp className="h-4 w-4 text-[#22B573]" />
+                  Success Benchmarks
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="p-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  {[
+                    { label: "Delivery Success", value: deliveryRate, color: "bg-blue-500", icon: CheckCircle2, sub: `${campaign.analyticsSummary.delivered} of ${campaign.analyticsSummary.total}` },
+                    { label: "Engagement Rate", value: readRate, color: "bg-emerald-500", icon: Eye, sub: `${campaign.analyticsSummary.read} of ${campaign.analyticsSummary.delivered}` },
+                    { label: "Failure Rate", value: failureRate, color: "bg-red-500", icon: AlertCircle, sub: `${campaign.analyticsSummary.failed} errors detected` },
+                  ].map((metric, i) => (
+                    <div key={i} className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className={`h-2 w-2 rounded-full ${metric.color}`} />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{metric.label}</span>
+                        </div>
+                        <span className="text-xl font-black text-slate-900">{metric.value}%</span>
+                      </div>
+                      <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: `${metric.value}%` }}
+                          transition={{ duration: 1, delay: 0.5 + (i * 0.2) }}
+                          className={`h-full ${metric.color} rounded-full`}
+                        />
+                      </div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{metric.sub}</p>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* Report Toggle Button */}
+        <div className="flex justify-center py-4">
+          <Button
+            onClick={handleShowReport}
+            className={`h-12 px-8 rounded-2xl flex items-center gap-3 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-[0.98] ${
+              showReport 
+                ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 shadow-none' 
+                : 'bg-white border-2 border-[#22B573] text-[#22B573] hover:bg-[#22B573]/5 shadow-xl shadow-green-600/10'
+            }`}
+          >
+            <FileText className="h-5 w-5" />
+            {showReport ? 'Hide Audit Log' : 'View Complete Audit Log'}
+          </Button>
+        </div>
+
+        {/* Audit Log / Report Section */}
+        <AnimatePresence>
+          {showReport && (
+            <motion.div
+              id="campaign-report-section"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-xl shadow-slate-200/50"
+            >
+              <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/30 flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div>
+                  <h2 className="text-xl font-black text-slate-900">Message Audit Log</h2>
+                  <p className="text-slate-500 text-xs font-medium mt-1">Granular message-level delivery tracking</p>
+                </div>
+                <Button 
+                  onClick={handleDownloadReport} 
+                  variant="outline" 
+                  disabled={isDownloadingReport}
+                  className="h-10 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50"
+                >
+                  {isDownloadingReport ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+                  Export CSV
+                </Button>
+              </div>
+
+              <div className="p-4 sm:p-8">
+                {messagesLoading ? (
+                  <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+                    <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                      <Loader2 className="h-8 w-8 animate-spin text-[#22B573]" />
+                    </div>
+                    <p className="font-bold text-sm uppercase tracking-widest">Loading Logs...</p>
+                  </div>
+                ) : messagesError ? (
+                  <Alert variant="destructive" className="bg-red-50 border-red-200 rounded-2xl">
+                    <AlertCircle className="h-4 w-4 text-red-600" />
+                    <AlertTitle className="text-red-800 font-bold">Log Fetch Failed</AlertTitle>
+                    <AlertDescription className="text-red-700 font-medium">We couldn't retrieve the message logs for this campaign.</AlertDescription>
+                  </Alert>
+                ) : !campaignMessagesData || campaignMessagesData.wabaMessages.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+                    <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                      <Search className="h-8 w-8 opacity-20" />
+                    </div>
+                    <p className="font-bold text-sm uppercase tracking-widest">No logs available</p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {campaignMessagesData.wabaMessages.map((message, index) => (
+                      <motion.div
+                        key={message._id}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="group flex flex-col xl:flex-row xl:items-center gap-6 p-6 rounded-2xl border border-slate-100 bg-white hover:bg-slate-50/50 hover:border-[#22B573]/20 transition-all duration-300"
+                      >
+                        {/* Status Icon */}
+                        <div className={`h-12 w-12 rounded-xl border flex items-center justify-center shadow-sm flex-shrink-0 transition-transform group-hover:scale-105 ${
+                          message.status === 'read' ? 'bg-green-50 text-green-600 border-green-100' :
+                          message.status === 'delivered' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
+                          message.status === 'sent' ? 'bg-blue-50 text-blue-600 border-blue-100' :
+                          message.status === 'failed' ? 'bg-red-50 text-red-600 border-red-100' :
+                          'bg-slate-50 text-slate-400 border-slate-100'
+                        }`}>
+                          {getMessageStatusIcon(message.status)}
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2 mb-1">
+                              <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-none shadow-sm ${
+                                message.status === 'read' ? 'bg-green-50 text-green-600' :
+                                message.status === 'delivered' ? 'bg-emerald-50 text-emerald-600' :
+                                message.status === 'sent' ? 'bg-blue-50 text-blue-600' :
+                                message.status === 'failed' ? 'bg-red-50 text-red-600' :
+                                'bg-slate-50 text-slate-400'
+                              }`}>
+                                {message.status}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Phone className="h-3.5 w-3.5 text-slate-400" />
+                              <h3 className="font-bold text-slate-900 text-base">{message.phoneNumber}</h3>
+                            </div>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest break-all">ID: {message.wabaMessageId || 'N/A'}</p>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-1">
+                              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Created</span>
+                              <span className="text-xs font-bold text-slate-600">{formatDateTime12(message.createdAt)}</span>
+                            </div>
+                            {message.sentAt && (
+                              <div className="space-y-1">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Sent</span>
+                                <span className="text-xs font-bold text-slate-600">{formatDateTime12(message.sentAt)}</span>
+                              </div>
+                            )}
+                            {message.deliveredAt && (
+                              <div className="space-y-1">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block text-emerald-600">Delivered</span>
+                                <span className="text-xs font-bold text-emerald-600">{formatDateTime12(message.deliveredAt)}</span>
+                              </div>
+                            )}
+                            {message.readAt && (
+                              <div className="space-y-1">
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block text-green-600">Read</span>
+                                <span className="text-xs font-bold text-green-600">{formatDateTime12(message.readAt)}</span>
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="flex flex-col justify-center">
+                            {message.failureReason ? (
+                              <div className="p-3 rounded-xl bg-red-50 border border-red-100 flex items-start gap-2.5">
+                                <AlertCircle className="h-3.5 w-3.5 text-red-500 mt-0.5 flex-shrink-0" />
+                                <div className="min-w-0">
+                                  <p className="text-[10px] font-black text-red-600 uppercase tracking-widest leading-none mb-1">Error Trace</p>
+                                  <p className="text-[11px] font-medium text-red-700 leading-tight line-clamp-2">{message.failureReason}</p>
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="p-3 rounded-xl bg-emerald-50/50 border border-emerald-100/50 flex items-center gap-2.5">
+                                <Trophy className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
+                                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">No issues detected</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </motion.div>
                     ))}
-                  </TableBody>
-                </Table>
+                  </div>
+                )}
+
+                {/* Pagination */}
+                {campaignMessagesData && campaignMessagesData.totalPages > 1 && renderPagination()}
               </div>
-            )}
-            
-            {/* Pagination */}
-            {reportData && reportData.pagination.totalPages > 1 && (
-              <div className="flex justify-center pt-4">
-                <Pagination>
-                  <PaginationContent>
-                    <PaginationItem>
-                      <PaginationPrevious 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (reportData.pagination.hasPrevPage) {
-                            handleReportPageChange(reportPage - 1);
-                          }
-                        }}
-                        className={!reportData.pagination.hasPrevPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                      />
-                    </PaginationItem>
-                    
-                    {/* Show first page */}
-                    {reportPage > 3 && (
-                      <>
-                        <PaginationItem>
-                          <PaginationLink 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleReportPageChange(1);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            1
-                          </PaginationLink>
-                        </PaginationItem>
-                        {reportPage > 4 && (
-                          <PaginationItem>
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                        )}
-                      </>
-                    )}
-                    
-                    {/* Show pages around current page */}
-                    {Array.from({ length: Math.min(5, reportData.pagination.totalPages) }, (_, i) => {
-                      const startPage = Math.max(1, reportPage - 2);
-                      const pageNum = startPage + i;
-                      
-                      if (pageNum > reportData.pagination.totalPages) return null;
-                      
-                      return (
-                        <PaginationItem key={pageNum}>
-                          <PaginationLink
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleReportPageChange(pageNum);
-                            }}
-                            isActive={pageNum === reportPage}
-                            className="cursor-pointer"
-                          >
-                            {pageNum}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    })}
-                    
-                    {/* Show last page */}
-                    {reportPage < reportData.pagination.totalPages - 2 && (
-                      <>
-                        {reportPage < reportData.pagination.totalPages - 3 && (
-                          <PaginationItem>
-                            <PaginationEllipsis />
-                          </PaginationItem>
-                        )}
-                        <PaginationItem>
-                          <PaginationLink 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              handleReportPageChange(reportData.pagination.totalPages);
-                            }}
-                            className="cursor-pointer"
-                          >
-                            {reportData.pagination.totalPages}
-                          </PaginationLink>
-                        </PaginationItem>
-                      </>
-                    )}
-                    
-                    <PaginationItem>
-                      <PaginationNext 
-                        onClick={(e) => {
-                          e.preventDefault();
-                          if (reportData.pagination.hasNextPage) {
-                            handleReportPageChange(reportPage + 1);
-                          }
-                        }}
-                        className={!reportData.pagination.hasNextPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                      />
-                    </PaginationItem>
-                  </PaginationContent>
-                </Pagination>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
     </div>
   );
 };

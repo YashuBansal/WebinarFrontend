@@ -1,5 +1,5 @@
 import { useEffect, useLayoutEffect, useRef } from 'react';
-import { Image, Video } from 'lucide-react';
+import { Image, Video, Check, CheckCheck, Clock } from 'lucide-react';
 import { TemplateMessageRenderer } from './TemplateMessageRenderer';
 
 interface Message {
@@ -35,18 +35,18 @@ interface MessagesListProps {
   projectId?: string;
 }
 
-export function MessagesList({ 
-  messages, 
-  templates, 
-  hasMore, 
-  loading, 
+export function MessagesList({
+  messages,
+  templates,
+  hasMore,
+  loading,
   onLoadMore,
   contact,
   className = "",
   projectId
 }: MessagesListProps) {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
-  
+
   // Helper function to get proxy URL for media
   const getMediaProxyUrl = (mediaUrl?: string): string => {
     if (!projectId || !mediaUrl) return mediaUrl || '';
@@ -99,12 +99,12 @@ export function MessagesList({
     if (!loading && messages.length > prevMessagesLengthRef.current) {
       const prevState = scrollPositionRef.current;
       const heightDiff = container.scrollHeight - prevState.scrollHeight;
-      
+
       // Adjust scroll position to maintain visual position
       if (heightDiff > 0) {
         container.scrollTop = prevState.scrollTop + heightDiff;
       }
-      
+
       scrollPositionRef.current = null;
       prevMessagesLengthRef.current = messages.length;
     } else if (!loading) {
@@ -153,55 +153,23 @@ export function MessagesList({
 
   const formatMessageTime = (createdAt: string) => {
     const date = new Date(createdAt);
-    const now = new Date();
-    const isToday = date.toDateString() === now.toDateString();
-    
-    if (isToday) {
-      return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    } else {
-      return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
-    }
+    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
   };
 
-  const getOutboundStatusLabel = (message: Message): string => {
-    // Prefer explicit status if backend provides it
-    switch (message.status) {
-      case 'failed':
-        return 'Failed';
-      case 'read':
-        return 'Read';
-      case 'delivered':
-        return 'Delivered';
-      case 'sent':
-        return 'Sent';
-      case 'pending':
-        return 'Pending/Sending';
-      case 'clicked':
-        return 'Clicked';
-      default:
-        break;
-    }
-
-    // Fallback to timestamps (useful for optimistic UI or partial payloads)
-    if (message.readAt) return 'Read';
-    if (message.deliveredAt) return 'Delivered';
-    if (message.sentAt) return 'Sent';
-    return 'Pending/Sending';
-  };
 
   return (
-    <div 
+    <div
       ref={scrollContainerRef}
-      className={`h-full overflow-y-auto p-4 space-y-3 bg-gray-50 ${className}`} 
-      role="log" 
+      className={`h-full overflow-y-auto custom-scrollbar p-4 space-y-3 bg-transparent ${className}`}
+      role="log"
       aria-label="Chat messages"
     >
       {/* Load More Button at Top */}
       {hasMore && (
         <div className="flex justify-center mb-4">
-          <button 
-            className="px-4 py-2 text-sm bg-white border rounded-lg hover:bg-gray-50 disabled:opacity-50 shadow-sm transition-colors" 
-            onClick={onLoadMore} 
+          <button
+            className="px-4 py-2 text-sm bg-white border rounded-lg hover:bg-gray-50 disabled:opacity-50 shadow-sm transition-colors"
+            onClick={onLoadMore}
             disabled={loading}
             aria-label="Load older messages"
           >
@@ -209,7 +177,7 @@ export function MessagesList({
           </button>
         </div>
       )}
-      
+
       {/* Messages */}
       {messages.length === 0 && !loading ? (
         <div className="flex justify-center items-center h-32 text-gray-500">
@@ -219,110 +187,165 @@ export function MessagesList({
           </div>
         </div>
       ) : (
-        messages.map((message, idx) => (
-          <div 
-            key={message._id || idx} 
-            className={`flex ${message.direction === 'outbound' ? 'justify-end' : 'justify-start'}`}
-            role="article"
-            aria-label={`${message.direction} message`}
-          >
-            <div className={`max-w-[70%] ${message.direction === 'outbound' ? 'bg-blue-500 text-white' : 'bg-white border'} rounded-2xl px-4 py-2 shadow-sm`}> 
-              {/* Message content */}
-              <div className="text-sm break-words">
-                {message.messageFormat === 'template' ? (
-                  <TemplateMessageRenderer message={message} templates={templates} />
-                ) : message.messageFormat === 'media' ? (
-                  <div className="space-y-2">
-                    {message.mediaUrl ? (
-                      <>
-                        {message.mimeType?.startsWith('image/') ? (
-                          <img
-                            src={getMediaProxyUrl(message.mediaUrl)}
-                            alt={message.textBody || 'Image'}
-                            className="max-w-full rounded-lg object-contain"
-                            style={{ maxHeight: '300px' }}
-                            onError={(e) => {
-                              // Fallback to icon if image fails to load
-                              const target = e.target as HTMLImageElement;
-                              target.style.display = 'none';
-                              const fallback = target.nextElementSibling as HTMLElement;
-                              if (fallback) fallback.style.display = 'flex';
-                            }}
-                          />
-                        ) : message.mimeType?.startsWith('video/') ? (
-                          <video
-                            src={getMediaProxyUrl(message.mediaUrl)}
-                            controls
-                            className="max-w-full rounded-lg"
-                            style={{ maxHeight: '300px' }}
-                            onError={(e) => {
-                              // Fallback to icon if video fails to load
-                              const target = e.target as HTMLVideoElement;
-                              target.style.display = 'none';
-                              const fallback = target.nextElementSibling as HTMLElement;
-                              if (fallback) fallback.style.display = 'flex';
-                            }}
-                          />
-                        ) : null}
-                        {/* Fallback icon display (hidden by default, shown on error) */}
-                        <div className="flex items-start gap-2" style={{ display: message.mediaUrl ? 'none' : 'flex' }}>
-                          {message.mimeType?.startsWith('image/') ? (
-                            <Image className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                          ) : message.mimeType?.startsWith('video/') ? (
-                            <Video className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                          ) : (
-                            <Image className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                          )}
-                          <div className="flex-1">
-                            {message.textBody || message.displayText || (message.mimeType?.startsWith('image/') ? '[Image]' : '[Video]')}
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="flex items-start gap-2">
-                        {message.mimeType?.startsWith('image/') ? (
-                          <Image className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                        ) : message.mimeType?.startsWith('video/') ? (
-                          <Video className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                        ) : (
-                          <Image className="h-5 w-5 flex-shrink-0 mt-0.5" />
-                        )}
-                        <div className="flex-1">
-                          {message.textBody || message.displayText || (message.mimeType?.startsWith('image/') ? '[Image]' : '[Video]')}
-                        </div>
-                      </div>
-                    )}
-                    {/* Show caption if available and different from placeholder */}
-                    {message.textBody && 
-                     message.textBody !== '[Image]' && 
-                     message.textBody !== '[Video]' && 
-                     message.mediaUrl && (
-                      <div className="text-sm mt-2">
-                        {message.textBody}
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <div>{message.textBody || message.displayText}</div>
-                )}
-              </div>
-              
-              {/* Message timestamp */}
-              <div className={`text-xs mt-1 ${message.direction === 'outbound' ? 'text-blue-100' : 'text-gray-500'}`}>
-                {formatMessageTime(message.createdAt)}
-              </div>
+        messages.map((message, idx) => {
+          // Check if we should show a date separator
+          const messageDate = new Date(message.createdAt).toDateString();
+          const prevMessageDate = idx > 0 ? new Date(messages[idx - 1].createdAt).toDateString() : null;
+          const showDateSeparator = messageDate !== prevMessageDate;
 
-              {/* Message status (outbound only) */}
-              {message.direction === 'outbound' && (
-                <div className="text-[11px] mt-0.5 text-blue-200">
-                  {getOutboundStatusLabel(message)}
+          const getDateLabel = (dateStr: string) => {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const yesterday = new Date(now);
+            yesterday.setDate(now.getDate() - 1);
+
+            if (date.toDateString() === now.toDateString()) {
+              return 'Today';
+            } else if (date.toDateString() === yesterday.toDateString()) {
+              return 'Yesterday';
+            } else {
+              return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined });
+            }
+          };
+
+          return (
+            <div key={message._id || idx} className="space-y-3">
+              {showDateSeparator && (
+                <div className="flex justify-center my-4 sticky top-2 z-10">
+                  <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-[11px] font-bold text-gray-500 shadow-sm border border-gray-100 uppercase tracking-wider">
+                    {getDateLabel(message.createdAt)}
+                  </div>
                 </div>
               )}
+              
+              <div
+                className={`flex flex-col ${message.direction === 'outbound' ? 'items-end' : 'items-start'}`}
+                role="article"
+                aria-label={`${message.direction} message`}
+              >
+                {/* Bubble with Entrance Animation */}
+                <div 
+                  className={`max-w-[75%] px-4 py-2.5 shadow-sm animate-in fade-in zoom-in-95 duration-500 fill-mode-both ${
+                    message.direction === 'outbound' 
+                      ? 'bg-teal-600 text-white rounded-2xl rounded-tr-sm slide-in-from-right-4' 
+                      : 'bg-white border border-slate-100 text-gray-800 rounded-2xl rounded-tl-sm slide-in-from-left-4'
+                  }`}
+                  style={{ animationDelay: `${(messages.length - 1 - idx) < 10 ? (messages.length - 1 - idx) * 30 : 0}ms` }}
+                >
+                  {/* Message content */}
+                  <div className="text-[14.5px] leading-relaxed break-words">
+                    {message.messageFormat === 'template' ? (
+                      <TemplateMessageRenderer message={message} templates={templates} />
+                    ) : message.messageFormat === 'media' ? (
+                      <div className="space-y-2">
+                        {message.mediaUrl ? (
+                          <>
+                            {message.mimeType?.startsWith('image/') ? (
+                              <img
+                                src={getMediaProxyUrl(message.mediaUrl)}
+                                alt={message.textBody || 'Image'}
+                                className="max-w-full rounded-lg object-contain"
+                                style={{ maxHeight: '300px' }}
+                                onError={(e) => {
+                                  // Fallback to icon if image fails to load
+                                  const target = e.target as HTMLImageElement;
+                                  target.style.display = 'none';
+                                  const fallback = target.nextElementSibling as HTMLElement;
+                                  if (fallback) fallback.style.display = 'flex';
+                                }}
+                              />
+                            ) : message.mimeType?.startsWith('video/') ? (
+                              <video
+                                src={getMediaProxyUrl(message.mediaUrl)}
+                                controls
+                                className="max-w-full rounded-lg"
+                                style={{ maxHeight: '300px' }}
+                                onError={(e) => {
+                                  // Fallback to icon if video fails to load
+                                  const target = e.target as HTMLVideoElement;
+                                  target.style.display = 'none';
+                                  const fallback = target.nextElementSibling as HTMLElement;
+                                  if (fallback) fallback.style.display = 'flex';
+                                }}
+                              />
+                            ) : null}
+                            {/* Fallback icon display (hidden by default, shown on error) */}
+                            <div className="flex items-start gap-2" style={{ display: message.mediaUrl ? 'none' : 'flex' }}>
+                              {message.mimeType?.startsWith('image/') ? (
+                                <Image className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                              ) : message.mimeType?.startsWith('video/') ? (
+                                <Video className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                              ) : (
+                                <Image className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                              )}
+                              <div className="flex-1 text-inherit">
+                                {message.textBody || message.displayText || (message.mimeType?.startsWith('image/') ? '[Image]' : '[Video]')}
+                              </div>
+                            </div>
+                          </>
+                        ) : (
+                          <div className="flex items-start gap-2">
+                            {message.mimeType?.startsWith('image/') ? (
+                              <Image className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                            ) : message.mimeType?.startsWith('video/') ? (
+                              <Video className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                            ) : (
+                              <Image className="h-5 w-5 flex-shrink-0 mt-0.5" />
+                            )}
+                            <div className="flex-1 text-inherit">
+                              {message.textBody || message.displayText || (message.mimeType?.startsWith('image/') ? '[Image]' : '[Video]')}
+                            </div>
+                          </div>
+                        )}
+                        {/* Show caption if available and different from placeholder */}
+                        {message.textBody &&
+                          message.textBody !== '[Image]' &&
+                          message.textBody !== '[Video]' &&
+                          message.mediaUrl && (
+                            <div className="text-sm mt-2 text-inherit opacity-90">
+                              {message.textBody}
+                            </div>
+                          )}
+                      </div>
+                    ) : (
+                      <div className="whitespace-pre-wrap">{message.textBody || message.displayText}</div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Footer outside: Time + Status (outbound only) */}
+                <div className="flex items-center gap-1.5 mt-1 px-1 opacity-60">
+                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                    {formatMessageTime(message.createdAt)}
+                  </span>
+                  
+                  {message.direction === 'outbound' && (
+                    <div className="flex items-center">
+                      {(() => {
+                        const status = message.status || (message.readAt ? 'read' : message.deliveredAt ? 'delivered' : message.sentAt ? 'sent' : 'pending');
+                        switch (status) {
+                          case 'read':
+                          case 'clicked':
+                            return <CheckCheck className="h-3.5 w-3.5 text-blue-500" />;
+                          case 'delivered':
+                            return <CheckCheck className="h-3.5 w-3.5 text-gray-400" />;
+                          case 'sent':
+                            return <Check className="h-3.5 w-3.5 text-gray-400" />;
+                          case 'failed':
+                            return <span className="text-[10px] text-red-500 font-bold">!</span>;
+                          default:
+                            return <Clock className="h-3.5 w-3.5 text-gray-400" />;
+                        }
+                      })()}
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
-          </div>
-        ))
+          );
+        })
       )}
-      
+
       {/* Loading indicator */}
       {loading && messages.length === 0 && (
         <div className="flex justify-center items-center h-32">

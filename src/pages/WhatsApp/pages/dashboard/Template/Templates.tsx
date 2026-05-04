@@ -1,10 +1,13 @@
 import { useMemo, useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { useTemplates, useDeleteTemplate, useSyncTemplates } from '@/hooks/useTemplates';
 import { useProjectContext } from '@/context/ProjectContext';
 import { Link, useParams } from 'react-router-dom';
 import { toastUtils } from '@/lib/utils';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, LayoutGrid } from 'lucide-react';
 
 // Import modular components
 import {
@@ -110,23 +113,21 @@ export default function Templates() {
 
   if (!selectedProject) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
-        <div className="max-w-7xl mx-auto">
-          <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">No Project Selected</h2>
-            <p className="text-gray-600 mb-6">Please select a project to view templates.</p>
-            <Link to="/whatsapp">
-              <Button>Go to Projects</Button>
-            </Link>
-          </div>
-        </div>
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+          <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
+          <AlertTitle className="text-xl font-black text-slate-900 mb-2">No Project Selected</AlertTitle>
+          <AlertDescription className="text-slate-500 font-medium">
+            Please select a project to view templates.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
 
   return (
-    <div className=" bg-gray-50 p-4 sm:p-6 overflow-y-auto">
-        {/* Header */}
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Header */}
       <TemplateHeader
         projectName={selectedProject.projectName}
         projectId={projectId || ''}
@@ -137,6 +138,67 @@ export default function Templates() {
         onRefresh={() => refetch()}
         onSync={handleSyncTemplates}
       />
+      <main className="container mx-auto space-y-6 pb-12">
+        {/* Search & Tabs Row */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <TemplateTabs
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
+            approvedCount={allTemplates.filter(t => t.status === 'APPROVED').length}
+            pendingCount={allTemplates.filter(t => t.status === 'PENDING').length}
+            rejectedCount={allTemplates.filter(t => t.status === 'REJECTED').length}
+          />
+          <div className="w-full lg:w-72">
+            <TemplateSearch
+              searchTerm={searchTerm}
+              onSearchChange={setSearchTerm}
+            />
+          </div>
+        </div>
+
+        {/* Templates List */}
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab + searchTerm}
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            {isLoading ? (
+              <TemplateLoadingState />
+            ) : error ? (
+              <TemplateErrorState error={error} onRetry={() => refetch()} />
+            ) : filteredTemplates.length === 0 ? (
+              <TemplateEmptyState
+                activeTab={activeTab}
+                hasTemplatesInTab={allTemplates.filter(t => t.status === activeTab.toUpperCase()).length > 0}
+                projectId={projectId || ''}
+              />
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6">
+                {filteredTemplates.map((template) => (
+                  <TemplateCard
+                    key={template.id}
+                    template={template}
+                    onCopy={copyTemplateName}
+                    onDelete={handleDeleteTemplate}
+                  />
+                ))}
+              </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+
+        {/* Stats */}
+        <TemplateStats
+          totalTemplates={allTemplates.length}
+          approvedTemplates={allTemplates.filter(t => t.status === 'APPROVED').length}
+          pendingTemplates={allTemplates.filter(t => t.status === 'PENDING').length}
+          rejectedTemplates={allTemplates.filter(t => t.status === 'REJECTED').length}
+        />
+      </main>
+
       <ConfirmationDialog
         isOpen={!!pendingDelete}
         onClose={() => (deleteTemplateMutation.isPending ? null : setPendingDelete(null))}
@@ -152,53 +214,6 @@ export default function Templates() {
         variant="destructive"
         isLoading={deleteTemplateMutation.isPending}
       />
-
-      {/* Tabs */}
-      <TemplateTabs
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        approvedCount={allTemplates.filter(t => t.status === 'APPROVED').length}
-        pendingCount={allTemplates.filter(t => t.status === 'PENDING').length}
-        rejectedCount={allTemplates.filter(t => t.status === 'REJECTED').length}
-      />
-
-              {/* Search */}
-      <TemplateSearch
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-      />
-
-        {/* Templates List */}
-        {isLoading ? (
-        <TemplateLoadingState />
-        ) : error ? (
-        <TemplateErrorState error={error} onRetry={() => refetch()} />
-      ) : filteredTemplates.length === 0 ? (
-        <TemplateEmptyState
-          activeTab={activeTab}
-          hasTemplatesInTab={allTemplates.filter(t => t.status === activeTab.toUpperCase()).length > 0}
-          projectId={projectId || ''}
-        />
-      ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-6">
-          {filteredTemplates.map((template) => (
-            <TemplateCard
-              key={template.id}
-              template={template}
-              onCopy={copyTemplateName}
-              onDelete={handleDeleteTemplate}
-            />
-          ))}
-          </div>
-        )}
-
-        {/* Stats */}
-      <TemplateStats
-        totalTemplates={allTemplates.length}
-        approvedTemplates={allTemplates.filter(t => t.status === 'APPROVED').length}
-        pendingTemplates={allTemplates.filter(t => t.status === 'PENDING').length}
-        rejectedTemplates={allTemplates.filter(t => t.status === 'REJECTED').length}
-      />
     </div>
   );
-}
+}

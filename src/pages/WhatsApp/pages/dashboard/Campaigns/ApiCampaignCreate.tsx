@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Card,
   CardHeader,
@@ -12,9 +13,25 @@ import {
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Label } from "@/components/ui/label";
-import { Loader2, MessageSquare, Sparkles, ArrowLeft } from "lucide-react";
+import {
+  Loader2,
+  MessageSquare,
+  Sparkles,
+  ArrowLeft,
+  Settings2,
+  Code,
+  Target,
+  Zap,
+  LayoutGrid,
+  Search,
+  CheckCircle2,
+  AlertCircle,
+  FileText,
+  ChevronRight,
+  Activity
+} from "lucide-react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { useCreateApiCampaign } from "@/hooks/useApiCampaigns";
 import type { VariableMapping } from "@/api/modules/autoMessage";
@@ -138,10 +155,12 @@ const ApiCampaignCreate = () => {
 
   if (!selectedProject) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Alert>
-          <AlertDescription>
-            Please select a project to create API campaigns.
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Alert className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+          <AlertCircle className="h-8 w-8 mb-4 text-[#22B573]" />
+          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Project Required</AlertTitle>
+          <AlertDescription className="text-slate-500 font-medium">
+            Please select a project from the sidebar to create API campaigns.
           </AlertDescription>
         </Alert>
       </div>
@@ -149,130 +168,207 @@ const ApiCampaignCreate = () => {
   }
 
   return (
-    <div className="h-full flex flex-col space-y-4 sm:space-y-6 px-2 sm:px-0 overflow-y-auto">
-      <ApiCampaignHeader resolvedProjectId={resolvedProjectId} />
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-primary" />
-            Campaign Details
-          </CardTitle>
-          <CardDescription>
-            Configure name, template, variables, and optional media.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
-            <div className="space-y-2">
-              <Label htmlFor="name">Campaign Name</Label>
-              <Input
-                id="name"
-                placeholder="Summer Promo API Campaign"
-                {...register("name")}
-              />
-              {errors.name && (
-                <p className="text-sm text-destructive">
-                  {errors.name.message}
-                </p>
-              )}
-            </div>
-
-            <TemplateSelectionForm
-              selectedTemplate={selectedTemplate}
-              variableMappings={variableMappings}
-              selectedMediaAsset={selectedMediaAsset}
-              uploadedFileName={uploadedFileName}
-              setSelectedTemplate={(template) => {
-                setSelectedTemplate(template);
-                setShowValidationErrors(false); // Reset validation errors when template changes
-              }}
-              setVariableMappings={setVariableMappings}
-              setSelectedMediaAsset={setSelectedMediaAsset}
-              setUploadedFileName={setUploadedFileName}
-              onTemplateSelect={(template) => {
-                setValue("templateName", template.name, {
-                  shouldValidate: true,
-                });
-                setFormErrors((prev) => ({ ...prev, template: undefined }));
-                setShowValidationErrors(false); // Reset validation errors when template changes
-              }}
-              onVariableMappingsChange={() => {
-                setFormErrors((prev) => ({ ...prev, variables: undefined }));
-              }}
-              projectId={selectedProject?._id}
-              showPreview={true}
-              showHeaderMedia={true}
-              allowDynamicFields={false}
-              showValidationErrors={showValidationErrors}
-            />
-
-            {formErrors.template && (
-              <p className="text-sm text-destructive">{formErrors.template}</p>
-            )}
-            {formErrors.variables && (
-              <p className="text-sm text-destructive">{formErrors.variables}</p>
-            )}
-            {formErrors.media && (
-              <p className="text-sm text-destructive">{formErrors.media}</p>
-            )}
-
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
             <Button
-              type="submit"
-              className="w-full gap-2"
-              disabled={
-                createApiCampaignMutation.isPending ||
-                (showValidationErrors && !watchedValues.templateName)
-              }
+              variant="ghost"
+              size="icon"
+              onClick={() => navigate(`/whatsapp/dashboard/${resolvedProjectId}/api-campaigns`)}
+              className="h-10 w-10 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100 transition-all text-slate-500"
             >
-              {createApiCampaignMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="h-4 w-4" />
-              )}
-              <span>
-                {createApiCampaignMutation.isPending
-                  ? "Creating..."
-                  : "Create API Campaign"}
-              </span>
+              <ArrowLeft className="h-5 w-5" />
             </Button>
-          </form>
-        </CardContent>
-      </Card>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2 text-[#22B573] font-bold text-xs uppercase tracking-widest">
+                <Code className="h-3.5 w-3.5" />
+                API Hub
+              </div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+                Create API Campaign
+              </h1>
+              <p className="text-slate-500 text-xs font-medium">
+                Establish a webhook-ready messaging endpoint.
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Link to={`/whatsapp/dashboard/${resolvedProjectId}/campaigns`}>
+              <Button variant="ghost" size="sm" className="h-10 px-4 rounded-xl font-bold text-xs uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-all">
+                WhatsApp Campaigns
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        {/* Help Sidebar */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="xl:col-span-1 space-y-6"
+        >
+          <Card className="rounded-[24px] border-slate-200 shadow-sm overflow-hidden sticky top-6">
+            <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
+              <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+                <Target className="h-4 w-4 text-[#22B573]" />
+                Endpoint Specs
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-6 space-y-6">
+              <div className="space-y-4">
+                {[
+                  { label: "Trigger Mechanism", value: "REST API / Webhook", icon: Zap },
+                  { label: "Execution Mode", value: "Asynchronous", icon: Activity },
+                  { label: "Data Format", value: "JSON Payload", icon: Code },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-start gap-4 group">
+                    <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-[#22B573] transition-all">
+                      <item.icon className="h-5 w-5" />
+                    </div>
+                    <div className="space-y-0.5">
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.label}</p>
+                      <p className="text-sm font-bold text-slate-900">{item.value}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[#22B573]/5 border border-[#22B573]/10">
+                <p className="text-[11px] font-medium text-slate-600 leading-relaxed">
+                  API campaigns are lightweight templates that can be triggered programmatically from your existing workflows or systems.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        {/* Main Content */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="xl:col-span-3"
+        >
+          <Card className="rounded-[32px] border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden bg-white">
+            <CardHeader className="bg-slate-50/30 border-b border-slate-100 px-6 sm:px-10 py-8">
+              <CardTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <Settings2 className="h-6 w-6 text-[#22B573]" />
+                Campaign configuration
+              </CardTitle>
+              <CardDescription className="text-slate-500 font-medium">
+                Map your template and variables for API consumption.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="px-6 sm:px-10 py-10">
+              <form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="h-5 w-1 bg-[#22B573] rounded-full" />
+                    <Label htmlFor="name" className="text-sm font-black uppercase tracking-widest text-slate-400">Campaign Identity</Label>
+                  </div>
+                  <div className="relative group">
+                    <Input
+                      id="name"
+                      placeholder="e.g. Transactional OTP Service"
+                      className={`h-14 rounded-2xl border-slate-200 bg-slate-50/50 pl-12 text-base font-bold transition-all focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] ${errors.name ? 'border-red-300' : ''}`}
+                      {...register("name")}
+                    />
+                    <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#22B573] transition-colors" />
+                  </div>
+                  {errors.name && (
+                    <motion.p
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className="text-xs font-bold text-red-600 flex items-center gap-1 pl-2"
+                    >
+                      <AlertCircle className="h-3 w-3" />
+                      {errors.name.message}
+                    </motion.p>
+                  )}
+                </div>
+
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2">
+                    <div className="h-5 w-1 bg-[#22B573] rounded-full" />
+                    <Label className="text-sm font-black uppercase tracking-widest text-slate-400">Template blueprint</Label>
+                  </div>
+
+                  <div className="rounded-3xl border border-slate-100 bg-slate-50/30 p-1">
+                    <TemplateSelectionForm
+                      selectedTemplate={selectedTemplate}
+                      variableMappings={variableMappings}
+                      selectedMediaAsset={selectedMediaAsset}
+                      uploadedFileName={uploadedFileName}
+                      setSelectedTemplate={(template) => {
+                        setSelectedTemplate(template);
+                        setShowValidationErrors(false);
+                      }}
+                      setVariableMappings={setVariableMappings}
+                      setSelectedMediaAsset={setSelectedMediaAsset}
+                      setUploadedFileName={setUploadedFileName}
+                      onTemplateSelect={(template) => {
+                        setValue("templateName", template.name, {
+                          shouldValidate: true,
+                        });
+                        setFormErrors((prev) => ({ ...prev, template: undefined }));
+                        setShowValidationErrors(false);
+                      }}
+                      onVariableMappingsChange={() => {
+                        setFormErrors((prev) => ({ ...prev, variables: undefined }));
+                      }}
+                      projectId={selectedProject?._id}
+                      showPreview={true}
+                      showHeaderMedia={true}
+                      allowDynamicFields={false}
+                      showValidationErrors={showValidationErrors}
+                    />
+                  </div>
+
+                  {(formErrors.template || formErrors.variables || formErrors.media) && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="p-4 rounded-2xl bg-red-50 border border-red-100 space-y-1"
+                    >
+                      {formErrors.template && <p className="text-xs font-bold text-red-600 flex items-center gap-1.5"><AlertCircle className="h-3 w-3" /> {formErrors.template}</p>}
+                      {formErrors.variables && <p className="text-xs font-bold text-red-600 flex items-center gap-1.5"><AlertCircle className="h-3 w-3" /> {formErrors.variables}</p>}
+                      {formErrors.media && <p className="text-xs font-bold text-red-600 flex items-center gap-1.5"><AlertCircle className="h-3 w-3" /> {formErrors.media}</p>}
+                    </motion.div>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  disabled={createApiCampaignMutation.isPending || (showValidationErrors && !watchedValues.templateName)}
+                  className="w-full h-14 rounded-2xl bg-[#22B573] hover:bg-[#1da467] text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
+                >
+                  {createApiCampaignMutation.isPending ? (
+                    <Loader2 className="h-5 w-5 animate-spin mr-3" />
+                  ) : (
+                    <Sparkles className="h-5 w-5 mr-3" />
+                  )}
+                  {createApiCampaignMutation.isPending ? "Initializing Engine..." : "Deploy API Campaign"}
+                </Button>
+              </form>
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
     </div>
   );
 };
 
 export default ApiCampaignCreate;
-
-const ApiCampaignHeader = ({
-  resolvedProjectId,
-}: {
-  resolvedProjectId: string;
-}) => (
-  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-    <div className="flex items-center gap-2">
-      <MessageSquare className="h-6 w-6 text-primary" />
-      <div>
-        <h1 className="text-2xl font-semibold">Create API Campaign</h1>
-        <p className="text-sm text-muted-foreground">
-          Configure a lightweight campaign for API triggering.
-        </p>
-      </div>
-    </div>
-    <div className="flex items-center gap-2">
-      <Link to={`/whatsapp/dashboard/${resolvedProjectId}/api-campaigns`}>
-        <Button variant="outline" size="sm" className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Back to API Campaigns
-        </Button>
-      </Link>
-      <Link to={`/whatsapp/dashboard/${resolvedProjectId}/campaigns`}>
-        <Button variant="ghost" size="sm">
-          WhatsApp Campaigns
-        </Button>
-      </Link>
-    </div>
-  </div>
-);
 

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import {
   Pagination,
@@ -24,6 +25,17 @@ import {
   Clock,
   Eye,
   X,
+  Plus,
+  Settings2,
+  Activity,
+  History,
+  Trash2,
+  Zap,
+  Target,
+  Sparkles,
+  Search,
+  Code,
+  AlertCircle
 } from "lucide-react";
 
 type ConfirmationDialogState = {
@@ -48,7 +60,7 @@ const ApiCampaignsList = () => {
     title: "",
     description: "",
     variant: "default" as "default" | "destructive",
-    onConfirm: async () => {},
+    onConfirm: async () => { },
     isLoading: false,
   });
   const limit = 10;
@@ -132,7 +144,7 @@ const ApiCampaignsList = () => {
     showConfirmationDialog(
       "Cancel API Campaign",
       "Are you sure you want to cancel this API campaign? This action cannot be undone.",
-      "default",
+      "destructive",
       async () => {
         await deleteApiCampaignMutation.mutateAsync(campaignId);
         await refetch();
@@ -142,22 +154,127 @@ const ApiCampaignsList = () => {
 
   const getStatusBadge = (campaign: any) => {
     if (campaign.isDeleted) {
-      return <Badge variant="destructive">Cancelled</Badge>;
+      return (
+        <Badge variant="outline" className="rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-red-100 bg-red-50 text-red-600 shadow-sm">
+          Cancelled
+        </Badge>
+      );
     }
 
     if (campaign.isActive === false) {
-      return <Badge variant="secondary">Inactive</Badge>;
+      return (
+        <Badge variant="outline" className="rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-slate-100 bg-slate-50 text-slate-500 shadow-sm">
+          Inactive
+        </Badge>
+      );
     }
 
-    return <Badge className="bg-green-500 text-white">Active</Badge>;
+    return (
+      <Badge variant="outline" className="rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-emerald-100 bg-emerald-50 text-emerald-600 shadow-sm">
+        Active
+      </Badge>
+    );
+  };
+
+  const renderPagination = () => {
+    if (!data?.pagination) return null;
+    const { totalPages, hasPrevPage, hasNextPage } = data.pagination;
+
+    return (
+      <div className="flex justify-center pt-10">
+        <Pagination>
+          <PaginationContent className="gap-2">
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (hasPrevPage) handlePageChange(currentPage - 1);
+                }}
+                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasPrevPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+              />
+            </PaginationItem>
+
+            {currentPage > 3 && (
+              <>
+                <PaginationItem>
+                  <PaginationLink
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(1);
+                    }}
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                  >
+                    1
+                  </PaginationLink>
+                </PaginationItem>
+                {currentPage > 4 && <PaginationItem><PaginationEllipsis /></PaginationItem>}
+              </>
+            )}
+
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const startPage = Math.max(1, currentPage - 2);
+              const pageNum = startPage + i;
+              if (pageNum > totalPages) return null;
+
+              return (
+                <PaginationItem key={pageNum}>
+                  <PaginationLink
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(pageNum);
+                    }}
+                    isActive={pageNum === currentPage}
+                    className={`cursor-pointer h-10 w-10 rounded-xl font-bold transition-all ${pageNum === currentPage
+                        ? 'bg-[#22B573] text-white border-[#22B573] shadow-lg shadow-green-600/20'
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                      }`}
+                  >
+                    {pageNum}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+
+            {currentPage < totalPages - 2 && (
+              <>
+                {currentPage < totalPages - 3 && <PaginationItem><PaginationEllipsis /></PaginationItem>}
+                <PaginationItem>
+                  <PaginationLink
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(totalPages);
+                    }}
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                  >
+                    {totalPages}
+                  </PaginationLink>
+                </PaginationItem>
+              </>
+            )}
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (hasNextPage) handlePageChange(currentPage + 1);
+                }}
+                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasNextPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    );
   };
 
   if (!selectedProject) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Alert>
-          <AlertDescription>
-            Please select a project to view API campaigns.
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Alert className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+          <AlertCircle className="h-8 w-8 mb-4 text-[#22B573]" />
+          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Project Required</AlertTitle>
+          <AlertDescription className="text-slate-500 font-medium">
+            Please select a project from the sidebar to view your API campaigns.
           </AlertDescription>
         </Alert>
       </div>
@@ -166,311 +283,203 @@ const ApiCampaignsList = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-[400px] flex flex-col items-center justify-center py-24 text-slate-400">
+        <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+          <Loader2 className="h-8 w-8 animate-spin text-[#22B573]" />
+        </div>
+        <p className="font-bold text-sm uppercase tracking-widest">Initializing API Hub...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <Alert variant="destructive">
-        <AlertDescription>
-          Failed to load API campaigns:{" "}
-          {(error as any)?.response?.data?.message || error.message}
-        </AlertDescription>
-      </Alert>
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+          <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
+          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Connection Error</AlertTitle>
+          <AlertDescription className="text-slate-500 font-medium">
+            Failed to load API campaigns: {(error as any)?.response?.data?.message || error.message}
+          </AlertDescription>
+        </Alert>
+      </div>
     );
   }
 
   const campaigns = data?.campaigns || [];
-  const pagination = data?.pagination;
 
   return (
-    <div className="h-full flex flex-col space-y-4 sm:space-y-6 px-2 sm:px-0">
-      <div className="space-y-4 flex-shrink-0">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5 text-primary" />
-            <div>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-[#22B573]/10 flex items-center justify-center text-[#22B573]">
+              <Code className="h-6 w-6" />
+            </div>
+            <div className="space-y-0.5">
+              <div className="flex items-center gap-2 text-[#22B573] font-bold text-xs uppercase tracking-widest">
+                <Zap className="h-3.5 w-3.5" />
+                Live Sync Active
+              </div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
                 API Campaigns
               </h1>
-              <p className="text-sm text-muted-foreground">
-                Lightweight campaigns you can trigger programmatically.
+              <p className="text-slate-500 text-xs font-medium">
+                Programmatically triggered template messaging hub.
               </p>
             </div>
           </div>
-          <div className="text-sm text-muted-foreground">
-            <div className="font-medium">
-              Project: {selectedProject?.projectName || "Unknown"}
-            </div>
-            {lastRefreshTime && (
-              <div className="text-xs text-muted-foreground">
-                Last updated:{" "}
-                {lastRefreshTime.toLocaleTimeString("en-US", {
-                  hour: "numeric",
-                  minute: "2-digit",
-                  second: "2-digit",
-                  hour12: true,
-                })}
-              </div>
-            )}
-          </div>
-        </div>
 
-        <div
-          className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 ${
-            autoRefreshEnabled ? "justify-between" : "justify-end"
-          }`}
-        >
-          {autoRefreshEnabled && (
-            <div className="flex items-center gap-2 text-sm text-green-600">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-              <span>Auto-refresh active</span>
-            </div>
-          )}
-
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Button
               onClick={handleRefresh}
               variant="outline"
-              size="sm"
               disabled={isRefreshing}
-              className="flex items-center gap-2"
+              className="h-11 px-5 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
             >
-              <RefreshCw
-                className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
-              />
-              <span className="hidden sm:inline">
-                {isRefreshing ? "Refreshing..." : "Refresh"}
-              </span>
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <span className="hidden sm:inline">{isRefreshing ? 'Syncing...' : 'Sync'}</span>
             </Button>
 
             <Button
-              onClick={() => setAutoRefreshEnabled((prev) => !prev)}
+              onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
               variant={autoRefreshEnabled ? "default" : "outline"}
-              size="sm"
-              className="flex items-center gap-2 w-32"
+              className={`h-11 px-5 rounded-xl flex items-center gap-2 font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] ${autoRefreshEnabled ? 'bg-[#22B573]/10 text-[#22B573] border-[#22B573]/20 hover:bg-[#22B573]/15 shadow-none' : ''
+                }`}
             >
-              <Clock className="h-4 w-4" />
-              <span className="hidden sm:inline">
-                {autoRefreshEnabled ? "Disable Auto" : "Enable Auto"}
-              </span>
+              <Clock className={`h-4 w-4 ${autoRefreshEnabled ? 'animate-pulse' : ''}`} />
+              <span className="hidden sm:inline">{autoRefreshEnabled ? 'Auto-Sync' : 'Manual Sync'}</span>
             </Button>
 
             <Link to={`/whatsapp/dashboard/${resolvedProjectId}/api-campaigns/create`}>
-              <Button className="flex items-center gap-2">
-                <MessageSquarePlus className="h-4 w-4" />
-                <span className="hidden sm:inline">Create API Campaign</span>
-                <span className="sm:hidden">Create</span>
+              <Button className="h-11 px-6 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-green-600/20 bg-[#22B573] hover:bg-[#1da467] text-white transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">New API Campaign</span>
+                <span className="sm:hidden">New</span>
               </Button>
             </Link>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="flex-1 min-h-0 flex flex-col">
+      {/* Main Content Area */}
+      <div className="space-y-6">
         {campaigns.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 border rounded-lg flex-1 text-center space-y-3">
-            <MessageSquare className="h-12 w-12 text-muted-foreground mx-auto" />
-            <h3 className="text-lg font-semibold">No API campaigns yet</h3>
-            <p className="text-sm text-muted-foreground max-w-md">
-              Create your first API campaign to start triggering template sends
-              programmatically.
-            </p>
-            <Link to={`/whatsapp/dashboard/${resolvedProjectId}/api-campaigns/create`}>
-              <Button>Create your first API campaign</Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="border rounded-lg overflow-hidden flex-1 flex flex-col">
-            <div className="overflow-auto flex-1">
-              <table className="w-full min-w-[720px]">
-                <thead className="bg-gray-50 dark:bg-gray-800">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Campaign Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Template
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Created
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-                  {campaigns.map((campaign) => (
-                    <tr
-                      key={campaign._id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-800"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900 dark:text-white">
-                          {campaign.name}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 dark:text-white">
-                          {campaign.messageTemplate.templateName}
-                        </div>
-                        {campaign.messageTemplate.bodyVariables &&
-                          campaign.messageTemplate.bodyVariables.length > 0 && (
-                            <div className="text-xs text-gray-500 dark:text-gray-400">
-                              {campaign.messageTemplate.bodyVariables.length}{" "}
-                              placeholder(s)
-                            </div>
-                          )}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {campaign.createdAt
-                          ? formatDate12(campaign.createdAt)
-                          : "—"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(campaign)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div className="flex items-center gap-2">
-                          <Link
-                            to={`/whatsapp/dashboard/${resolvedProjectId}/api-campaigns/${campaign._id}`}
-                          >
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                          {!campaign.isDeleted && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleCancelApiCampaign(campaign._id)}
-                              disabled={deleteApiCampaignMutation.isPending}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center py-24 px-8 border border-dashed border-slate-200 rounded-[32px] bg-slate-50/50 text-center space-y-6"
+          >
+            <div className="h-24 w-24 bg-white rounded-3xl flex items-center justify-center shadow-xl shadow-slate-200/50">
+              <Sparkles className="h-12 w-12 text-[#22B573]" />
             </div>
+            <div className="space-y-2">
+              <h3 className="text-2xl font-black text-slate-900 tracking-tight">No API Campaigns Found</h3>
+              <p className="text-slate-500 text-sm font-medium max-w-sm mx-auto">
+                Trigger high-volume template sends directly from your own systems via our robust API interface.
+              </p>
+            </div>
+            <Link to={`/whatsapp/dashboard/${resolvedProjectId}/api-campaigns/create`}>
+              <Button className="h-12 px-8 rounded-2xl bg-[#22B573] hover:bg-[#1da467] text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-green-600/20 transition-all hover:scale-105 active:scale-95">
+                Build First API Campaign
+              </Button>
+            </Link>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6">
+            <AnimatePresence mode="popLayout">
+              {campaigns.map((campaign, index) => (
+                <motion.div
+                  key={campaign._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.9 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="group relative flex flex-col h-full rounded-[24px] border border-slate-200 bg-white p-5 hover:border-[#22B573]/30 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
+                >
+                  {/* Status Indicator */}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-[#22B573] group-hover:bg-[#22B573]/5 group-hover:border-[#22B573]/20 transition-all duration-300">
+                      <Target className="h-5 w-5" />
+                    </div>
+                    {getStatusBadge(campaign)}
+                  </div>
+
+                  {/* Body */}
+                  <div className="flex-1 space-y-4">
+                    <div className="space-y-1">
+                      <h3 className="text-lg font-black text-slate-900 tracking-tight group-hover:text-[#22B573] transition-colors line-clamp-1">
+                        {campaign.name}
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <MessageSquare className="h-3.5 w-3.5 text-slate-400" />
+                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">
+                          {campaign.messageTemplate.templateName}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Metadata Grid */}
+                    <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100">
+                      <div className="space-y-0.5">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Created</p>
+                        <p className="text-[11px] font-bold text-slate-600">{campaign.createdAt ? formatDate12(campaign.createdAt) : "—"}</p>
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Parameters</p>
+                        <p className="text-[11px] font-bold text-slate-600">
+                          {campaign.messageTemplate.bodyVariables?.length || 0} Variable(s)
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="mt-6 flex items-center gap-2">
+                    <Link
+                      to={campaign.isDeleted ? "#" : `/whatsapp/dashboard/${resolvedProjectId}/api-campaigns/${campaign._id}`}
+                      className={`flex-1 ${campaign.isDeleted ? "pointer-events-none" : ""}`}
+                    >
+                      <Button
+                        variant="outline"
+                        disabled={campaign.isDeleted}
+                        className="w-full h-10 rounded-xl border-slate-100 bg-slate-50/50 text-slate-600 font-bold text-xs uppercase tracking-widest hover:bg-[#22B573] hover:text-white hover:border-[#22B573] transition-all duration-300 disabled:opacity-30"
+                      >
+                        <Eye className="h-3.5 w-3.5 mr-2" />
+                        Explore
+                      </Button>
+                    </Link>
+                    {!campaign.isDeleted && (
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleCancelApiCampaign(campaign._id)}
+                        disabled={deleteApiCampaignMutation.isPending}
+                        className="h-10 w-10 rounded-xl border-slate-100 bg-slate-50/50 text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-all duration-300"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
           </div>
         )}
+
+        {/* Pagination */}
+        {renderPagination()}
       </div>
 
-      {pagination && pagination.totalPages > 1 && (
-        <div className="flex justify-center pt-4 flex-shrink-0">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (pagination.hasPrevPage)
-                      handlePageChange(currentPage - 1);
-                  }}
-                  className={
-                    !pagination.hasPrevPage
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-
-              {currentPage > 3 && (
-                <>
-                  <PaginationItem>
-                    <PaginationLink
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handlePageChange(1);
-                      }}
-                      className="cursor-pointer"
-                    >
-                      1
-                    </PaginationLink>
-                  </PaginationItem>
-                  {currentPage > 4 && (
-                    <PaginationItem>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  )}
-                </>
-              )}
-
-              {Array.from(
-                { length: Math.min(5, pagination.totalPages) },
-                (_, i) => {
-                  const startPage = Math.max(1, currentPage - 2);
-                  const pageNum = startPage + i;
-
-                  if (pageNum > pagination.totalPages) return null;
-
-                  return (
-                    <PaginationItem key={pageNum}>
-                      <PaginationLink
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handlePageChange(pageNum);
-                        }}
-                        isActive={pageNum === currentPage}
-                        className="cursor-pointer"
-                      >
-                        {pageNum}
-                      </PaginationLink>
-                    </PaginationItem>
-                  );
-                }
-              )}
-
-              {currentPage < pagination.totalPages - 2 && (
-                <>
-                  {currentPage < pagination.totalPages - 3 && (
-                    <PaginationItem>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  )}
-                  <PaginationItem>
-                    <PaginationLink
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handlePageChange(pagination.totalPages);
-                      }}
-                      className="cursor-pointer"
-                    >
-                      {pagination.totalPages}
-                    </PaginationLink>
-                  </PaginationItem>
-                </>
-              )}
-
-              <PaginationItem>
-                <PaginationNext
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (pagination.hasNextPage)
-                      handlePageChange(currentPage + 1);
-                  }}
-                  className={
-                    !pagination.hasNextPage
-                      ? "pointer-events-none opacity-50"
-                      : "cursor-pointer"
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
       <ConfirmationDialog
         isOpen={confirmationDialog.isOpen}
         onClose={closeConfirmationDialog}
@@ -480,9 +489,9 @@ const ApiCampaignsList = () => {
         variant={confirmationDialog.variant}
         isLoading={confirmationDialog.isLoading}
         confirmText={
-          confirmationDialog.variant === "destructive" ? "Cancel" : "Confirm"
+          confirmationDialog.variant === "destructive" ? "Confirm Delete" : "Confirm"
         }
-        cancelText="Cancel"
+        cancelText="Discard"
       />
     </div>
   );

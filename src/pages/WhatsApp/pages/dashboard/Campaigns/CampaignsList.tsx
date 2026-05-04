@@ -1,9 +1,19 @@
 import { useState, useEffect } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Card, CardContent } from '@/components/ui/card';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from '@/components/ui/pagination';
 import { 
   Plus, 
   MessageSquare, 
@@ -15,6 +25,16 @@ import {
   X,
   RefreshCw,
   Loader2,
+  Search,
+  LayoutGrid,
+  ChevronRight,
+  TrendingUp,
+  BarChart3,
+  Users,
+  ArrowLeft,
+  Settings2,
+  Trash2,
+  History
 } from 'lucide-react';
 import { useProjectContext } from '@/context/ProjectContext';
 import { useCampaigns, useDeleteCampaign, useRescheduleCampaign } from '@/hooks/useCampaigns';
@@ -27,6 +47,7 @@ import { formatDateTime12 } from '@/lib/date';
 
 const CampaignsList = () => {
   const { projectId } = useParams<{ projectId: string }>();
+  const navigate = useNavigate();
   const { selectedProject } = useProjectContext();
   const [currentPage, setCurrentPage] = useState(1);
   const [isRefreshing, setIsRefreshing] = useState(false);
@@ -88,6 +109,7 @@ const CampaignsList = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const showConfirmationDialog = (
@@ -128,15 +150,13 @@ const CampaignsList = () => {
   const handleDeleteCampaign = async (campaignId: string) => {
     showConfirmationDialog(
       'Cancel Campaign',
-      'Are you sure you want to Cancel this campaign? This action cannot be undone.',
-      'default',
+      'Are you sure you want to cancel this campaign? This action cannot be undone.',
+      'destructive',
       async () => {
         await deleteCampaignMutation.mutateAsync(campaignId);
       }
     );
   };
-
-
 
   const handleRescheduleCampaign = async () => {
     if (!selectedCampaign || !newScheduledDate || !newScheduledTime) return;
@@ -157,447 +177,515 @@ const CampaignsList = () => {
     }
   };
 
-  // const openRescheduleDialog = (campaign: Campaign) => {
-  //   setSelectedCampaign(campaign);
-  //   if (campaign.scheduledAt) {
-  //     const scheduledDate = new Date(campaign.scheduledAt);
-  //     setNewScheduledDate(scheduledDate.toISOString().split('T')[0]);
-  //     setNewScheduledTime(scheduledDate.toTimeString().slice(0, 5));
-  //   }
-  //   setRescheduleDialogOpen(true);
-  // };
-
-  const getStatusBadge = (status: string) => {
+  const getStatusStyles = (status: string, isDeleted: boolean) => {
+    if (isDeleted) return 'bg-red-50 text-red-600 border-red-100';
     switch (status) {
       case 'completed':
-        return <Badge variant="default" className="bg-green-500">Completed</Badge>;
+        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
       case 'in-progress':
-        return <Badge variant="default" className="bg-blue-500">In Progress</Badge>;
+        return 'bg-blue-50 text-blue-600 border-blue-100';
       case 'failed':
-        return <Badge variant="destructive">Failed</Badge>;
+        return 'bg-red-50 text-red-600 border-red-100';
       case 'draft':
-        return <Badge variant="secondary">Draft</Badge>;
+        return 'bg-slate-50 text-slate-600 border-slate-100';
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return 'bg-amber-50 text-amber-600 border-amber-100';
     }
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: string, isDeleted: boolean) => {
+    if (isDeleted) return <X className="h-4 w-4" />;
     switch (status) {
       case 'completed':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle className="h-4 w-4" />;
       case 'in-progress':
-        return <Clock className="h-4 w-4 text-blue-500" />;
+        return <RefreshCw className="h-4 w-4 animate-spin-slow" />;
       case 'failed':
-        return <AlertCircle className="h-4 w-4 text-red-500" />;
+        return <AlertCircle className="h-4 w-4" />;
       case 'draft':
-        return <MessageSquare className="h-4 w-4 text-gray-500" />;
+        return <Clock className="h-4 w-4" />;
       default:
-        return <MessageSquare className="h-4 w-4 text-gray-500" />;
+        return <MessageSquare className="h-4 w-4" />;
     }
   };
 
-  const getScheduleInfo = (campaign: Campaign) => {
-    if (campaign.scheduledAt && campaign.status === 'draft') {
-      return (
-        <div className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400">
-          <Calendar className="h-3 w-3" />
-          <span>{formatDateTime12(campaign.scheduledAt)}</span>
-        </div>
-      );
-    }
-    return null;
+  const renderPagination = () => {
+    if (!campaignsData?.pagination) return null;
+
+    const { page = 1, totalPages = 1 } = campaignsData.pagination;
+    const hasPrevPage = page > 1;
+    const hasNextPage = page < totalPages;
+
+    return (
+      <div className="flex justify-center pt-8">
+        <Pagination>
+          <PaginationContent className="gap-2">
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (hasPrevPage) handlePageChange(page - 1);
+                }}
+                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasPrevPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+              />
+            </PaginationItem>
+
+            {page > 3 && (
+              <>
+                <PaginationItem>
+                  <PaginationLink
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(1);
+                    }}
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                  >
+                    1
+                  </PaginationLink>
+                </PaginationItem>
+                {page > 4 && <PaginationItem><PaginationEllipsis /></PaginationItem>}
+              </>
+            )}
+
+            {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+              const startPage = Math.max(1, page - 2);
+              const pageNum = startPage + i;
+              if (pageNum > totalPages) return null;
+
+              return (
+                <PaginationItem key={pageNum}>
+                  <PaginationLink
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(pageNum);
+                    }}
+                    isActive={pageNum === page}
+                    className={`cursor-pointer h-10 w-10 rounded-xl font-bold transition-all ${
+                      pageNum === page 
+                        ? 'bg-[#22B573] text-white border-[#22B573] shadow-lg shadow-green-600/20' 
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    {pageNum}
+                  </PaginationLink>
+                </PaginationItem>
+              );
+            })}
+
+            {page < totalPages - 2 && (
+              <>
+                {page < totalPages - 3 && <PaginationItem><PaginationEllipsis /></PaginationItem>}
+                <PaginationItem>
+                  <PaginationLink
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handlePageChange(totalPages);
+                    }}
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                  >
+                    {totalPages}
+                  </PaginationLink>
+                </PaginationItem>
+              </>
+            )}
+
+            <PaginationItem>
+              <PaginationNext
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (hasNextPage) handlePageChange(page + 1);
+                }}
+                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasNextPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      </div>
+    );
   };
 
   if (!selectedProject) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Alert>
-          <AlertDescription>
-            Please select a project to view campaigns.
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+          <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
+          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Project Required</AlertTitle>
+          <AlertDescription className="text-slate-500 font-medium">
+            Please select a project to view and manage campaigns.
           </AlertDescription>
         </Alert>
       </div>
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="flex flex-col items-center space-y-4">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">Loading campaigns...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          Failed to load campaigns: {(error as any)?.response?.data?.message || 'Unknown error'}
-        </AlertDescription>
-      </Alert>
-    );
-  }
+  // Fetch global campaigns for project-wide statistics
+  const { data: globalStatsData } = useCampaigns(
+    selectedProject?._id || '',
+    1,
+    1000 // Fetch a large enough sample for global stats
+  );
 
   const campaigns = campaignsData?.campaigns || [];
-  const pagination = campaignsData?.pagination;
+  const globalCampaigns = globalStatsData?.campaigns || [];
+
+  const stats = [
+    { 
+      label: "Total Campaigns", 
+      value: campaignsData?.pagination?.totalCount || 0, 
+      icon: MessageSquare, 
+      color: "text-blue-600", 
+      bg: "bg-blue-50", 
+      border: "border-blue-100" 
+    },
+    { 
+      label: "Completed", 
+      value: globalCampaigns.filter(c => c.status === 'completed').length, 
+      icon: CheckCircle, 
+      color: "text-emerald-600", 
+      bg: "bg-emerald-50", 
+      border: "border-emerald-100" 
+    },
+    { 
+      label: "In Progress", 
+      value: globalCampaigns.filter(c => c.status === 'in-progress').length, 
+      icon: TrendingUp, 
+      color: "text-blue-600", 
+      bg: "bg-blue-50", 
+      border: "border-blue-100" 
+    },
+    { 
+      label: "Failed/Cancelled", 
+      value: globalCampaigns.filter(c => c.status === 'failed' || c.isDeleted).length, 
+      icon: X, 
+      color: "text-red-600", 
+      bg: "bg-red-50", 
+      border: "border-red-100" 
+    },
+  ];
 
   return (
-    <div className="h-full flex flex-col space-y-4 sm:space-y-6 px-2 sm:px-0">
-      {/* Header */}
-      <div className="space-y-4 flex-shrink-0">
-        {/* Main Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-primary" />
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-[#22B573] font-bold text-xs uppercase tracking-widest mb-0.5">
+                <BarChart3 className="h-3.5 w-3.5" />
+                Marketing Hub
+              </div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
                 Campaigns
               </h1>
+              <p className="text-slate-500 text-xs font-medium">
+                Manage your bulk messaging campaigns for <span className="text-slate-900 font-bold">{selectedProject?.projectName || 'Project'}</span>
+              </p>
             </div>
           </div>
-          
-          {/* Project Info */}
-          <div className="text-sm text-muted-foreground">
-            <div className="font-medium">Project: {selectedProject?.projectName || 'Unknown'}</div>
-            {lastRefreshTime && (
-              <div className="text-xs text-muted-foreground">
-                Last updated: {lastRefreshTime.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: '2-digit', hour12: true })}
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Controls Row */}
-        <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 ${autoRefreshEnabled ? 'justify-between' : 'justify-end'}`}>
-          {/* Auto-refresh indicator */}
-          {autoRefreshEnabled && (
-            <div className="flex items-center gap-2 text-sm text-green-600">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>Auto-refresh active</span>
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-end mr-2 hidden sm:flex">
+              {lastRefreshTime && (
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Last Updated: {lastRefreshTime.toLocaleTimeString()}
+                </span>
+              )}
+              {autoRefreshEnabled && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Live Sync Active</span>
+                </div>
+              )}
             </div>
-          )}
-          
-          {/* Action Buttons */}
-          <div className="flex items-center gap-2">
-            <Button 
-              onClick={handleRefresh} 
-              variant="outline" 
-              size="sm"
+            
+            <Button
+              onClick={handleRefresh}
+              variant="outline"
               disabled={isRefreshing}
-              className="flex items-center gap-2"
+              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+              {isRefreshing ? 'Syncing...' : 'Sync Now'}
             </Button>
-            
-            <Button 
+
+            <Button
               onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
-              variant={autoRefreshEnabled ? "default" : "outline"}
-              size="sm"
-              className="flex items-center gap-2 w-32"
+              className={`h-11 px-6 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                autoRefreshEnabled 
+                  ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/10' 
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
             >
-              <Clock className="h-4 w-4" />
-              <span className="hidden sm:inline">{autoRefreshEnabled ? 'Disable Auto' : 'Enable Auto'}</span>
+              <motion.div
+                animate={autoRefreshEnabled ? { rotate: 360 } : { rotate: 0 }}
+                transition={autoRefreshEnabled ? { repeat: Infinity, duration: 4, ease: "linear" } : { duration: 0.5 }}
+              >
+                <Clock className="h-4 w-4" />
+              </motion.div>
+              {autoRefreshEnabled ? 'Live' : 'Manual'}
             </Button>
 
             <Link to={`/whatsapp/dashboard/${projectId}/campaigns/create`}>
-              <Button className="flex items-center gap-2">
+              <Button
+                className="h-11 px-6 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] bg-[#22B573] hover:bg-[#1da467] text-white"
+              >
                 <Plus className="h-4 w-4" />
                 <span className="hidden sm:inline">Create Campaign</span>
-                <span className="sm:hidden">Create</span>
+                <span className="sm:hidden">New</span>
               </Button>
             </Link>
           </div>
         </div>
-      </div>
+      </motion.div>
 
-      {/* Campaigns Table */}
-      <div className="flex-1 min-h-0 flex flex-col">
-        {campaigns.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-12 border rounded-lg flex-1">
-            <MessageSquare className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold mb-2">No campaigns yet</h3>
-            <p className="text-muted-foreground text-center mb-4">
-              Create your first campaign to start sending bulk messages to your contacts.
-            </p>
-            <Link to={`/whatsapp/dashboard/${projectId}/campaigns/create`}>
-              <Button className="flex items-center gap-2">
-                <Plus className="h-4 w-4" />
-                Create Your First Campaign
-              </Button>
-            </Link>
-          </div>
-        ) : (
-          <div className="border rounded-lg overflow-hidden flex-1 flex flex-col">
-            <div className="overflow-auto flex-1">
-              <table className="w-full min-w-[800px]">
-            <thead className="bg-gray-50 dark:bg-gray-800">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Campaign Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Schedule
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Completed At
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Total
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
-              {campaigns.map((campaign: Campaign) => (
-                <tr key={campaign._id} className="hover:bg-gray-50 dark:hover:bg-gray-800">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm font-medium text-gray-900 dark:text-white">
-                      {campaign.name}
+      <main className="container mx-auto space-y-6 pb-12">
+        {/* Stats Section */}
+        <AnimatePresence mode="wait">
+          {campaignsData && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+            >
+              {stats.map((stat, i) => (
+                <Card key={i} className={`rounded-2xl border ${stat.border} ${stat.bg} shadow-sm group hover:shadow-md transition-all duration-300`}>
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className={`h-12 w-12 rounded-xl bg-white border ${stat.border} flex items-center justify-center ${stat.color} shadow-sm group-hover:scale-110 transition-transform`}>
+                      <stat.icon className="h-6 w-6" />
                     </div>
-                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                      {campaign.messageTemplate.templateName}
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">{stat.label}</p>
+                      <h4 className={`text-2xl font-black ${stat.color}`}>{stat.value}</h4>
                     </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-2">
-                      {campaign.isDeleted ? (
-                        <AlertCircle className="h-4 w-4 text-red-500" />
-                      ) : (
-                        getStatusIcon(campaign.status)
-                      )}
-                      {campaign.isDeleted ? (
-                        <Badge variant="destructive">Cancelled</Badge>
-                      ) : (
-                        getStatusBadge(campaign.status)
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {getScheduleInfo(campaign) || (
-                      <span className="text-gray-500 dark:text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                    {campaign.completedAt ? (
-                      <div className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4 text-green-500" />
-                        {new Date(campaign.completedAt).toLocaleDateString()}
-                      </div>
-                    ) : (
-                      <span className="text-gray-500 dark:text-gray-400">-</span>
-                    )}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">
-                    {campaign.analyticsSummary.total}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                    <div className="flex items-center gap-2">
-                      {campaign.isDeleted ? (
-                        <span className="text-gray-500 dark:text-gray-400">Cancelled</span>
-                      ) : (
-                        <>
-                          <Link to={`/whatsapp/dashboard/${projectId}/campaigns/${campaign._id}`}>
-                            <Button variant="outline" size="sm">
-                              <Eye className="h-4 w-4" />
-                            </Button>
-                          </Link>
-                          
-                          {/* {campaign.status === 'draft' && campaign.scheduledAt && (
-                            <>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openRescheduleDialog(campaign)}
-                                disabled={rescheduleCampaignMutation.isPending}
-                              >
-                                <Edit3 className="h-4 w-4" />
-                              </Button>
-                               <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleCancelScheduledCampaign(campaign._id)}
-                                disabled={cancelScheduledCampaignMutation.isPending}
-                              >
-                              </Button> 
-                            </>
-                          )} */}
-                          
-                          {campaign.status !== 'completed' && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleDeleteCampaign(campaign._id)}
-                              disabled={deleteCampaignMutation.isPending}
-                            >
-                                                              <X className="h-4 w-4" />
-
-                            </Button>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </td>
-                </tr>
+                  </CardContent>
+                </Card>
               ))}
-            </tbody>
-            </table>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* List Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500"
+        >
+          <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/30">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div>
+                <h2 className="text-xl font-black text-slate-900">Campaign History</h2>
+                <p className="text-slate-500 text-xs font-medium mt-1">Monitor and manage your marketing outreach</p>
+              </div>
+
+              <div className="relative w-full lg:w-96 group">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-[#22B573] transition-colors" />
+                <Input
+                  placeholder="Search campaigns..."
+                  className="h-11 pl-11 rounded-xl border-slate-200 bg-white/50 focus:bg-white transition-all"
+                />
+              </div>
             </div>
           </div>
-        )}
-      </div>
 
-      {/* Pagination */}
-      {pagination && pagination.totalPages > 1 && (
-        <div className="flex justify-center pt-4 flex-shrink-0">
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (pagination.hasPrevPage) handlePageChange(currentPage - 1);
-                  }}
-                  className={!pagination.hasPrevPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                />
-              </PaginationItem>
-              
-              {/* Show first page */}
-              {currentPage > 3 && (
-                <>
-                  <PaginationItem>
-                    <PaginationLink 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handlePageChange(1);
-                      }}
-                      className="cursor-pointer"
-                    >
-                      1
-                    </PaginationLink>
-                  </PaginationItem>
-                  {currentPage > 4 && (
-                    <PaginationItem>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  )}
-                </>
-              )}
-              
-              {/* Show pages around current page */}
-              {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                const startPage = Math.max(1, currentPage - 2);
-                const pageNum = startPage + i;
-                
-                if (pageNum > pagination.totalPages) return null;
-                
-                return (
-                  <PaginationItem key={pageNum}>
-                    <PaginationLink
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handlePageChange(pageNum);
-                      }}
-                      isActive={pageNum === currentPage}
-                      className="cursor-pointer"
-                    >
-                      {pageNum}
-                    </PaginationLink>
-                  </PaginationItem>
-                );
-              })}
-              
-              {/* Show last page */}
-              {currentPage < pagination.totalPages - 2 && (
-                <>
-                  {currentPage < pagination.totalPages - 3 && (
-                    <PaginationItem>
-                      <PaginationEllipsis />
-                    </PaginationItem>
-                  )}
-                  <PaginationItem>
-                    <PaginationLink 
-                      onClick={(e) => {
-                        e.preventDefault();
-                        handlePageChange(pagination.totalPages);
-                      }}
-                      className="cursor-pointer"
-                    >
-                      {pagination.totalPages}
-                    </PaginationLink>
-                  </PaginationItem>
-                </>
-              )}
-              
-              <PaginationItem>
-                <PaginationNext 
-                  onClick={(e) => {
-                    e.preventDefault();
-                    if (pagination.hasNextPage) handlePageChange(currentPage + 1);
-                  }}
-                  className={!pagination.hasNextPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        </div>
-      )}
+          <div className="p-4 sm:p-8">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+                <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                  <Loader2 className="h-8 w-8 animate-spin text-[#22B573]" />
+                </div>
+                <p className="font-bold text-sm uppercase tracking-widest">Loading Campaigns...</p>
+              </div>
+            ) : error ? (
+              <Alert variant="destructive" className="bg-red-50 border-red-200 rounded-2xl">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <AlertTitle className="text-red-800 font-bold">Failed to load</AlertTitle>
+                <AlertDescription className="text-red-700 font-medium">Please check your connection and try again.</AlertDescription>
+              </Alert>
+            ) : campaigns.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+                <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                  <Search className="h-8 w-8 opacity-20" />
+                </div>
+                <p className="font-bold text-sm uppercase tracking-widest">No campaigns found</p>
+                <p className="text-xs font-medium mt-1">Start by creating your first campaign</p>
+                <Link to={`/whatsapp/dashboard/${projectId}/campaigns/create`} className="mt-6">
+                  <Button className="bg-[#22B573] hover:bg-[#1da467] text-white font-bold rounded-xl px-6">
+                    Create Campaign
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {campaigns.map((campaign, index) => (
+                  <motion.div
+                    key={campaign._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="group flex flex-col xl:flex-row xl:items-center gap-6 p-6 rounded-2xl border border-slate-100 bg-white hover:bg-slate-50/50 hover:border-[#22B573]/20 hover:shadow-lg hover:shadow-slate-200/40 transition-all duration-300"
+                  >
+                    {/* Status Icon */}
+                    <div className={`h-14 w-14 rounded-2xl border flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform ${getStatusStyles(campaign.status, campaign.isDeleted)}`}>
+                      {getStatusIcon(campaign.status, campaign.isDeleted)}
+                    </div>
 
-      {/* Reschedule Dialog */}
+                    {/* Content Section */}
+                    <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-tighter px-2 py-0.5 border-slate-200 bg-slate-50 text-slate-500`}>
+                            {campaign.messageTemplate?.templateName || 'Direct Campaign'}
+                          </Badge>
+                          <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-none shadow-sm ${getStatusStyles(campaign.status, campaign.isDeleted)}`}>
+                            {campaign.isDeleted ? 'Cancelled' : campaign.status}
+                          </Badge>
+                        </div>
+                        <h3 className="font-black text-slate-900 text-lg line-clamp-1 group-hover:text-[#22B573] transition-colors">
+                          {campaign.name}
+                        </h3>
+                        <div className="flex items-center gap-2 text-slate-400">
+                          <Users className="h-3 w-3" />
+                          <span className="text-xs font-bold tracking-tight">{campaign.analyticsSummary?.total || 0} Recipients</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex flex-col gap-1.5">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-3 w-3 text-slate-400" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Timeline</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-bold text-slate-400 uppercase">Scheduled</span>
+                              <span className="text-[11px] font-medium text-slate-600">
+                                {campaign.scheduledAt ? formatDateTime12(campaign.scheduledAt) : 'Immediate'}
+                              </span>
+                            </div>
+                            {campaign.completedAt && (
+                              <div className="flex flex-col">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase">Completed</span>
+                                <span className="text-[11px] font-medium text-emerald-600">{formatDateTime12(campaign.completedAt)}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col justify-center gap-3">
+                        <div className="flex items-center gap-4">
+                          <div className="flex-1 p-3 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sent</span>
+                            <span className="text-sm font-black text-slate-900">{campaign.analyticsSummary?.sent || 0}</span>
+                          </div>
+                          <div className="flex-1 p-3 rounded-xl bg-emerald-50 border border-emerald-100 flex flex-col items-center">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600">Read</span>
+                            <span className="text-sm font-black text-emerald-700">{campaign.analyticsSummary?.read || 0}</span>
+                          </div>
+                          <div className="flex-1 p-3 rounded-xl bg-red-50 border border-red-100 flex flex-col items-center">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-red-600">Failed</span>
+                            <span className="text-sm font-black text-red-700">{campaign.analyticsSummary?.failed || 0}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-2">
+                      <Link 
+                        to={campaign.isDeleted ? "#" : `/whatsapp/dashboard/${projectId}/campaigns/${campaign._id}`}
+                        className={campaign.isDeleted ? "pointer-events-none" : ""}
+                      >
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          disabled={campaign.isDeleted}
+                          className="h-10 w-10 rounded-xl border-slate-200 text-slate-500 hover:text-[#22B573] hover:border-[#22B573]/30 hover:bg-[#22B573]/5 transition-all disabled:opacity-30"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </Link>
+                      
+                      {!campaign.isDeleted && campaign.status !== 'completed' && (
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleDeleteCampaign(campaign._id)}
+                          disabled={deleteCampaignMutation.isPending}
+                          className="h-10 w-10 rounded-xl border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all"
+                        >
+                          {deleteCampaignMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
+                        </Button>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
+
+            {/* Pagination */}
+            {campaignsData?.pagination && campaignsData.pagination.totalPages > 1 && renderPagination()}
+          </div>
+        </motion.div>
+      </main>
+
+      {/* Reschedule Dialog (Kept for future use or hidden if not used) */}
       <Dialog open={rescheduleDialogOpen} onOpenChange={setRescheduleDialogOpen}>
-        <DialogContent>
+        <DialogContent className="rounded-2xl p-8 border-none shadow-2xl bg-white">
           <DialogHeader>
-            <DialogTitle>Reschedule Campaign</DialogTitle>
+            <DialogTitle className="text-xl font-black text-slate-900">Reschedule Campaign</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="reschedule-date">Date</Label>
-              <Input
-                id="reschedule-date"
-                type="date"
-                value={newScheduledDate}
-                onChange={(e) => setNewScheduledDate(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
-              />
+          <div className="space-y-6 mt-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">New Date</Label>
+                <Input
+                  type="date"
+                  value={newScheduledDate}
+                  onChange={(e) => setNewScheduledDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  className="rounded-xl border-slate-200 focus:ring-[#22B573]/20"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">New Time</Label>
+                <Input
+                  type="time"
+                  value={newScheduledTime}
+                  onChange={(e) => setNewScheduledTime(e.target.value)}
+                  className="rounded-xl border-slate-200 focus:ring-[#22B573]/20"
+                />
+              </div>
             </div>
             
-            <div className="space-y-2">
-              <Label htmlFor="reschedule-time">Time</Label>
-              <Input
-                id="reschedule-time"
-                type="time"
-                value={newScheduledTime}
-                onChange={(e) => setNewScheduledTime(e.target.value)}
-              />
-            </div>
-            
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-50 border border-blue-100 text-xs text-blue-600 font-medium">
               <Clock className="h-4 w-4" />
-              <span>Your local timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone}</span>
+              <span>Timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone}</span>
             </div>
             
-            <div className="flex justify-end gap-2">
+            <div className="flex justify-end gap-3 pt-4">
               <Button
                 variant="outline"
                 onClick={() => setRescheduleDialogOpen(false)}
+                className="rounded-xl h-11 px-6 font-bold text-slate-600 border-slate-200 hover:bg-slate-50"
               >
                 Cancel
               </Button>
               <Button
                 onClick={handleRescheduleCampaign}
                 disabled={!newScheduledDate || !newScheduledTime || rescheduleCampaignMutation.isPending}
+                className="rounded-xl h-11 px-8 font-bold bg-[#22B573] hover:bg-[#1da467] text-white shadow-lg shadow-green-600/20 transition-all hover:scale-[1.02]"
               >
-                {rescheduleCampaignMutation.isPending ? 'Rescheduling...' : 'Reschedule'}
+                {rescheduleCampaignMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Confirm Reschedule'}
               </Button>
             </div>
           </div>
@@ -613,8 +701,8 @@ const CampaignsList = () => {
         description={confirmationDialog.description}
         variant={confirmationDialog.variant}
         isLoading={confirmationDialog.isLoading}
-        confirmText={confirmationDialog.variant === 'destructive' ? 'Cancel' : 'Confirm'}
-        cancelText="Cancel"
+        confirmText={confirmationDialog.variant === 'destructive' ? 'Cancel Campaign' : 'Confirm'}
+        cancelText="Keep Campaign"
       />
     </div>
   );

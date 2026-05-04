@@ -12,7 +12,7 @@ import {
   CommandInput,
   CommandItem,
 } from "@/components/ui/command";
-import { ChevronsUpDown, Check } from "lucide-react";
+import { Check, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface MultiSelectOption {
@@ -82,17 +82,34 @@ export function MultiSelect({
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between text-left"
+          className={cn(
+            "w-full h-11 px-4 justify-between rounded-xl border-slate-200 bg-slate-50/50 text-xs font-bold transition-all hover:bg-slate-100/50 focus:ring-4 focus:ring-[#22B573]/10",
+            open && "border-[#22B573] ring-4 ring-[#22B573]/10 bg-white"
+          )}
         >
-          <span className="truncate flex-1 mr-2">{displayText}</span>
-          <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+          <span className="truncate flex-1 text-left text-slate-700">
+            {selectedValues.length > 0 ? (
+              <span className="text-slate-900">{displayText}</span>
+            ) : (
+              <span className="text-slate-400">{placeholder}</span>
+            )}
+          </span>
+          <ChevronDown className={cn(
+            "h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200",
+            open && "rotate-180 text-[#22B573]"
+          )} />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
-        <Command>
-          <CommandInput placeholder={searchPlaceholder} />
-          <CommandEmpty>{emptyMessage}</CommandEmpty>
-          <CommandGroup className="max-h-64 overflow-auto">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1 rounded-2xl border-slate-200 shadow-xl" align="start">
+        <Command className="rounded-xl">
+          <CommandInput 
+            placeholder={searchPlaceholder} 
+            className="h-10 text-xs font-medium border-none focus:ring-0"
+          />
+          <CommandEmpty className="py-4 text-xs font-medium text-slate-500 text-center">
+            {emptyMessage}
+          </CommandEmpty>
+          <CommandGroup className="max-h-64 overflow-auto p-1">
             {options.map((option) => {
               const isSelected = selectedValues.includes(option.value);
               return (
@@ -100,14 +117,15 @@ export function MultiSelect({
                   key={option.id}
                   value={option.label}
                   onSelect={() => handleToggle(option.value)}
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-700 data-[selected=true]:bg-[#22B573]/5 data-[selected=true]:text-[#22B573] transition-colors cursor-pointer"
                 >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      isSelected ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {option.label}
+                  <div className={cn(
+                    "flex h-4 w-4 shrink-0 items-center justify-center rounded-md border border-slate-300 transition-all",
+                    isSelected ? "bg-[#22B573] border-[#22B573]" : "group-hover:border-[#22B573]"
+                  )}>
+                    {isSelected && <Check className="h-3 w-3 text-white stroke-[3px]" />}
+                  </div>
+                  <span className="flex-1 truncate">{option.label}</span>
                 </CommandItem>
               );
             })}

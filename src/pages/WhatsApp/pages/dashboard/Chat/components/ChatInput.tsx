@@ -1,6 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Send, MessageSquare, AlertCircle, Loader2 } from 'lucide-react';
+import { Send, MessageSquare, AlertCircle, Loader2, Smile } from 'lucide-react';
+import EmojiPicker, { Theme } from 'emoji-picker-react';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ChatInputProps {
   disabled?: boolean;
@@ -62,68 +69,128 @@ export function ChatInput({
     }
   }, [disabled]);
 
+  const onEmojiClick = (emojiData: any) => {
+    setText((prev) => prev + emojiData.emoji);
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
+  };
+
   return (
-    <div className={`p-4 bg-white border-t ${className}`}>
+    <div className={`flex-shrink-0 mt-auto p-4 bg-white/80 backdrop-blur-md border-t border-gray-100/50 ${className}`}>
       {/* Error message */}
       {error && (
-        <div className="mb-3 p-2 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2 text-sm text-red-700">
+        <div className="mb-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-100 rounded-xl flex items-center gap-2.5 text-[12px] text-red-700 animate-in slide-in-from-bottom-2 duration-300">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
-          <span>{error}</span>
+          <span className="font-medium">{error}</span>
         </div>
       )}
       
-      <div className="flex gap-3 items-end">
-        {/* Template Button */}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={onShowTemplate}
-          disabled={disabled}
-          className="flex-shrink-0 h-10"
-          aria-label="Send template message"
-        >
-          <MessageSquare className="h-4 w-4 mr-1" />
-          Template
-        </Button>
-        
-        {/* Text Input Form */}
-        <form
-          className="flex gap-2 flex-1"
-          onSubmit={handleSubmit}
-        >
-          <div className="flex-1 relative">
-            <input
-              ref={inputRef}
-              className="w-full border border-gray-300 rounded-full px-4 py-2 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition-colors"
-              placeholder={placeholder || defaultPlaceholder}
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              onKeyDown={handleKeyDown}
-              disabled={disabled || !canSendDirect || isSubmitting}
-              maxLength={maxLength}
-              aria-label="Message input"
-              aria-describedby={error ? "error-message" : undefined}
-            />
-            <button 
-              type="submit"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 bg-blue-500 text-white rounded-full hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" 
-              disabled={disabled || !canSendDirect || !text.trim() || isSubmitting}
-              aria-label="Send message"
-            >
-              {isSubmitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Send className="h-4 w-4" />
+      <div className="max-w-[1400px] mx-auto">
+        <TooltipProvider>
+          <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-2xl p-2 shadow-sm focus-within:ring-4 focus-within:ring-teal-500/5 focus-within:border-teal-500/50 transition-all duration-300">
+            {/* Action Buttons Left */}
+            <div className="flex items-center gap-0.5">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-10 w-10 rounded-xl text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-all"
+                    disabled={disabled || !canSendDirect}
+                  >
+                    <Smile className="h-5.5 w-5.5" />
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent 
+                  side="top" 
+                  align="start" 
+                  sideOffset={12}
+                  avoidCollisions={true}
+                  collisionPadding={16}
+                  className="p-0 border-none shadow-2xl z-[100] w-[90vw] max-w-[350px] rounded-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+                >
+                  <EmojiPicker 
+                    onEmojiClick={onEmojiClick} 
+                    autoFocusSearch={false}
+                    theme={Theme.LIGHT}
+                    width="100%"
+                    height={400}
+                    lazyLoadEmojis={true}
+                    previewConfig={{ showPreview: false }}
+                    searchPlaceHolder="Search emoji..."
+                  />
+                </PopoverContent>
+              </Popover>
+              
+              {canSendDirect && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={onShowTemplate}
+                      className="h-10 w-10 rounded-xl text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-all"
+                    >
+                      <MessageSquare className="h-5.5 w-5.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>Send Template</TooltipContent>
+                </Tooltip>
               )}
-            </button>
+            </div>
+
+            {/* Input area */}
+            <form
+              className="flex-1 flex items-center gap-2"
+              onSubmit={handleSubmit}
+            >
+              <div className="flex-1 relative group">
+                <input
+                  ref={inputRef}
+                  className="w-full bg-transparent border-none py-2 px-1 text-[14.5px] font-medium focus:outline-none placeholder:text-gray-400 transition-all"
+                  placeholder={placeholder || defaultPlaceholder}
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  disabled={disabled || !canSendDirect || isSubmitting}
+                  maxLength={maxLength}
+                  aria-label="Message input"
+                />
+                {!canSendDirect && (
+                  <button
+                    type="button"
+                    onClick={onShowTemplate}
+                    className="absolute right-0 top-1/2 -translate-y-1/2 text-[10px] font-extrabold text-teal-600 bg-teal-50 px-3 py-1.5 rounded-lg border border-teal-100 hover:bg-teal-100 transition-colors uppercase tracking-widest shadow-sm"
+                  >
+                    Template Required
+                  </button>
+                )}
+              </div>
+
+              {text.trim() && (
+                <Button 
+                  type="submit"
+                  size="icon"
+                  className="h-10 w-10 rounded-xl bg-teal-500 hover:bg-teal-600 text-white shadow-lg shadow-teal-500/20 transition-all active:scale-95" 
+                  disabled={disabled || !canSendDirect || isSubmitting}
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Send className="h-5 w-5" />
+                  )}
+                </Button>
+              )}
+            </form>
           </div>
-        </form>
+        </TooltipProvider>
       </div>
       
       {/* Character count */}
       {text.length > maxLength * 0.8 && (
-        <div className="mt-2 text-xs text-gray-500 text-right">
-          {text.length}/{maxLength}
+        <div className="mt-2 text-[10px] text-gray-400 text-right font-bold uppercase tracking-widest pr-4">
+          {text.length} / {maxLength}
         </div>
       )}
     </div>

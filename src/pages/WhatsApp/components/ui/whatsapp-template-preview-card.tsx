@@ -209,7 +209,7 @@ export function WhatsAppTemplatePreviewCard({
                   )}
                 </div>
               )}
-              
+
               {/* Header Text */}
               {headerText && (
                 <div className={`px-4 ${headerFormat === 'IMAGE' || headerFormat === 'VIDEO' || headerFormat === 'DOCUMENT' ? 'pt-3 pb-1' : 'pt-3 pb-1'}`}>

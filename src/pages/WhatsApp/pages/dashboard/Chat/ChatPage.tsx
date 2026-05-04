@@ -6,11 +6,14 @@ import type { ChatMessageDTO } from '@/api/modules/chatAPI';
 import type { SendTemplateMessagePayload } from '@/schemas/templateSchema';
 import { wabaMessageApi } from '@/api/modules/wabaMessageAPI';
 
-// Import modular components
-import { 
-  ContactsList, 
-  ChatWindow
+import {
+  ContactsList,
+  ChatWindow,
+  type Contact
 } from './components';
+import { useContacts } from '@/hooks/useContacts';
+import { DUMMY_CONTACTS } from './dummyData';
+import { useMemo } from 'react';
 
 export default function ChatPage() {
   const { selectedProject } = useProjectContext();
@@ -22,6 +25,29 @@ export default function ChatPage() {
 
   const initialPhone = searchParams.get('phone') || undefined;
   const [activePhone, setActivePhone] = useState<string | undefined>(initialPhone);
+
+  // Fetch contacts to find the active one
+  const { data: contactsData } = useContacts({ page: 1, limit: 5000 });
+
+  const activeContactObject = useMemo<Contact | undefined>(() => {
+    if (!activePhone) return undefined;
+
+    // Check dummy contacts first
+    const dummy = DUMMY_CONTACTS.find(c => c.phoneNumber === activePhone);
+    if (dummy) {
+      return { 
+        ...dummy, 
+        _id: `dummy-${dummy.phoneNumber}`,
+        phone: dummy.phoneNumber, 
+        firstName: dummy.name, 
+        lastName: '' 
+      };
+    }
+
+    // Check real contacts
+    const contact = contactsData?.contacts?.find(c => c.phone === activePhone);
+    return contact as Contact | undefined;
+  }, [activePhone, contactsData]);
 
   // Handle contact selection
   const handleContactSelect = useCallback(
@@ -79,23 +105,29 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-full w-full overflow-hidden">
-      <ContactsList 
-        projectId={selectedProject._id}
-        activePhone={activePhone}
-        onContactSelect={handleContactSelect}
-      />
+    <div className="flex h-[calc(100vh-64px)] w-full overflow-hidden min-h-0 relative">
+      <div className={`flex-shrink-0 ${activePhone ? 'hidden md:block' : 'block w-full md:w-auto'}`}>
+        <ContactsList
+          projectId={selectedProject._id}
+          activePhone={activePhone}
+          onContactSelect={handleContactSelect}
+        />
+      </div>
 
-      <ChatWindow
-        projectId={selectedProject._id}
-        activeContact={activePhone}
-        onMessageSent={handleMessageSent}
-        onTemplateSent={handleTemplateSent}
-        emptyState={{
-          title: "Select a contact to start chatting",
-          description: "Choose a contact from the sidebar to view your conversation"
-        }}
-      />
+      <div className={`flex-1 min-w-0 ${activePhone ? 'block' : 'hidden md:block'}`}>
+        <ChatWindow
+          projectId={selectedProject._id}
+          activeContact={activePhone}
+          contact={activeContactObject}
+          onMessageSent={handleMessageSent}
+          onTemplateSent={handleTemplateSent}
+          onBack={() => setActivePhone(undefined)}
+          emptyState={{
+            title: "Select a contact to start chatting",
+            description: "Choose a contact from the sidebar to view your conversation"
+          }}
+        />
+      </div>
     </div>
   );
 }

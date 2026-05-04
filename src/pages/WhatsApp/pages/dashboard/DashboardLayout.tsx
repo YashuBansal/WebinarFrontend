@@ -30,7 +30,7 @@ export default function DashboardLayout() {
 
   // Fetch project data if we have projectId but no selectedProject
   const { data: projectsResponse, isLoading: isProjectsLoading } = useProjects(1, 100);
-  
+
   useEffect(() => {
     if (projectId && !selectedProject && projectsResponse) {
       // Find and set the project from the URL parameter
@@ -52,7 +52,7 @@ export default function DashboardLayout() {
     if (selectedProject && projectId) {
       const isConfigured = isProjectConfigured(selectedProject);
       const currentPath = window.location.pathname;
-      
+
       // Check for post-configuration redirect
       const postConfigRedirect = sessionStorage.getItem('postConfigRedirect');
       if (postConfigRedirect) {
@@ -60,7 +60,7 @@ export default function DashboardLayout() {
         navigate(postConfigRedirect, { replace: true });
         return;
       }
-      
+
       // If not configured and not already on configuration page, redirect to configuration
       if (!isConfigured && !currentPath.includes('/configuration')) {
         navigate(`/whatsapp/dashboard/${projectId}/configuration`, { replace: true });

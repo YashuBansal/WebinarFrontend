@@ -1,15 +1,24 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { 
-  History, 
-  ArrowLeft, 
-  MessageSquare, 
-  Calendar, 
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious
+} from '@/components/ui/pagination';
+import {
+  History,
+  ArrowLeft,
+  MessageSquare,
+  Calendar,
   AlertCircle,
   Loader2,
   CheckCircle,
@@ -17,7 +26,12 @@ import {
   XCircle,
   Eye,
   RefreshCw,
-  Phone
+  Phone,
+  ChevronRight,
+  Filter,
+  CheckCircle2,
+  LayoutGrid,
+  Search
 } from 'lucide-react';
 import { useProjectContext } from '@/context/ProjectContext';
 import { useWabaMessages, type DatePreset } from '@/hooks/useWabaMessages';
@@ -25,7 +39,6 @@ import { Input } from '@/components/ui/input';
 import { formatDateTime12 } from '@/lib/date';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { type MessageType } from '@/schemas/wabaMessageSchema';
-
 
 const MessageHistory = () => {
   const { projectId } = useParams<{ projectId: string }>();
@@ -45,9 +58,9 @@ const MessageHistory = () => {
   // Message type filtering state
   const [selectedMessageType, setSelectedMessageType] = useState<MessageType | null>(null);
 
-  const { 
-    data: messagesData, 
-    isLoading, 
+  const {
+    data: messagesData,
+    isLoading,
     error,
     refetch
   } = useWabaMessages(projectId || '', currentPage, limit, {
@@ -81,34 +94,34 @@ const MessageHistory = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'sent':
-        return <CheckCircle className="h-4 w-4 text-blue-500" />;
+        return <CheckCircle className="h-4 w-4" />;
       case 'delivered':
-        return <CheckCircle className="h-4 w-4 text-green-500" />;
+        return <CheckCircle2 className="h-4 w-4" />;
       case 'read':
-        return <Eye className="h-4 w-4 text-green-600" />;
+        return <Eye className="h-4 w-4" />;
       case 'failed':
-        return <XCircle className="h-4 w-4 text-red-500" />;
+        return <XCircle className="h-4 w-4" />;
       case 'clicked':
-        return <CheckCircle className="h-4 w-4 text-purple-500" />;
+        return <CheckCircle className="h-4 w-4" />;
       default:
-        return <Clock className="h-4 w-4 text-yellow-500" />;
+        return <Clock className="h-4 w-4" />;
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusStyles = (status: string) => {
     switch (status) {
       case 'sent':
-        return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200';
+        return 'bg-blue-50 text-blue-600 border-blue-100';
       case 'delivered':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
       case 'read':
-        return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200';
+        return 'bg-green-50 text-green-600 border-green-100';
       case 'failed':
-        return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200';
+        return 'bg-red-50 text-red-600 border-red-100';
       case 'clicked':
-        return 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200';
+        return 'bg-purple-50 text-purple-600 border-purple-100';
       default:
-        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200';
+        return 'bg-amber-50 text-amber-600 border-amber-100';
     }
   };
 
@@ -132,6 +145,7 @@ const MessageHistory = () => {
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleRefresh = async () => {
@@ -154,48 +168,41 @@ const MessageHistory = () => {
     const hasNextPage = page < totalPages;
 
     return (
-      <div className="flex justify-center pt-4">
+      <div className="flex justify-center pt-8">
         <Pagination>
-          <PaginationContent>
+          <PaginationContent className="gap-2">
             <PaginationItem>
-              <PaginationPrevious 
+              <PaginationPrevious
                 onClick={(e) => {
                   e.preventDefault();
                   if (hasPrevPage) handlePageChange(page - 1);
                 }}
-                className={!hasPrevPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasPrevPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
               />
             </PaginationItem>
-            
-            {/* Show first page */}
+
             {page > 3 && (
               <>
                 <PaginationItem>
-                  <PaginationLink 
+                  <PaginationLink
                     onClick={(e) => {
                       e.preventDefault();
                       handlePageChange(1);
                     }}
-                    className="cursor-pointer"
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
                   >
                     1
                   </PaginationLink>
                 </PaginationItem>
-                {page > 4 && (
-                  <PaginationItem>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                )}
+                {page > 4 && <PaginationItem><PaginationEllipsis /></PaginationItem>}
               </>
             )}
-            
-            {/* Show pages around current page */}
+
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const startPage = Math.max(1, page - 2);
               const pageNum = startPage + i;
-              
               if (pageNum > totalPages) return null;
-              
+
               return (
                 <PaginationItem key={pageNum}>
                   <PaginationLink
@@ -204,43 +211,42 @@ const MessageHistory = () => {
                       handlePageChange(pageNum);
                     }}
                     isActive={pageNum === page}
-                    className="cursor-pointer"
+                    className={`cursor-pointer h-10 w-10 rounded-xl font-bold transition-all ${
+                      pageNum === page 
+                        ? 'bg-[#22B573] text-white border-[#22B573] shadow-lg shadow-green-600/20' 
+                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
                   >
                     {pageNum}
                   </PaginationLink>
                 </PaginationItem>
               );
             })}
-            
-            {/* Show last page */}
+
             {page < totalPages - 2 && (
               <>
-                {page < totalPages - 3 && (
-                  <PaginationItem>
-                    <PaginationEllipsis />
-                  </PaginationItem>
-                )}
+                {page < totalPages - 3 && <PaginationItem><PaginationEllipsis /></PaginationItem>}
                 <PaginationItem>
-                  <PaginationLink 
+                  <PaginationLink
                     onClick={(e) => {
                       e.preventDefault();
                       handlePageChange(totalPages);
                     }}
-                    className="cursor-pointer"
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
                   >
                     {totalPages}
                   </PaginationLink>
                 </PaginationItem>
               </>
             )}
-            
+
             <PaginationItem>
-              <PaginationNext 
+              <PaginationNext
                 onClick={(e) => {
                   e.preventDefault();
                   if (hasNextPage) handlePageChange(page + 1);
                 }}
-                className={!hasNextPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasNextPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
               />
             </PaginationItem>
           </PaginationContent>
@@ -251,11 +257,12 @@ const MessageHistory = () => {
 
   if (!projectId) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            No project ID provided.
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+          <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
+          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Project ID Required</AlertTitle>
+          <AlertDescription className="text-slate-500 font-medium">
+            Please provide a valid project ID to view message history.
           </AlertDescription>
         </Alert>
       </div>
@@ -263,323 +270,337 @@ const MessageHistory = () => {
   }
 
   return (
-    <div className="space-y-4 sm:space-y-6 px-2 sm:px-0 overflow-y-auto">
-      {/* Header */}
-      <div className="space-y-4 flex flex-col gap-4">
-        {/* Main Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
             <Button
               variant="ghost"
-              size="sm"
+              size="icon"
               onClick={() => navigate(`/whatsapp/dashboard/${projectId}/send-message`)}
-              className="flex items-center gap-2"
+              className="h-10 w-10 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100 transition-all text-slate-500"
             >
-              <ArrowLeft className="h-4 w-4" />
-              <span className="hidden sm:inline">Back to Send Message</span>
-              <span className="sm:hidden">Back</span>
+              <ArrowLeft className="h-5 w-5" />
             </Button>
-            <div className="flex items-center gap-2">
-              <History className="h-5 w-5 text-primary" />
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-[#22B573] font-bold text-xs uppercase tracking-widest mb-0.5">
+                <History className="h-3.5 w-3.5" />
+                Audit Logs
+              </div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
                 Message History
               </h1>
+              <p className="text-slate-500 text-xs font-medium">
+                Tracking all outbound messages for <span className="text-slate-900 font-bold">{selectedProject?.projectName || 'Project'}</span>
+              </p>
             </div>
           </div>
-          
-          {/* Project Info */}
-          <div className="text-sm text-muted-foreground">
-            <div className="font-medium">Project: {selectedProject?.projectName || 'Unknown'}</div>
-            {lastRefreshTime && (
-              <div className="text-xs text-muted-foreground">
-                Last updated: {lastRefreshTime.toLocaleTimeString()}
-              </div>
-            )}
-          </div>
-        </div>
 
-        {/* Controls Row */}
-        <div className={`flex flex-col sm:flex-row items-start sm:items-center gap-3 ${autoRefreshEnabled ? 'justify-between' : 'justify-end'}`}>
-          {/* Auto-refresh indicator */}
-          {autoRefreshEnabled && (
-            <div className="flex items-center gap-2 text-sm text-green-600">
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              <span>Auto-refresh active</span>
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-end mr-2 hidden sm:flex">
+              {lastRefreshTime && (
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Last Updated: {lastRefreshTime.toLocaleTimeString()}
+                </span>
+              )}
+              {autoRefreshEnabled && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Live Sync Active</span>
+                </div>
+              )}
             </div>
-          )}
-          
-          {/* Date Filters + Actions */}
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Date Filter Dropdown */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Date Filter:</span>
-              <Select value={datePreset || ''} onValueChange={(value) => setDatePreset(value as DatePreset)}>
-                <SelectTrigger className="w-32 h-8">
-                  <SelectValue placeholder="Select period" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="today">Today</SelectItem>
-                  <SelectItem value="yesterday">Yesterday</SelectItem>
-                  <SelectItem value="lastWeek">Last Week</SelectItem>
-                  <SelectItem value="custom">Custom Range</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Message Type Filter Dropdown */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">Message Type:</span>
-              <Select 
-                value={selectedMessageType || 'all'} 
-                onValueChange={(value) => {
-                  setSelectedMessageType(value === 'all' ? null : (value as MessageType));
-                }}
-              >
-                <SelectTrigger className="w-40 h-8">
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All</SelectItem>
-                  <SelectItem value="campaign">Campaign</SelectItem>
-                  <SelectItem value="individual">Individual</SelectItem>
-                  <SelectItem value="template">Template</SelectItem>
-                  <SelectItem value="auto-message">Auto Message</SelectItem>
-                  <SelectItem value="alarm">Alarm</SelectItem>
-                  <SelectItem value="zoom-event">Zoom Event</SelectItem>
-                  <SelectItem value="api-campaign">API Campaign</SelectItem>
-                  <SelectItem value="program">Program</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {/* Custom Date Range Inputs
-            {datePreset === 'custom' && (
-              <div className="flex items-center gap-2">
-                <span className="text-sm text-muted-foreground">From:</span>
-                <Input 
-                  type="date" 
-                  value={customStart} 
-                  onChange={(e) => setCustomStart(e.target.value)} 
-                  className="h-8 w-40" 
-                />
-                <span className="text-sm text-muted-foreground">To:</span>
-                <Input 
-                  type="date" 
-                  value={customEnd} 
-                  onChange={(e) => setCustomEnd(e.target.value)} 
-                  className="h-8 w-40" 
-                />
-              </div>
-            )} */}
-
-            <Button 
-              onClick={handleRefresh} 
-              variant="outline" 
-              size="sm"
+            
+            <Button
+              onClick={handleRefresh}
+              variant="outline"
               disabled={isRefreshing}
-              className="flex items-center gap-2"
+              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span className="hidden sm:inline">{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+              {isRefreshing ? 'Syncing...' : 'Sync Now'}
             </Button>
-            
-            <Button 
+
+            <Button
               onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
-              variant={autoRefreshEnabled ? "default" : "outline"}
-              size="sm"
-              className="flex items-center gap-2 w-32"
+              className={`h-11 px-6 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${
+                autoRefreshEnabled 
+                  ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/10' 
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+              }`}
             >
-              <Clock className="h-4 w-4" />
-              <span className="hidden sm:inline">{autoRefreshEnabled ? 'Disable Auto' : 'Enable Auto'}</span>
+              <motion.div
+                animate={autoRefreshEnabled ? { rotate: 360 } : { rotate: 0 }}
+                transition={autoRefreshEnabled ? { repeat: Infinity, duration: 4, ease: "linear" } : { duration: 0.5 }}
+              >
+                <Clock className="h-4 w-4" />
+              </motion.div>
+              {autoRefreshEnabled ? 'Live' : 'Manual'}
             </Button>
           </div>
         </div>
+      </motion.div>
 
-        <div className="flex items-center gap-2 w-full justify-end">
-        {datePreset === 'custom' && (
-              <div className="flex items-center gap-2 bg-gray-50 dark:bg-gray-800 px-3 py-2 rounded-lg border">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Date Range:</span>
-                <Input 
-                  type="date" 
-                  value={customStart} 
-                  onChange={(e) => setCustomStart(e.target.value)} 
-                  className="h-8 w-40" 
-                  placeholder="Start date"
-                />
-                <span className="text-sm text-muted-foreground">to</span>
-                <Input 
-                  type="date" 
-                  value={customEnd} 
-                  onChange={(e) => setCustomEnd(e.target.value)} 
-                  className="h-8 w-40" 
-                  placeholder="End date"
-                />
+      <main className="container mx-auto space-y-6 pb-12">
+        {/* Stats Section */}
+        <AnimatePresence mode="wait">
+          {messagesData && (
+            <motion.div 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="grid grid-cols-2 lg:grid-cols-4 gap-4"
+            >
+              {[
+                { label: "Total Messages", value: messagesData.total, icon: MessageSquare, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
+                { label: "Delivered/Read", value: messagesData.wabaMessages.filter(m => m.status === 'delivered' || m.status === 'read').length, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
+                { label: "Pending/Sent", value: messagesData.wabaMessages.filter(m => m.status === 'sent' || m.status === 'pending').length, icon: Clock, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100" },
+                { label: "Failed", value: messagesData.wabaMessages.filter(m => m.status === 'failed').length, icon: XCircle, color: "text-red-600", bg: "bg-red-50", border: "border-red-100" },
+              ].map((stat, i) => (
+                <Card key={i} className={`rounded-2xl border ${stat.border} ${stat.bg} shadow-sm group hover:shadow-md transition-all duration-300`}>
+                  <CardContent className="p-5 flex items-center gap-4">
+                    <div className={`h-12 w-12 rounded-xl bg-white border ${stat.border} flex items-center justify-center ${stat.color} shadow-sm group-hover:scale-110 transition-transform`}>
+                      <stat.icon className="h-6 w-6" />
+                    </div>
+                    <div>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">{stat.label}</p>
+                      <h4 className={`text-2xl font-black ${stat.color}`}>{stat.value}</h4>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Filters and List */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500"
+        >
+          <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/30">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div>
+                <h2 className="text-xl font-black text-slate-900">Message Logs</h2>
+                <p className="text-slate-500 text-xs font-medium mt-1">Filter and audit your message delivery status</p>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Date Filter */}
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400">
+                    <Calendar className="h-4 w-4" />
+                  </div>
+                  <Select value={datePreset || ''} onValueChange={(value) => setDatePreset(value as DatePreset)}>
+                    <SelectTrigger className="w-40 h-10 rounded-xl border-slate-200 font-bold text-slate-700 bg-white focus:ring-[#22B573]/20">
+                      <SelectValue placeholder="Period" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-slate-200 shadow-2xl">
+                      <SelectItem value="today" className="font-bold">Today</SelectItem>
+                      <SelectItem value="yesterday" className="font-bold">Yesterday</SelectItem>
+                      <SelectItem value="lastWeek" className="font-bold">Last Week</SelectItem>
+                      <SelectItem value="custom" className="font-bold text-blue-600">Custom Range</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Message Type Filter */}
+                <div className="flex items-center gap-2">
+                  <div className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400">
+                    <Filter className="h-4 w-4" />
+                  </div>
+                  <Select
+                    value={selectedMessageType || 'all'}
+                    onValueChange={(value) => {
+                      setSelectedMessageType(value === 'all' ? null : (value as MessageType));
+                    }}
+                  >
+                    <SelectTrigger className="w-48 h-10 rounded-xl border-slate-200 font-bold text-slate-700 bg-white focus:ring-[#22B573]/20">
+                      <SelectValue placeholder="All Types" />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-slate-200 shadow-2xl">
+                      <SelectItem value="all" className="font-bold">All Messages</SelectItem>
+                      <SelectItem value="campaign" className="font-bold">Campaigns</SelectItem>
+                      <SelectItem value="individual" className="font-bold">Individual</SelectItem>
+                      <SelectItem value="template" className="font-bold">Templates</SelectItem>
+                      <SelectItem value="auto-message" className="font-bold">Auto-Messages</SelectItem>
+                      <SelectItem value="alarm" className="font-bold">Alarms</SelectItem>
+                      <SelectItem value="zoom-event" className="font-bold">Zoom Events</SelectItem>
+                      <SelectItem value="api-campaign" className="font-bold">API Campaigns</SelectItem>
+                      <SelectItem value="program" className="font-bold">Programs</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            </div>
+
+            {/* Custom Date Range Picker */}
+            <AnimatePresence>
+              {datePreset === 'custom' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, marginTop: 0 }}
+                  animate={{ opacity: 1, height: 'auto', marginTop: 24 }}
+                  exit={{ opacity: 0, height: 0, marginTop: 0 }}
+                  className="flex flex-wrap items-center gap-4 p-4 rounded-2xl bg-[#22B573]/5 border border-[#22B573]/10"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#22B573]">Start Date:</span>
+                    <Input
+                      type="date"
+                      value={customStart}
+                      onChange={(e) => setCustomStart(e.target.value)}
+                      className="h-10 w-44 rounded-xl border-slate-200 bg-white font-bold text-slate-700 focus:ring-[#22B573]/20"
+                    />
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-[#22B573]">End Date:</span>
+                    <Input
+                      type="date"
+                      value={customEnd}
+                      onChange={(e) => setCustomEnd(e.target.value)}
+                      className="h-10 w-44 rounded-xl border-slate-200 bg-white font-bold text-slate-700 focus:ring-[#22B573]/20"
+                    />
+                  </div>
+                  <Button 
+                    size="sm" 
+                    onClick={handleRefresh}
+                    className="ml-auto bg-[#22B573] hover:bg-[#1da467] text-white font-bold rounded-xl px-6 h-10"
+                  >
+                    Apply Range
+                  </Button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          <div className="p-4 sm:p-8">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+                <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                  <Loader2 className="h-8 w-8 animate-spin text-[#22B573]" />
+                </div>
+                <p className="font-bold text-sm uppercase tracking-widest">Loading Messages...</p>
+              </div>
+            ) : error ? (
+              <Alert variant="destructive" className="bg-red-50 border-red-200 rounded-2xl">
+                <AlertCircle className="h-4 w-4 text-red-600" />
+                <AlertTitle className="text-red-800 font-bold">Failed to load</AlertTitle>
+                <AlertDescription className="text-red-700 font-medium">Please check your connection and try again.</AlertDescription>
+              </Alert>
+            ) : !messagesData || messagesData.wabaMessages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+                <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                  <Search className="h-8 w-8 opacity-20" />
+                </div>
+                <p className="font-bold text-sm uppercase tracking-widest">No messages found</p>
+                <p className="text-xs font-medium mt-1">Try adjusting your filters or date range</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {messagesData.wabaMessages.map((message, index) => (
+                  <motion.div
+                    key={message._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="group flex flex-col xl:flex-row xl:items-center gap-6 p-6 rounded-2xl border border-slate-100 bg-white hover:bg-slate-50/50 hover:border-[#22B573]/20 hover:shadow-lg hover:shadow-slate-200/40 transition-all duration-300"
+                  >
+                    {/* Status Icon */}
+                    <div className={`h-14 w-14 rounded-2xl border flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform ${getStatusStyles(message.status)}`}>
+                      {getStatusIcon(message.status)}
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-tighter px-2 py-0.5 border-slate-200 bg-slate-50 text-slate-500`}>
+                            {getMessageTypeLabel(message.messageType)}
+                          </Badge>
+                          <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-none shadow-sm ${getStatusStyles(message.status)}`}>
+                            {message.status}
+                          </Badge>
+                        </div>
+                        <h3 className="font-black text-slate-900 text-lg line-clamp-1 group-hover:text-[#22B573] transition-colors">
+                          {message.templateName || 'Direct Message'}
+                        </h3>
+                        <div className="flex items-center gap-2 text-slate-400">
+                          <Phone className="h-3 w-3" />
+                          <span className="text-xs font-mono font-bold tracking-tight">{message.phoneNumber}</span>
+                        </div>
+                      </div>
+
+                      <div className="space-y-3">
+                        <div className="flex flex-col gap-1.5">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-3 w-3 text-slate-400" />
+                            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Timeline</span>
+                          </div>
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                            <div className="flex flex-col">
+                              <span className="text-[10px] font-bold text-slate-400 uppercase">Created</span>
+                              <span className="text-[11px] font-medium text-slate-600">{formatDate(message.createdAt)}</span>
+                            </div>
+                            {message.sentAt && (
+                              <div className="flex flex-col">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase">Sent</span>
+                                <span className="text-[11px] font-medium text-slate-600">{formatDate(message.sentAt)}</span>
+                              </div>
+                            )}
+                            {message.deliveredAt && (
+                              <div className="flex flex-col">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase">Delivered</span>
+                                <span className="text-[11px] font-medium text-emerald-600">{formatDate(message.deliveredAt)}</span>
+                              </div>
+                            )}
+                            {message.readAt && (
+                              <div className="flex flex-col">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase">Read</span>
+                                <span className="text-[11px] font-medium text-green-600">{formatDate(message.readAt)}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col justify-center gap-3">
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex flex-col gap-1">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">WABA Message ID</span>
+                          <span className="text-xs font-mono font-medium text-slate-600 break-all">{message.wabaMessageId}</span>
+                        </div>
+                        
+                        {message.failureReason && (
+                          <div className="p-2.5 rounded-xl bg-red-50 border border-red-100 flex items-start gap-2.5">
+                            <AlertCircle className="h-3.5 w-3.5 text-red-500 mt-0.5 flex-shrink-0" />
+                            <div className="min-w-0">
+                              <p className="text-[10px] font-black text-red-600 uppercase tracking-widest leading-none mb-1">Error Trace</p>
+                              <p className="text-[11px] font-medium text-red-700 leading-tight line-clamp-2">{message.failureReason}</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                  </motion.div>
+                ))}
               </div>
             )}
-        </div>
-      </div>
 
-      {/* Stats Card */}
-      {messagesData && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
-              Message Statistics
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              <div className="text-center p-2 sm:p-3">
-                <div className="text-lg sm:text-2xl font-bold text-primary">{messagesData.total}</div>
-                <div className="text-xs sm:text-sm text-muted-foreground">Total Messages</div>
-              </div>
-              <div className="text-center p-2 sm:p-3">
-                <div className="text-lg sm:text-2xl font-bold text-green-600">
-                  {messagesData.wabaMessages.filter(m => m.status === 'delivered' || m.status === 'read').length}
-                </div>
-                <div className="text-xs sm:text-sm text-muted-foreground">Delivered</div>
-              </div>
-              <div className="text-center p-2 sm:p-3">
-                <div className="text-lg sm:text-2xl font-bold text-blue-600">
-                  {messagesData.wabaMessages.filter(m => m.status === 'sent').length}
-                </div>
-                <div className="text-xs sm:text-sm text-muted-foreground">Sent</div>
-              </div>
-              <div className="text-center p-2 sm:p-3">
-                <div className="text-lg sm:text-2xl font-bold text-red-600">
-                  {messagesData.wabaMessages.filter(m => m.status === 'failed').length}
-                </div>
-                <div className="text-xs sm:text-sm text-muted-foreground">Failed</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Messages List */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Messages</CardTitle>
-          <CardDescription>
-            View all WhatsApp messages sent through this project
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <Loader2 className="h-6 w-6 animate-spin mr-2" />
-              Loading messages...
-            </div>
-          ) : error ? (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                Failed to load messages. Please try again.
-              </AlertDescription>
-            </Alert>
-          ) : messagesData?.wabaMessages.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No messages found for this project.
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {messagesData?.wabaMessages.map((message) => (
-                <div key={message._id} className="border rounded-lg p-4 space-y-3 bg-white dark:bg-gray-800 shadow-sm hover:shadow-md transition-shadow">
-                  {/* Header Row */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      {getStatusIcon(message.status)}
-                      <div className="min-w-0">
-                        <h3 className="font-semibold text-base truncate">{message.templateName}</h3>
-                        <p className="text-xs text-muted-foreground">{getMessageTypeLabel(message.messageType)}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 flex-shrink-0">
-                      <Badge className={getStatusColor(message.status)}>
-                        {message.status.toUpperCase()}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDate(message.createdAt)}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Contact Information */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                    <div className="space-y-2">
-                      {/* Phone Number */}
-                      {message.phoneNumber && (
-                        <div className="flex items-center gap-2">
-                          <Phone className="h-3 w-3 text-blue-500 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <span className="text-xs text-muted-foreground">Phone:</span>
-                            <p className="font-mono text-sm font-medium truncate">{message.phoneNumber}</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="space-y-2">
-                      {/* Timestamps */}
-                      {message.sentAt && (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-3 w-3 text-blue-500 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <span className="text-xs text-muted-foreground">Sent:</span>
-                            <p className="text-xs truncate">{formatDate(message.sentAt)}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {message.deliveredAt && (
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-3 w-3 text-green-500 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <span className="text-xs text-muted-foreground">Delivered:</span>
-                            <p className="text-xs truncate">{formatDate(message.deliveredAt)}</p>
-                          </div>
-                        </div>
-                      )}
-
-                      {message.readAt && (
-                        <div className="flex items-center gap-2">
-                          <Eye className="h-3 w-3 text-green-600 flex-shrink-0" />
-                          <div className="min-w-0">
-                            <span className="text-xs text-muted-foreground">Read:</span>
-                            <p className="text-xs truncate">{formatDate(message.readAt)}</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Error Message */}
-                  {message.failureReason && (
-                    <div className="p-2 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
-                      <div className="flex items-center gap-2">
-                        <AlertCircle className="h-3 w-3 text-red-500" />
-                        <span className="text-xs font-medium text-red-700 dark:text-red-300">Error:</span>
-                      </div>
-                      <p className="text-xs text-red-600 dark:text-red-400 mt-1">{message.failureReason}</p>
-                    </div>
-                  )}
-
-                  {/* Footer */}
-                  <div className="flex items-center justify-between pt-1 border-t border-gray-200 dark:border-gray-600">
-                    <div className="text-xs text-muted-foreground">
-                      ID: <span className="font-mono">{message.wabaMessageId}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Pagination: hide when date filters are applied */}
-          {messagesData && !datePreset && !selectedMessageType && messagesData.totalPages > 1 && renderPagination()}
-        </CardContent>
-      </Card>
+            {/* Pagination */}
+            {messagesData && messagesData.totalPages > 1 && renderPagination()}
+          </div>
+        </motion.div>
+      </main>
     </div>
   );
 };

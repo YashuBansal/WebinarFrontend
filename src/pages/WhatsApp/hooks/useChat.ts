@@ -61,32 +61,56 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
 
   const sendText = useCallback(async (text: string, contactId?: string) => {
     if (!projectId || !phoneNumber || !text?.trim()) return;
-    const { id } = await chatApi.sendText({ projectId, phoneNumber, text, contactId });
-    // Optimistic append
-    setMessages((prev) => {
-      const optimistic = {
-        phoneNumber,
-        textBody: text,
-        direction: 'outbound' as const,
-        createdAt: new Date().toISOString(),
-        status: 'sent' as const,
-        sentAt: new Date().toISOString(),
-      };
-      // If last message is identical outbound within 3s, skip duplicate optimistic append
-      const last = prev[prev.length - 1];
-      if (
-        last &&
-        last.direction === 'outbound' &&
-        last.textBody === optimistic.textBody &&
-        Math.abs(new Date(optimistic.createdAt).getTime() - new Date(last.createdAt).getTime()) < 3000
-      ) {
-        return prev;
-      }
-      return [...prev, optimistic];
-    });
-    // Invalidate contact queries to refresh session time and contact lists
+
+    const optimisticCreatedAt = new Date().toISOString();
+    const optimistic: ChatMessageDTO = {
+      phoneNumber,
+      textBody: text,
+      direction: 'outbound',
+      createdAt: optimisticCreatedAt,
+      status: 'pending',
+    };
+
+    // 1. Immediately show the message in the UI
+    setMessages((prev) => [...prev, optimistic]);
     invalidateContactQueries();
-    return id;
+
+    try {
+      // 2. Perform the actual API call
+      const { id } = await chatApi.sendText({ projectId, phoneNumber, text, contactId });
+      const sentAt = new Date().toISOString();
+
+      // 3. Update the optimistic message with the real ID and 'sent' status
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m._id) return m; // Already has a server ID, skip
+          if (m.direction !== 'outbound') return m;
+          if (m.textBody !== text) return m;
+          if (m.createdAt !== optimisticCreatedAt) return m;
+          return { ...m, _id: id, status: 'sent', sentAt };
+        })
+      );
+
+      invalidateContactQueries();
+      return id;
+    } catch (error) {
+      console.error('Failed to send text message:', error);
+      const failureReason = 'Failed to send message';
+      
+      // Update message to show failure
+      setMessages((prev) =>
+        prev.map((m) => {
+          if (m._id) return m;
+          if (m.direction !== 'outbound') return m;
+          if (m.textBody !== text) return m;
+          if (m.createdAt !== optimisticCreatedAt) return m;
+          return { ...m, status: 'failed', failureReason };
+        })
+      );
+      
+      toastUtils.error('Failed to send message');
+      throw error;
+    }
   }, [projectId, phoneNumber, invalidateContactQueries]);
 
   const sendTemplate = useCallback(async (payload: SendTemplateMessagePayload) => {
@@ -190,6 +214,7 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
       if (isActiveContact) {
         setMessages((prev) => {
           const incoming: ChatMessageDTO = {
+            _id: evt._id, // Ensure ID is captured
             phoneNumber: evt.phoneNumber,
             textBody: evt.textBody,
             direction: evt.direction as ChatMessageDTO['direction'],
@@ -201,10 +226,33 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
             displayText: evt.displayText || evt.textBody,
             mimeType: evt.mimeType,
             mediaUrl: evt.mediaUrl,
+            status: evt.status,
           };
           
+          // Check if this message (by ID) is already in the list
+          if (incoming._id && prev.some(m => String(m._id) === String(incoming._id))) {
+            return prev;
+          }
+
+          // If it's an outbound message, try to find and replace an optimistic placeholder
+          if (incoming.direction === 'outbound') {
+            const MATCH_WINDOW_MS = 60000; // 1 minute window for socket echoes
+            const optimisticIdx = prev.findIndex(m => 
+              !m._id && 
+              m.direction === 'outbound' && 
+              m.textBody === incoming.textBody &&
+              Math.abs(new Date(m.createdAt).getTime() - new Date(incoming.createdAt).getTime()) < MATCH_WINDOW_MS
+            );
+
+            if (optimisticIdx !== -1) {
+              const next = [...prev];
+              next[optimisticIdx] = incoming;
+              return next;
+            }
+          }
+
+          // Prevent duplicate append for identical messages without IDs (very quick echoes)
           const last = prev[prev.length - 1];
-          // Prevent duplicate append when socket echoes sent message quickly
           if (
             last &&
             last.direction === incoming.direction &&
@@ -213,6 +261,7 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
           ) {
             return prev;
           }
+
           return [...prev, incoming];
         });
         

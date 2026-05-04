@@ -29,7 +29,7 @@ export const templateSelectionSchema = z.object({
 });
 
 // Step 4: Preview and Send
-const campaignSendBaseSchema = z.object({
+export const campaignSendBaseSchema = z.object({
   sendType: z.enum(['now', 'scheduled']),
   scheduledAt: z.string().nullable().optional(),
 });
@@ -60,6 +60,14 @@ export const createCampaignWorkflowSchema = z.object({
   // Step 4
   sendType: campaignSendBaseSchema.shape.sendType,
   scheduledAt: campaignSendBaseSchema.shape.scheduledAt,
+}).refine((data) => {
+  if (data.sendType === 'scheduled' && !data.scheduledAt) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Scheduled date and time are required when scheduling a campaign.",
+  path: ["scheduledAt"],
 });
 
 // Campaign response schema

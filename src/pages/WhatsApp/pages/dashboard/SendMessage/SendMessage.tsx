@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { motion, AnimatePresence } from 'framer-motion';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, Send, AlertCircle, Phone, MessageSquare, Users, History } from 'lucide-react';
+import { Loader2, Send, AlertCircle, Phone, MessageSquare, Users, History, ArrowRight, CheckCircle2 } from 'lucide-react';
 import { useSendTemplateMessage, useSendBulkTemplateMessage } from '@/hooks/useTemplates';
 import { useMediaAssets } from '@/hooks/useMediaAssets';
 import { useProjectContext } from '@/context/ProjectContext';
@@ -375,10 +376,11 @@ const SendMessage = () => {
 
   if (!selectedProject && !isBulkMode) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+          <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
+          <AlertTitle className="text-xl font-black text-slate-900 mb-2">No Project Selected</AlertTitle>
+          <AlertDescription className="text-slate-500 font-medium">
             Please select a project to send messages.
           </AlertDescription>
         </Alert>
@@ -387,201 +389,196 @@ const SendMessage = () => {
   }
 
   return (
-    <div className="space-y-6 overflow-y-auto">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {isBulkMode ? (
-            <Users className="h-6 w-6 text-primary" />
-          ) : (
-            <MessageSquare className="h-6 w-6 text-primary" />
-          )}
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            {isBulkMode ? 'Send Bulk Template Messages' : 'Send Template Message'}
-          </h1>
-          {isBulkMode && (
-            <Badge variant="secondary" className="ml-2">
-              {selectedContacts.length} contacts selected
-            </Badge>
-          )}
-        </div>
-        
-        {/* Message History Button */}
-        {currentProjectId && (
-          <Button
-            variant="outline"
-            onClick={() => navigate(`/whatsapp/dashboard/${projectId}/message-history/${currentProjectId}`)}
-            className="flex items-center gap-2"
-          >
-            <History className="h-4 w-4" />
-            Message History
-          </Button>
-        )}
-      </div>
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-1">
+              {isBulkMode ? <Users className="h-3.5 w-3.5" /> : <MessageSquare className="h-3.5 w-3.5" />}
+              {isBulkMode ? 'Bulk Campaign' : 'Direct Message'}
+            </div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+              {isBulkMode ? 'Send Bulk Messages' : 'Send Template Message'}
+            </h1>
+            <p className="text-slate-500 text-xs font-medium">
+              {isBulkMode 
+                ? `Sending to ${selectedContacts.length} selected contacts`
+                : 'Send a personalized WhatsApp template message to a single recipient'
+              }
+            </p>
+          </div>
 
-      {/* Selected Contacts Display - Only in bulk mode */}
-      {/* {isBulkMode && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Users className="h-5 w-5" />
-              Selected Contacts ({selectedContacts.length})
-            </CardTitle>
-            <CardDescription>
-              These contacts will receive the template message
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid gap-2 max-h-60 overflow-y-auto">
-              {selectedContacts.map((contact) => (
-                <div key={contact._id} className="flex items-center justify-between p-2 border rounded-lg">
-                  <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center">
-                      <User className="w-4 h-4 text-primary" />
+          <div className="flex items-center gap-3">
+            {currentProjectId && (
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/whatsapp/dashboard/${projectId}/message-history/${currentProjectId}`)}
+                className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <History className="h-4 w-4" />
+                View History
+              </Button>
+            )}
+          </div>
+        </div>
+      </motion.div>
+
+      <main className="container mx-auto space-y-6 pb-12">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <AnimatePresence>
+            {(sendMessageMutation.isError || sendBulkMessageMutation.isError) && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
+                <Alert variant="destructive" className="bg-red-50 border-red-200 rounded-2xl mb-6">
+                  <AlertCircle className="h-4 w-4 text-red-600" />
+                  <AlertTitle className="text-red-800 font-bold">Failed to Send</AlertTitle>
+                  <AlertDescription className="text-red-700 font-medium">
+                    {((sendMessageMutation.error || sendBulkMessageMutation.error) as any) || 'An unexpected error occurred.'}
+                  </AlertDescription>
+                </Alert>
+              </motion.div>
+            )}
+            {(sendMessageMutation.isSuccess || sendBulkMessageMutation.isSuccess) && (
+              <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
+                <Alert className="bg-green-50 border-green-200 rounded-2xl mb-6">
+                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <AlertTitle className="text-green-800 font-bold">Sent Successfully</AlertTitle>
+                  <AlertDescription className="text-green-700 font-medium">
+                    {isBulkMode ? 'Bulk messages have been queued for sending.' : 'Your message has been sent successfully.'}
+                  </AlertDescription>
+                </Alert>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          <div className="grid gap-6 items-start">
+            {/* Template Selection Section */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="group relative bg-white border border-slate-200 hover:border-green-400/30 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-1 transition-all duration-300"
+            >
+              <TemplateSelectionForm
+                selectedTemplate={selectedTemplate}
+                variableMappings={autoMessageMappings}
+                selectedMediaAsset={selectedMediaAsset}
+                uploadedFileName={uploadedFileName}
+                setSelectedTemplate={handleSetSelectedTemplate}
+                setVariableMappings={handleSetVariableMappings}
+                setSelectedMediaAsset={handleMediaAssetChange}
+                setUploadedFileName={handleSetUploadedFileName}
+                onTemplateSelect={handleTemplateSelect}
+                onVariableMappingsChange={handleVariableMappingsChange}
+                projectId={currentProjectId}
+                contactFieldOptions={CONTACT_FIELD_OPTIONS}
+                showPreview={true}
+                showHeaderMedia={true}
+                allowDynamicFields={isBulkMode}
+                showValidationErrors={showValidationErrors}
+              />
+            </motion.div>
+
+            {/* Recipient and Action Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="bg-white border border-slate-200 rounded-[20px] p-6 sm:p-8"
+            >
+              <div className="flex flex-col md:flex-row gap-8 items-end">
+                {/* Phone Number - Only show in single mode */}
+                {!isBulkMode ? (
+                  <div className="flex-1 space-y-3 w-full">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="h-7 w-7 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                        <Phone className="h-3.5 w-3.5" />
+                      </div>
+                      <Label htmlFor="recipientPhoneNumber" className="text-sm font-bold text-slate-700 uppercase tracking-wider">
+                        Recipient Phone Number
+                      </Label>
                     </div>
-                    <div>
-                      <p className="font-medium text-sm">{contact.firstName} {contact.lastName}</p>
-                      <p className="text-xs text-muted-foreground">{contact.phone}</p>
+                    <div className="relative">
+                      <Input
+                        id="recipientPhoneNumber"
+                        placeholder="+91 12345 67890"
+                        {...register('recipientPhoneNumber')}
+                        className="h-12 bg-slate-50/50 border-slate-200 rounded-xl px-4 text-slate-900 font-medium focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
+                      />
+                      {errors.recipientPhoneNumber && (
+                        <p className="absolute -bottom-5 left-0 text-[10px] font-bold text-red-500 uppercase tracking-tight">
+                          {errors.recipientPhoneNumber.message}
+                        </p>
+                      )}
+                    </div>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Examples:</span>
+                      {phoneNumberExamples.slice(0, 2).map((ex, i) => (
+                        <span key={i} className="text-[10px] text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded-md">{ex}</span>
+                      ))}
                     </div>
                   </div>
-                  <Badge variant="outline" className="text-xs">
-                    {contact.email}
-                  </Badge>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )} */}
-
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* TemplateSelectionForm with built-in preview */}
-        <TemplateSelectionForm
-          selectedTemplate={selectedTemplate}
-          variableMappings={autoMessageMappings}
-          selectedMediaAsset={selectedMediaAsset}
-          uploadedFileName={uploadedFileName}
-          setSelectedTemplate={handleSetSelectedTemplate}
-          setVariableMappings={handleSetVariableMappings}
-          setSelectedMediaAsset={handleMediaAssetChange}
-          setUploadedFileName={handleSetUploadedFileName}
-          onTemplateSelect={handleTemplateSelect}
-          onVariableMappingsChange={handleVariableMappingsChange}
-          projectId={currentProjectId}
-          contactFieldOptions={CONTACT_FIELD_OPTIONS}
-          showPreview={true}
-          showHeaderMedia={true}
-          allowDynamicFields={isBulkMode}
-          showValidationErrors={showValidationErrors}
-        />
-
-        {/* Phone Number and Submit Button Card */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Send className="h-5 w-5" />
-              {isBulkMode ? 'Send Bulk Messages' : 'Send Message'}
-            </CardTitle>
-            <CardDescription>
-              {isBulkMode 
-                ? `Send WhatsApp template messages to ${selectedContacts.length} selected contacts`
-                : 'Send a WhatsApp template message to a recipient'
-              }
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            {/* Phone Number - Only show in single mode */}
-            {!isBulkMode && (
-              <div className="space-y-2">
-                <Label htmlFor="recipientPhoneNumber" className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  Recipient Phone Number
-                </Label>
-                <Input
-                  id="recipientPhoneNumber"
-                  placeholder="+911234567890"
-                  {...register('recipientPhoneNumber')}
-                />
-                {errors.recipientPhoneNumber && (
-                  <p className="text-sm text-red-500">{errors.recipientPhoneNumber.message}</p>
+                ) : (
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                        <Users className="h-4 w-4" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-slate-900">Bulk Mode Active</h3>
+                        <p className="text-xs text-slate-500 font-medium">{selectedContacts.length} contacts will receive this message</p>
+                      </div>
+                    </div>
+                  </div>
                 )}
-                <div className="text-xs text-muted-foreground">
-                  Examples: {phoneNumberExamples.join(', ')}
+
+                {/* Submit Button */}
+                <div className="w-full md:w-auto">
+                  <Button
+                    type="submit"
+                    disabled={
+                      (isBulkMode ? sendBulkMessageMutation.isPending : sendMessageMutation.isPending) || 
+                      (showValidationErrors && (
+                        isMediaRequiredMissing ||
+                        (variableMappings.length > 0 && variableMappings.some(mapping => !isVariableValid(mapping)))
+                      ))
+                    }
+                    className="h-12 px-10 rounded-xl w-full md:w-auto flex items-center justify-center gap-3 text-white font-bold shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100"
+                    style={{ backgroundColor: "#22B573", boxShadow: "0 10px 20px -5px rgba(34, 181, 115, 0.3)" }}
+                  >
+                    {(isBulkMode ? sendBulkMessageMutation.isPending : sendMessageMutation.isPending) ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin" />
+                        {isBulkMode ? 'Sending Batch...' : 'Sending...'}
+                      </>
+                    ) : (
+                      <>
+                        <Send className="h-5 w-5" />
+                        {isBulkMode ? `Send to ${selectedContacts.length} Contacts` : 'Send Message'}
+                        <ArrowRight className="h-4 w-4 opacity-50" />
+                      </>
+                    )}
+                  </Button>
                 </div>
               </div>
-            )}
 
-            {errors.templateName && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertDescription>{errors.templateName.message}</AlertDescription>
-              </Alert>
-            )}
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={
-                (isBulkMode ? sendBulkMessageMutation.isPending : sendMessageMutation.isPending) || 
-                (showValidationErrors && (
-                  isMediaRequiredMissing ||
-                  (variableMappings.length > 0 && variableMappings.some(mapping => !isVariableValid(mapping)))
-                ))
-              }
-            >
-              {(isBulkMode ? sendBulkMessageMutation.isPending : sendMessageMutation.isPending) ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {isBulkMode ? 'Sending Bulk Messages...' : 'Sending...'}
-                </>
-              ) : (
-                <>
-                  <Send className="mr-2 h-4 w-4" />
-                  {isBulkMode ? `Send to ${selectedContacts.length} Contacts` : 'Send Message'}
-                </>
+              {errors.templateName && (
+                <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2 text-red-600 text-xs font-bold uppercase tracking-tight">
+                  <AlertCircle className="h-4 w-4" />
+                  {errors.templateName.message}
+                </div>
               )}
-            </Button>
-          </CardContent>
-        </Card>
-      </form>
-
-      {/* Success/Error Messages */}
-      {!isBulkMode && sendMessageMutation.isError && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Failed to send message: {(sendMessageMutation.error as any) || 'Unknown error'}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {isBulkMode && sendBulkMessageMutation.isError && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Failed to send bulk messages: { (sendBulkMessageMutation.error as any) || 'Unknown error'}
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {/* Success Messages */}
-      {!isBulkMode && sendMessageMutation.isSuccess && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Message sent successfully!
-          </AlertDescription>
-        </Alert>
-      )}
-
-      {isBulkMode && sendBulkMessageMutation.isSuccess && (
-        <Alert>
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Bulk messages sent! Check the results for details.
-          </AlertDescription>
-        </Alert>
-      )}
+            </motion.div>
+          </div>
+        </form>
+      </main>
     </div>
   );
 };

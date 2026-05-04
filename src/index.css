@@ -292,7 +292,7 @@ input.dateTime-picker[type="datetime-local"]::-webkit-calendar-picker-indicator 
 
 /* frontend UI New — Dashboard.tsx + DashboardPage.tsx scrollbars */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 8px;
+  width: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -309,7 +309,7 @@ input.dateTime-picker[type="datetime-local"]::-webkit-calendar-picker-indicator 
 }
 
 .dashboard-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 .dashboard-scrollbar::-webkit-scrollbar-track {

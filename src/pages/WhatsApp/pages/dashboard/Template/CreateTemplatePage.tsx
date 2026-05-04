@@ -1,18 +1,40 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
-import { ChevronDown, Plus, Phone, Link, Copy, Image, Video, FileText, Loader2 } from 'lucide-react';
+import {
+  ChevronDown,
+  Plus,
+  Phone,
+  Link,
+  Copy,
+  Image,
+  Video,
+  FileText,
+  Loader2,
+  ArrowLeft,
+  LayoutGrid,
+  MessageSquare,
+  AlertCircle,
+  X,
+  Type,
+  Paperclip,
+  CheckCircle,
+  Info,
+  Eye
+} from 'lucide-react';
 import { useCreateTemplate } from '@/hooks/useTemplates';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { templateFormSchema, type TemplateFormData, type TemplateCategory } from '@/schemas/templateSchema';
 import { useProjectContext } from '@/context/ProjectContext';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { toastUtils } from '@/lib/utils';
 import { FileUploader } from '@/components/ui/FileUploader';
+import { Badge } from '@/components/ui/badge';
 import type { AxiosError } from 'axios';
 
 interface InteractiveAction {
@@ -61,7 +83,7 @@ export default function CreateTemplatePage() {
   const watchedInteractiveActions = watch('interactiveActions') || [];
   const [characterCount, setCharacterCount] = useState(0);
   const [sampleValues, setSampleValues] = useState<string[]>([]);
-  
+
   // Media upload state
   const [headerHandle, setHeaderHandle] = useState<string | null>(null);
   const [useGenericSample, setUseGenericSample] = useState(false);
@@ -122,8 +144,8 @@ export default function CreateTemplatePage() {
       data?.source === 'meta'
         ? 'meta'
         : data?.source === 'app'
-        ? 'app'
-        : 'unknown';
+          ? 'app'
+          : 'unknown';
 
     const message =
       data?.message ||
@@ -156,7 +178,7 @@ export default function CreateTemplatePage() {
 
   const updateInteractiveAction = (id: string, field: keyof InteractiveAction, value: string) => {
     const currentActions = watchedInteractiveActions;
-    const updatedActions = currentActions.map(action => 
+    const updatedActions = currentActions.map(action =>
       action.id === id ? { ...action, [field]: value } : action
     );
     setValue('interactiveActions', updatedActions);
@@ -187,10 +209,10 @@ export default function CreateTemplatePage() {
     // Validate sample values for variables
     const variables = extractVariablesFromText(data.format);
     if (variables.length > 0) {
-      const missingSampleValues = sampleValues.some((value, index) => 
+      const missingSampleValues = sampleValues.some((value, index) =>
         index < variables.length && (!value || value.trim() === '')
       );
-      
+
       if (missingSampleValues) {
         toastUtils.error('Please provide sample values for all template variables ({{1}}, {{2}}, etc.)');
         return;
@@ -205,7 +227,7 @@ export default function CreateTemplatePage() {
         return;
       }
     }
-    
+
     if (['IMAGE', 'VIDEO', 'DOCUMENT'].includes(data.headerFormat || '')) {
       const currentHeaderHandle = useGenericSample ? getGenericSampleHandle() : headerHandle;
       if (currentHeaderHandle) {
@@ -241,7 +263,7 @@ export default function CreateTemplatePage() {
           // LOCATION format doesn't need additional properties but can be added
           shouldAddHeader = true;
         }
-        
+
         if (shouldAddHeader) {
           components.push(headerComponent);
         }
@@ -269,7 +291,7 @@ export default function CreateTemplatePage() {
       // Add buttons if interactive actions exist and have titles
       if (data.interactiveActions && data.interactiveActions.length > 0) {
         const validActions = data.interactiveActions.filter(action => action.title && action.title.trim() !== '');
-        
+
         if (validActions.length > 0) {
           const buttons = validActions.map(action => {
             const button: any = {
@@ -391,585 +413,636 @@ export default function CreateTemplatePage() {
   };
 
   return (
-    <div className=" overflow-y-auto bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Create Template</h1>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <RouterLink
+                to={`/whatsapp/dashboard/${selectedProject?._id}/templates`}
+                className="h-10 w-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </RouterLink>
+              <div>
+                <div className="flex items-center gap-1.5 text-green-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-0.5">
+                  <Plus className="h-3 w-3" />
+                  New Template
+                </div>
+                <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl flex items-center gap-2">
+                  Create Template
+                </h1>
+              </div>
+            </div>
+            <p className="text-slate-500 text-xs font-medium">
+              Design and submit a new message template for <span className="text-slate-900 font-bold">{selectedProject?.projectName}</span>
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => navigate(-1)}
+              className="h-11 px-6 rounded-xl border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50"
+            >
+              Cancel
+            </Button>
+            <Button
+              form="template-form"
+              type="submit"
+              disabled={isSubmitting || createTemplateMutation.isPending}
+              className="h-11 px-8 rounded-xl flex items-center gap-2 text-white font-bold text-sm shadow-xl shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{ backgroundColor: "#22B573" }}
+            >
+              {isSubmitting || createTemplateMutation.isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <CheckCircle className="h-4 w-4" />
+                  Submit Template
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+
+      <main className="container mx-auto pb-12">
+        <form id="template-form" onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column - Form */}
-          <div className="space-y-6">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div className="lg:col-span-7 space-y-6">
+            <div className="grid gap-6 md:grid-cols-2">
               {/* Template Category */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Template Category</CardTitle>
-                  <CardDescription>
-                    Your template should fall under one of these categories.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="relative">
-                    <select
-                      {...register('category')}
-                      className="w-full h-9 px-3 py-1 border border-gray-300 rounded-md bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      {categories.map(category => (
-                        <option key={category} value={category}>{category}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                    <LayoutGrid className="h-4 w-4" />
                   </div>
-                  {errors.category && (
-                    <p className="text-red-500 text-sm mt-1">{errors.category.message}</p>
-                  )}
-                </CardContent>
-              </Card>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Category</span>
+                </div>
+                <div className="relative">
+                  <select
+                    {...register('category')}
+                    className="w-full h-11 px-4 py-2 border border-slate-200 rounded-xl bg-slate-50/50 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                  >
+                    {categories.map(category => (
+                      <option key={category} value={category}>{category}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
+                {errors.category && (
+                  <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.category.message}</p>
+                )}
+              </motion.div>
 
               {/* Template Language */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Template Language</CardTitle>
-                  <CardDescription>
-                    You will need to specify the language in which message template is submitted.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="relative">
-                    <select
-                      {...register('language')}
-                      className="w-full h-9 px-3 py-1 border border-gray-300 rounded-md bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.05 }}
+                className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                    <Type className="h-4 w-4" />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Language</span>
+                </div>
+                <div className="relative">
+                  <select
+                    {...register('language')}
+                    className="w-full h-11 px-4 py-2 border border-slate-200 rounded-xl bg-slate-50/50 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                  >
+                    <option value="">Select language</option>
+                    {languages.map(language => (
+                      <option key={language.value} value={language.value}>{language.label}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                </div>
+                {errors.language && (
+                  <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.language.message}</p>
+                )}
+              </motion.div>
+            </div>
+
+            {/* Template Name */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                  <Info className="h-4 w-4" />
+                </div>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Template Name</span>
+                  <p className="text-[9px] text-slate-400 mt-0.5">Use lowercase, numbers, and underscores only</p>
+                </div>
+              </div>
+              <Input
+                type="text"
+                placeholder="e.g. order_confirmation_v1"
+                {...register('name')}
+                className="h-11 rounded-xl border-slate-200 bg-slate-50/50 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+              />
+              {errors.name && (
+                <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.name.message}</p>
+              )}
+            </motion.div>
+
+            {/* Template Header/Type Selection */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.15 }}
+              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                  <Paperclip className="h-4 w-4" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Header Type</span>
+              </div>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                {['NONE', ...headerFormats].map((format) => {
+                  const isSelected = (watch('headerFormat') || 'NONE') === format;
+                  const Icon = format === 'IMAGE' ? Image : format === 'VIDEO' ? Video : format === 'DOCUMENT' ? FileText : format === 'TEXT' ? Type : X;
+                  return (
+                    <button
+                      key={format}
+                      type="button"
+                      onClick={() => setValue('headerFormat', format === 'NONE' ? undefined : format as any)}
+                      className={`
+                        flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition-all
+                        ${isSelected
+                          ? 'border-green-500 bg-green-50 text-green-700 shadow-sm'
+                          : 'border-slate-100 bg-slate-50/50 text-slate-400 hover:border-slate-200 hover:bg-slate-100/50'}
+                      `}
                     >
-                      <option value="">Select message language</option>
-                      {languages.map(language => (
-                        <option key={language.value} value={language.value}>{language.label}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                      <Icon className="h-5 w-5" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">{format}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </motion.div>
+
+
+
+            {/* Template Format (Body) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                    <MessageSquare className="h-4 w-4" />
                   </div>
-                  {errors.language && (
-                    <p className="text-red-500 text-sm mt-1">{errors.language.message}</p>
-                  )}
-                </CardContent>
-              </Card>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Template Body</span>
+                </div>
+                <div className="text-[10px] font-black text-slate-400 tabular-nums">
+                  {characterCount} / 1024
+                </div>
+              </div>
+              <textarea
+                placeholder="Enter your message in here..."
+                {...register('format')}
+                className="w-full min-h-[160px] px-4 py-3 border border-slate-200 rounded-xl bg-slate-50/50 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm resize-none"
+                maxLength={1024}
+              />
+              {errors.format && (
+                <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.format.message}</p>
+              )}
+              <div className="mt-3 p-3 bg-blue-50/50 border border-blue-100 rounded-xl flex items-start gap-3">
+                <Info className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
+                <p className="text-[10px] text-blue-600 font-medium leading-relaxed">
+                  Use <span className="font-bold">*bold*</span>, <span className="font-bold">_italic_</span>, and <span className="font-bold">{`{{1}}`}</span> for variables.
+                </p>
+              </div>
+            </motion.div>
 
-              {/* Template Name */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Template Name</CardTitle>
-                  <CardDescription>
-                    Name can only be in lowercase alphanumeric characters and underscores. Special characters and white-space are not allowed e.g. - app_verification_code
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Input
-                    type="text"
-                    placeholder="Enter name"
-                    {...register('name')}
-                  />
-                  {errors.name && (
-                    <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Header Format */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Template Type</CardTitle>
-                  <CardDescription>
-                    Choose the type for your template. TEXT allows custom text, while media formats require uploaded assets.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="relative">
-                    <select
-                      {...register('headerFormat')}
-                      className="w-full h-9 px-3 py-1 border border-gray-300 rounded-md bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="">Select template type</option>
-                      {headerFormats.map(format => (
-                        <option key={format} value={format}>{format}</option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+            {/* Template Header Text (Condition-based) */}
+            {watchedHeaderFormat === 'TEXT' && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+              >
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                    <Type className="h-4 w-4" />
                   </div>
-                </CardContent>
-              </Card>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Header Content</span>
+                </div>
+                <Input
+                  type="text"
+                  placeholder="Enter header text here"
+                  {...register('header')}
+                  maxLength={60}
+                  className="h-11 rounded-xl border-slate-200 bg-slate-50/50 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                />
+                {errors.header && (
+                  <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.header.message}</p>
+                )}
+              </motion.div>
+            )}
 
-
-           
-              {/* Template Format */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Template Format</CardTitle>
-                  <CardDescription>
-                    Use text formatting - *bold*, _italic_, & ~strikethrough~ Your message content. Upto 1024 characters are allowed. e.g. - Hello {`{{1}}`}, your code will expire in {`{{2}}`} mins.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <textarea
-                    placeholder="Enter your message in here..."
-                    {...register('format')}
-                    className="w-full min-h-[120px] px-3 py-2 border border-gray-300 rounded-md resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    maxLength={1024}
-                  />
-                  <div className="text-sm text-gray-500 mt-2">
-                    {characterCount}/1024
+            {/* Media Upload Section */}
+            {['IMAGE', 'VIDEO', 'DOCUMENT'].includes(watchedHeaderFormat || '') && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+              >
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                      <Paperclip className="h-4 w-4" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Media Assets</span>
                   </div>
-                  {errors.format && (
-                    <p className="text-red-500 text-sm mt-1">{errors.format.message}</p>
-                  )}
-                </CardContent>
-              </Card>
+                </div>
 
-              {/* Template Header Text */}
-              {watchedHeaderFormat === 'TEXT' && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Template Header Text</CardTitle>
-                    <CardDescription>
-                      Header text for your template. Upto 60 characters are allowed.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <Input
-                      type="text"
-                      placeholder="Enter header text here"
-                      {...register('header')}
-                      maxLength={60}
+                <div className="space-y-4">
+                  <label className="flex items-center gap-3 p-3 bg-slate-50/50 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                    <Checkbox
+                      checked={useGenericSample}
+                      onCheckedChange={(checked) => {
+                        setUseGenericSample(checked as boolean);
+                        if (checked) {
+                          setHeaderHandle(null);
+                          setUploadError('');
+                        }
+                      }}
+                      className="rounded-md border-slate-300 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
                     />
-                    {errors.header && (
-                      <p className="text-red-500 text-sm mt-1">{errors.header.message}</p>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
+                    <span className="text-xs font-bold text-slate-600">Use generic sample handle</span>
+                  </label>
 
-              {/* Media Upload Section */}
-              {['IMAGE', 'VIDEO', 'DOCUMENT'].includes(watchedHeaderFormat || '') && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Media Sample Upload</CardTitle>
-                    <CardDescription>
-                      Upload a sample file for your {watchedHeaderFormat?.toLowerCase()} template. This will be used for template approval.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    {/* Generic Sample Option */}
-                    <div className="flex items-center space-x-2">
-                      <Checkbox
-                        id="use-generic-sample"
-                        checked={useGenericSample}
-                        onCheckedChange={(checked) => {
-                          setUseGenericSample(checked as boolean);
-                          if (checked) {
-                            setHeaderHandle(null);
-                            setUploadError('');
-                          }
-                        }}
+                  {!useGenericSample && (
+                    <div className="p-4 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/30">
+                      <FileUploader
+                        onFileSelect={handleFileSelect}
+                        onUploadSuccess={handleUploadSuccess}
+                        onUploadError={handleUploadError}
+                        accept={getFileAcceptTypes()}
+                        maxSize={getMaxFileSize()}
+                        uploadEndpoint={
+                          selectedProject
+                            ? `/whatsapp/templates/${selectedProject._id}/upload-sample-media`
+                            : ''
+                        }
+                        uploadFieldName="file"
                       />
-                      <Label htmlFor="use-generic-sample" className="text-sm">
-                        Use a generic sample (recommended for testing)
-                      </Label>
                     </div>
-
-                    {/* File Uploader */}
-                    {!useGenericSample && (
-                      <div>
-                        <Label className="text-sm font-medium mb-2 block">
-                          Upload Your Own Sample
-                        </Label>
-                        <FileUploader
-                          onFileSelect={handleFileSelect}
-                          onUploadSuccess={handleUploadSuccess}
-                          onUploadError={handleUploadError}
-                          accept={getFileAcceptTypes()}
-                          maxSize={getMaxFileSize()}
-                          uploadEndpoint={
-                            selectedProject
-                              ? `/whatsapp/templates/${selectedProject._id}/upload-sample-media`
-                              : ''
-                          }
-                          uploadFieldName="file"
-                        />
-                        {uploadError && (
-                          <p className="text-red-500 text-sm mt-2">{uploadError}</p>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Upload Status */}
-                    {(headerHandle || useGenericSample) && (
-                      <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-                        <p className="text-sm text-green-800">
-                          <strong>✓ Sample Ready:</strong> {useGenericSample ? 'Using generic sample' : 'Custom sample uploaded successfully'}
-                        </p>
-                      </div>
-                    )}
-
-                    <div className="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                      <p className="text-xs text-blue-800">
-                        <strong>Supported formats:</strong>
-                        <br />• IMAGE: JPG, PNG (max 2MB)
-                        <br />• VIDEO: MP4, 3GPP (max 16MB)
-                        <br />• DOCUMENT: PDF, DOC, DOCX, PPT, PPTX, XLS, XLSX (max 16MB)
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Sample Values for Variables */}
-              {sampleValues.length > 0 && (
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Sample Values for Variables</CardTitle>
-                    <CardDescription>
-                      Provide sample values for template variables. These are required for template approval.
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      {sampleValues.map((value, index) => (
-                        <div key={index} className="space-y-1">
-                          <Label htmlFor={`sample-${index}`} className="text-sm font-medium">
-                            Sample value for {`{{${index + 1}}}`}:
-                          </Label>
-                          <Input
-                            id={`sample-${index}`}
-                            placeholder={`Enter sample value for {{${index + 1}}}`}
-                            value={value}
-                            onChange={(e) => handleSampleValueChange(index, e.target.value)}
-                            required
-                          />
-                        </div>
-                      ))}
-                    </div>
-                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md">
-                      <p className="text-xs text-blue-800">
-                        <strong>Note:</strong> Sample values help WhatsApp understand how your template will be used. 
-                        Make sure to provide realistic examples that represent actual use cases.
-                      </p>
-                    </div>
-                  </CardContent>
-                </Card>
-              )}
-
-              {/* Template Footer */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Template Footer (Optional)</CardTitle>
-                  <CardDescription>
-                    Your message content. Upto 60 characters are allowed.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <Input
-                    type="text"
-                    placeholder="Enter footer text here"
-                    {...register('footer')}
-                    maxLength={60}
-                  />
-                  {errors.footer && (
-                    <p className="text-red-500 text-sm mt-1">{errors.footer.message}</p>
                   )}
-                </CardContent>
-              </Card>
 
-              {/* Interactive Actions */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Interactive Actions</CardTitle>
-                  <CardDescription>
-                    In addition to your message, you can send actions with your message. Maximum 25 characters are allowed in CTA button title & Quick Replies.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {/* Radio Buttons */}
-                    <div className="space-y-2">
-                      {['none', 'call_to_actions', 'quick_replies', 'all'].map((option) => (
-                        <label key={option} className="flex items-center space-x-2">
-                          <input
-                            type="radio"
-                            {...register('interactiveType')}
-                            value={option}
-                            className="text-blue-600"
-                          />
-                          <span className="capitalize">{option.replace('_', ' ')}</span>
-                        </label>
-                      ))}
+                  {(headerHandle || useGenericSample) && (
+                    <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-100 rounded-xl text-[10px] font-bold text-green-700 uppercase tracking-widest">
+                      <CheckCircle className="h-3.5 w-3.5" />
+                      Sample file is ready
                     </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
 
-                    {/* Action Buttons */}
-                    <div className="grid grid-cols-2 gap-2">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => addInteractiveAction('QUICK_REPLY')}
-                        className="flex items-center gap-2"
-                      >
-                        <Plus className="w-4 h-4" />
-                        Quick Replies {getActionCount('QUICK_REPLY')}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => addInteractiveAction('URL')}
-                        className="flex items-center gap-2"
-                      >
-                        <Link className="w-4 h-4" />
-                        URL {getActionCount('URL')}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => addInteractiveAction('PHONE_NUMBER')}
-                        className="flex items-center gap-2"
-                      >
-                        <Phone className="w-4 h-4" />
-                        Phone Number {getActionCount('PHONE_NUMBER')}
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => addInteractiveAction('OTP')}
-                        className="flex items-center gap-2"
-                      >
-                        <Copy className="w-4 h-4" />
-                        OTP {getActionCount('OTP')}
-                      </Button>
+            {/* Sample Values for Variables */}
+            {sampleValues.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+              >
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                    <LayoutGrid className="h-4 w-4" />
+                  </div>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Variable Samples</span>
+                </div>
+
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {sampleValues.map((value, index) => (
+                    <div key={index} className="space-y-1.5">
+                      <label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                        Sample for {`{{${index + 1}}}`}
+                      </label>
+                      <Input
+                        placeholder={`e.g. ${index === 0 ? 'John' : '24 hours'}`}
+                        value={value}
+                        onChange={(e) => handleSampleValueChange(index, e.target.value)}
+                        required
+                        className="h-10 rounded-xl border-slate-200 bg-slate-50/50 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                      />
                     </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
 
-                    {/* Interactive Actions List */}
-                    {watchedInteractiveActions.map((action) => (
-                      <div key={action.id} className="border border-gray-200 rounded-md p-3 space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="flex items-center gap-2 text-sm font-medium">
+            {/* Template Footer */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                  <Info className="h-4 w-4" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Footer Text (Optional)</span>
+              </div>
+              <Input
+                type="text"
+                placeholder="Enter footer text (e.g. reply STOP to unsubscribe)"
+                {...register('footer')}
+                maxLength={60}
+                className="h-11 rounded-xl border-slate-200 bg-slate-50/50 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+              />
+              {errors.footer && (
+                <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.footer.message}</p>
+              )}
+            </motion.div>
+
+            {/* Interactive Actions */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                  <LayoutGrid className="h-4 w-4" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Interactive Actions</span>
+              </div>
+
+              <div className="space-y-6">
+                {/* Radio Selection Pill */}
+                <div className="flex flex-wrap gap-2 p-1.5 bg-slate-100/50 border border-slate-200 rounded-2xl w-full">
+                  {['none', 'call_to_actions', 'quick_replies', 'all'].map((option) => {
+                    const isActive = watch('interactiveType') === option;
+                    return (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => setValue('interactiveType', option as any)}
+                        className={`
+                          flex-1 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all
+                          ${isActive ? 'bg-white text-green-600 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-600'}
+                        `}
+                      >
+                        {option.replace('_', ' ')}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Add Buttons Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {[
+                    { id: 'QUICK_REPLY', label: 'Reply', icon: Plus },
+                    { id: 'URL', label: 'Link', icon: Link },
+                    { id: 'PHONE_NUMBER', label: 'Call', icon: Phone },
+                    { id: 'OTP', label: 'OTP', icon: Copy },
+                  ].map((btn) => (
+                    <button
+                      key={btn.id}
+                      type="button"
+                      onClick={() => addInteractiveAction(btn.id as any)}
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border border-slate-100 bg-slate-50/50 text-slate-400 hover:border-slate-200 hover:bg-slate-100/50 hover:text-slate-600 transition-all"
+                    >
+                      <btn.icon className="h-4 w-4" />
+                      <span className="text-[9px] font-black uppercase tracking-tight">{btn.label}</span>
+                      <span className="flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-slate-200 text-slate-500 text-[8px] font-black">
+                        {getActionCount(btn.id as any)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Actions List */}
+                <div className="space-y-4">
+                  {watchedInteractiveActions.map((action) => (
+                    <div key={action.id} className="relative group/action bg-slate-50/50 border border-slate-200 rounded-2xl p-4 transition-all hover:bg-white hover:shadow-md">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                          <div className="h-7 w-7 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-slate-400">
                             {getActionIcon(action.type)}
-                            {action.type.replace('_', ' ').toUpperCase()}
+                          </div>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                            {action.type.replace('_', ' ')}
                           </span>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => removeInteractiveAction(action.id)}
-                            className="text-red-500 hover:text-red-700"
-                          >
-                            Remove
-                          </Button>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => removeInteractiveAction(action.id)}
+                          className="h-7 w-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                        >
+                          <X className="h-4 w-4" />
+                        </button>
+                      </div>
+
+                      <div className="grid gap-3">
                         <Input
-                          placeholder="Enter title"
+                          placeholder="Button Label (e.g. Visit Website)"
                           value={action.title}
                           onChange={(e) => updateInteractiveAction(action.id, 'title', e.target.value)}
                           maxLength={25}
+                          className="h-10 rounded-xl border-slate-200 bg-white focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                         />
                         {(action.type === 'URL' || action.type === 'PHONE_NUMBER') && (
                           <Input
-                            placeholder={action.type === 'URL' ? 'Enter URL' : 'Enter phone number'}
+                            placeholder={action.type === 'URL' ? 'https://example.com' : '+1 234 567 8900'}
                             value={action.value || ''}
                             onChange={(e) => updateInteractiveAction(action.id, 'value', e.target.value)}
+                            className="h-10 rounded-xl border-slate-200 bg-white focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                           />
                         )}
                         {action.type === 'OTP' && (
-                          <div className="space-y-2">
-                            <Label className="text-sm font-medium">OTP Type</Label>
-                            <div className="relative">
-                              <select
-                                value={action.otp_type || 'COPY_CODE'}
-                                onChange={(e) => updateInteractiveAction(action.id, 'otp_type', e.target.value)}
-                                className="w-full h-9 px-3 py-1 border border-gray-300 rounded-md bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              >
-                                <option value="COPY_CODE">Copy Code</option>
-                                <option value="ZERO_TAP">Zero Tap</option>
-                              </select>
-                              <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                            </div>
+                          <div className="relative">
+                            <select
+                              value={action.otp_type || 'COPY_CODE'}
+                              onChange={(e) => updateInteractiveAction(action.id, 'otp_type', e.target.value)}
+                              className="w-full h-10 px-3 py-1 border border-slate-200 rounded-xl bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                            >
+                              <option value="COPY_CODE">Copy Code</option>
+                              <option value="ZERO_TAP">Zero Tap</option>
+                            </select>
+                            <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                           </div>
                         )}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Error Banners - Display above Submit Button */}
-              {appErrorMessage && (
-                <div className="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800">
-                  <p className="font-semibold">There was a problem with your template.</p>
-                  <p className="mt-1">{appErrorMessage}</p>
-                  <p className="mt-1 text-xs opacity-80">
-                    Please review your template details and try again.
-                  </p>
+                    </div>
+                  ))}
                 </div>
-              )}
-              {metaError && (
-                <div className="rounded-md border border-yellow-200 bg-yellow-50 p-3 text-sm text-yellow-800">
-                  <p className="font-semibold">
-                    WhatsApp (Meta) rejected this template request.
-                  </p>
-                  <p className="mt-1">{metaError.message}</p>
-                  
-                  {/* Display user-friendly error message from Meta if available */}
-                  {metaError.details?.error?.error_user_msg && (
-                    <div className="mt-2 p-2 bg-yellow-100 rounded border-l-4 border-yellow-400">
-                      <p className="font-medium text-xs mb-1">
-                        {metaError.details.error.error_user_title || 'Meta Feedback:'}
-                      </p>
-                      <p className="text-xs">
-                        {metaError.details.error.error_user_msg}
-                      </p>
+              </div>
+            </motion.div>
+
+            {/* Error Messages (Final check) */}
+            <AnimatePresence>
+              {(appErrorMessage || metaError) && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: 'auto' }}
+                  exit={{ opacity: 0, height: 0 }}
+                  className="space-y-4"
+                >
+                  {appErrorMessage && (
+                    <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl">
+                      <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-black uppercase tracking-widest text-red-900 mb-1">Application Error</p>
+                        <p className="text-xs font-medium text-red-700 leading-relaxed">{appErrorMessage}</p>
+                      </div>
                     </div>
                   )}
-                  
-                  {/* Display error code and subcode if available */}
-                  {(metaError.code || metaError.details?.error?.error_subcode) && (
-                    <div className="mt-2 text-xs opacity-80 space-y-1">
-                      {metaError.code && (
-                        <p>Error code: {metaError.code}</p>
-                      )}
-                      {metaError.details?.error?.error_subcode && (
-                        <p>Error subcode: {metaError.details.error.error_subcode}</p>
-                      )}
-                      {metaError.details?.error?.type && (
-                        <p>Error type: {metaError.details.error.type}</p>
-                      )}
+                  {metaError && (
+                    <div className="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-100 rounded-2xl">
+                      <AlertCircle className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
+                      <div className="flex-1">
+                        <p className="text-xs font-black uppercase tracking-widest text-yellow-900 mb-1">Meta Rejection</p>
+                        <p className="text-xs font-medium text-yellow-800 leading-relaxed">{metaError.message}</p>
+                        {metaError.details?.error?.error_user_msg && (
+                          <div className="mt-2 p-3 bg-white/50 rounded-xl border border-yellow-200">
+                            <p className="text-[10px] font-bold text-yellow-900">{metaError.details.error.error_user_title || 'Feedback:'}</p>
+                            <p className="text-[10px] text-yellow-800 mt-1">{metaError.details.error.error_user_msg}</p>
+                          </div>
+                        )}
+                      </div>
                     </div>
                   )}
-                </div>
+                </motion.div>
               )}
-
-              {/* Submit Button */}
-              <Button 
-                type="submit" 
-                className="w-full bg-teal-600 hover:bg-teal-700 text-white"
-                disabled={
-                  isSubmitting || 
-                  createTemplateMutation.isPending
-                }
-              >
-                {isSubmitting || createTemplateMutation.isPending ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    Creating Template...
-                  </>
-                ) : (
-                  'Submit'
-                )}
-              </Button>
-            </form>
+            </AnimatePresence>
           </div>
 
           {/* Right Column - Preview */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Template Preview</CardTitle>
-                <CardDescription>
-                  Your template message preview. It will update as you fill in the values in the form.
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-                  {/* WhatsApp Logo */}
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
-                      <Phone className="w-4 h-4 text-white" />
-                    </div>
-                    <span className="text-sm font-medium">WhatsApp</span>
-                  </div>
+          <div className="lg:col-span-5 sticky top-4">
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.3 }}
+              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                  <Eye className="h-4 w-4" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Live Preview</span>
+              </div>
 
-                  {/* Header Preview */}
-                  {watchedHeaderFormat && (
-                    <div className="mb-3">
-                      {watchedHeaderFormat === 'TEXT' && watch('header') && (
-                        <div className="bg-blue-50 p-3 rounded-md border-l-4 border-blue-400">
-                          <p className="text-sm font-medium text-blue-800">
+              {/* WhatsApp Mockup */}
+              <div className="relative mx-auto max-w-[320px] bg-[#E5DDD5] rounded-[32px] border-8 border-slate-900 p-4 min-h-[480px] shadow-2xl overflow-hidden">
+                <div className="absolute top-0 inset-x-0 h-12 bg-[#075E54] flex items-center px-4 gap-3 z-10">
+                  <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden">
+                    <Phone className="h-4 w-4 text-slate-500" />
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-white text-[10px] font-bold">WhatsApp Business</p>
+                    <p className="text-white/60 text-[8px]">Online</p>
+                  </div>
+                </div>
+
+                <div className="mt-14 space-y-3 relative z-10">
+                  <div className="max-w-[85%] bg-white rounded-2xl rounded-tl-none p-3 shadow-sm border border-slate-100 animate-in fade-in slide-in-from-left-2">
+                    {/* Header Preview */}
+                    {watchedHeaderFormat && (
+                      <div className="mb-2 rounded-lg overflow-hidden">
+                        {watchedHeaderFormat === 'TEXT' && watch('header') && (
+                          <p className="text-[11px] font-bold text-slate-900 mb-1 leading-tight">
                             {watch('header')}
                           </p>
-                        </div>
-                      )}
-                      {watchedHeaderFormat === 'IMAGE' && (
-                        <div className="w-full h-32 bg-yellow-100 rounded-md flex items-center justify-center border-2 border-dashed border-yellow-300">
-                          <div className="text-center">
-                            <Image className="w-8 h-8 text-yellow-600 mx-auto mb-2" />
-                            <p className="text-xs text-yellow-700">Image Header</p>
+                        )}
+                        {watchedHeaderFormat === 'IMAGE' && (
+                          <div className="aspect-video bg-slate-100 flex flex-col items-center justify-center gap-1 border border-slate-200 rounded-lg">
+                            <Image className="h-6 w-6 text-slate-300" />
+                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Image Header</span>
                           </div>
-                        </div>
-                      )}
-                      {watchedHeaderFormat === 'VIDEO' && (
-                        <div className="w-full h-32 bg-blue-100 rounded-md flex items-center justify-center border-2 border-dashed border-blue-300">
-                          <div className="text-center">
-                            <Video className="w-8 h-8 text-blue-600 mx-auto mb-2" />
-                            <p className="text-xs text-blue-700">Video Header</p>
+                        )}
+                        {watchedHeaderFormat === 'VIDEO' && (
+                          <div className="aspect-video bg-slate-100 flex flex-col items-center justify-center gap-1 border border-slate-200 rounded-lg">
+                            <Video className="h-6 w-6 text-slate-300" />
+                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Video Header</span>
                           </div>
-                        </div>
-                      )}
-                      {watchedHeaderFormat === 'DOCUMENT' && (
-                        <div className="w-full h-32 bg-pink-100 rounded-md flex items-center justify-center border-2 border-dashed border-pink-300">
-                          <div className="text-center">
-                            <FileText className="w-8 h-8 text-pink-600 mx-auto mb-2" />
-                            <p className="text-xs text-pink-700">Document Header</p>
+                        )}
+                        {watchedHeaderFormat === 'DOCUMENT' && (
+                          <div className="p-3 bg-slate-50 flex items-center gap-3 border border-slate-200 rounded-lg">
+                            <FileText className="h-6 w-6 text-slate-400" />
+                            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Document</span>
                           </div>
-                        </div>
-                      )}
-                      {watchedHeaderFormat === 'LOCATION' && (
-                        <div className="w-full h-32 bg-green-100 rounded-md flex items-center justify-center border-2 border-dashed border-green-300">
-                          <div className="text-center">
-                            <div className="w-8 h-8 bg-green-600 rounded-full flex items-center justify-center mx-auto mb-2">
-                              <span className="text-white text-xs">📍</span>
-                            </div>
-                            <p className="text-xs text-green-700">Location Header</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                        )}
+                      </div>
+                    )}
 
+                    {/* Body Preview */}
+                    <p className="text-[11px] text-slate-700 whitespace-pre-wrap leading-relaxed">
+                      {watchedFormat
+                        ? (sampleValues.length > 0 ? replaceVariablesWithSamples(watchedFormat, sampleValues) : watchedFormat)
+                        : "Your message content will appear here..."
+                      }
+                    </p>
 
-                  {/* Message Preview */}
-                  {watchedFormat && (
-                    <div className="bg-gray-50 p-3 rounded-md">
-                      <p className="text-sm whitespace-pre-wrap">
-                        {sampleValues.length > 0 
-                          ? replaceVariablesWithSamples(watchedFormat, sampleValues)
-                          : watchedFormat
-                        }
+                    {/* Footer Preview */}
+                    {watch('footer') && (
+                      <p className="text-[9px] text-slate-400 mt-1.5 border-t border-slate-50 pt-1.5">
+                        {watch('footer')}
                       </p>
-                      {watch('footer') && (
-                        <p className="text-xs text-gray-500 mt-2">{watch('footer')}</p>
-                      )}
-                    </div>
-                  )}
+                    )}
+                  </div>
 
-                  {/* Interactive Actions Preview */}
+                  {/* Action Buttons Preview */}
                   {watchedInteractiveActions.length > 0 && (
-                    <div className="space-y-2">
+                    <div className="flex flex-col gap-1.5 px-2">
                       {watchedInteractiveActions.map((action) => (
-                        <Button
+                        <div
                           key={action.id}
-                          variant="outline"
-                          size="sm"
-                          className="w-full justify-start"
+                          className="w-full bg-white/90 backdrop-blur-sm border border-slate-100 py-2 rounded-xl text-[10px] font-bold text-blue-600 text-center shadow-sm"
                         >
                           {action.title || `${action.type.replace('_', ' ')} button`}
-                        </Button>
+                        </div>
                       ))}
                     </div>
                   )}
                 </div>
 
-                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
-                  <p className="text-xs text-yellow-800">
-                    <strong>Disclaimer:</strong> This is just a graphical representation of the message that will be delivered. Actual message will consist of media selected and may appear different.
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+                {/* WhatsApp Background Pattern (Simulated) */}
+                <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]" />
+              </div>
+
+              <div className="mt-6 flex items-start gap-3 p-4 bg-yellow-50/50 border border-yellow-100 rounded-2xl">
+                <Info className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
+                <p className="text-[10px] text-yellow-800 font-medium leading-relaxed">
+                  <strong>Preview Notice:</strong> This mockup is a graphical approximation. The final message appearance depends on the user&apos;s device and WhatsApp version.
+                </p>
+              </div>
+            </motion.div>
           </div>
-        </div>
-      </div>
+        </form>
+      </main>
     </div>
   );
 }

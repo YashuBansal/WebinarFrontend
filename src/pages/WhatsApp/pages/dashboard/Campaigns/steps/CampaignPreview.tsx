@@ -4,10 +4,24 @@ import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Send, Calendar, Clock, Users, MessageSquare, CheckCircle } from 'lucide-react';
+import { 
+  ArrowLeft, 
+  Send, 
+  Calendar, 
+  Clock, 
+  Users, 
+  MessageSquare, 
+  CheckCircle2, 
+  Layout, 
+  Zap,
+  ChevronRight,
+  AlertCircle,
+  FileText
+} from 'lucide-react';
 import { WhatsAppTemplatePreviewCard } from '@/components/ui/whatsapp-template-preview-card';
 import { useMediaAssets } from '@/hooks/useMediaAssets';
 import { useProjectContext } from '@/context/ProjectContext';
+import { motion, AnimatePresence } from 'framer-motion';
 import type {
   CampaignTemplate,
   VariableMapping,
@@ -53,14 +67,12 @@ const CampaignPreview = ({
 
   const sampleContact = selectedContacts[0];
 
-  // Fetch media assets to get the selected media asset
   const { data: mediaAssetsData } = useMediaAssets({
     projectId: selectedProject?._id || '',
     page: 1,
     limit: 50,
   });
 
-  // Find the selected media asset when headerMediaAssetId is available
   useEffect(() => {
     if (headerMediaAssetId && mediaAssetsData?.data) {
       const mediaAsset = mediaAssetsData.data.find((file: any) => file._id === headerMediaAssetId);
@@ -91,28 +103,17 @@ const CampaignPreview = ({
 
   const handleDateChange = (date: string) => {
     setScheduledDate(date);
-    if (date && scheduledTime) {
-      const selectedDateTime = new Date(`${date}T${scheduledTime}`);
-      const nowPlusOneMinute = new Date(Date.now() + 60 * 1000);
-
-      if (selectedDateTime <= nowPlusOneMinute) {
-        setScheduledError('Please choose a time at least 1 minute from now.');
-        setValue('scheduledAt', undefined);
-      } else {
-        setScheduledError(null);
-        const scheduledAt = selectedDateTime.toISOString();
-        setValue('scheduledAt', scheduledAt);
-      }
-    } else {
-      setScheduledError(null);
-      setValue('scheduledAt', undefined);
-    }
+    updateScheduledDateTime(date, scheduledTime);
   };
 
   const handleTimeChange = (time: string) => {
     setScheduledTime(time);
-    if (scheduledDate && time) {
-      const selectedDateTime = new Date(`${scheduledDate}T${time}`);
+    updateScheduledDateTime(scheduledDate, time);
+  };
+
+  const updateScheduledDateTime = (date: string, time: string) => {
+    if (date && time) {
+      const selectedDateTime = new Date(`${date}T${time}`);
       const nowPlusOneMinute = new Date(Date.now() + 60 * 1000);
 
       if (selectedDateTime <= nowPlusOneMinute) {
@@ -120,8 +121,7 @@ const CampaignPreview = ({
         setValue('scheduledAt', undefined);
       } else {
         setScheduledError(null);
-        const scheduledAt = selectedDateTime.toISOString();
-        setValue('scheduledAt', scheduledAt);
+        setValue('scheduledAt', selectedDateTime.toISOString());
       }
     } else {
       setScheduledError(null);
@@ -129,173 +129,288 @@ const CampaignPreview = ({
     }
   };
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
+
   return (
-    <div className="space-y-6">
-      {/* Campaign Summary */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-2">
-          <CheckCircle className="h-5 w-5 text-green-500" />
-          <Label className="text-lg font-semibold">Campaign Summary</Label>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="p-4 border rounded-lg">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Campaign Name</span>
-              </div>
-              <p className="text-sm text-muted-foreground">{campaignData.name}</p>
-            </div>
+    <motion.div 
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-10 py-2"
+    >
+      {/* Campaign Summary Section */}
+      <motion.div variants={itemVariants} className="space-y-6">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-2xl bg-[#22B573]/10 flex items-center justify-center">
+            <Layout className="h-5 w-5 text-[#22B573]" />
           </div>
-
-          <div className="p-4 border rounded-lg">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <Users className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Total Recipients</span>
-              </div>
-              <p className="text-sm text-muted-foreground">{contactType === 'whatsapp' ? selectedContacts.length : wlhAttendeeFilters.contactCount} contacts</p>
-            </div>
-          </div>
-
-          <div className="p-4 border rounded-lg">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Message Template</span>
-              </div>
-              <p className="text-sm text-muted-foreground">{selectedTemplate?.name}</p>
-            </div>
-          </div>
-
-          <div className="p-4 border rounded-lg">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <CheckCircle className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">Status</span>
-              </div>
-              <Badge variant="outline" className="text-xs">Ready to Send</Badge>
-            </div>
+          <div>
+            <h3 className="text-base font-black text-slate-900 uppercase tracking-tight">Campaign Manifest</h3>
+            <p className="text-xs font-medium text-slate-400">Review your configuration before deployment</p>
           </div>
         </div>
-      </div>
 
-      {/* Message Preview */}
-      <div className="space-y-4">
-        <Label className="text-lg font-semibold">Message Preview</Label>
-        <WhatsAppTemplatePreviewCard
-          template={selectedTemplate}
-          variableMappings={variableMappings}
-          sampleContact={sampleContact}
-          showSampleContact={true}
-          showVariableMappings={true}
-          headerMediaAsset={selectedMediaAsset}
-        />
-      </div>
-
-      {/* Sending Options */}
-      <div className="space-y-4">
-        <Label className="text-lg font-semibold">Sending Options</Label>
-
-        <RadioGroup value={sendType} onValueChange={handleSendTypeChange}>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="now" id="now" />
-            <Label htmlFor="now" className="flex items-center gap-2">
-              <Send className="h-4 w-4" />
-              Send Now
-            </Label>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all group">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <FileText className="h-4 w-4 text-blue-500" />
+                <Badge variant="secondary" className="bg-blue-50 text-blue-600 border-none text-[9px] font-black px-1.5 py-0">NAME</Badge>
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-sm font-bold text-slate-800 truncate">{campaignData.name}</p>
+                <p className="text-[10px] font-medium text-slate-400">Target Identifier</p>
+              </div>
+            </div>
           </div>
 
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="scheduled" id="scheduled" />
-            <Label htmlFor="scheduled" className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              Schedule for Later
-            </Label>
+          <div className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all group">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <Users className="h-4 w-4 text-[#22B573]" />
+                <Badge variant="secondary" className="bg-[#22B573]/10 text-[#22B573] border-none text-[9px] font-black px-1.5 py-0">AUDIENCE</Badge>
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-sm font-bold text-slate-800">
+                  {contactType === 'whatsapp' ? selectedContacts.length : wlhAttendeeFilters.contactCount} Contacts
+                </p>
+                <p className="text-[10px] font-medium text-slate-400">Total Recipients</p>
+              </div>
+            </div>
           </div>
-        </RadioGroup>
 
-        {/* Schedule Options */}
-        {sendType === 'scheduled' && (
-          <div className="space-y-4 p-4 border rounded-lg bg-gray-50 dark:bg-gray-800">
-            <div className="space-y-2">
-              <Label htmlFor="scheduled-date">Date</Label>
-              <Input
-                id="scheduled-date"
-                type="date"
-                value={scheduledDate}
-                onChange={(e) => handleDateChange(e.target.value)}
-                min={new Date().toISOString().split('T')[0]}
+          <div className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all group">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <MessageSquare className="h-4 w-4 text-purple-500" />
+                <Badge variant="secondary" className="bg-purple-50 text-purple-600 border-none text-[9px] font-black px-1.5 py-0">TEMPLATE</Badge>
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-sm font-bold text-slate-800 truncate">{selectedTemplate?.name}</p>
+                <p className="text-[10px] font-medium text-slate-400">WhatsApp Approved</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all group">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <CheckCircle2 className="h-4 w-4 text-orange-500" />
+                <Badge variant="secondary" className="bg-orange-50 text-orange-600 border-none text-[9px] font-black px-1.5 py-0">STATUS</Badge>
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-sm font-bold text-slate-800">Validated</p>
+                <p className="text-[10px] font-medium text-slate-400">System Ready</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      <div className="grid lg:grid-cols-12 gap-10">
+        {/* Left Column: Preview */}
+        <motion.div variants={itemVariants} className="lg:col-span-7 space-y-6">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-2xl bg-blue-50 flex items-center justify-center">
+              <Zap className="h-5 w-5 text-blue-500" />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-slate-900 uppercase tracking-tight">Transmission Preview</h3>
+              <p className="text-xs font-medium text-slate-400">Simulated mobile experience</p>
+            </div>
+          </div>
+          
+          <div className="bg-slate-50/50 rounded-3xl border border-slate-200 p-8 flex justify-center">
+            <div className="w-full max-w-sm">
+              <WhatsAppTemplatePreviewCard
+                template={selectedTemplate}
+                variableMappings={variableMappings}
+                sampleContact={sampleContact}
+                showSampleContact={true}
+                showVariableMappings={true}
+                headerMediaAsset={selectedMediaAsset}
               />
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="scheduled-time">Time</Label>
-              <Input
-                id="scheduled-time"
-                type="time"
-                value={scheduledTime}
-                onChange={(e) => handleTimeChange(e.target.value)}
-              />
-            </div>
-
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Clock className="h-4 w-4" />
-              <span>Your local timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone}</span>
-            </div>
-
-            {scheduledError && (
-              <p className="text-sm text-red-500">
-                {scheduledError}
-              </p>
-            )}
           </div>
-        )}
+        </motion.div>
+
+        {/* Right Column: Transmission Settings */}
+        <motion.div variants={itemVariants} className="lg:col-span-5 space-y-8">
+          <div className="flex items-center gap-3">
+            <div className="h-10 w-10 rounded-2xl bg-orange-50 flex items-center justify-center">
+              <Send className="h-5 w-5 text-orange-500" />
+            </div>
+            <div>
+              <h3 className="text-base font-black text-slate-900 uppercase tracking-tight">Launch Control</h3>
+              <p className="text-xs font-medium text-slate-400">Configure deployment timeline</p>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <RadioGroup 
+              value={sendType} 
+              onValueChange={handleSendTypeChange}
+              className="grid gap-4"
+            >
+              <Label
+                htmlFor="now"
+                className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all cursor-pointer ${
+                  sendType === 'now' 
+                  ? 'border-[#22B573] bg-[#22B573]/5 shadow-sm' 
+                  : 'border-slate-100 bg-slate-50/50 hover:bg-slate-100'
+                }`}
+              >
+                <RadioGroupItem value="now" id="now" className="sr-only" />
+                <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors ${sendType === 'now' ? 'bg-[#22B573] text-white' : 'bg-slate-100 text-slate-400'}`}>
+                  <Zap className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-slate-800">Instant Broadcast</p>
+                  <p className="text-xs font-medium text-slate-400">Deliver all messages immediately</p>
+                </div>
+                {sendType === 'now' && <CheckCircle2 className="h-5 w-5 text-[#22B573]" />}
+              </Label>
+
+              <Label
+                htmlFor="scheduled"
+                className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all cursor-pointer ${
+                  sendType === 'scheduled' 
+                  ? 'border-[#22B573] bg-[#22B573]/5 shadow-sm' 
+                  : 'border-slate-100 bg-slate-50/50 hover:bg-slate-100'
+                }`}
+              >
+                <RadioGroupItem value="scheduled" id="scheduled" className="sr-only" />
+                <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors ${sendType === 'scheduled' ? 'bg-[#22B573] text-white' : 'bg-slate-100 text-slate-400'}`}>
+                  <Calendar className="h-5 w-5" />
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-bold text-slate-800">Scheduled Release</p>
+                  <p className="text-xs font-medium text-slate-400">Plan for a specific future moment</p>
+                </div>
+                {sendType === 'scheduled' && <CheckCircle2 className="h-5 w-5 text-[#22B573]" />}
+              </Label>
+            </RadioGroup>
+
+            <AnimatePresence>
+              {sendType === 'scheduled' && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0, y: -10 }}
+                  animate={{ opacity: 1, height: 'auto', y: 0 }}
+                  exit={{ opacity: 0, height: 0, y: -10 }}
+                  className="space-y-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm"
+                >
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="scheduled-date" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Launch Date</Label>
+                      <div className="relative group">
+                        <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-[#22B573] transition-colors" />
+                        <Input
+                          id="scheduled-date"
+                          type="date"
+                          value={scheduledDate}
+                          onChange={(e) => handleDateChange(e.target.value)}
+                          min={new Date().toISOString().split('T')[0]}
+                          className="h-12 pl-12 rounded-xl border-slate-200 bg-slate-50/50 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="scheduled-time" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Launch Time</Label>
+                      <div className="relative group">
+                        <Clock className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-[#22B573] transition-colors" />
+                        <Input
+                          id="scheduled-time"
+                          type="time"
+                          value={scheduledTime}
+                          onChange={(e) => handleTimeChange(e.target.value)}
+                          className="h-12 pl-12 rounded-xl border-slate-200 bg-slate-50/50 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                    <Clock className="h-4 w-4 text-slate-400" />
+                    <p className="text-[10px] font-medium text-slate-500">
+                      Current Node: <span className="text-slate-900 font-bold">{Intl.DateTimeFormat().resolvedOptions().timeZone}</span>
+                    </p>
+                  </div>
+
+                  {scheduledError && (
+                    <motion.div 
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-100 text-red-600"
+                    >
+                      <AlertCircle className="h-4 w-4 shrink-0" />
+                      <p className="text-xs font-bold">{scheduledError}</p>
+                    </motion.div>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </motion.div>
       </div>
 
-      {/* Selected Contacts Preview */}
-      <div className="space-y-4">
-        <Label className="text-lg font-semibold">Selected Contacts ({contactType === 'whatsapp' ? selectedContacts.length : wlhAttendeeFilters.contactCount})</Label>
-
-
-      </div>
-
-      {/* Navigation */}
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrevious} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
-          Previous
+      {/* Navigation Controls */}
+      <motion.div variants={itemVariants} className="flex items-center justify-between pt-8 border-t border-slate-100">
+        <Button 
+          variant="ghost" 
+          onClick={onPrevious} 
+          className="h-12 px-6 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 transition-all"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Previous Step
         </Button>
 
         <Button
           onClick={onSubmit}
           disabled={!canSubmit || isSubmitting}
-          className="flex items-center gap-2"
+          className={`h-14 px-10 rounded-2xl font-bold text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30 flex items-center gap-2 ${
+            sendType === 'now' 
+            ? 'bg-[#22B573] hover:bg-[#1a8d58] text-white shadow-[#22B573]/20' 
+            : 'bg-blue-600 hover:bg-blue-700 text-white shadow-blue-200'
+          }`}
         >
           {isSubmitting ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              {sendType === 'now' ? 'Sending Campaign...' : 'Scheduling Campaign...'}
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+              {sendType === 'now' ? 'Transmitting...' : 'Scheduling...'}
             </>
           ) : (
             <>
               {sendType === 'now' ? (
                 <>
-                  <Send className="h-4 w-4" />
+                  <Zap className="h-5 w-5" />
                   Launch Campaign
                 </>
               ) : (
                 <>
-                  <Calendar className="h-4 w-4" />
-                  Schedule Campaign
+                  <Calendar className="h-5 w-5" />
+                  Schedule Broadcast
                 </>
               )}
+              <ChevronRight className="h-4 w-4 ml-1" />
             </>
           )}
         </Button>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 };
 

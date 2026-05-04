@@ -6,7 +6,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Trash2 } from "lucide-react";
+import { Trash2, Hash, Layers, Settings2, Database } from "lucide-react";
 import type {
   FilterCondition,
   ConditionField,
@@ -62,73 +62,77 @@ export function FilterConditionCard({
   }, [condition.field]);
 
   return (
-    <div className="rounded-lg border p-4 space-y-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-          {index + 1}
-        </span>
-        <div className="flex items-center gap-2">
-          {(["include", "exclude"] as const).map((modeOption) => (
-            <Button
-              key={modeOption}
-              type="button"
-              size="sm"
-              variant={condition.mode === modeOption ? "default" : "outline"}
-              onClick={() => onUpdate({ mode: modeOption })}
-            >
-              {modeOption === "include" ? "Include" : "Exclude"}
-            </Button>
-          ))}
-        </div>
-
-        {index > 0 && (
-          <div className="flex items-center gap-2">
-            <span className="text-xs font-medium text-muted-foreground">
-              Logic
-            </span>
-            {LOGIC_OPTIONS.map((logic) => (
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-5 shadow-sm hover:border-slate-300 transition-colors">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="h-7 w-7 rounded-lg bg-slate-900 flex items-center justify-center">
+            <span className="text-[10px] font-black text-white">{index + 1}</span>
+          </div>
+          
+          <div className="flex p-0.5 bg-slate-100 rounded-lg">
+            {(["include", "exclude"] as const).map((modeOption) => (
               <Button
-                key={logic}
+                key={modeOption}
                 type="button"
                 size="sm"
-                variant={
-                  condition.logicOperator === logic ? "default" : "outline"
-                }
-                onClick={() => onUpdate({ logicOperator: logic })}
+                variant="ghost"
+                className={`h-7 px-4 rounded-md text-[10px] font-black uppercase tracking-wider transition-all ${condition.mode === modeOption ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                onClick={() => onUpdate({ mode: modeOption })}
               >
-                {logic}
+                {modeOption}
               </Button>
             ))}
           </div>
-        )}
+
+          {index > 0 && (
+            <div className="flex items-center gap-2 border-l pl-3 ml-1 border-slate-200">
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Logic</span>
+              <div className="flex p-0.5 bg-slate-100 rounded-lg">
+                {LOGIC_OPTIONS.map((logic) => (
+                  <Button
+                    key={logic}
+                    type="button"
+                    size="sm"
+                    variant="ghost"
+                    className={`h-7 px-4 rounded-md text-[10px] font-black uppercase tracking-wider transition-all ${condition.logicOperator === logic ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                    onClick={() => onUpdate({ logicOperator: logic })}
+                  >
+                    {logic}
+                  </Button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
 
         <Button
           type="button"
           variant="ghost"
           size="icon"
           onClick={onRemove}
-          className="ml-auto text-muted-foreground hover:text-destructive"
+          className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors rounded-lg"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="grid gap-3 md:grid-cols-3">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-muted-foreground">
-            Field
-          </span>
+      <div className="grid gap-4 md:grid-cols-12">
+        <div className="md:col-span-4 space-y-2">
+          <div className="flex items-center gap-2">
+            <Database className="h-3 w-3 text-slate-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Data Field</span>
+          </div>
           <Select
             value={condition.field}
             onValueChange={(value: ConditionField) => handleFieldChange(value)}
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-10 rounded-xl border-slate-200 bg-slate-50/50 text-xs font-bold focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all">
               <SelectValue placeholder="Select field" />
             </SelectTrigger>
-            <SelectContent className="max-h-60 overflow-y-auto">
+            <SelectContent className="rounded-xl border-slate-200 shadow-xl">
               {(Object.keys(FIELD_CONFIG) as ConditionField[]).map(
                 (fieldKey) => (
-                  <SelectItem key={fieldKey} value={fieldKey}>
+                  <SelectItem key={fieldKey} value={fieldKey} className="text-xs font-medium py-2.5 rounded-lg">
                     {FIELD_CONFIG[fieldKey].label}
                   </SelectItem>
                 )
@@ -137,22 +141,23 @@ export function FilterConditionCard({
           </Select>
         </div>
 
-        <div className="flex flex-col gap-1">
-          <span className="text-xs font-medium text-muted-foreground">
-            Operator
-          </span>
+        <div className="md:col-span-3 space-y-2">
+          <div className="flex items-center gap-2">
+            <Settings2 className="h-3 w-3 text-slate-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Operator</span>
+          </div>
           <Select
             value={condition.operator}
             onValueChange={(value: ConditionOperator) =>
               onUpdate({ operator: value })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="h-10 rounded-xl border-slate-200 bg-slate-50/50 text-xs font-bold focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all">
               <SelectValue placeholder="Select operator" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="rounded-xl border-slate-200 shadow-xl">
               {operatorOptionsForField.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
+                <SelectItem key={option.value} value={option.value} className="text-xs font-medium py-2.5 rounded-lg">
                   {option.label}
                 </SelectItem>
               ))}
@@ -160,17 +165,20 @@ export function FilterConditionCard({
           </Select>
         </div>
 
-        <div className="flex flex-col gap-1 md:col-span-1">
-          <span className="text-xs font-medium text-muted-foreground">
-            Value
-          </span>
-          <ConditionValueInput
-            condition={condition}
-            webinars={webinars}
-            tags={tags}
-            employees={employees}
-            onValueChange={(value) => onUpdate({ value })}
-          />
+        <div className="md:col-span-5 space-y-2">
+          <div className="flex items-center gap-2">
+            <Layers className="h-3 w-3 text-slate-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Criteria Value</span>
+          </div>
+          <div className="relative group">
+            <ConditionValueInput
+              condition={condition}
+              webinars={webinars}
+              tags={tags}
+              employees={employees}
+              onValueChange={(value) => onUpdate({ value })}
+            />
+          </div>
         </div>
       </div>
     </div>

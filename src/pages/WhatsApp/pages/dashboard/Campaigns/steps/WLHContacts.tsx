@@ -7,7 +7,7 @@ import { useAdvanceFilterCount } from "@/hooks/useAdvanceFilters";
 import { useEmployees } from "@/hooks/useEmployees";
 
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Plus } from "lucide-react";
+import { ArrowLeft, ArrowRight, Plus, RotateCcw, Filter, CheckCircle2, AlertCircle } from "lucide-react";
 
 import type { Dispatch, SetStateAction } from "react";
 import type {
@@ -26,6 +26,7 @@ import { FilterResults } from "./WLHContacts/components/FilterResults";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mapConditionsToAdvanceUnits } from "./WLHContacts/advanceFilterMapper";
 import { WebinarSelector } from "./WLHContacts/components/WebinarSelector";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function WLHContacts({
   onNext,
@@ -80,16 +81,16 @@ export default function WLHContacts({
       setConditions(
         nonWebinarConditions.length > 0
           ? nonWebinarConditions.map((condition) => ({
-              id: createConditionId(),
-              mode: condition.mode,
-              field: condition.field,
-              operator: condition.operator,
-              logicOperator: condition.logicOperator ?? "AND",
-              value:
-                condition.field === "tags" || condition.field === "assignedTo"
-                  ? condition.value
-                  : condition.value.join(", "),
-            }))
+            id: createConditionId(),
+            mode: condition.mode,
+            field: condition.field,
+            operator: condition.operator,
+            logicOperator: condition.logicOperator ?? "AND",
+            value:
+              condition.field === "tags" || condition.field === "assignedTo"
+                ? condition.value
+                : condition.value.join(", "),
+          }))
           : [createEmptyCondition()]
       );
 
@@ -181,8 +182,8 @@ export default function WLHContacts({
   const isApplyDisabled =
     activeTab === "single"
       ? selectedWebinarIds.length === 0 ||
-        isAttended === null ||
-        advanceCountIsPending
+      isAttended === null ||
+      advanceCountIsPending
       : true;
 
   const handleNext = () => {
@@ -191,136 +192,136 @@ export default function WLHContacts({
   };
 
   return (
-    <div className="p-4 sm:py-6 md:py-8 grid grid-cols-1 rounded-md border border-gray-200">
-      <div className="w-full flex justify-center my-2 ">
-        <Tabs
-          value={activeTab}
-          onValueChange={(value) =>
-            setActiveTab(value as "all" | "single")
-          }
-        >
-          <TabsList>
-            {/* <TabsTrigger value="all">All</TabsTrigger> */}
-            <TabsTrigger value="single">Single</TabsTrigger>
-          </TabsList>
-          <TabsContent value="all"></TabsContent>
-
-          <TabsContent value="single">
-            <div className="space-y-6">
-              <div className="grid gap-4 md:grid-cols-2">
-                <div className="flex flex-col gap-2">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Webinars
-                  </span>
-                  <WebinarSelector
-                    webinars={webinarsData ?? []}
-                    selectedWebinarIds={selectedWebinarIds}
-                    onSelectionChange={setSelectedWebinarIds}
-                    placeholder="Select webinars..."
-                  />
-                </div>
-
-                <div className="flex flex-col gap-2">
-                  <span className="text-xs font-medium text-muted-foreground">
-                    Attendance
-                  </span>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={
-                        isAttended === true ? "default" : "outline"
-                      }
-                      onClick={() => setIsAttended(true)}
-                    >
-                      Sales
-                    </Button>
-                    <Button
-                      type="button"
-                      size="sm"
-                      variant={
-                        isAttended === false ? "default" : "outline"
-                      }
-                      onClick={() => setIsAttended(false)}
-                    >
-                      Reminder
-                    </Button>
-                  </div>
-                </div>
+    <div className="space-y-6">
+      <div className="p-6 rounded-2xl border border-slate-200 bg-white/50 backdrop-blur-sm shadow-sm">
+        <div className="space-y-8">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="h-4 w-1 bg-[#22B573] rounded-full" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Target Webinar</span>
               </div>
+              <WebinarSelector
+                webinars={(webinarsData as any)?.data ?? []}
+                selectedWebinarIds={selectedWebinarIds}
+                onSelectionChange={setSelectedWebinarIds}
+                placeholder="Select one or more webinars..."
+              />
+            </div>
 
-              <div className="space-y-4">
-                {conditions.map((condition, index) => (
-                  <FilterConditionCard
-                    key={condition.id}
-                    condition={condition}
-                    index={index}
-                    webinars={webinarsData ?? []}
-                    tags={WLHTags ?? []}
-                    employees={employeesData ?? []}
-                    onUpdate={(updates) =>
-                      handleConditionUpdate(condition.id, updates)
-                    }
-                    onRemove={() => handleRemoveCondition(condition.id)}
-                  />
-                ))}
-
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 mb-1">
+                <div className="h-4 w-1 bg-blue-500 rounded-full" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Attendance Type</span>
+              </div>
+              <div className="flex p-1 bg-slate-100 rounded-xl w-fit">
                 <Button
                   type="button"
-                  variant="outline"
                   size="sm"
-                  onClick={handleAddCondition}
+                  variant="ghost"
+                  className={`h-9 px-6 rounded-lg text-xs font-bold transition-all ${isAttended === true ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                  onClick={() => setIsAttended(true)}
                 >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Add Condition
+                  Sales
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  className={`h-9 px-6 rounded-lg text-xs font-bold transition-all ${isAttended === false ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                  onClick={() => setIsAttended(false)}
+                >
+                  Reminder
                 </Button>
               </div>
+            </div>
+          </div>
 
-              <FilterResults
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4 text-slate-400" />
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Advanced Segmentation Rules</span>
+              </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={handleAddCondition}
+                className="h-8 text-[#22B573] hover:text-[#1a8d58] hover:bg-[#22B573]/5 font-bold text-[10px] uppercase tracking-wider"
+              >
+                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                Add Condition
+              </Button>
+            </div>
+
+            <div className="space-y-3">
+              <AnimatePresence initial={false}>
+                {conditions.map((condition, index) => (
+                  <motion.div
+                    key={condition.id}
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden"
+                  >
+                    <FilterConditionCard
+                      condition={condition}
+                      index={index}
+                      webinars={(webinarsData as any)?.data ?? []}
+                      tags={(WLHTags as any)?.data ?? []}
+                      employees={(employeesData as any)?.data ?? []}
+                      onUpdate={(updates) =>
+                        handleConditionUpdate(condition.id, updates)
+                      }
+                      onRemove={() => handleRemoveCondition(condition.id)}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+             <FilterResults
                 isLoading={advanceCountIsPending}
                 count={advanceCountData?.count}
               />
+          </div>
 
-              <div className="mt-4 flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={onPrevious}
-                >
-                  <ArrowLeft className="mr-2 h-4 w-4" />
-                  Back
-                </Button>
-                <div className="flex flex-wrap gap-2 sm:justify-end">
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    onClick={handleReset}
-                  >
-                    Reset
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    disabled={isApplyDisabled}
-                    onClick={handleApply}
-                  >
-                    Apply Filters
-                  </Button>
-                  <Button
-                    type="button"
-                    onClick={handleNext}
-                    disabled={wlhAttendeeFilters.contactCount <= 0}
-                  >
-                    Next
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+          <div className="flex flex-col-reverse gap-4 sm:flex-row sm:items-center sm:justify-between pt-4">
+            <Button
+              type="button"
+              variant="ghost"
+              onClick={handleReset}
+              className="h-10 px-4 rounded-xl text-slate-400 hover:text-slate-600 font-bold text-xs"
+            >
+              <RotateCcw className="mr-2 h-3.5 w-3.5" />
+              Reset Filters
+            </Button>
+            
+            <Button
+              type="button"
+              variant="default"
+              disabled={isApplyDisabled}
+              onClick={handleApply}
+              className="h-11 px-8 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-md shadow-blue-200 transition-all active:scale-[0.98] disabled:opacity-30"
+            >
+              {advanceCountIsPending ? (
+                <>
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent animate-spin mr-2 rounded-full" />
+                  Calculating...
+                </>
+              ) : (
+                <>
+                  <Filter className="mr-2 h-4 w-4" />
+                  Apply Segment
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </div>
-      
     </div>
   );
 }

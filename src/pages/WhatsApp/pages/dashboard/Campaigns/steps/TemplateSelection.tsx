@@ -186,32 +186,38 @@ const TemplateSelection = ({
 
   return (
     <div className="space-y-6">
-      <TemplateSelectionForm
-        selectedTemplate={selectedTemplate}
-        variableMappings={autoMessageMappings}
-        selectedMediaAsset={selectedMediaAsset}
-        uploadedFileName={uploadedFileName}
-        setSelectedTemplate={(template) => {
-          handleSetSelectedTemplate(template);
-          setShowValidationErrors(false); // Reset validation errors when template changes
-        }}
-        setVariableMappings={handleSetVariableMappings}
-        setSelectedMediaAsset={handleMediaAssetChange}
-        setUploadedFileName={handleSetUploadedFileName}
-        onTemplateSelect={handleTemplateSelect}
-        onVariableMappingsChange={handleVariableMappingsChange}
-        projectId={selectedProject?._id}
-        contactFieldOptions={contactFieldOptions}
-        showPreview={true}
-        showHeaderMedia={true}
-        allowDynamicFields={true}
-        showValidationErrors={showValidationErrors}
-      />
+      <div className="rounded-3xl border border-slate-100 bg-slate-50/30 p-1">
+        <TemplateSelectionForm
+          selectedTemplate={selectedTemplate}
+          variableMappings={autoMessageMappings}
+          selectedMediaAsset={selectedMediaAsset}
+          uploadedFileName={uploadedFileName}
+          setSelectedTemplate={(template) => {
+            handleSetSelectedTemplate(template);
+            setShowValidationErrors(false); // Reset validation errors when template changes
+          }}
+          setVariableMappings={handleSetVariableMappings}
+          setSelectedMediaAsset={handleMediaAssetChange}
+          setUploadedFileName={handleSetUploadedFileName}
+          onTemplateSelect={handleTemplateSelect}
+          onVariableMappingsChange={handleVariableMappingsChange}
+          projectId={selectedProject?._id}
+          contactFieldOptions={contactFieldOptions}
+          showPreview={true}
+          showHeaderMedia={true}
+          allowDynamicFields={true}
+          showValidationErrors={showValidationErrors}
+        />
+      </div>
 
       {/* Navigation buttons */}
-      <div className="flex justify-between">
-        <Button variant="outline" onClick={onPrevious} className="flex items-center gap-2">
-          <ArrowLeft className="h-4 w-4" />
+      <div className="flex items-center justify-between pt-8 border-t border-slate-100">
+        <Button 
+          variant="outline" 
+          onClick={onPrevious} 
+          className="h-12 px-6 rounded-xl border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Previous
         </Button>
         
@@ -223,10 +229,10 @@ const TemplateSelection = ({
             }
           }} 
           disabled={showValidationErrors && !canProceed}
-          className="flex items-center gap-2"
+          className="h-12 px-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-30 group"
         >
-          Next
-          <ArrowRight className="h-4 w-4" />
+          Proceed to Contacts
+          <ArrowRight className="h-4 w-4 ml-2 group-hover:translate-x-1 transition-transform" />
         </Button>
       </div>
     </div>
