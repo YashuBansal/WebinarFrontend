@@ -172,7 +172,7 @@ export default function AutoMessageConfig() {
           <div className="relative z-10">
             <div className="mb-8">
               <h2 className="text-xl font-black text-slate-900">Message Content</h2>
-              <p className="text-slate-500 text-xs font-medium mt-1">Select a template and map its variables to registration data</p>
+              <p className="text-slate-500 text-xs font-medium mt-1">Select a template and map its variable to registration data</p>
             </div>
 
             <TemplateSelectionForm
@@ -229,9 +229,8 @@ export default function AutoMessageConfig() {
                       variant="outline"
                       role="combobox"
                       aria-expanded={webinarDropdownOpen}
-                      className={`w-full justify-between h-12 rounded-xl border-slate-200 bg-slate-50/50 hover:bg-white transition-all text-left font-medium ${
-                        showValidationErrors && isWebinarIdMissing ? "border-red-500 ring-1 ring-red-500" : ""
-                      }`}
+                      className={`w-full justify-between h-12 rounded-xl border-slate-200 bg-slate-50/50 hover:bg-white transition-all text-left font-medium ${showValidationErrors && isWebinarIdMissing ? "border-red-500 ring-1 ring-red-500" : ""
+                        }`}
                       disabled={webinarsLoading}
                     >
                       {selectedWebinar ? (
@@ -289,9 +288,8 @@ export default function AutoMessageConfig() {
                                     </span>
                                   </div>
                                   <Check
-                                    className={`ml-2 h-4 w-4 text-green-600 transition-opacity ${
-                                      webinarId === webinar._id ? "opacity-100" : "opacity-0"
-                                    }`}
+                                    className={`ml-2 h-4 w-4 text-green-600 transition-opacity ${webinarId === webinar._id ? "opacity-100" : "opacity-0"
+                                      }`}
                                   />
                                 </div>
                               </CommandItem>
