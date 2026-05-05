@@ -172,7 +172,7 @@ export default function AutoMessageConfig() {
           <div className="relative z-10">
             <div className="mb-8">
               <h2 className="text-xl font-black text-slate-900">Message Content</h2>
-              <p className="text-slate-500 text-xs font-medium mt-1">Select a template and map its variable to registration data</p>
+              <p className="text-slate-500 text-xs font-medium mt-1">Select a template and map its variables to registration data</p>
             </div>
 
             <TemplateSelectionForm
