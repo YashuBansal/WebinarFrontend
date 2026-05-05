@@ -19,10 +19,10 @@ interface ChatInputProps {
   className?: string;
 }
 
-export function ChatInput({ 
-  disabled, 
-  canSendDirect, 
-  onSend, 
+export function ChatInput({
+  disabled,
+  canSendDirect,
+  onSend,
   onShowTemplate,
   placeholder,
   maxLength = 1000,
@@ -32,18 +32,18 @@ export function ChatInput({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-  
-  const defaultPlaceholder = canSendDirect 
-    ? "Type a message..." 
+
+  const defaultPlaceholder = canSendDirect
+    ? "Type a message..."
     : "Use template messages (24h window expired)";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!text.trim() || disabled || !canSendDirect || isSubmitting) return;
-    
+
     setIsSubmitting(true);
     setError(null);
-    
+
     try {
       await onSend(text.trim());
       setText('');
@@ -85,7 +85,7 @@ export function ChatInput({
           <span className="font-medium">{error}</span>
         </div>
       )}
-      
+
       <div className="max-w-[1400px] mx-auto">
         <TooltipProvider>
           <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-2xl p-2 shadow-sm focus-within:ring-4 focus-within:ring-teal-500/5 focus-within:border-teal-500/50 transition-all duration-300">
@@ -93,25 +93,25 @@ export function ChatInput({
             <div className="flex items-center gap-0.5">
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button 
-                    variant="ghost" 
-                    size="icon" 
+                  <Button
+                    variant="ghost"
+                    size="icon"
                     className="h-10 w-10 rounded-xl text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-all"
                     disabled={disabled || !canSendDirect}
                   >
                     <Smile className="h-5.5 w-5.5" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent 
-                  side="top" 
-                  align="start" 
+                <PopoverContent
+                  side="top"
+                  align="start"
                   sideOffset={12}
                   avoidCollisions={true}
                   collisionPadding={16}
                   className="p-0 border-none shadow-2xl z-[100] w-[90vw] max-w-[350px] rounded-2xl overflow-hidden animate-in zoom-in-95 duration-200"
                 >
-                  <EmojiPicker 
-                    onEmojiClick={onEmojiClick} 
+                  <EmojiPicker
+                    onEmojiClick={onEmojiClick}
                     autoFocusSearch={false}
                     theme={Theme.LIGHT}
                     width="100%"
@@ -122,12 +122,12 @@ export function ChatInput({
                   />
                 </PopoverContent>
               </Popover>
-              
+
               {canSendDirect && (
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       size="icon"
                       onClick={onShowTemplate}
                       className="h-10 w-10 rounded-xl text-gray-400 hover:text-teal-600 hover:bg-teal-50 transition-all"
@@ -169,10 +169,10 @@ export function ChatInput({
               </div>
 
               {text.trim() && (
-                <Button 
+                <Button
                   type="submit"
                   size="icon"
-                  className="h-10 w-10 rounded-xl bg-teal-500 hover:bg-teal-600 text-white shadow-lg shadow-teal-500/20 transition-all active:scale-95" 
+                  className="h-10 w-10 rounded-xl bg-teal-500 hover:bg-teal-600 text-white shadow-lg shadow-teal-500/20 transition-all active:scale-95"
                   disabled={disabled || !canSendDirect || isSubmitting}
                 >
                   {isSubmitting ? (
@@ -186,7 +186,7 @@ export function ChatInput({
           </div>
         </TooltipProvider>
       </div>
-      
+
       {/* Character count */}
       {text.length > maxLength * 0.8 && (
         <div className="mt-2 text-[10px] text-gray-400 text-right font-bold uppercase tracking-widest pr-4">
