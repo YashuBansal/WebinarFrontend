@@ -11,6 +11,37 @@ import { PersistGate } from "redux-persist/integration/react";
 import { injectStoreInDateFormat } from "./utils/extra";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
+function enforceAntiClickjacking() {
+  if (typeof window === "undefined") return;
+
+  // Hide UI until we know this window is not framed.
+  if (document?.documentElement) {
+    document.documentElement.style.display = "none";
+  }
+
+  const unhide = () => {
+    if (document?.documentElement) {
+      document.documentElement.style.display = "";
+    }
+  };
+
+  if (window.self === window.top) {
+    unhide();
+    return;
+  }
+
+  try {
+    window.top.location = window.self.location;
+  } catch (_error) {
+    // Cross-origin framing: keep the app hidden as a safe fallback.
+    return;
+  }
+
+  unhide();
+}
+
+enforceAntiClickjacking();
+
 function mountCharlaWidget() {
   if (document.querySelector('script[src="https://app.charla.com/widget/widget.js"]')) return;
 
