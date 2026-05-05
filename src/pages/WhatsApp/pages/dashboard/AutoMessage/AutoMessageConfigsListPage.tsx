@@ -1,31 +1,55 @@
 import { useParams, Link } from "react-router-dom";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, MessageSquare } from "lucide-react";
 import AutoMessageConfigsList from "./AutoMessageConfigsList";
 
 export default function AutoMessageConfigsListPage() {
   const { projectId } = useParams<{ projectId: string }>();
 
   return (
-    <div className="p-6 space-y-6 overflow-y-auto">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">
-            Auto Message Configurations
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Manage auto message configurations for webinar registrations
-          </p>
-        </div>
-        <Link to={`/whatsapp/dashboard/${projectId}/auto-message/create`}>
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            Create New Configuration
-          </Button>
-        </Link>
-      </div>
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-1">
+              <MessageSquare className="h-3.5 w-3.5" />
+              Automations
+            </div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+              Auto Message Configurations
+            </h1>
+            <p className="text-slate-500 text-xs font-medium">
+              Manage automatic WhatsApp messages for <span className="text-slate-900 font-bold">Webinar Registrations</span>
+            </p>
+          </div>
 
-      <AutoMessageConfigsList />
+          <div className="flex items-center gap-3">
+            <Link to={`/whatsapp/dashboard/${projectId}/auto-message/create`}>
+              <Button
+                className="h-11 px-6 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-green-600/20 bg-[#22B573] hover:bg-[#1da467] text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <Plus className="h-4 w-4" />
+                <span className="hidden sm:inline">Create Configuration</span>
+                <span className="sm:hidden">Create</span>
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </motion.div>
+
+      <main className="container mx-auto pb-12">
+        <AutoMessageConfigsList />
+      </main>
     </div>
   );
 }
