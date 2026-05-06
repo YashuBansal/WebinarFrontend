@@ -30,7 +30,8 @@ import {
 import { useProjectContext } from '@/context/ProjectContext';
 import { usePrograms, useDeleteProgram } from '@/hooks/usePrograms';
 import type { Program } from '@/schemas/programSchema';
-import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
+// @ts-ignore
+import ConfirmDeleteModal from '../../../../../components/ConfirmDeleteModal';
 
 const LIMIT = 10;
 
@@ -38,13 +39,12 @@ export default function Programs() {
   const { projectId } = useParams<{ projectId: string }>();
   const { selectedProject } = useProjectContext();
   const [currentPage, setCurrentPage] = useState(1);
-  const [confirmationDialog, setConfirmationDialog] = useState({
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    program: Program | null;
+  }>({
     isOpen: false,
-    title: '',
-    description: '',
-    variant: 'destructive' as const,
-    onConfirm: () => { },
-    isLoading: false,
+    program: null,
   });
 
   const { data, isLoading, error, refetch } = usePrograms(
@@ -58,46 +58,21 @@ export default function Programs() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const showConfirmationDialog = (
-    title: string,
-    description: string,
-    onConfirm: () => void
-  ) => {
-    setConfirmationDialog({
+  const handleDeleteProgram = (program: Program) => {
+    setDeleteModal({
       isOpen: true,
-      title,
-      description,
-      variant: 'destructive',
-      onConfirm,
-      isLoading: false,
+      program,
     });
   };
 
-  const closeConfirmationDialog = () => {
-    setConfirmationDialog((prev) => ({
-      ...prev,
-      isOpen: false,
-      isLoading: false,
-    }));
-  };
-
-  const handleConfirmationConfirm = async () => {
-    setConfirmationDialog((prev) => ({ ...prev, isLoading: true }));
+  const handleConfirmDelete = async () => {
+    if (!deleteModal.program) return;
     try {
-      await confirmationDialog.onConfirm();
-      closeConfirmationDialog();
+      await deleteProgramMutation.mutateAsync(deleteModal.program._id);
+      setDeleteModal({ isOpen: false, program: null });
     } catch (err) {
-      console.error('Confirmation action failed:', err);
-      setConfirmationDialog((prev) => ({ ...prev, isLoading: false }));
+      console.error('Delete sequence failed:', err);
     }
-  };
-
-  const handleDeleteProgram = (program: Program) => {
-    showConfirmationDialog(
-      'Cancel Sequence',
-      `Are you sure you want to cancel "${program.name}"? This action is irreversible. All un-triggered assignments will also be cancelled.`,
-      () => deleteProgramMutation.mutateAsync(program._id)
-    );
   };
 
   const WEEKDAY_NAMES: Record<number, string> = {
@@ -131,7 +106,7 @@ export default function Programs() {
         <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
           <AlertTitle className="text-xl font-black text-slate-900 mb-2">No Project Selected</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertDescription className="text-slate-600 font-medium">
             Please select a project to manage its sequences.
           </AlertDescription>
         </Alert>
@@ -147,7 +122,7 @@ export default function Programs() {
             <div className="h-12 w-12 rounded-full border-4 border-green-100 border-t-green-500 animate-spin" />
             <Loader2 className="h-6 w-6 text-green-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
           </div>
-          <p className="text-slate-500 font-bold text-xs uppercase tracking-widest animate-pulse">Loading sequences...</p>
+          <p className="text-slate-600 font-bold text-xs uppercase tracking-widest animate-pulse">Loading sequences...</p>
         </div>
       </div>
     );
@@ -159,7 +134,7 @@ export default function Programs() {
         <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
           <AlertTitle className="text-xl font-black text-slate-900 mb-2">Error Loading Sequences</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertDescription className="text-slate-600 font-medium">
             {error.message || 'Something went wrong while fetching your sequences.'}
           </AlertDescription>
         </Alert>
@@ -192,7 +167,7 @@ export default function Programs() {
             <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl flex items-center gap-2">
               Sequences
             </h1>
-            <p className="text-slate-500 text-xs font-medium">
+            <p className="text-slate-600 text-xs font-medium">
               Schedule recurring messages and automate your communication for <span className="text-slate-900 font-bold">{selectedProject?.projectName}</span>
             </p>
           </div>
@@ -229,20 +204,20 @@ export default function Programs() {
           <div className="p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 group-hover:text-green-600 transition-colors">
                   <ListTodo className="h-4 w-4" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sequence Management</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Sequence Management</span>
               </div>
             </div>
 
             {programs.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-20 px-6 rounded-[20px] border-2 border-dashed border-slate-100 bg-slate-50/30">
                 <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center mb-6 shadow-sm border border-slate-100">
-                  <ListTree className="h-8 w-8 text-slate-200" />
+                  <ListTree className="h-8 w-8 text-slate-600" />
                 </div>
                 <h3 className="text-lg font-black text-slate-900 mb-2">No sequences found</h3>
-                <p className="text-slate-500 text-xs font-medium mb-6 text-center max-w-xs">Start by creating your first automated sequence to streamline your communication.</p>
+                <p className="text-slate-600 text-xs font-medium mb-6 text-center max-w-xs">Start by creating your first automated sequence to streamline your communication.</p>
                 <Link to={`/whatsapp/dashboard/${projectId}/programs/create`}>
                   <Button className="h-10 px-6 rounded-xl bg-green-600 hover:bg-green-700 text-white font-bold text-xs shadow-lg shadow-green-600/10 transition-all hover:scale-[1.02] active:scale-[0.98]">
                     <Plus className="w-4 h-4 mr-2" />
@@ -256,10 +231,10 @@ export default function Programs() {
                   <Table>
                     <TableHeader className="bg-slate-50/50">
                       <TableRow className="hover:bg-transparent border-slate-100">
-                        <TableHead className="h-14 text-[10px] font-black uppercase tracking-widest text-slate-400 pl-6">Sequence Details</TableHead>
-                        <TableHead className="h-14 text-[10px] font-black uppercase tracking-widest text-slate-400">Schedule Info</TableHead>
-                        <TableHead className="h-14 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Status</TableHead>
-                        <TableHead className="h-14 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right pr-6">Actions</TableHead>
+                        <TableHead className="h-14 text-[10px] font-black uppercase tracking-widest text-slate-600 pl-6">Sequence Details</TableHead>
+                        <TableHead className="h-14 text-[10px] font-black uppercase tracking-widest text-slate-600">Schedule Info</TableHead>
+                        <TableHead className="h-14 text-[10px] font-black uppercase tracking-widest text-slate-600 text-center">Status</TableHead>
+                        <TableHead className="h-14 text-[10px] font-black uppercase tracking-widest text-slate-600 text-right pr-6">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -267,13 +242,13 @@ export default function Programs() {
                         <TableRow key={program._id} className="group/row hover:bg-slate-50/50 border-slate-100 transition-colors">
                           <TableCell className="py-5 pl-6">
                             <div className="flex items-center gap-4">
-                              <div className="h-11 w-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover/row:text-green-600 group-hover/row:bg-green-50 group-hover/row:border-green-100 transition-all">
+                              <div className="h-11 w-11 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 group-hover/row:text-green-600 group-hover/row:bg-green-50 group-hover/row:border-green-100 transition-all">
                                 <ListTree className="h-5 w-5" />
                               </div>
                               <div className="space-y-0.5">
                                 <div className="font-extrabold text-slate-900 text-sm tracking-tight">{program.name}</div>
                                 <div className="flex items-center gap-2">
-                                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">
                                     {(program.occurrenceTimeSlots ?? []).reduce((sum, s) => sum + (s?.length ?? 0), 0)} Slots
                                   </span>
                                   {program.isAutoAssignable && (
@@ -288,10 +263,10 @@ export default function Programs() {
                           <TableCell className="py-5">
                             <div className="space-y-1.5">
                               <div className="flex items-center gap-2 text-slate-700 font-bold text-xs">
-                                <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                                <Calendar className="h-3.5 w-3.5 text-slate-600" />
                                 {formatInterval(program)}
                               </div>
-                              <div className="flex items-center gap-2 text-slate-400 font-black text-[9px] uppercase tracking-widest">
+                              <div className="flex items-center gap-2 text-slate-600 font-black text-[9px] uppercase tracking-widest">
                                 <Clock className="h-3 w-3" />
                                 {program.occurrenceCount} Occurrences
                               </div>
@@ -307,7 +282,7 @@ export default function Programs() {
                                 Active
                               </Badge>
                             ) : (
-                              <Badge variant="secondary" className="bg-slate-100 text-slate-500 border-slate-200 rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                              <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-slate-200 rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
                                 Inactive
                               </Badge>
                             )}
@@ -318,7 +293,7 @@ export default function Programs() {
                                 <Button
                                   variant="outline"
                                   size="icon"
-                                  className="h-9 w-9 rounded-xl border-slate-200 text-slate-400 hover:text-green-600 hover:border-green-200 hover:bg-green-50 transition-all shadow-sm"
+                                  className="h-9 w-9 rounded-xl border-slate-200 text-slate-600 hover:text-green-600 hover:border-green-200 hover:bg-green-50 transition-all shadow-sm"
                                   title="View details"
                                 >
                                   <Eye className="h-4 w-4" />
@@ -329,9 +304,9 @@ export default function Programs() {
                                   variant="outline"
                                   size="icon"
                                   disabled={program.isDeleted}
-                                  className={`h-9 w-9 rounded-xl border-slate-200 text-slate-400 transition-all shadow-sm ${program.isDeleted
-                                      ? "opacity-50 cursor-not-allowed"
-                                      : "hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50"
+                                  className={`h-9 w-9 rounded-xl border-slate-200 text-slate-600 transition-all shadow-sm ${program.isDeleted
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : "hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50"
                                     }`}
                                   title={program.isDeleted ? "Cannot edit cancelled sequence" : "Edit sequence"}
                                 >
@@ -343,9 +318,9 @@ export default function Programs() {
                                 size="icon"
                                 onClick={() => handleDeleteProgram(program)}
                                 disabled={program.isDeleted || deleteProgramMutation.isPending}
-                                className={`h-9 w-9 rounded-xl border-slate-200 text-slate-400 transition-all shadow-sm ${program.isDeleted || deleteProgramMutation.isPending
-                                    ? "opacity-50 cursor-not-allowed"
-                                    : "hover:text-red-600 hover:border-red-200 hover:bg-red-50"
+                                className={`h-9 w-9 rounded-xl border-slate-200 text-slate-600 transition-all shadow-sm ${program.isDeleted || deleteProgramMutation.isPending
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : "hover:text-red-600 hover:border-red-200 hover:bg-red-50"
                                   }`}
                                 title={program.isDeleted ? 'Sequence is already cancelled' : 'Cancel sequence'}
                               >
@@ -366,7 +341,7 @@ export default function Programs() {
                 {/* Premium Pagination */}
                 {totalPages > 1 && (
                   <div className="flex items-center justify-between mt-8 px-2">
-                    <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                    <div className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
                       Page <span className="text-slate-900 font-extrabold">{currentPage}</span> of <span className="text-slate-900 font-extrabold">{totalPages}</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -399,16 +374,17 @@ export default function Programs() {
         </motion.div>
       </main>
 
-      <ConfirmationDialog
-        isOpen={confirmationDialog.isOpen}
-        onClose={closeConfirmationDialog}
-        onConfirm={handleConfirmationConfirm}
-        title={confirmationDialog.title}
-        description={confirmationDialog.description}
-        variant={confirmationDialog.variant}
-        isLoading={confirmationDialog.isLoading}
-        confirmText="Cancel Sequence"
-      />
+      {deleteModal.isOpen && deleteModal.program && (
+        <ConfirmDeleteModal
+          setModal={(val) => {
+            if (!val) setDeleteModal({ isOpen: false, program: null });
+          }}
+          triggerDelete={handleConfirmDelete}
+          title="Cancel Sequence"
+          isLoading={deleteProgramMutation.isPending}
+          itemName={deleteModal.program.name}
+        />
+      )}
     </div>
   );
 }

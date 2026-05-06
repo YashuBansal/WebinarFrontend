@@ -255,8 +255,10 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
               ) : null}
             </Link>
 
-            <Link
-              to="/zoom"
+            <a
+              href={import.meta.env.VITE_REACT_APP_ZOOM_URL || "/zoom"}
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => dispatch(setActiveHeaderSection("Zoom"))}
               className={`relative flex flex-shrink-0 flex-col items-center justify-center rounded-xl px-3 py-2 transition-all duration-300 md:px-6 md:py-2.5 ${activeHeaderSection === "Zoom"
                 ? isDark
@@ -290,7 +292,7 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
               {activeHeaderSection === "Zoom" ? (
                 <div className="absolute right-1 top-1 h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500 md:right-1.5 md:top-1.5 md:h-2 md:w-2" />
               ) : null}
-            </Link>
+            </a>
           </div>
 
           <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-2 lg:gap-3">

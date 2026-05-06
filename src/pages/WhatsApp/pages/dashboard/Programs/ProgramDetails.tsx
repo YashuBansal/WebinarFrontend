@@ -142,7 +142,7 @@ export default function ProgramDetails() {
         <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
           <AlertTitle className="text-xl font-black text-slate-900 mb-2">Missing Context</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertDescription className="text-slate-600 font-medium">
             Please select a project and a valid sequence to view details.
           </AlertDescription>
         </Alert>
@@ -158,7 +158,7 @@ export default function ProgramDetails() {
             <div className="h-12 w-12 rounded-full border-4 border-green-100 border-t-green-500 animate-spin" />
             <Loader2 className="h-6 w-6 text-green-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
           </div>
-          <p className="text-slate-500 font-bold text-xs uppercase tracking-widest animate-pulse">Loading sequence details...</p>
+          <p className="text-slate-600 font-bold text-xs uppercase tracking-widest animate-pulse">Loading sequence details...</p>
         </div>
       </div>
     );
@@ -170,7 +170,7 @@ export default function ProgramDetails() {
         <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
           <AlertTitle className="text-xl font-black text-slate-900 mb-2">Error Loading Sequence</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertDescription className="text-slate-600 font-medium">
             Failed to load sequence details. It may not exist or you don't have access.
           </AlertDescription>
           <Link to={`/whatsapp/dashboard/${projectId}/programs`} className="mt-6 block">
@@ -200,7 +200,7 @@ export default function ProgramDetails() {
             <div className="flex items-center gap-3">
               <Link
                 to={`/whatsapp/dashboard/${projectId}/programs`}
-                className="h-10 w-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+                className="h-10 w-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Link>
@@ -213,12 +213,12 @@ export default function ProgramDetails() {
                   {program.name}
                 </h1>
                 <div className="flex flex-wrap items-center gap-4 mt-2">
-                  <div className="flex items-center gap-1.5 text-slate-500 font-bold text-[10px] uppercase tracking-wider">
-                    <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                  <div className="flex items-center gap-1.5 text-slate-600 font-bold text-[10px] uppercase tracking-wider">
+                    <Calendar className="h-3.5 w-3.5 text-slate-600" />
                     {formatInterval(program)}
                   </div>
-                  <div className="flex items-center gap-1.5 text-slate-500 font-bold text-[10px] uppercase tracking-wider">
-                    <Clock className="h-3.5 w-3.5 text-slate-400" />
+                  <div className="flex items-center gap-1.5 text-slate-600 font-bold text-[10px] uppercase tracking-wider">
+                    <Clock className="h-3.5 w-3.5 text-slate-600" />
                     {getTotalOccurrenceCount(program)} Occurrences
                   </div>
                   <div className="flex items-center gap-2">
@@ -231,7 +231,7 @@ export default function ProgramDetails() {
                         Active
                       </Badge>
                     ) : (
-                      <Badge variant="secondary" className="bg-slate-100 text-slate-500 border-slate-200 rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                      <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-slate-200 rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
                         Inactive
                       </Badge>
                     )}
@@ -264,63 +264,57 @@ export default function ProgramDetails() {
         </div>
       </motion.div>
 
-      <main className="container mx-auto space-y-6 pb-20">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          {/* Left Column: Timeline & Assignments */}
-          <div className="lg:col-span-8 space-y-6">
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <div className="flex items-center gap-3 mb-6 px-2">
-                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
-                  <Activity className="h-4 w-4" />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sequence Timeline</span>
+      <main className="container mx-auto space-y-8 pb-20">
+        <div className="space-y-8">
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <div className="flex items-center gap-3 mb-6 px-2">
+              <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+                <Activity className="h-4 w-4" />
               </div>
-              <ProgramTimeSlotsCard program={program} />
-            </motion.section>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Sequence Timeline</span>
+            </div>
+            <ProgramTimeSlotsCard program={program} />
+          </motion.section>
 
-            <motion.section
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-            >
-              <div className="flex items-center gap-3 mb-6 px-2">
-                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
-                  <Zap className="h-4 w-4" />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Active Assignments</span>
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <div className="flex items-center gap-3 mb-6 px-2">
+              <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+                <Zap className="h-4 w-4" />
               </div>
-              <ProgramAssignmentsSection programId={programId} program={program} />
-            </motion.section>
-          </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Active Assignments</span>
+            </div>
+            <ProgramAssignmentsSection programId={programId} program={program} />
+          </motion.section>
 
-          {/* Right Column: Automation Rules */}
-          <div className="lg:col-span-4 space-y-12">
-            <motion.section
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.1 }}
-            >
-              <div className="flex items-center gap-3 mb-6 px-2">
-                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
-                  <Settings className="h-4 w-4" />
-                </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Automation Rules</span>
+          <motion.section
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <div className="flex items-center gap-3 mb-6 px-2">
+              <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+                <Settings className="h-4 w-4" />
               </div>
-              <AutoAssignRuleBuilder
-                isAutoAssignable={isAutoAssignable}
-                onAutoAssignableChange={setIsAutoAssignable}
-                criteria={autoAssignCriteria}
-                onCriteriaChange={setAutoAssignCriteria}
-                onSave={handleSaveAutoAssignRules}
-                isSaving={updateProgramMutation.isPending}
-                disabled={isProgramCancelled}
-              />
-            </motion.section>
-          </div>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Automation Rules</span>
+            </div>
+            <AutoAssignRuleBuilder
+              isAutoAssignable={isAutoAssignable}
+              onAutoAssignableChange={setIsAutoAssignable}
+              criteria={autoAssignCriteria}
+              onCriteriaChange={setAutoAssignCriteria}
+              onSave={handleSaveAutoAssignRules}
+              isSaving={updateProgramMutation.isPending}
+              disabled={isProgramCancelled}
+            />
+          </motion.section>
         </div>
       </main>
 

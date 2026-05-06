@@ -712,7 +712,9 @@ const App = () => {
           path: "/zoom",
           element: (
             <RouteGuard roleNames={["ADMIN"]}>
-              <ComingSoon />
+              <RedirectToExternal
+                url={import.meta.env.VITE_REACT_APP_ZOOM_URL}
+              />
             </RouteGuard>
           ),
         },

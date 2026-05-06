@@ -87,10 +87,10 @@ function ProgramTimeSlotsEditorInner({
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between px-3">
-        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600">
           <span>Message Queue</span>
           <span className="h-1 w-1 rounded-full bg-slate-300" />
-          <span className="text-slate-500">{timeSlots.length} Slots</span>
+          <span className="text-slate-600">{timeSlots.length} Slots</span>
         </div>
         <Button
           type="button"
@@ -258,7 +258,7 @@ const ProgramTimeSlotRow = memo(function ProgramTimeSlotRow({
           size="icon"
           onClick={() => removeTimeSlot(index)}
           disabled={disableRemove}
-          className="h-8 w-8 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
+          className="h-8 w-8 rounded-lg text-slate-600 hover:text-red-600 hover:bg-red-50 transition-all"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
@@ -266,26 +266,26 @@ const ProgramTimeSlotRow = memo(function ProgramTimeSlotRow({
 
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs group-hover/slot:text-blue-600 group-hover/slot:bg-blue-50 group-hover/slot:border-blue-100 transition-all">
+          <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 font-bold text-xs group-hover/slot:text-blue-600 group-hover/slot:bg-blue-50 group-hover/slot:border-blue-100 transition-all">
             S{index + 1}
           </div>
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="text-sm font-black text-slate-900 tracking-tight">Slot Schedule</span>
               {slot.time && (
-                <Badge variant="outline" className="bg-slate-50 text-[9px] font-black uppercase tracking-widest text-slate-400 border-slate-200 rounded-md py-0 px-2 h-5">
+                <Badge variant="outline" className="bg-slate-50 text-[9px] font-black uppercase tracking-widest text-slate-600 border-slate-200 rounded-md py-0 px-2 h-5">
                   {slot.time}
                 </Badge>
               )}
             </div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Content & Timing</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Content & Timing</p>
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-4">
           {/* Time Picker */}
           <div className="space-y-1.5">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Send Time</Label>
+            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-600 ml-1">Send Time</Label>
             <div className="flex items-center gap-1.5 p-1 bg-slate-100/50 border border-slate-200 rounded-xl">
               <Select
                 value={hour12 || undefined}
@@ -358,7 +358,7 @@ const ProgramTimeSlotRow = memo(function ProgramTimeSlotRow({
 
           {/* Template Picker */}
           <div className="space-y-1.5 flex-1 min-w-[200px]">
-            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Message Content</Label>
+            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-600 ml-1">Message Content</Label>
             <div className="flex items-center gap-2">
               <TemplateSelectionDialog
                 triggerLabel={
@@ -381,7 +381,7 @@ const ProgramTimeSlotRow = memo(function ProgramTimeSlotRow({
                   flex-1 h-10 px-4 rounded-xl border border-slate-200 text-xs font-bold transition-all text-left
                   ${slot.messageConfig.templateName 
                     ? 'bg-blue-50/50 text-blue-700 border-blue-100 hover:bg-blue-50' 
-                    : 'bg-slate-50/50 text-slate-400 hover:bg-slate-50'}
+                    : 'bg-slate-50/50 text-slate-600 hover:bg-slate-50'}
                 `}
               />
             </div>
