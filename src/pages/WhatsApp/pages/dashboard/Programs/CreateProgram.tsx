@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,9 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { ArrowLeft, Loader2, ListTodo, AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { ArrowLeft, Loader2, ListTodo, AlertCircle, Plus, ListTree, Calendar, Clock, Save, X } from 'lucide-react';
 import { useProjectContext } from '@/context/ProjectContext';
 import { useCreateProgram, useProgramById, useUpdateProgram } from '@/hooks/usePrograms';
 import type {
@@ -21,8 +21,7 @@ import type {
   ProgramTimeSlot,
   Program,
 } from '@/schemas/programSchema';
-import { getOccurrenceLabel, getTotalOccurrenceCount } from '@/schemas/programSchema';
-import { getDefaultProgramTimeSlot } from '@/schemas/programSchema';
+import { getOccurrenceLabel, getTotalOccurrenceCount, getDefaultProgramTimeSlot } from '@/schemas/programSchema';
 import { ProgramTimeSlotsEditor } from './components/ProgramTimeSlotsEditor';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toastUtils } from '@/lib/utils';
@@ -32,7 +31,6 @@ const INTERVAL_UNITS = [
   { value: 'week', label: 'Week' },
 ] as const;
 
-/** When unit is week, intervalValue is day of week: 1=Monday .. 7=Sunday */
 const WEEKDAY_OPTIONS = [
   { value: 1, label: 'Monday' },
   { value: 2, label: 'Tuesday' },
@@ -110,6 +108,10 @@ export default function CreateProgram() {
     form?: string;
     slotErrorsPerOccurrence?: SlotError[][];
   }>({});
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
 
   useEffect(() => {
     if (!programId) hasInitializedFromProgram.current = false;
@@ -227,7 +229,6 @@ export default function CreateProgram() {
     );
 
     if (isEditMode && programId) {
-      // User can only update name, occurrence count, and slots (not interval unit/value)
       const updatePayload: UpdateProgramDto = {
         name: name.trim(),
         occurrenceCount,
@@ -275,46 +276,45 @@ export default function CreateProgram() {
 
   if (!selectedProject) {
     return (
-      <div className="px-4 sm:px-6 py-6">
-        <p className="text-sm text-muted-foreground">Please select a project.</p>
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+          <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
+          <AlertTitle className="text-xl font-black text-slate-900 mb-2">No Project Selected</AlertTitle>
+          <AlertDescription className="text-slate-500 font-medium">
+            Please select a project to configure sequences.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
 
   if (isEditMode && programLoading) {
     return (
-      <div className="flex items-center justify-center h-64 px-4 sm:px-6 py-6">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-[400px] flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative">
+            <div className="h-12 w-12 rounded-full border-4 border-green-100 border-t-green-500 animate-spin" />
+            <Loader2 className="h-6 w-6 text-green-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+          </div>
+          <p className="text-slate-500 font-bold text-xs uppercase tracking-widest animate-pulse">Loading sequence...</p>
+        </div>
       </div>
     );
   }
 
   if (isEditMode && (programError || (!program && !programLoading))) {
     return (
-      <div className="px-4 sm:px-6 py-6 space-y-4">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Failed to load sequence. It may not exist or you don&apos;t have access.
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+          <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
+          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Error Loading Sequence</AlertTitle>
+          <AlertDescription className="text-slate-500 font-medium">
+            Failed to load sequence. It may not exist or you don't have access.
           </AlertDescription>
+          <Link to={`/whatsapp/dashboard/${projectId}/programs`} className="mt-6 block">
+            <Button variant="outline" className="w-full rounded-xl border-slate-200">Back to Sequences</Button>
+          </Link>
         </Alert>
-        <Link to={programId ? `/whatsapp/dashboard/${projectId}/programs/${programId}` : `/whatsapp/dashboard/${projectId}/programs`}>
-          <Button variant="outline">Back</Button>
-        </Link>
-      </div>
-    );
-  }
-
-  if (isEditMode && program && projectId && program.projectId !== projectId) {
-    return (
-      <div className="px-4 sm:px-6 py-6 space-y-4">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>This sequence belongs to a different project.</AlertDescription>
-        </Alert>
-        <Link to={`/whatsapp/dashboard/${projectId}/programs`}>
-          <Button variant="outline">Back to Sequences</Button>
-        </Link>
       </div>
     );
   }
@@ -322,237 +322,295 @@ export default function CreateProgram() {
   const isPending = createProgramMutation.isPending || updateProgramMutation.isPending;
 
   return (
-    <div className="px-4 sm:px-6 py-6 space-y-8">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-3 min-w-0">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-            <ListTodo className="h-5 w-5" />
-          </div>
-          <div className="space-y-1 min-w-0">
-            <h1 className="text-2xl font-bold tracking-tight text-foreground">
-              {isEditMode ? 'Edit sequence' : 'Create sequence'}
-            </h1>
-            <p className="text-sm text-muted-foreground">
-              {isEditMode
-                ? 'Update sequence name, number of occurrences, and time slots. Interval cannot be changed.'
-                : 'Set up a recurring message sequence with schedules and templates.'}
-            </p>
-          </div>
-        </div>
-        <Link
-          to={isEditMode && programId ? `/whatsapp/dashboard/${projectId}/programs/${programId}` : `/whatsapp/dashboard/${projectId}/programs`}
-          className="shrink-0 self-start sm:self-center"
-        >
-          <Button variant="outline" size="sm" className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            {isEditMode ? 'Back to sequence' : 'Back to Sequences'}
-          </Button>
-        </Link>
-      </header>
-
-      <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl mx-auto">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Sequence details</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">Sequence name</Label>
-                <Input
-                  id="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="e.g. Welcome series"
-                  required
-                  maxLength={100}
-                />
-                {formErrors.form && (
-                  <p
-                    className="text-xs text-destructive"
-                    role="alert"
-                    aria-live="polite"
-                  >
-                    {formErrors.form}
-                  </p>
-                )}
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="occurrenceCount">Number of occurrences</Label>
-                <Input
-                  id="occurrenceCount"
-                  type="number"
-                  min={1}
-                  value={occurrenceCount}
-                  onChange={(e) => setOccurrenceCount(Number(e.target.value) || 1)}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {isEditMode ? (
-                <div className="space-y-2 sm:col-span-2">
-                  <Label>Interval (read-only)</Label>
-                  <p className="text-sm text-muted-foreground py-2">
-                    {intervalUnit === 'day'
-                      ? `Every ${intervalValue} day${intervalValue !== 1 ? 's' : ''}`
-                      : weekdays.length > 0
-                        ? `Week: ${weekdays.map((d) => WEEKDAY_OPTIONS.find((o) => o.value === d)?.label ?? '').filter(Boolean).join(', ')}`
-                        : 'Week'}
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <div className="space-y-2">
-                    <Label htmlFor="intervalUnit">Interval unit</Label>
-                    <Select
-                      value={intervalUnit}
-                      onValueChange={handleIntervalUnitChange}
-                    >
-                      <SelectTrigger id="intervalUnit">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {INTERVAL_UNITS.map((u) => (
-                          <SelectItem key={u.value} value={u.value}>
-                            {u.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    {intervalUnit === 'day' ? (
-                      <>
-                        <Label htmlFor="intervalValue">Interval value (every N days)</Label>
-                        <Input
-                          id="intervalValue"
-                          type="number"
-                          min={1}
-                          value={intervalValue}
-                          onChange={(e) => setIntervalValue(Number(e.target.value) || 1)}
-                        />
-                      </>
-                    ) : (
-                      <>
-                        <Label>Days of week</Label>
-                        <div className="flex flex-wrap gap-4 pt-1">
-                          {WEEKDAY_OPTIONS.map((opt) => (
-                            <label
-                              key={opt.value}
-                              className="flex items-center gap-2 cursor-pointer text-sm"
-                            >
-                              <Checkbox
-                                checked={weekdays.includes(opt.value)}
-                                onCheckedChange={() => toggleWeekday(opt.value)}
-                              />
-                              {opt.label}
-                            </label>
-                          ))}
-                        </div>
-                        {weekdays.length === 0 && (
-                          <p className="text-xs text-destructive">Select at least one day.</p>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Time slots per occurrence</CardTitle>
-            <p className="text-sm text-muted-foreground font-normal">
-              {totalOccurrences} occurrence{totalOccurrences !== 1 ? 's' : ''} total
-              {intervalUnit === 'week' && weekdays.length > 1 && ` (${occurrenceCount} weeks × ${weekdays.length} days)`}
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {occurrenceTimeSlots.map((slots, occIndex) => (
-              <div
-                key={occIndex}
-                className="rounded-lg border border-border bg-card shadow-sm p-4 space-y-3"
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Link
+                to={isEditMode && programId ? `/whatsapp/dashboard/${projectId}/programs/${programId}` : `/whatsapp/dashboard/${projectId}/programs`}
+                className="h-10 w-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
               >
-                <div className="flex items-center justify-between">
-                  <h4 className="text-sm font-semibold text-foreground">
-                    {getOccurrenceLabel(
-                      intervalUnit,
-                      intervalValue,
-                      intervalUnit === 'week' ? weekdays : undefined,
-                      occIndex,
-                    )}
-                  </h4>
-                  {occurrenceTimeSlots.length > 1 && (
-                    <Select
-                      value=""
-                      onValueChange={(val) => {
-                        if (!val) return;
-                        const fromIndex = parseInt(val, 10);
-                        if (!isNaN(fromIndex) && occurrenceTimeSlots[fromIndex]) {
-                          setSlotsForOccurrence(occIndex, JSON.parse(JSON.stringify(occurrenceTimeSlots[fromIndex])));
-                          toastUtils.success('Slots copied successfully');
-                        }
-                      }}
-                    >
-                      <SelectTrigger className="w-[180px] h-8 text-xs">
-                        <SelectValue placeholder="Copy slots from..." />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {occurrenceTimeSlots.map((_, i) => {
-                          if (i === occIndex) return null;
-                          return (
-                            <SelectItem key={i} value={i.toString()} className="text-xs">
-                              {getOccurrenceLabel(
-                                intervalUnit,
-                                intervalValue,
-                                intervalUnit === 'week' ? weekdays : undefined,
-                                i,
-                              )}
-                            </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                  )}
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+              <div>
+                <div className="flex items-center gap-1.5 text-green-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-0.5">
+                  <ListTree className="h-3 w-3" />
+                  Sequence Builder
                 </div>
-                <ProgramTimeSlotsEditor
-                  timeSlots={slots}
-                  occIndex={occIndex}
-                  setSlotsForOccurrence={setSlotsForOccurrence}
-                  slotErrors={formErrors.slotErrorsPerOccurrence?.[occIndex]}
-                />
+                <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl flex items-center gap-2">
+                  {isEditMode ? 'Edit Sequence' : 'Create Sequence'}
+                </h1>
+                <p className="text-slate-500 text-xs font-medium mt-1">
+                  {isEditMode
+                    ? 'Update sequence name and time slots for your automated workflow.'
+                    : 'Design a recurring message sequence with custom schedules and templates.'}
+                </p>
               </div>
-            ))}
-          </CardContent>
-        </Card>
+            </div>
+          </div>
 
-        <div className="pt-6 border-t border-border flex flex-wrap items-center gap-3">
-          <Button
-            type="submit"
-            disabled={isPending}
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                {isEditMode ? 'Saving...' : 'Creating...'}
-              </>
-            ) : isEditMode ? (
-              'Save changes'
-            ) : (
-              'Create Sequence'
-            )}
-          </Button>
-          <Link to={isEditMode && programId ? `/whatsapp/dashboard/${projectId}/programs/${programId}` : `/whatsapp/dashboard/${projectId}/programs`}>
-            <Button type="button" variant="outline">
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => navigate(-1)}
+              className="h-11 px-6 rounded-xl border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50"
+            >
               Cancel
             </Button>
-          </Link>
+            <Button
+              form="program-form"
+              type="submit"
+              disabled={isPending}
+              className="h-11 px-8 rounded-xl flex items-center gap-2 text-white font-bold text-sm shadow-xl shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{ backgroundColor: "#22B573" }}
+            >
+              {isPending ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  {isEditMode ? 'Saving...' : 'Creating...'}
+                </>
+              ) : (
+                <>
+                  {isEditMode ? <Save className="h-4 w-4" /> : <ListTree className="h-4 w-4" />}
+                  {isEditMode ? 'Save Changes' : 'Launch Sequence'}
+                </>
+              )}
+            </Button>
+          </div>
         </div>
-      </form>
+      </motion.div>
+
+      <main className="container mx-auto space-y-6 pb-20">
+        <form id="program-form" onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          {/* Left Column - Configuration */}
+          <div className="lg:col-span-12 space-y-6">
+            {/* Sequence Basics Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-2xl p-6 sm:p-8 transition-all duration-300 overflow-hidden"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                  <ListTodo className="h-4 w-4" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sequence Configuration</span>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div className="space-y-2.5 md:col-span-2">
+                  <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Sequence Name</Label>
+                  <Input
+                    id="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="e.g. Welcome Series - Premium"
+                    className="h-11 bg-slate-50/50 border-slate-200 rounded-xl focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                    required
+                    maxLength={100}
+                  />
+                  {formErrors.form && (
+                    <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider flex items-center gap-1 mt-2 ml-1">
+                      <AlertCircle className="h-3 w-3" /> {formErrors.form}
+                    </p>
+                  )}
+                </div>
+
+                <div className="space-y-2.5">
+                  <Label htmlFor="occurrenceCount" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Total Occurrences</Label>
+                  <Input
+                    id="occurrenceCount"
+                    type="number"
+                    min={1}
+                    value={occurrenceCount}
+                    onChange={(e) => setOccurrenceCount(Number(e.target.value) || 1)}
+                    className="h-11 bg-slate-50/50 border-slate-200 rounded-xl focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                  />
+                </div>
+
+                {isEditMode ? (
+                  <div className="space-y-2.5">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Frequency</Label>
+                    <div className="h-11 px-4 flex items-center gap-2 bg-slate-100/50 border border-slate-200 rounded-xl text-slate-600 font-bold text-xs italic">
+                      <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                      {intervalUnit === 'day'
+                        ? `Every ${intervalValue} day${intervalValue !== 1 ? 's' : ''}`
+                        : weekdays.length > 0
+                          ? `Repeats on: ${weekdays.map((d) => WEEKDAY_OPTIONS.find((o) => o.value === d)?.label.slice(0, 3) ?? '').filter(Boolean).join(', ')}`
+                          : 'Weekly'}
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-2.5">
+                      <Label htmlFor="intervalUnit" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Interval Unit</Label>
+                      <Select value={intervalUnit} onValueChange={handleIntervalUnitChange}>
+                        <SelectTrigger id="intervalUnit" className="h-11 bg-slate-50/50 border-slate-200 rounded-xl font-medium text-sm focus:ring-green-500/20 focus:border-green-500">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="rounded-xl border-slate-200">
+                          {INTERVAL_UNITS.map((u) => (
+                            <SelectItem key={u.value} value={u.value} className="rounded-lg py-2.5 text-sm">
+                              {u.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div className="md:col-span-2 lg:col-span-4 space-y-4 pt-2">
+                      {intervalUnit === 'day' ? (
+                        <div className="max-w-xs space-y-2.5">
+                          <Label htmlFor="intervalValue" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Interval (Every N Days)</Label>
+                          <Input
+                            id="intervalValue"
+                            type="number"
+                            min={1}
+                            value={intervalValue}
+                            onChange={(e) => setIntervalValue(Number(e.target.value) || 1)}
+                            className="h-11 bg-slate-50/50 border-slate-200 rounded-xl focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Select Repeat Days</Label>
+                          <div className="flex flex-wrap gap-2.5">
+                            {WEEKDAY_OPTIONS.map((opt) => (
+                              <label
+                                key={opt.value}
+                                className={`
+                                  flex items-center gap-2 rounded-xl px-4 py-2 border transition-all cursor-pointer
+                                  ${weekdays.includes(opt.value)
+                                    ? "bg-green-50 border-green-200 text-green-700 shadow-sm"
+                                    : "bg-slate-50/50 border-slate-200 text-slate-500 hover:border-slate-300 hover:bg-slate-50"}
+                                `}
+                              >
+                                <Checkbox
+                                  checked={weekdays.includes(opt.value)}
+                                  onCheckedChange={() => toggleWeekday(opt.value)}
+                                  className="border-slate-300 data-[state=checked]:bg-green-600 data-[state=checked]:border-green-600"
+                                />
+                                <span className="text-xs font-bold">{opt.label}</span>
+                              </label>
+                            ))}
+                          </div>
+                          {weekdays.length === 0 && (
+                            <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider mt-1 ml-1 flex items-center gap-1">
+                              <AlertCircle className="h-3 w-3" /> Select at least one day.
+                            </p>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </div>
+            </motion.div>
+
+            {/* Time Slots Section */}
+            <div className="space-y-6">
+              <div className="flex items-center justify-between px-2">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2">
+                    <div className="h-8 w-8 rounded-lg bg-green-50 flex items-center justify-center text-green-600 border border-green-100">
+                      <Clock className="h-4 w-4" />
+                    </div>
+                    <h3 className="text-lg font-black text-slate-900 tracking-tight">Timeline & Content</h3>
+                  </div>
+                  <p className="text-slate-500 text-[10px] font-medium ml-10">
+                    Configure message templates for each of the <span className="text-slate-900 font-bold">{totalOccurrences} scheduled occurrences</span>.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 gap-6">
+                {occurrenceTimeSlots.map((slots, occIndex) => (
+                  <motion.div
+                    key={occIndex}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + occIndex * 0.05 }}
+                    className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[24px] p-6 sm:p-8 transition-all duration-300 overflow-hidden"
+                  >
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6">
+                      <div className="flex items-center gap-4">
+                        <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 group-hover:bg-green-50 group-hover:border-green-100 transition-all font-black text-sm">
+                          {occIndex + 1}
+                        </div>
+                        <div>
+                          <h4 className="text-lg font-black text-slate-900 tracking-tight">
+                            {getOccurrenceLabel(
+                              intervalUnit,
+                              intervalValue,
+                              intervalUnit === 'week' ? weekdays : undefined,
+                              occIndex,
+                            )}
+                          </h4>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mt-0.5">Occurrence Entry</p>
+                        </div>
+                      </div>
+
+                      {occurrenceTimeSlots.length > 1 && (
+                        <div className="flex items-center gap-2">
+                          <Select
+                            value=""
+                            onValueChange={(val) => {
+                              if (!val) return;
+                              const fromIndex = parseInt(val, 10);
+                              if (!isNaN(fromIndex) && occurrenceTimeSlots[fromIndex]) {
+                                setSlotsForOccurrence(occIndex, JSON.parse(JSON.stringify(occurrenceTimeSlots[fromIndex])));
+                                toastUtils.success(`Copied content from ${getOccurrenceLabel(intervalUnit, intervalValue, intervalUnit === 'week' ? weekdays : undefined, fromIndex)}`);
+                              }
+                            }}
+                          >
+                            <SelectTrigger className="w-[200px] h-10 bg-slate-50/50 border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-400 focus:ring-green-500/20 focus:border-green-500">
+                              <SelectValue placeholder="Copy from other day..." />
+                            </SelectTrigger>
+                            <SelectContent className="rounded-xl border-slate-200">
+                              {occurrenceTimeSlots.map((_, i) => {
+                                if (i === occIndex) return null;
+                                return (
+                                  <SelectItem key={i} value={i.toString()} className="rounded-lg text-xs font-bold py-2.5">
+                                    {getOccurrenceLabel(
+                                      intervalUnit,
+                                      intervalValue,
+                                      intervalUnit === 'week' ? weekdays : undefined,
+                                      i,
+                                    )}
+                                  </SelectItem>
+                                );
+                              })}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="rounded-2xl bg-slate-50/30 border border-slate-100/50 p-1 transition-all group-hover:bg-white group-hover:border-slate-100">
+                      <ProgramTimeSlotsEditor
+                        timeSlots={slots}
+                        occIndex={occIndex}
+                        setSlotsForOccurrence={setSlotsForOccurrence}
+                        slotErrors={formErrors.slotErrorsPerOccurrence?.[occIndex]}
+                      />
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </form>
+      </main>
     </div>
   );
 }
-

@@ -1,12 +1,11 @@
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Download, Copy } from 'lucide-react';
+import { Download, Copy, X, FileJson, FileSpreadsheet, Share2 } from 'lucide-react';
 import type { Contact } from '@/schemas/contactSchema';
 import { toastUtils } from '@/lib/utils';
 
@@ -69,26 +68,72 @@ export default function ExportDialog({ isOpen, onClose, contacts }: ExportDialog
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Export Contacts</DialogTitle>
-          <DialogDescription>
-            Choose how you would like to export your contacts.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-3 py-4">
-          <Button onClick={handleExportJson} variant="outline" className="w-full justify-start h-12">
-            <Copy className="h-4 w-4 mr-3" />
-            <div className="flex flex-col items-start gap-1">
-              <span>Copy as JSON</span>
+      <DialogContent 
+        className="sm:max-w-[400px] border-0 bg-transparent p-0 shadow-none outline-none"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        showCloseButton={false}
+      >
+        <div className="relative w-full rounded-2xl p-8 shadow-2xl flex flex-col bg-white border border-slate-200">
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <div className="flex items-center gap-2 text-blue-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-1">
+                <Share2 className="h-3 w-3" />
+                Data Portability
+              </div>
+              <DialogTitle className="text-xl font-bold text-slate-900">
+                Export Audience
+              </DialogTitle>
+              <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
+                Total {contacts.length} contacts to export
+              </DialogDescription>
             </div>
-          </Button>
-          <Button onClick={handleExportCsv} variant="outline" className="w-full justify-start h-12">
-            <Download className="h-4 w-4 mr-3" />
-            <div className="flex flex-col items-start gap-1">
-              <span>Download CSV</span>
-            </div>
-          </Button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-50 text-slate-400 transition-colors border border-transparent hover:border-slate-100"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            <button
+              onClick={handleExportJson}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-blue-200 hover:shadow-lg hover:shadow-blue-900/5 transition-all group"
+            >
+              <div className="h-12 w-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-blue-600 group-hover:border-blue-100 transition-all">
+                <FileJson className="h-6 w-6" />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-bold text-slate-900">Copy as JSON</span>
+                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Clip to clipboard</span>
+              </div>
+            </button>
+
+            <button
+              onClick={handleExportCsv}
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-green-200 hover:shadow-lg hover:shadow-green-900/5 transition-all group"
+            >
+              <div className="h-12 w-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 group-hover:border-green-100 transition-all">
+                <FileSpreadsheet className="h-6 w-6" />
+              </div>
+              <div className="flex flex-col items-start">
+                <span className="text-sm font-bold text-slate-900">Download CSV</span>
+                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Excel compatible file</span>
+              </div>
+            </button>
+          </div>
+
+          <div className="mt-8 flex justify-end">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              className="h-11 px-6 rounded-xl font-bold text-slate-600 border-slate-200 hover:bg-slate-50 transition-all"
+            >
+              Cancel
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

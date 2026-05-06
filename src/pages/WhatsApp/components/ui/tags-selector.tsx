@@ -17,36 +17,29 @@ import {
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { WabaTag } from "@/schemas/tagSchema";
 
-interface TagsSelectorProps {
-  tags: WabaTag[];
+export interface TagsSelectorProps {
+  tags: any[];
   value?: string[];
   onChange: (value: string[]) => void;
   disabled?: boolean;
   placeholder?: string;
+  className?: string;
 }
 
-export function TagsSelector({ 
+export const TagsSelector: React.FC<TagsSelectorProps> = ({ 
   tags, 
   value = [], 
   onChange, 
   disabled, 
-  placeholder = "Select tags..." 
-}: TagsSelectorProps) {
+  placeholder = "Select tags...",
+  className
+}) => {
   const [open, setOpen] = useState(false);
   const hasInitialized = useRef(false);
   const availableTagNames = useMemo(() => new Set(tags.map((tag) => tag.name)), [tags]);
 
-  useEffect(() => {
-    if (!hasInitialized.current) {
-      hasInitialized.current = true;
-      return;
-    }
-
-    const filteredValue = value.filter((tagName) => availableTagNames.has(tagName));
-    if (filteredValue.length !== value.length) {
-      onChange(filteredValue);
-    }
-  }, [availableTagNames, onChange, value]);
+  // Removed auto-cleanup effect that was wiping values during loading/project switching
+  // which was causing filter selections to disappear.
 
   const handleSelect = (tagName: string) => {
     if (value.includes(tagName)) {
@@ -65,40 +58,47 @@ export function TagsSelector({
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
           <Button
+            type="button"
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className="w-full justify-between"
+            className={cn("w-full justify-between h-12 rounded-xl border-slate-200 bg-white hover:bg-slate-50 transition-all px-4", className)}
             disabled={disabled}
           >
             {value.length > 0 ? (
-              <span>{value.length} tag{value.length > 1 ? 's' : ''} selected</span>
+              <span className="text-sm font-bold text-slate-700">{value.length} tag{value.length > 1 ? 's' : ''} selected</span>
             ) : (
-              <span>{placeholder}</span>
+              <span className="text-sm font-medium text-slate-400">{placeholder}</span>
             )}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-slate-400" />
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
+        <PopoverContent className="w-[--radix-popover-trigger-width] p-0" align="start">
           <Command>
             <CommandInput placeholder="Search tags..." />
             <CommandEmpty>No tags found.</CommandEmpty>
             <CommandGroup className="max-h-64 overflow-auto">
-              {tags.map((tag) => (
-                <CommandItem
-                  key={tag._id}
-                  value={tag.name}
-                  onSelect={() => handleSelect(tag.name)}
-                >
-                  <Check
-                    className={cn(
-                      "mr-2 h-4 w-4",
-                      value.includes(tag.name) ? "opacity-100" : "opacity-0"
-                    )}
-                  />
-                  {tag.name}
-                </CommandItem>
-              ))}
+              {tags.map((tag, index) => {
+                const tagName = typeof tag === 'string' ? tag : tag.name;
+                const tagId = typeof tag === 'object' && tag?._id ? tag._id : `tag-${index}`;
+                
+                return (
+                  <CommandItem
+                    key={tagId}
+                    value={tagName}
+                    onSelect={() => handleSelect(tagName)}
+                    className="rounded-xl m-1"
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4 text-green-600",
+                        value.includes(tagName) ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    <span className="text-xs font-bold text-slate-700">{tagName}</span>
+                  </CommandItem>
+                );
+              })}
             </CommandGroup>
           </Command>
         </PopoverContent>

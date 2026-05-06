@@ -1,7 +1,9 @@
 import React from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { 
+  Dialog, 
+  DialogContent, 
+} from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { 
   Download, 
   Copy, 
@@ -9,9 +11,14 @@ import {
   Image as ImageIcon, 
   Video as VideoIcon,
   Calendar,
-  HardDrive
+  HardDrive,
+  X,
+  Eye,
+  ArrowRight
 } from 'lucide-react';
 import { toastUtils } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { motion } from 'framer-motion';
 
 type MediaFile = {
   _id: string;
@@ -76,107 +83,124 @@ const PreviewDialog: React.FC<Props> = ({ file, open, onOpenChange }) => {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] flex flex-col p-0 gap-0">
-        <DialogHeader className="px-6 pt-6 pb-4">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <DialogTitle className="text-xl font-semibold truncate" title={file.fileName}>
-                {file.fileName}
-              </DialogTitle>
-              <DialogDescription className="mt-2 space-y-1">
-                <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
-                  <div className="flex items-center gap-2">
-                    {isImage && <ImageIcon className="h-4 w-4" />}
-                    {isVideo && <VideoIcon className="h-4 w-4" />}
-                    {!isImage && !isVideo && <FileText className="h-4 w-4" />}
-                    <span>{file.mimeType}</span>
+      <DialogContent 
+        className="max-w-4xl border-0 bg-transparent p-0 shadow-none outline-none"
+        showCloseButton={false}
+      >
+        <div className="relative w-full rounded-[24px] overflow-hidden shadow-2xl flex flex-col bg-white border border-slate-200">
+          {/* Premium Header */}
+          <div className="bg-slate-50/80 backdrop-blur-md px-8 py-6 border-b border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="h-12 w-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 shadow-sm">
+                {isImage && <ImageIcon className="h-6 w-6 text-blue-500" />}
+                {isVideo && <VideoIcon className="h-6 w-6 text-purple-500" />}
+                {!isImage && !isVideo && <FileText className="h-6 w-6 text-orange-500" />}
+              </div>
+              <div>
+                <h3 className="text-lg font-black text-slate-900 line-clamp-1 max-w-md">
+                  {file.fileName}
+                </h3>
+                <div className="flex items-center gap-3 mt-1">
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <HardDrive className="h-3 w-3" />
+                    {formatFileSize(file.fileSize)}
                   </div>
-                  <div className="flex items-center gap-2">
-                    <HardDrive className="h-4 w-4" />
-                    <span>{formatFileSize(file.fileSize)}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span>{formatDate(file.createdAt)}</span>
+                  <div className="h-1 w-1 rounded-full bg-slate-300" />
+                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                    <Calendar className="h-3 w-3" />
+                    {formatDate(file.createdAt)}
                   </div>
                 </div>
-              </DialogDescription>
+              </div>
             </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
+
+            <div className="flex items-center gap-2">
               <Button
-                variant="outline"
-                size="sm"
-                onClick={handleCopyUrl}
-                className="gap-2"
+                variant="ghost"
+                size="icon"
+                onClick={() => onOpenChange(false)}
+                className="h-10 w-10 rounded-xl hover:bg-black/5 transition-colors"
               >
-                <Copy className="h-4 w-4" />
-                Copy URL
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleDownload}
-                className="gap-2"
-              >
-                <Download className="h-4 w-4" />
-                Download
+                <X className="h-5 w-5 text-slate-400" />
               </Button>
             </div>
           </div>
-        </DialogHeader>
 
-        <Separator />
-
-        <div className="flex-1 overflow-auto p-6">
-          <div className="flex items-center justify-center min-h-[400px] bg-muted/30 rounded-lg">
-            {isImage && (
-              <div className="w-full flex items-center justify-center">
-                <img
+          {/* Preview Area */}
+          <div className="p-8 flex-1 overflow-auto bg-[#fafafa]">
+            <div className="min-h-[400px] flex items-center justify-center bg-white rounded-[24px] border border-slate-100 shadow-inner overflow-hidden relative group">
+              {isImage && (
+                <motion.img
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
                   src={file.filePath}
                   alt={file.fileName}
-                  className="max-w-full max-h-[calc(90vh-300px)] object-contain rounded-lg shadow-lg"
+                  className="max-w-full max-h-[60vh] object-contain transition-transform duration-500 group-hover:scale-105"
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}
                 />
-              </div>
-            )}
-            {isVideo && (
-              <div className="w-full flex items-center justify-center">
+              )}
+              {isVideo && (
                 <video
                   src={file.filePath}
-                  className="max-w-full max-h-[calc(90vh-300px)] object-contain rounded-lg shadow-lg"
+                  className="max-w-full max-h-[60vh] object-contain"
                   controls
                   autoPlay
                   onError={(e) => {
                     e.currentTarget.style.display = 'none';
                   }}
                 />
+              )}
+              {!isImage && !isVideo && (
+                <div className="flex flex-col items-center justify-center text-center p-12 space-y-6">
+                  <div className="h-24 w-24 rounded-[32px] bg-slate-50 border border-slate-100 flex items-center justify-center shadow-sm">
+                    <FileText className="h-12 w-12 text-slate-200" />
+                  </div>
+                  <div className="space-y-2">
+                    <h4 className="text-xl font-black text-slate-900">Preview not available</h4>
+                    <p className="text-slate-500 text-sm font-medium max-w-sm mx-auto">
+                      This file type cannot be previewed in the browser. You can download it or copy the URL to access it.
+                    </p>
+                  </div>
+                </div>
+              )}
+              
+              <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Badge variant="outline" className="bg-white/80 backdrop-blur-md border-slate-200 text-slate-600 font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-widest shadow-sm">
+                  {file.mimeType}
+                </Badge>
               </div>
-            )}
-            {!isImage && !isVideo && (
-              <div className="flex flex-col items-center justify-center text-center p-8 space-y-4">
-                <div className="p-6 rounded-full bg-muted">
-                  <FileText className="h-12 w-12 text-muted-foreground" />
-                </div>
-                <div className="space-y-2">
-                  <p className="text-lg font-medium">Preview not available</p>
-                  <p className="text-sm text-muted-foreground max-w-md">
-                    This file type cannot be previewed. Use the download or copy URL button to access the file.
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 pt-2">
-                  <Button variant="outline" size="sm" onClick={handleDownload}>
-                    <Download className="h-4 w-4 mr-2" />
-                    Download File
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={handleCopyUrl}>
-                    <Copy className="h-4 w-4 mr-2" />
-                    Copy URL
-                  </Button>
-                </div>
-              </div>
-            )}
+            </div>
+          </div>
+
+          {/* Premium Footer */}
+          <div className="px-8 py-6 bg-white border-t border-slate-100 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+               <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-widest">
+                ID: {file._id.slice(-8)}
+              </Badge>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                onClick={handleCopyUrl}
+                className="h-11 px-5 rounded-xl border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-all flex items-center gap-2"
+              >
+                <Copy className="h-4 w-4" />
+                Copy URL
+              </Button>
+              <Button
+                onClick={handleDownload}
+                className="h-11 px-6 rounded-xl flex items-center gap-2 text-white font-bold text-sm shadow-lg shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                style={{ backgroundColor: "#22B573" }}
+              >
+                <Download className="h-4 w-4" />
+                Download File
+                <ArrowRight className="h-4 w-4 ml-1" />
+              </Button>
+            </div>
           </div>
         </div>
       </DialogContent>

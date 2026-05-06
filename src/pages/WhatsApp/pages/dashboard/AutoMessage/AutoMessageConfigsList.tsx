@@ -146,8 +146,8 @@ export default function AutoMessageConfigsList() {
                   {/* Left: Main Info */}
                   <div className="flex-1 space-y-4">
                     <div className="flex items-start gap-4">
-                      <div className={`h-12 w-12 rounded-2xl flex items-center justify-center shrink-0 shadow-sm transition-colors ${cfg.enabled ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
-                        {cfg.enabled ? <Sparkles className="h-6 w-6" /> : <PowerOff className="h-6 w-6" />}
+                      <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${cfg.enabled ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
+                        <MessageSquare className="h-5 w-5" />
                       </div>
                       
                       <div className="space-y-1">
@@ -161,12 +161,6 @@ export default function AutoMessageConfigsList() {
                               MEDIA
                             </Badge>
                           )}
-                          <Badge 
-                            variant={cfg.enabled ? 'default' : 'secondary'}
-                            className={`text-[10px] font-bold px-2 py-0 uppercase tracking-widest ${cfg.enabled ? 'bg-green-500 hover:bg-green-600' : 'bg-slate-100 text-slate-500'}`}
-                          >
-                            {cfg.enabled ? 'Active' : 'Paused'}
-                          </Badge>
                         </div>
                         <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
                           <MessageSquare className="h-3 w-3" />
@@ -197,37 +191,31 @@ export default function AutoMessageConfigsList() {
 
                   {/* Right: Actions */}
                   <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-                    {cfg.enabled ? (
+                    <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl p-1 gap-1">
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleToggleClick(cfg)}
                         disabled={toggling}
-                        className="h-10 px-4 rounded-xl border-orange-200 text-orange-600 font-bold text-xs hover:bg-orange-50 hover:border-orange-300 transition-all"
+                        className={`h-9 px-3 rounded-lg flex items-center gap-2 font-bold text-xs transition-all ${cfg.enabled
+                          ? "bg-white text-green-600 shadow-sm border border-slate-100"
+                          : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                          }`}
                       >
-                        <Pause className="h-4 w-4 mr-2" />
-                        Pause
+                        {cfg.enabled ? <Power className="h-3.5 w-3.5" /> : <PowerOff className="h-3.5 w-3.5" />}
+                        {cfg.enabled ? "Active" : "Paused"}
                       </Button>
-                    ) : (
+
                       <Button
-                        variant="outline"
+                        variant="ghost"
                         size="sm"
-                        onClick={() => handleToggleClick(cfg)}
-                        disabled={toggling}
-                        className="h-10 px-4 rounded-xl border-green-200 text-green-600 font-bold text-xs hover:bg-green-50 hover:border-green-300 transition-all"
+                        onClick={() => handleDeleteClick(cfg)}
+                        disabled={deleting}
+                        className="h-9 w-9 p-0 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
                       >
-                        <Play className="h-4 w-4 mr-2" />
-                        Activate
+                        <Trash2 className="h-4 w-4" />
                       </Button>
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteClick(cfg)}
-                      className="h-10 w-10 rounded-xl p-0 text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    </div>
                   </div>
                 </div>
               </motion.div>

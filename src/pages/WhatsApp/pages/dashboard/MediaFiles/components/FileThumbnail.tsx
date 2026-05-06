@@ -2,9 +2,9 @@ import React from 'react';
 import { Image, Video, FileText } from 'lucide-react';
 
 type MediaFile = {
-  mimeType: string;
-  filePath: string;
-  fileName: string;
+  mimeType?: string;
+  filePath?: string;
+  fileName?: string;
 };
 
 type Props = {
@@ -13,9 +13,9 @@ type Props = {
   rounded?: boolean;
 };
 
-const getFileIcon = (mimeType: string) => {
-  if (mimeType.startsWith('image/')) return <Image className="h-5 w-5 text-blue-500" />;
-  if (mimeType.startsWith('video/')) return <Video className="h-5 w-5 text-purple-500" />;
+const getFileIcon = (mimeType?: string) => {
+  if (mimeType?.startsWith('image/')) return <Image className="h-5 w-5 text-blue-500" />;
+  if (mimeType?.startsWith('video/')) return <Video className="h-5 w-5 text-purple-500" />;
   return <FileText className="h-5 w-5 text-green-500" />;
 };
 
@@ -23,6 +23,15 @@ const FileThumbnail: React.FC<Props> = ({ file, size = 'small', rounded = true }
   const baseClass = size === 'large' ? 'w-full h-40' : 'w-12 h-12';
   const radiusClass = rounded ? 'rounded-lg' : '';
   const containerClass = `${baseClass} ${radiusClass} overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0`;
+
+  if (!file || !file.mimeType) {
+    return (
+      <div className={`${baseClass} ${radiusClass} bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0`}>
+        <FileText className="h-5 w-5 text-slate-300" />
+      </div>
+    );
+  }
+
   if (file.mimeType.startsWith('image/')) {
     return (
       <div className={containerClass}>

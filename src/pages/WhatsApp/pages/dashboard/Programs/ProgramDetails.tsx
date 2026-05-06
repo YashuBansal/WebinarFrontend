@@ -1,16 +1,21 @@
 import { Link, useParams } from "react-router-dom";
 import { useState, useEffect, useMemo } from "react";
+import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
   ArrowLeft,
   Loader2,
   AlertCircle,
   ListTodo,
   FileText,
-  // Pencil,
+  Calendar,
+  Clock,
+  ListTree,
+  Zap,
+  Settings,
+  Activity,
 } from "lucide-react";
 import { useProjectContext } from "@/context/ProjectContext";
 import { useProgramById, useUpdateProgram } from "@/hooks/usePrograms";
@@ -42,6 +47,10 @@ export default function ProgramDetails() {
     useState<AutoAssignCriteriaPayload | null>(null);
   const [apiDialogOpen, setApiDialogOpen] = useState(false);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   // Sync state when program loads
   useEffect(() => {
     if (program) {
@@ -66,7 +75,6 @@ export default function ProgramDetails() {
             if (cleaned) variables.add(cleaned);
           }
         })
-
       })
     })
 
@@ -112,6 +120,7 @@ export default function ProgramDetails() {
     6: "Saturday",
     7: "Sunday",
   };
+
   const formatInterval = (p: NonNullable<typeof program>) => {
     if (p.intervalUnit === "week") {
       if (p.weekdays?.length) {
@@ -129,35 +138,45 @@ export default function ProgramDetails() {
 
   if (!programId || !selectedProject) {
     return (
-      <div className="p-6">
-        <p className="text-muted-foreground">Missing project or program.</p>
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+          <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
+          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Missing Context</AlertTitle>
+          <AlertDescription className="text-slate-500 font-medium">
+            Please select a project and a valid sequence to view details.
+          </AlertDescription>
+        </Alert>
       </div>
     );
   }
 
   if (programLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-[400px] flex items-center justify-center">
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative">
+            <div className="h-12 w-12 rounded-full border-4 border-green-100 border-t-green-500 animate-spin" />
+            <Loader2 className="h-6 w-6 text-green-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
+          </div>
+          <p className="text-slate-500 font-bold text-xs uppercase tracking-widest animate-pulse">Loading sequence details...</p>
+        </div>
       </div>
     );
   }
 
   if (programError || !program) {
     return (
-      <div className="p-6">
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Failed to load program. It may not exist or you don&apos;t have
-            access.
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+          <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
+          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Error Loading Sequence</AlertTitle>
+          <AlertDescription className="text-slate-500 font-medium">
+            Failed to load sequence details. It may not exist or you don't have access.
           </AlertDescription>
+          <Link to={`/whatsapp/dashboard/${projectId}/programs`} className="mt-6 block">
+            <Button variant="outline" className="w-full rounded-xl border-slate-200">Back to Sequences</Button>
+          </Link>
         </Alert>
-        <Link to={`/whatsapp/dashboard/${projectId}/programs`}>
-          <Button variant="outline" className="mt-4">
-            Back to Sequences
-          </Button>
-        </Link>
       </div>
     );
   }
@@ -165,65 +184,145 @@ export default function ProgramDetails() {
   const isProgramCancelled = !program.isActive || program.isDeleted;
 
   return (
-    <div className="p-6 space-y-6 overflow-y-auto">
-      <div className="flex items-center gap-4">
-        <Link to={`/whatsapp/dashboard/${projectId}/programs`}>
-          <Button variant="ghost" size="sm" className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Sequences
-          </Button>
-        </Link>
-        <div className="ml-auto">
-          <Button
-            variant="outline"
-            size="sm"
-            className="gap-2"
-            onClick={() => setApiDialogOpen(true)}
-          >
-            <FileText className="h-4 w-4" />
-            API
-          </Button>
-        </div>
-        {/* <Link to={`/whatsapp/dashboard/${projectId}/programs/${programId}/edit`}>
-          <Button variant="outline" size="sm" className="gap-2">
-            <Pencil className="h-4 w-4" />
-            Edit
-          </Button>
-        </Link> */}
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ListTodo className="h-5 w-5" />
-            {program.name}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <p className="text-sm text-muted-foreground">
-            <span className="font-medium">Interval:</span>{" "}
-            {formatInterval(program)} ·{" "}
-            <span className="font-medium">Occurrences:</span>{" "}
-            {getTotalOccurrenceCount(program)} total
-            {" · "}
-            <span className="font-medium">Time slots:</span>{" "}
-            {(program.occurrenceTimeSlots ?? []).reduce(
-              (sum, slots) => sum + (slots?.length ?? 0),
-              0,
-            )}{" "}
-            total across occurrences
-          </p>
-          <div>
-            {program.isActive ? (
-              <Badge className="bg-green-600">Active</Badge>
-            ) : (
-              <Badge variant="secondary">Inactive</Badge>
-            )}
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Link
+                to={`/whatsapp/dashboard/${projectId}/programs`}
+                className="h-10 w-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+              <div>
+                <div className="flex items-center gap-1.5 text-green-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-0.5">
+                  <ListTree className="h-3 w-3" />
+                  Sequence Analytics
+                </div>
+                <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl flex items-center gap-2">
+                  {program.name}
+                </h1>
+                <div className="flex flex-wrap items-center gap-4 mt-2">
+                  <div className="flex items-center gap-1.5 text-slate-500 font-bold text-[10px] uppercase tracking-wider">
+                    <Calendar className="h-3.5 w-3.5 text-slate-400" />
+                    {formatInterval(program)}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-500 font-bold text-[10px] uppercase tracking-wider">
+                    <Clock className="h-3.5 w-3.5 text-slate-400" />
+                    {getTotalOccurrenceCount(program)} Occurrences
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {program.isDeleted ? (
+                      <Badge variant="secondary" className="bg-red-50 text-red-600 border-red-100 rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                        Cancelled
+                      </Badge>
+                    ) : program.isActive ? (
+                      <Badge className="bg-green-50 text-green-600 border-green-100 rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                        Active
+                      </Badge>
+                    ) : (
+                      <Badge variant="secondary" className="bg-slate-100 text-slate-500 border-slate-200 rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                        Inactive
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-        </CardContent>
-      </Card>
 
-      <ProgramTimeSlotsCard program={program} />
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              onClick={() => setApiDialogOpen(true)}
+              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 hover:bg-slate-50 font-bold text-sm transition-all active:scale-[0.98] shadow-sm"
+            >
+              <FileText className="h-4 w-4" />
+              API Details
+            </Button>
+            <Link to={`/whatsapp/dashboard/${projectId}/programs/${programId}/edit`}>
+              <Button
+                disabled={program.isDeleted}
+                className="h-11 px-6 rounded-xl flex items-center gap-2 text-white font-bold text-sm shadow-xl shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                style={{ backgroundColor: "#22B573" }}
+              >
+                <Settings className="h-4 w-4" />
+                Configure
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </motion.div>
+
+      <main className="container mx-auto space-y-6 pb-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+          {/* Left Column: Timeline & Assignments */}
+          <div className="lg:col-span-8 space-y-6">
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <div className="flex items-center gap-3 mb-6 px-2">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                  <Activity className="h-4 w-4" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sequence Timeline</span>
+              </div>
+              <ProgramTimeSlotsCard program={program} />
+            </motion.section>
+
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+            >
+              <div className="flex items-center gap-3 mb-6 px-2">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                  <Zap className="h-4 w-4" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Active Assignments</span>
+              </div>
+              <ProgramAssignmentsSection programId={programId} program={program} />
+            </motion.section>
+          </div>
+
+          {/* Right Column: Automation Rules */}
+          <div className="lg:col-span-4 space-y-12">
+            <motion.section
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.1 }}
+            >
+              <div className="flex items-center gap-3 mb-6 px-2">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                  <Settings className="h-4 w-4" />
+                </div>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Automation Rules</span>
+              </div>
+              <AutoAssignRuleBuilder
+                isAutoAssignable={isAutoAssignable}
+                onAutoAssignableChange={setIsAutoAssignable}
+                criteria={autoAssignCriteria}
+                onCriteriaChange={setAutoAssignCriteria}
+                onSave={handleSaveAutoAssignRules}
+                isSaving={updateProgramMutation.isPending}
+                disabled={isProgramCancelled}
+              />
+            </motion.section>
+          </div>
+        </div>
+      </main>
 
       <ProgramApiExecutionDetailsDialog
         open={apiDialogOpen}
@@ -231,21 +330,6 @@ export default function ProgramDetails() {
         programName={program.name}
         requiredVariables={requiredVariables}
       />
-
-      <div className="space-y-4">
-        <AutoAssignRuleBuilder
-          isAutoAssignable={isAutoAssignable}
-          onAutoAssignableChange={setIsAutoAssignable}
-          criteria={autoAssignCriteria}
-          onCriteriaChange={setAutoAssignCriteria}
-          onSave={handleSaveAutoAssignRules}
-          isSaving={updateProgramMutation.isPending}
-          disabled={isProgramCancelled}
-        />
-      </div>
-
-      <ProgramAssignmentsSection programId={programId} program={program} />
     </div>
   );
 }
-

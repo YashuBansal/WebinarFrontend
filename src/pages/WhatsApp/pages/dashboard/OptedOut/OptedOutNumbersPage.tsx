@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
 import { useProjectContext } from '@/context/ProjectContext';
 import { toastUtils } from '@/lib/utils';
 import {
@@ -9,7 +11,21 @@ import {
   type OptedOutNumber,
 } from '@/api/modules/whatsappOptoutAPI';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Clock, Loader2, RefreshCw } from 'lucide-react';
+import {
+  Clock,
+  Loader2,
+  RefreshCw,
+  Hash,
+  Calendar,
+  X,
+  ShieldCheck,
+  Search,
+  Filter,
+  UserX,
+  UserCheck,
+  AlertCircle
+} from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 const OPT_OUT_QUERY_KEY = 'whatsapp-optout';
 
@@ -83,141 +99,238 @@ export default function OptedOutNumbersPage() {
 
   if (isError) {
     return (
-      <div className="container mx-auto py-8">
-        <Card>
-          <CardContent className="py-8">
-            <p className="text-red-600">Failed to load opted out numbers</p>
-          </CardContent>
-        </Card>
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+          <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
+          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Error Loading Numbers</AlertTitle>
+          <AlertDescription className="text-slate-500 font-medium">
+            Failed to load opted out numbers. Please check your connection and try again.
+          </AlertDescription>
+          <Button onClick={() => refetch()} variant="outline" className="mt-6 w-full rounded-xl border-slate-200">
+            Retry Connection
+          </Button>
+        </Alert>
       </div>
     );
   }
 
-  return (
-    <div className="container mx-auto py-8 space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold">Opted Out Numbers</h1>
-        <p className="text-gray-600 mt-2">
-          People who asked not to get messages from this number. They can text
-          START anytime to hear from you again.
-        </p>
-        <p className="text-lg font-semibold text-gray-800 mt-2">
-          Total opted out: {totalCount}
-        </p>
-      </div>
 
-      <Card>
-        <CardContent className="border-b py-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="text-xs text-gray-600">Start Date</label>
-                <Input
-                  type="date"
-                  value={startDate}
-                  onChange={(event) => setStartDate(event.target.value)}
-                />
-              </div>
-              <div className="space-y-1">
-                <label className="text-xs text-gray-600">End Date</label>
-                <Input
-                  type="date"
-                  value={endDate}
-                  onChange={(event) => setEndDate(event.target.value)}
-                />
-              </div>
+  return (
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-1.5 text-red-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-0.5">
+              <ShieldCheck className="h-3.5 w-3.5" />
+              Compliance Management
             </div>
-            <div className="flex flex-col items-end gap-2">
-              {autoRefreshEnabled && (
-                <div className="flex items-center gap-2 text-xs text-green-600">
-                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-                  <span>Auto-refresh active</span>
-                </div>
-              )}
-              <div className="flex items-center gap-2">
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl flex items-center gap-2">
+              Opted Out Numbers
+            </h1>
+            <p className="text-slate-500 text-xs font-medium">
+              People who asked not to get messages from this number. They can text START anytime to re-subscribe.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex flex-col items-end mr-2 hidden sm:flex">
               {lastRefreshTime && (
-                <span className="text-xs text-gray-600">
-                  Last refreshed: {lastRefreshTime.toLocaleTimeString()}
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                  Last Updated: {lastRefreshTime.toLocaleTimeString()}
                 </span>
               )}
-              <Button
-                variant="outline"
-                onClick={handleRefresh}
-                disabled={isRefreshing || !projectId}
+              {autoRefreshEnabled && (
+                <div className="flex items-center gap-1.5 mt-1">
+                  <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+                  <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Live Sync Active</span>
+                </div>
+              )}
+            </div>
+
+            <Button
+              onClick={handleRefresh}
+              variant="outline"
+              disabled={isRefreshing || !projectId}
+              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+            >
+              <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+              {isRefreshing ? 'Syncing...' : 'Sync Now'}
+            </Button>
+
+            <Button
+              onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
+              className={`h-11 px-6 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${autoRefreshEnabled
+                ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/10'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
+            >
+              <motion.div
+                animate={autoRefreshEnabled ? { rotate: 360 } : { rotate: 0 }}
+                transition={autoRefreshEnabled ? { repeat: Infinity, duration: 4, ease: "linear" } : { duration: 0.5 }}
               >
-                {isRefreshing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Refreshing...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="h-4 w-4 mr-2" />
-                    Refresh
-                  </>
+                <Clock className="h-4 w-4" />
+              </motion.div>
+              {autoRefreshEnabled ? 'Live' : 'Manual'}
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+
+      <main className="container mx-auto space-y-6 pb-12">
+
+        {/* List Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500"
+        >
+          <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/30">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+              <div>
+                <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+                  <UserX className="h-5 w-5 text-red-600" />
+                  Blocklist Management
+                </h2>
+                <p className="text-slate-500 text-xs font-medium mt-1">View and manage recipients who opted out of communications</p>
+              </div>
+
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="space-y-1 min-w-[140px]">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Start Date</span>
+                    <Input
+                      type="date"
+                      value={startDate}
+                      onChange={(event) => setStartDate(event.target.value)}
+                      className="h-10 rounded-xl border-slate-200 bg-white/50 focus:bg-white text-xs font-bold"
+                    />
+                  </div>
+                  <div className="space-y-1 min-w-[140px]">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">End Date</span>
+                    <Input
+                      type="date"
+                      value={endDate}
+                      onChange={(event) => setEndDate(event.target.value)}
+                      className="h-10 rounded-xl border-slate-200 bg-white/50 focus:bg-white text-xs font-bold"
+                    />
+                  </div>
+                </div>
+
+                {(startDate || endDate) && (
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => { setStartDate(''); setEndDate(''); }}
+                    className="h-10 w-10 mt-5 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
                 )}
-              </Button>
-              <Button
-                variant={autoRefreshEnabled ? 'default' : 'outline'}
-                onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
-                disabled={!projectId}
-              >
-                <Clock className="h-4 w-4 mr-2" />
-                {autoRefreshEnabled ? 'Disable Auto' : 'Enable Auto'}
-              </Button>
               </div>
             </div>
           </div>
-        </CardContent>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="border-b bg-gray-50">
-                  <th className="text-left px-4 py-3">Phone Number</th>
-                  <th className="text-left px-4 py-3">Reason</th>
-                  <th className="text-left px-4 py-3">Opted Out At</th>
-                  <th className="text-right px-4 py-3">Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  <tr>
-                    <td className="px-4 py-6 text-gray-500" colSpan={4}>
-                      Loading...
-                    </td>
-                  </tr>
-                ) : rows.length === 0 ? (
-                  <tr>
-                    <td className="px-4 py-6 text-gray-500" colSpan={4}>
-                      No opted out numbers found.
-                    </td>
-                  </tr>
-                ) : (
-                  rows.map((item) => (
-                    <tr key={item._id} className="border-b">
-                      <td className="px-4 py-3">{item.phoneNumber}</td>
-                      <td className="px-4 py-3">{item.reason || 'N/A'}</td>
-                      <td className="px-4 py-3">
-                        {new Date(item.createdAt).toLocaleString()}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <Button
-                          size="sm"
-                          onClick={() => optInMutation.mutate(item._id)}
-                          disabled={optInMutation.isPending}
-                        >
-                          Opt In
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+
+          <div className="p-4 sm:p-8">
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+                <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                  <Loader2 className="h-8 w-8 animate-spin text-red-500" />
+                </div>
+                <p className="font-bold text-sm uppercase tracking-widest">Loading Records...</p>
+              </div>
+            ) : rows.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 text-slate-400 bg-slate-50/20 rounded-[20px] border border-dashed border-slate-100">
+                <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-slate-50">
+                  <ShieldCheck className="h-8 w-8 opacity-20" />
+                </div>
+                <p className="font-bold text-sm uppercase tracking-widest">No opted out numbers</p>
+                <p className="text-xs font-medium mt-1">Your compliance list is currently empty</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {rows.map((item, index) => (
+                  <motion.div
+                    key={item._id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.03 }}
+                    className="group flex flex-col sm:flex-row sm:items-center gap-6 p-5 rounded-2xl border border-slate-100 bg-white hover:bg-slate-50/50 hover:border-red-400/20 hover:shadow-lg hover:shadow-slate-200/40 transition-all duration-300"
+                  >
+                    {/* Number Icon */}
+                    <div className="h-12 w-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform">
+                      <Hash className="h-5 w-5" />
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-center">
+                      <div className="space-y-0.5">
+                        <div className="flex items-center gap-2 mb-1">
+                          <Badge variant="outline" className="rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-none bg-red-50 text-red-600">
+                            Opted Out
+                          </Badge>
+                        </div>
+                        <h3 className="font-black text-slate-900 text-lg tracking-tight group-hover:text-red-600 transition-colors">
+                          {item.phoneNumber}
+                        </h3>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <AlertCircle className="h-3 w-3 text-slate-400" />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Reason</span>
+                        </div>
+                        <p className="text-sm font-bold text-slate-600 italic">
+                          {item.reason || 'No specific reason provided'}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-3 w-3 text-slate-400" />
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Event Date</span>
+                        </div>
+                        <p className="text-xs font-bold text-slate-500">
+                          {new Date(item.createdAt).toLocaleString(undefined, {
+                            dateStyle: 'medium',
+                            timeStyle: 'short'
+                          })}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Action */}
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => optInMutation.mutate(item._id)}
+                        disabled={optInMutation.isPending}
+                        className="h-10 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/10 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
+                      >
+                        {optInMutation.isPending ? (
+                          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                        ) : (
+                          <UserCheck className="h-3.5 w-3.5" />
+                        )}
+                        Re-Subscribe
+                      </Button>
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            )}
           </div>
-        </CardContent>
-      </Card>
+        </motion.div>
+      </main>
     </div>
   );
 }

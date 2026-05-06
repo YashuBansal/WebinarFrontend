@@ -1,112 +1,100 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
-import { 
-  Plus, 
-  Search, 
-  Filter, 
-  Eye, 
-  Trash2, 
+import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Plus,
+  Search,
+  Filter,
+  Eye,
+  Trash2,
   ChevronDown,
   RefreshCw,
   MessageSquare,
-  Settings
+  Settings,
+  Video,
+  Sparkles,
+  X,
+  AlertTriangle,
+  ChevronLeft,
+  ChevronRight,
+  MoreVertical
 } from 'lucide-react';
 import ConfiguredTemplatePreviewDialog from '@/components/ui/ConfiguredTemplatePreviewDialog';
-import { 
-  useConfiguredTemplates, 
-  useDeleteConfiguredTemplate, 
-  useRefreshConfiguredTemplates 
+import {
+  useConfiguredTemplates,
+  useDeleteConfiguredTemplate,
+  useRefreshConfiguredTemplates
 } from '@/hooks/useConfiguredTemplates';
 import { useProjectContext } from '@/context/ProjectContext';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import type { GetConfiguredTemplatesQuery } from '@/schemas/configuredTemplateSchema';
+import ConfirmDeleteModal from '../../../../../components/ConfirmDeleteModal';
 
 export default function ConfiguredTemplatesList() {
   const { selectedProject } = useProjectContext();
   const { projectId } = useParams<{ projectId: string }>();
+  const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [activeFilter, setActiveFilter] = useState<'all' | 'active' | 'inactive'>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [previewConfiguredTemplate, setPreviewConfiguredTemplate] = useState<any | null>(null);
-  
-  // Confirmation dialog state
-  const [confirmationDialog, setConfirmationDialog] = useState<{
-    isOpen: boolean;
-    configuredTemplateId: string;
-    configuredTemplateName: string;
-  }>({
-    isOpen: false,
-    configuredTemplateId: '',
-    configuredTemplateName: '',
-  });
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedForDelete, setSelectedForDelete] = useState<{ id: string, name: string } | null>(null);
 
   const ITEMS_PER_PAGE = 12;
   const refreshConfiguredTemplates = useRefreshConfiguredTemplates();
   const deleteConfiguredTemplateMutation = useDeleteConfiguredTemplate();
 
-  // Build query object
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   const query: GetConfiguredTemplatesQuery = {
     page: currentPage.toString(),
     limit: ITEMS_PER_PAGE.toString(),
   };
-  
+
   if (searchTerm) query.search = searchTerm;
   if (activeFilter !== 'all') {
     query.isActive = activeFilter === 'active';
   }
 
-  const { 
-    data: configuredTemplatesResponse, 
-    isLoading, 
-    error, 
-    refetch 
+  const {
+    data: configuredTemplatesResponse,
+    isLoading,
+    error,
+    refetch
   } = useConfiguredTemplates(selectedProject?._id || '', query);
 
   const configuredTemplates = configuredTemplatesResponse?.data || [];
   const pagination = configuredTemplatesResponse?.pagination;
 
-  // Handle delete confirmation
   const handleDeleteClick = (configuredTemplateId: string, configuredTemplateName: string) => {
-    setConfirmationDialog({
-      isOpen: true,
-      configuredTemplateId,
-      configuredTemplateName,
-    });
+    setSelectedForDelete({ id: configuredTemplateId, name: configuredTemplateName });
+    setDeleteModalOpen(true);
   };
 
   const handleDeleteConfirm = async () => {
-    if (!projectId || !confirmationDialog.configuredTemplateId) return;
+    if (!projectId || !selectedForDelete) return;
 
     try {
       await deleteConfiguredTemplateMutation.mutateAsync({
         projectId,
-        configuredTemplateId: confirmationDialog.configuredTemplateId,
+        configuredTemplateId: selectedForDelete.id,
       });
-      
-      setConfirmationDialog({
-        isOpen: false,
-        configuredTemplateId: '',
-        configuredTemplateName: '',
-      });
+      setDeleteModalOpen(false);
+      setSelectedForDelete(null);
     } catch (error) {
       console.error('Failed to delete configured template:', error);
     }
   };
 
-  const handleDeleteCancel = () => {
-    setConfirmationDialog({
-      isOpen: false,
-      configuredTemplateId: '',
-      configuredTemplateName: '',
-    });
-  };
-
-  // Handle refresh
   const handleRefresh = () => {
     if (selectedProject?._id) {
       refreshConfiguredTemplates(selectedProject._id);
@@ -114,19 +102,16 @@ export default function ConfiguredTemplatesList() {
     refetch();
   };
 
-  // Handle search
   const handleSearch = (value: string) => {
     setSearchTerm(value);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
-  // Handle filter change
   const handleFilterChange = (filter: 'all' | 'active' | 'inactive') => {
     setActiveFilter(filter);
-    setCurrentPage(1); // Reset to first page when filtering
+    setCurrentPage(1);
   };
 
-  // Handle page change
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
@@ -141,249 +126,227 @@ export default function ConfiguredTemplatesList() {
     setPreviewConfiguredTemplate(null);
   };
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">Failed to load configured templates</p>
-          <Button onClick={handleRefresh} variant="outline">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
-          </Button>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="space-y-6 overflow-y-auto">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Configured Templates
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Manage your pre-configured WhatsApp templates with variable mappings
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button onClick={handleRefresh} variant="outline" size="sm">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Refresh
-          </Button>
-          <Link to={`/whatsapp/dashboard/${projectId}/configured-templates/create`}>
-            <Button>
-              <Plus className="h-4 w-4 mr-2" />
-              Create Template
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-1">
+              <Video className="h-3.5 w-3.5" />
+              WhatsApp Automations
+            </div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+              Zoom Templates
+            </h1>
+            <p className="text-slate-500 text-xs font-medium">
+              Manage mappings for <span className="text-slate-900 font-bold">Zoom Webhook</span> message automation
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={handleRefresh}
+              variant="outline"
+              className="h-11 px-4 rounded-xl border-slate-200 text-slate-600 font-bold text-xs hover:bg-slate-50 transition-all"
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
             </Button>
-          </Link>
-        </div>
-      </div>
-
-      {/* Search and Filters */}
-      <Card>
-        <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search configured templates..."
-                  value={searchTerm}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="pl-10"
-                />
-              </div>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={() => setShowFilters(!showFilters)}
-                className="flex items-center gap-2"
-              >
-                <Filter className="h-4 w-4" />
-                Filters
-                <ChevronDown className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} />
+            <Link to={`/whatsapp/dashboard/${projectId}/configured-templates/create`}>
+              <Button className="h-11 px-6 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg shadow-green-600/20 bg-[#22B573] hover:bg-[#1da467] text-white transition-all hover:scale-[1.02] active:scale-[0.98]">
+                <Plus className="h-4 w-4" />
+                Create Zoom Template
               </Button>
-            </div>
-          </div>
-
-          {/* Filter Options */}
-          {showFilters && (
-            <div className="mt-4 pt-4 border-t">
-              <div className="flex items-center gap-4">
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">Status:</span>
-                  <div className="flex gap-1">
-                    {[
-                      { key: 'all', label: 'All' },
-                      { key: 'active', label: 'Active' },
-                      { key: 'inactive', label: 'Inactive' }
-                    ].map((filter) => (
-                      <Button
-                        key={filter.key}
-                        variant={activeFilter === filter.key ? 'default' : 'outline'}
-                        size="sm"
-                        onClick={() => handleFilterChange(filter.key as 'all' | 'active' | 'inactive')}
-                      >
-                        {filter.label}
-                      </Button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Results Summary */}
-      {pagination && (
-        <div className="flex items-center justify-between text-sm text-gray-600 dark:text-gray-400">
-          <span>
-            Showing {((pagination.page - 1) * pagination.limit) + 1} to{' '}
-            {Math.min(pagination.page * pagination.limit, pagination.total)} of{' '}
-            {pagination.total} configured templates
-          </span>
-          <div className="flex items-center gap-2">
-            <span>Page {pagination.page} of {pagination.pages}</span>
+            </Link>
           </div>
         </div>
-      )}
+      </motion.div>
 
-      {/* Configured Templates Grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <Card key={index} className="animate-pulse">
-              <CardHeader>
-                <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-                <div className="h-3 bg-gray-200 rounded w-1/2"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  <div className="h-3 bg-gray-200 rounded"></div>
-                  <div className="h-3 bg-gray-200 rounded w-5/6"></div>
-                </div>
-              </CardContent>
-            </Card>
+      {/* Search and Filters Area */}
+      <div className="mb-6 flex flex-col md:flex-row gap-4 items-center">
+        <div className="relative flex-1 w-full">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Input
+            placeholder="Search templates by name..."
+            value={searchTerm}
+            onChange={(e) => handleSearch(e.target.value)}
+            className="h-12 pl-11 pr-4 rounded-2xl border-slate-200 bg-white shadow-sm focus:ring-2 focus:ring-green-500/20 transition-all placeholder:text-slate-400 font-medium"
+          />
+        </div>
+        <div className="flex items-center bg-white border border-slate-200 rounded-2xl p-1 gap-1 self-stretch md:self-auto">
+          {[
+            { key: 'all', label: 'All' },
+            { key: 'active', label: 'Active' },
+            { key: 'inactive', label: 'Inactive' }
+          ].map((filter) => (
+            <Button
+              key={filter.key}
+              variant="ghost"
+              size="sm"
+              onClick={() => handleFilterChange(filter.key as any)}
+              className={`h-10 px-6 rounded-xl font-bold text-xs transition-all ${activeFilter === filter.key
+                ? 'bg-slate-900 text-white shadow-lg'
+                : 'text-slate-500 hover:bg-slate-50'}`}
+            >
+              {filter.label}
+            </Button>
           ))}
         </div>
-      ) : configuredTemplates.length === 0 ? (
-        <Card>
-          <CardContent className="p-8 text-center">
-            <MessageSquare className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-              No configured templates found
-            </h3>
-            <p className="text-gray-600 dark:text-gray-400 mb-4">
-              {searchTerm || activeFilter !== 'all' 
-                ? 'Try adjusting your search or filter criteria.'
-                : 'Create your first configured template to get started.'
-              }
+      </div>
+
+      <main className="container mx-auto pb-12">
+        {isLoading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <Skeleton key={i} className="h-[180px] w-full rounded-[20px]" />
+            ))}
+          </div>
+        ) : configuredTemplates.length === 0 ? (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="flex flex-col items-center justify-center py-24 px-4 text-center bg-white border border-dashed border-slate-200 rounded-[32px]"
+          >
+            <div className="h-20 w-20 rounded-3xl bg-slate-50 flex items-center justify-center mb-6">
+              <Sparkles className="h-10 w-10 text-slate-300" />
+            </div>
+            <h3 className="text-xl font-bold text-slate-900 mb-2">No Templates Found</h3>
+            <p className="text-slate-500 text-sm max-w-xs mb-8">
+              {searchTerm || activeFilter !== 'all'
+                ? "We couldn't find any templates matching your criteria."
+                : "Start by creating your first configured template to automate your Zoom messaging."}
             </p>
             {!searchTerm && activeFilter === 'all' && (
               <Link to={`/whatsapp/dashboard/${projectId}/configured-templates/create`}>
-                <Button>
-                  <Plus className="h-4 w-4 mr-2" />
-                  Create Configured Template
+                <Button className="h-11 px-8 rounded-xl font-bold text-sm bg-slate-900 hover:bg-slate-800 text-white transition-all active:scale-95 shadow-xl shadow-slate-900/10">
+                  Create First Zoom Template
                 </Button>
               </Link>
             )}
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {configuredTemplates.map((configuredTemplate) => (
-            <Card key={configuredTemplate._id} className="hover:shadow-md transition-shadow">
-              <CardHeader>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg line-clamp-2">
-                      {configuredTemplate.configuredTemplateName}
-                    </CardTitle>
-                    <CardDescription className="mt-1">
-                      Based on: {configuredTemplate.templateName}
-                    </CardDescription>
-                  </div>
-                 
-                </div>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">
-                    <div className="flex items-center gap-2">
-                      <Settings className="h-4 w-4" />
-                      <span>
-                        {configuredTemplate.variableMappings.length} variable{configuredTemplate.variableMappings.length !== 1 ? 's' : ''}
-                      </span>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence mode="popLayout">
+              {configuredTemplates.map((ct, index) => (
+                <motion.div
+                  key={ct._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 -mr-12 -mt-12 h-32 w-32 rounded-full bg-green-500/5 blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                  <div className="relative z-10 flex flex-col h-full">
+                    <div className="flex items-start justify-between mb-4">
+                      <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${ct.isActive ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
+                        <MessageSquare className="h-5 w-5" />
+                      </div>
+                      <Badge variant="outline" className={`rounded-lg px-2 py-0 h-5 text-[10px] font-black uppercase tracking-wider ${ct.isActive ? 'bg-green-50 text-green-600 border-green-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
+                        {ct.isActive ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </div>
+
+                    <div className="flex-1 min-w-0 mb-6">
+                      <h3 className="text-lg font-black text-slate-900 truncate mb-1" title={ct.configuredTemplateName}>
+                        {ct.configuredTemplateName}
+                      </h3>
+                      <div className="flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+                        <Settings className="h-3 w-3" />
+                        Base: <span className="text-slate-600 truncate max-w-[120px]">{ct.templateName}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between mt-auto">
+                      <div className="flex items-center gap-1.5">
+                        <div className="h-2 w-2 rounded-full bg-blue-500" />
+                        <span className="text-[11px] font-bold text-slate-500">
+                          {ct.variableMappings?.length || 0} Variables
+                        </span>
+                      </div>
+
+                      <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl p-1 gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => openPreview(ct)}
+                          className="h-9 px-3 rounded-lg flex items-center gap-2 font-bold text-xs text-slate-400 hover:text-slate-900 hover:bg-white hover:shadow-sm transition-all"
+                        >
+                          <Eye className="h-3.5 w-3.5" />
+                          Preview
+                        </Button>
+
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(ct._id, ct.configuredTemplateName)}
+                          className="h-9 w-9 p-0 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                  
-                  <div className="flex items-center justify-between pt-2">
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => openPreview(configuredTemplate)}
-                        aria-label={`Preview ${configuredTemplate.configuredTemplateName}`}
-                      >
-                        <Eye className="h-4 w-4 mr-1" />
-                        Preview
-                      </Button>
-                    </div>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDeleteClick(configuredTemplate._id, configuredTemplate.configuredTemplateName)}
-                      className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    >
-                      <Trash2 className="h-4 w-4" aria-label={`Delete ${configuredTemplate.configuredTemplateName}`} />
-                    </Button>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
 
-      {/* Pagination */}
-      {pagination && pagination.pages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-          >
-            Previous
-          </Button>
-          <span className="text-sm text-gray-600 dark:text-gray-400">
-            Page {currentPage} of {pagination.pages}
-          </span>
-          <Button
-            variant="outline"
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === pagination.pages}
-          >
-            Next
-          </Button>
-        </div>
-      )}
+        {/* Pagination Container */}
+        {pagination && pagination.pages > 1 && (
+          <div className="mt-12 flex items-center justify-center gap-4">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={currentPage === 1}
+              className="h-10 w-10 rounded-xl border-slate-200"
+            >
+              <ChevronLeft className="h-4 w-4" />
+            </Button>
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-black text-slate-900">{currentPage}</span>
+              <span className="text-sm font-medium text-slate-400">of</span>
+              <span className="text-sm font-black text-slate-400">{pagination.pages}</span>
+            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={currentPage === pagination.pages}
+              className="h-10 w-10 rounded-xl border-slate-200"
+            >
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        )}
+      </main>
 
-      {/* Confirmation Dialog */}
-      <ConfirmationDialog
-        isOpen={confirmationDialog.isOpen}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
-        title="Delete Configured Template"
-        description={`Are you sure you want to delete "${confirmationDialog.configuredTemplateName}"? This action cannot be undone.`}
-        confirmText="Delete"
-        cancelText="Cancel"
-        variant="destructive"
-        isLoading={deleteConfiguredTemplateMutation.isPending}
-      />
+      {/* Premium Delete Confirmation Modal */}
+      {deleteModalOpen && selectedForDelete && (
+        <ConfirmDeleteModal
+          setModal={(val) => {
+            if (!val) {
+              setDeleteModalOpen(false);
+              setSelectedForDelete(null);
+            }
+          }}
+          triggerDelete={handleDeleteConfirm}
+          isLoading={deleteConfiguredTemplateMutation.isPending}
+          itemName={selectedForDelete.name}
+        />
+      )}
 
       {/* Configured Template Preview Dialog */}
       <ConfiguredTemplatePreviewDialog

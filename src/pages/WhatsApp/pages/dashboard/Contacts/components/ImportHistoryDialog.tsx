@@ -3,10 +3,24 @@ import { useImportHistory } from '@/hooks/useContacts';
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from '@/components/ui/dialog';
-import { Loader2, History, FileSpreadsheet, Eye } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+  Loader2,
+  History,
+  FileSpreadsheet,
+  Eye,
+  X,
+  Calendar,
+  CheckCircle2,
+  AlertTriangle,
+  XCircle,
+  Search,
+  Filter
+} from 'lucide-react';
 
 interface ImportHistoryDialogProps {
   isOpen: boolean;
@@ -33,10 +47,12 @@ export default function ImportHistoryDialog({
   const successCount = rows.filter((item) => item.status === 'success').length;
   const partialCount = rows.filter((item) => item.status === 'partial_success').length;
   const failedCount = rows.filter((item) => item.status === 'failed').length;
+
   const selectedImport = useMemo(
     () => rows.find((item) => item._id === selectedImportId) || null,
     [rows, selectedImportId],
   );
+
   const invalidRows = selectedImport?.invalidRecordsSample || [];
   const filteredInvalidRows = invalidRows.filter((row) => {
     const q = invalidSearch.trim().toLowerCase();
@@ -47,16 +63,15 @@ export default function ImportHistoryDialog({
     );
   });
 
-  const getStatusClasses = (status: string) => {
-    if (status === 'success') return 'bg-emerald-100 text-emerald-700 border-emerald-200';
-    if (status === 'partial_success') return 'bg-amber-100 text-amber-700 border-amber-200';
-    if (status === 'failed') return 'bg-rose-100 text-rose-700 border-rose-200';
-    return 'bg-blue-100 text-blue-700 border-blue-200';
+  const getStatusConfig = (status: string) => {
+    if (status === 'success') return { label: 'Success', icon: <CheckCircle2 className="h-3 w-3" />, className: 'bg-emerald-50 text-emerald-600 border-emerald-100' };
+    if (status === 'partial_success') return { label: 'Partial', icon: <AlertTriangle className="h-3 w-3" />, className: 'bg-amber-50 text-amber-600 border-amber-100' };
+    if (status === 'failed') return { label: 'Failed', icon: <XCircle className="h-3 w-3" />, className: 'bg-rose-50 text-rose-600 border-rose-100' };
+    return { label: status, icon: null, className: 'bg-slate-50 text-slate-600 border-slate-100' };
   };
 
   const selectImportAndScroll = (importId: string) => {
     setSelectedImportId(importId);
-    // Wait one frame so section can render/update before scrolling
     requestAnimationFrame(() => {
       invalidSectionRef.current?.scrollIntoView({
         behavior: 'smooth',
@@ -67,166 +82,220 @@ export default function ImportHistoryDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="w-[92vw] !max-w-[92vw] sm:!max-w-[1400px] max-h-[90vh] overflow-hidden flex flex-col p-0">
-        <DialogHeader>
-          <div className="px-6 pt-6 pb-4 border-b">
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <History className="h-5 w-5" />
-              Import History
-            </DialogTitle>
-            <p className="text-sm text-muted-foreground mt-1">
-              Track CSV/XLSX import outcomes and quality metrics.
-            </p>
-          </div>
-        </DialogHeader>
-
-        <div className="px-6 py-4 border-b bg-muted/20 grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="rounded-lg border bg-background p-3">
-            <p className="text-xs text-muted-foreground">Total Imports</p>
-            <p className="text-xl font-semibold">{totalImports}</p>
-          </div>
-          <div className="rounded-lg border bg-background p-3">
-            <p className="text-xs text-muted-foreground">Success</p>
-            <p className="text-xl font-semibold text-emerald-600">{successCount}</p>
-          </div>
-          <div className="rounded-lg border bg-background p-3">
-            <p className="text-xs text-muted-foreground">Partial</p>
-            <p className="text-xl font-semibold text-amber-600">{partialCount}</p>
-          </div>
-          <div className="rounded-lg border bg-background p-3">
-            <p className="text-xs text-muted-foreground">Failed</p>
-            <p className="text-xl font-semibold text-rose-600">{failedCount}</p>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-auto px-6 py-4">
-          <div className="mb-3 text-xs text-muted-foreground flex items-center gap-1.5">
-            <Eye className="h-3.5 w-3.5" />
-            Tip: Click any import row to view invalid records sample below.
-          </div>
-          {isLoading ? (
-            <div className="h-48 flex items-center justify-center text-muted-foreground">
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
-              Loading import history...
-            </div>
-          ) : rows.length === 0 ? (
-            <div className="h-56 flex flex-col items-center justify-center text-center text-muted-foreground">
-              <FileSpreadsheet className="h-8 w-8 mb-2" />
-              <p className="font-medium">No import history found</p>
-              <p className="text-sm">Import CSV/XLSX to start seeing history here.</p>
-            </div>
-          ) : (
-            <div className="rounded-lg border overflow-hidden">
-              <table className="w-full text-sm">
-                <thead className="sticky top-0 bg-background z-10">
-                  <tr className="text-left border-b">
-                    <th className="py-3 px-3 font-medium">Time</th>
-                    <th className="py-3 px-3 font-medium">Status</th>
-                    <th className="py-3 px-3 font-medium">Total</th>
-                    <th className="py-3 px-3 font-medium">Valid</th>
-                    <th className="py-3 px-3 font-medium">Invalid</th>
-                    <th className="py-3 px-3 font-medium">Duplicate</th>
-                    <th className="py-3 px-3 font-medium">New</th>
-                    <th className="py-3 px-3 font-medium">Updated</th>
-                    <th className="py-3 px-3 font-medium">Failed</th>
-                    <th className="py-3 px-3 font-medium">Reason</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.map((item) => (
-                    <tr
-                      key={item._id}
-                      onClick={() => selectImportAndScroll(item._id)}
-                      className={`border-b last:border-0 hover:bg-muted/30 transition-colors cursor-pointer ${
-                        selectedImportId === item._id ? 'bg-muted/40' : ''
-                      }`}
-                    >
-                      <td className="py-2.5 px-3 whitespace-nowrap">
-                        {new Date(item.createdAt).toLocaleString()}
-                      </td>
-                      <td className="py-2.5 px-3">
-                        <span
-                          className={`px-2.5 py-1 rounded-full text-xs border font-medium ${getStatusClasses(item.status)}`}
-                        >
-                          {item.status.replace('_', ' ')}
-                        </span>
-                      </td>
-                      <td className="py-2.5 px-3">{item.totalRows}</td>
-                      <td className="py-2.5 px-3 text-emerald-700">{item.validRows}</td>
-                      <td className="py-2.5 px-3 text-amber-700">{item.invalidRows}</td>
-                      <td className="py-2.5 px-3">{item.duplicates}</td>
-                      <td className="py-2.5 px-3">{item.newCount}</td>
-                      <td className="py-2.5 px-3">{item.updatedCount}</td>
-                      <td className="py-2.5 px-3 text-rose-700">{item.failedCount}</td>
-                      <td className="py-2.5 px-3">
-                        <button
-                          type="button"
-                          className="w-full text-left flex items-center gap-2 hover:text-primary"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            selectImportAndScroll(item._id);
-                          }}
-                          title={
-                            item.failureReason
-                              ? `${item.failureReason}. Click to view details`
-                              : 'Click to view details'
-                          }
-                        >
-                          <Eye className="h-3.5 w-3.5 shrink-0" />
-                          <span className="max-w-[250px] truncate">
-                            {item.failureReason || 'Click to view details'}
-                          </span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {selectedImport && (
-            <div ref={invalidSectionRef} className="mt-4 rounded-lg border p-4">
-              <div className="flex items-center justify-between gap-3 mb-3">
-                <div>
-                  <p className="text-sm font-semibold">Invalid Records (Sample)</p>
-                  <p className="text-xs text-muted-foreground">
-                    Showing first 100 invalid records for selected import.
-                  </p>
-                </div>
-                <input
-                  value={invalidSearch}
-                  onChange={(e) => setInvalidSearch(e.target.value)}
-                  placeholder="Search by phone or reason..."
-                  className="h-9 w-64 rounded-md border px-3 text-sm"
-                />
+      <DialogContent
+        className="w-[95vw] !max-w-[95vw] sm:!max-w-[1200px] border-0 bg-transparent p-0 shadow-none outline-none"
+        onPointerDownOutside={(e) => e.preventDefault()}
+        showCloseButton={false}
+      >
+        <div className="relative w-full rounded-2xl shadow-2xl flex flex-col bg-white border border-slate-200 overflow-hidden max-h-[90vh]">
+          {/* Header */}
+          <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-white sticky top-0 z-20">
+            <div>
+              <div className="flex items-center gap-2 text-blue-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-1">
+                <History className="h-3 w-3" />
+                Audit Log
               </div>
-              {filteredInvalidRows.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No invalid records in sample.</p>
+              <DialogTitle className="text-xl font-bold text-slate-900">
+                Import History
+              </DialogTitle>
+              <DialogDescription className="text-xs font-medium text-slate-500 mt-1">
+                Track CSV/XLSX import outcomes and quality metrics across your audience.
+              </DialogDescription>
+            </div>
+            <button
+              type="button"
+              onClick={onClose}
+              className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-50 text-slate-400 transition-colors border border-transparent hover:border-slate-100"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Compact Stats Bar */}
+          <div className="px-6 py-2.5 bg-slate-50/50 border-b border-slate-100 flex items-center justify-around gap-8">
+            <div className="flex items-center gap-3">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400">Total Imports</span>
+              <span className="text-sm font-black text-slate-900">{totalImports}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-[9px] font-black uppercase tracking-widest text-emerald-500">Success</span>
+              <span className="text-sm font-black text-emerald-600">{successCount}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-[9px] font-black uppercase tracking-widest text-amber-500">Partial</span>
+              <span className="text-sm font-black text-amber-600">{partialCount}</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="text-[9px] font-black uppercase tracking-widest text-rose-500">Failed</span>
+              <span className="text-sm font-black text-rose-600">{failedCount}</span>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-auto custom-scrollbar">
+            <div className="p-6">
+              {isLoading ? (
+                <div className="h-64 flex flex-col items-center justify-center text-slate-400">
+                  <Loader2 className="h-10 w-10 animate-spin mb-4 opacity-20" />
+                  <p className="font-bold text-xs uppercase tracking-widest">Fetching History...</p>
+                </div>
+              ) : rows.length === 0 ? (
+                <div className="h-64 flex flex-col items-center justify-center text-center">
+                  <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-6">
+                    <FileSpreadsheet className="h-8 w-8 text-slate-300" />
+                  </div>
+                  <p className="font-black text-sm uppercase tracking-widest text-slate-900 mb-1">No Imports Found</p>
+                  <p className="text-xs font-medium text-slate-500">Upload your first CSV to start tracking history.</p>
+                </div>
               ) : (
-                <div className="max-h-64 overflow-auto rounded-md border">
-                  <table className="w-full text-sm">
-                    <thead className="sticky top-0 bg-background z-10">
-                      <tr className="border-b text-left">
-                        <th className="py-2 px-3 font-medium">Row</th>
-                        <th className="py-2 px-3 font-medium">Phone</th>
-                        <th className="py-2 px-3 font-medium">Reason</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {filteredInvalidRows.map((row, idx) => (
-                        <tr key={`${row.rowNumber}-${idx}`} className="border-b last:border-0">
-                          <td className="py-2 px-3">{row.rowNumber}</td>
-                          <td className="py-2 px-3">{row.phoneRaw || '-'}</td>
-                          <td className="py-2 px-3">{row.reason}</td>
+                <div className="rounded-2xl border border-slate-100 overflow-hidden bg-white shadow-sm">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr className="bg-slate-50/50 text-left border-b border-slate-100">
+                          <th className="py-4 px-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Timestamp</th>
+                          <th className="py-4 px-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Status</th>
+                          <th className="py-4 px-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Records</th>
+                          <th className="py-4 px-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Valid/Inv</th>
+                          <th className="py-4 px-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Action</th>
+                          <th className="py-4 px-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Notes</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-slate-50">
+                        {rows.map((item) => {
+                          const status = getStatusConfig(item.status);
+                          return (
+                            <tr
+                              key={item._id}
+                              onClick={() => selectImportAndScroll(item._id)}
+                              className={`hover:bg-slate-50/50 transition-colors cursor-pointer group ${selectedImportId === item._id ? 'bg-blue-50/30' : ''
+                                }`}
+                            >
+                              <td className="py-4 px-6">
+                                <div className="flex items-center gap-2">
+                                  <Calendar className="h-3.5 w-3.5 text-slate-300" />
+                                  <span className="font-mono text-[11px] font-bold text-slate-600">
+                                    {new Date(item.createdAt).toLocaleString()}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-4 px-4">
+                                <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider ${status.className}`}>
+                                  {status.icon}
+                                  {status.label}
+                                </div>
+                              </td>
+                              <td className="py-4 px-4">
+                                <span className="font-bold text-slate-900">{item.totalRows}</span>
+                              </td>
+                              <td className="py-4 px-4">
+                                <div className="flex items-center gap-1.5 font-bold text-xs">
+                                  <span className="text-emerald-600">{item.validRows}</span>
+                                  <span className="text-slate-300">/</span>
+                                  <span className="text-rose-600">{item.invalidRows}</span>
+                                </div>
+                              </td>
+                              <td className="py-4 px-4">
+                                <div className="flex items-center gap-1.5 font-bold text-[10px] uppercase tracking-widest text-slate-400">
+                                  <span className="text-blue-600">{item.newCount} New</span>
+                                  <span>•</span>
+                                  <span className="text-slate-600">{item.updatedCount} Upd</span>
+                                </div>
+                              </td>
+                              <td className="py-4 px-6">
+                                <div className="flex items-center justify-between gap-3">
+                                  <span className="text-xs font-medium text-slate-500 truncate max-w-[200px]">
+                                    {item.failureReason || 'Process complete'}
+                                  </span>
+                                  <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:bg-white group-hover:text-blue-600 group-hover:border-blue-100 transition-all">
+                                    <Eye className="h-4 w-4" />
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {selectedImport && (
+                <div ref={invalidSectionRef} className="mt-6 rounded-2xl border border-slate-200 p-6 bg-slate-50/30">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-6">
+                    <div>
+                      <div className="flex items-center gap-2 text-rose-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-1">
+                        <AlertTriangle className="h-3 w-3" />
+                        Quality Analysis
+                      </div>
+                      <h4 className="text-lg font-bold text-slate-900">Invalid Records (Sample)</h4>
+                      <p className="text-xs font-medium text-slate-500 mt-1">
+                        Showing up to 100 invalid records detected during this process.
+                      </p>
+                    </div>
+
+                    <div className="relative w-full md:w-72 group">
+                      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+                      <Input
+                        value={invalidSearch}
+                        onChange={(e) => setInvalidSearch(e.target.value)}
+                        placeholder="Filter by reason..."
+                        className="h-11 pl-10 rounded-xl border-slate-200 bg-white focus:ring-blue-500/10 focus:border-blue-500/50 transition-all text-xs font-bold"
+                      />
+                    </div>
+                  </div>
+
+                  {filteredInvalidRows.length === 0 ? (
+                    <div className="py-12 text-center bg-white rounded-2xl border border-slate-100">
+                      <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No matching records</p>
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl border border-slate-100 overflow-hidden bg-white shadow-sm">
+                      <div className="max-h-80 overflow-auto custom-scrollbar">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="bg-slate-50/50 text-left border-b border-slate-100">
+                              <th className="py-3 px-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Row</th>
+                              <th className="py-3 px-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Data</th>
+                              <th className="py-3 px-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Failure Reason</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-50">
+                            {filteredInvalidRows.map((row, idx) => (
+                              <tr key={`${row.rowNumber}-${idx}`} className="hover:bg-slate-50/30 transition-colors">
+                                <td className="py-3 px-6">
+                                  <span className="font-mono text-[11px] font-bold text-slate-400">#{row.rowNumber}</span>
+                                </td>
+                                <td className="py-3 px-6">
+                                  <span className="text-xs font-bold text-slate-700">{row.phoneRaw || '-'}</span>
+                                </td>
+                                <td className="py-3 px-6">
+                                  <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 text-[10px] font-bold">
+                                    <XCircle className="h-3 w-3" />
+                                    {row.reason}
+                                  </div>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
+          </div>
+
+          <div className="p-6 border-t border-slate-100 bg-white flex justify-end sticky bottom-0 z-20">
+            <Button
+              type="button"
+              onClick={onClose}
+              className="h-12 px-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-lg shadow-slate-900/10"
+            >
+              Close History
+            </Button>
+          </div>
         </div>
       </DialogContent>
     </Dialog>

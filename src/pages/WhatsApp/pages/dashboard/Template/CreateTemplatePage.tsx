@@ -441,11 +441,11 @@ export default function CreateTemplatePage() {
                 <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl flex items-center gap-2">
                   Create Template
                 </h1>
+                <p className="text-slate-500 text-xs font-medium mt-1">
+                  Design and submit a new message template for <span className="text-slate-900 font-bold">{selectedProject?.projectName}</span>
+                </p>
               </div>
             </div>
-            <p className="text-slate-500 text-xs font-medium">
-              Design and submit a new message template for <span className="text-slate-900 font-bold">{selectedProject?.projectName}</span>
-            </p>
           </div>
 
           <div className="flex items-center gap-3">

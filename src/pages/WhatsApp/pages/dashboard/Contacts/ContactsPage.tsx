@@ -1,25 +1,50 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Trash2, MessageSquare, Download, Tags, History, MoreHorizontal, Upload } from 'lucide-react';
-import { useContacts, useContactMutations } from '@/hooks/useContacts';
+import {
+  Plus,
+  Trash2,
+  MessageSquare,
+  Download,
+  Tags,
+  History,
+  MoreHorizontal,
+  Upload,
+  Users,
+  Search,
+  Filter,
+  ArrowUpDown,
+  RefreshCw,
+  X,
+  XCircle
+} from 'lucide-react';
+import { useContacts, useContactMutations, useContactStats } from '@/hooks/useContacts';
 import { useProjectContext } from '@/context/ProjectContext';
 import type { CreateContactPayload, Contact } from '@/schemas/contactSchema';
 import { toastUtils } from '@/lib/utils';
-import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
+import ConfirmDeleteModal from '../../../../../components/ConfirmDeleteModal';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem
+} from '@/components/ui/dropdown-menu';
 import ContactsTable from './components/ContactsTable';
-import { 
+import {
   ContactForm,
   ContactSearch,
   ExportDialog,
   BulkManageTagsDialog,
   ImportHistoryDialog,
+  ContactStats,
 } from './components';
 import React, { Suspense, lazy } from 'react';
 import DialogFallback from '@/components/ui/dialog-fallback';
 import type { ContactColumnFilters } from './components/ContactSearch';
+import { Badge } from '@/components/ui/badge';
 
 const LazyCSVImport = lazy<React.ComponentType<any>>(
   () => import('./components/CSVImport').then((m) => ({ default: m.default }))
@@ -43,12 +68,12 @@ export default function ContactsPage() {
   const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
   const [isExportDialogOpen, setIsExportDialogOpen] = useState(false);
   const [isImportHistoryDialogOpen, setIsImportHistoryDialogOpen] = useState(false);
-  const [deleteContactState, setDeleteContactState] = useState<{isOpen: boolean, contact: Contact | null}>({ isOpen: false, contact: null });
+  const [deleteContactState, setDeleteContactState] = useState<{ isOpen: boolean, contact: Contact | null }>({ isOpen: false, contact: null });
   const [isBulkDeleteDialogOpen, setIsBulkDeleteDialogOpen] = useState(false);
   const [isManageTagsDialogOpen, setIsManageTagsDialogOpen] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [selectedContacts, setSelectedContacts] = useState<string[]>([]);
-  const [bulkDeleteFailures, setBulkDeleteFailures] = useState<Array<{ contactId: string; error: string }>>([]);
+  const [bulkDeleteFailures, setBulkDeleteFailures] = useState<Array<{ contactId?: string; error?: string }>>([]);
   const [isBulkDeleteFailuresDialogOpen, setIsBulkDeleteFailuresDialogOpen] = useState(false);
   const [filters, setFilters] = useState<ContactColumnFilters>({
     firstName: '',
@@ -91,6 +116,7 @@ export default function ContactsPage() {
       tagFilterMode: filters.tags.length ? filters.tagFilterMode : undefined,
     },
   });
+  const { data: statsData } = useContactStats();
   const { useCreateContact, useBulkCreateContacts, useUpdateContact, useDeleteContact, useBulkDeleteContacts, useBulkUpdateContactTags } = useContactMutations();
   const createContactMutation = useCreateContact();
   const updateContactMutation = useUpdateContact();
@@ -104,14 +130,14 @@ export default function ContactsPage() {
       await createContactMutation.mutateAsync(data);
       toastUtils.success('Contact created successfully');
       setIsCreateDialogOpen(false);
-    } catch (error) { 
+    } catch (error) {
       throw error; // keep form open
     }
   };
 
   const handleUpdateContact = async (data: CreateContactPayload) => {
     if (!editingContact) return;
-    
+
     try {
       await updateContactMutation.mutateAsync({
         contactId: editingContact._id,
@@ -199,7 +225,7 @@ export default function ContactsPage() {
         setIsBulkDeleteFailuresDialogOpen(true);
       }
       // Keep failed selected so user can retry / inspect
-      const failedIds = new Set(result.failed.map((f) => f.contactId));
+      const failedIds = new Set(result.failed.map((f) => f.contactId).filter(Boolean) as string[]);
       setSelectedContacts((prev) => prev.filter((id) => failedIds.has(id)));
       setIsBulkDeleteDialogOpen(false);
     } catch (error) {
@@ -209,8 +235,8 @@ export default function ContactsPage() {
   };
 
   const handleSelectContact = useCallback((contactId: string) => {
-    setSelectedContacts(prev => 
-      prev.includes(contactId) 
+    setSelectedContacts(prev =>
+      prev.includes(contactId)
         ? prev.filter(id => id !== contactId)
         : [...prev, contactId]
     );
@@ -254,7 +280,7 @@ export default function ContactsPage() {
     }
 
     // Get selected contact details
-    const selectedContactDetails = contactsData?.contacts.filter(contact => 
+    const selectedContactDetails = contactsData?.contacts.filter(contact =>
       selectedContacts.includes(contact._id)
     ) || [];
 
@@ -318,115 +344,152 @@ export default function ContactsPage() {
 
   if (error) {
     return (
-      <div className="p-6">
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-red-500">Error loading contacts: {error.message}</p>
-          </CardContent>
+      <div className="min-h-full flex items-center justify-center p-8">
+        <Card className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white text-center">
+          <div className="h-16 w-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-6 text-red-500">
+            <X className="h-8 w-8" />
+          </div>
+          <h2 className="text-xl font-black text-slate-900 mb-2">Error Loading Contacts</h2>
+          <p className="text-slate-500 font-medium">
+            {error.message || 'An unexpected error occurred while fetching your contacts.'}
+          </p>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="px-6 space-y-6 h-full flex flex-col">
-      {/* Header */}
-      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold">Contacts</h1>
-          <p className="text-muted-foreground">Manage your contact list</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          {selectedContacts.length > 0 && (
-            <>
-              <Button 
-                variant="destructive" 
-                onClick={requestBulkDelete}
-                disabled={bulkDeleteMutation.isPending}
-                size="sm"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete ({selectedContacts.length})
-              </Button>
-              
-              <Button 
-                onClick={handleBulkSend}
-                className="bg-green-600 hover:bg-green-700"
-                size="sm"
-              >
-                <MessageSquare className="w-4 h-4 mr-2" />
-                Send ({selectedContacts.length})
-              </Button>
-
-              <Button onClick={openManageTagsDialog} variant="outline" size="sm">
-                <Tags className="w-4 h-4 mr-2" />
-                Tags ({selectedContacts.length})
-              </Button>
-            </>
-          )}
-          
-          <Button onClick={() => setIsImportDialogOpen(true)} variant="outline" size="sm">
-            <Upload className="w-4 h-4 mr-2" />
-            Import
-          </Button>
-
-          <details className="relative">
-            <summary className="list-none">
-              <Button variant="outline" size="sm" asChild>
-                <span>
-                  <MoreHorizontal className="w-4 h-4 mr-2" />
-                  More
-                </span>
-              </Button>
-            </summary>
-            <div className="absolute right-0 mt-2 w-44 rounded-md border bg-background shadow-md z-20 p-1">
-              <button
-                type="button"
-                onClick={() => setIsExportDialogOpen(true)}
-                className="w-full text-left px-3 py-2 rounded-sm text-sm hover:bg-muted flex items-center gap-2"
-              >
-                <Download className="w-4 h-4" />
-                Export
-              </button>
-              <button
-                type="button"
-                onClick={() => setIsImportHistoryDialogOpen(true)}
-                className="w-full text-left px-3 py-2 rounded-sm text-sm hover:bg-muted flex items-center gap-2"
-              >
-                <History className="w-4 h-4" />
-                Import History
-              </button>
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        style={{
+          backgroundColor: "#ffffff",
+          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+        }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-1">
+              <Users className="h-3.5 w-3.5" />
+              Audience
             </div>
-          </details>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+              Contact Management
+            </h1>
+            <p className="text-slate-500 text-xs font-medium">
+              Manage your subscribers and customer base for <span className="text-slate-900 font-bold">WhatsApp Campaigns</span>
+            </p>
+          </div>
 
-          <Button onClick={() => setIsCreateDialogOpen(true)} size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Contact
-          </Button>
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={() => setIsImportDialogOpen(true)}
+                variant="outline"
+                className="h-10 px-4 rounded-xl border-slate-200 text-slate-600 font-bold text-xs transition-all hover:bg-slate-50 flex items-center gap-2"
+              >
+                <Upload className="w-4 h-4" />
+                Import
+              </Button>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="h-10 px-4 rounded-xl border border-slate-200 text-slate-600 font-bold text-xs transition-all hover:bg-slate-50 flex items-center gap-2 outline-none">
+                    <MoreHorizontal className="w-4 h-4" />
+                    More
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 rounded-2xl border border-slate-100 bg-white shadow-xl z-50 p-2 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+                  <DropdownMenuItem
+                    onClick={() => setIsExportDialogOpen(true)}
+                    className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors cursor-pointer outline-none focus:bg-slate-50 focus:text-slate-900"
+                  >
+                    <Download className="w-4 h-4 text-slate-400" />
+                    Export Contacts
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => setIsImportHistoryDialogOpen(true)}
+                    className="w-full text-left px-3 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-50 flex items-center gap-2 transition-colors cursor-pointer outline-none focus:bg-slate-50 focus:text-slate-900"
+                  >
+                    <History className="w-4 h-4 text-slate-400" />
+                    Import History
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <Button
+                onClick={() => setIsCreateDialogOpen(true)}
+                className="h-10 px-5 rounded-xl flex items-center gap-2 bg-[#22B573] hover:bg-[#1da467] text-white font-bold text-xs shadow-lg shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <Plus className="w-4 h-4" />
+                Add Contact
+              </Button>
+            </div>
+          </div>
         </div>
-      </div>
+      </motion.div>
 
-      <ContactSearch
-        projectId={selectedProject?._id}
-        filters={filters}
-        onFiltersChange={handleFiltersChange}
-      />
+      <main className="container mx-auto space-y-6 pb-12">
+        {/* Stats Section */}
+        {statsData && <ContactStats stats={statsData} />}
 
-      {/* Contacts Table */}
-      <div className="flex-1 min-h-[600px]">
-        <ContactsTable
-          data={contactsData}
-          isLoading={isLoading}
-          onPageChange={handlePageChange}
-          onEdit={handleEditContact}
-          onDelete={requestDeleteContact}
-          selectedContacts={selectedContacts}
-          onSelectContact={handleSelectContact}
-          onSelectAll={handleSelectAll}
-          pageLimit={pageLimit}
-          onPageLimitChange={handlePageLimitChange}
-        />
-      </div>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-2xl p-1 transition-all duration-300 overflow-hidden"
+        >
+          {/* Decorative background element */}
+          <div className="absolute top-0 right-0 -mr-24 -mt-24 h-64 w-64 rounded-full bg-green-500/5 blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+
+          <div className="relative z-10 flex flex-col h-full">
+            {/* Search and Filters Section */}
+            <div className="p-5 border-b border-slate-100 bg-slate-50/30">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="h-8 w-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-slate-400">
+                  <Filter className="h-4 w-4" />
+                </div>
+                <h3 className="text-sm font-black text-slate-900 uppercase tracking-widest">Filter Audience</h3>
+              </div>
+              <ContactSearch
+                projectId={selectedProject?._id}
+                filters={filters}
+                onFiltersChange={handleFiltersChange}
+              />
+            </div>
+
+            {/* Table Section */}
+            <div className="flex-1 p-2">
+              {isLoading ? (
+                <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+                  <RefreshCw className="h-10 w-10 animate-spin mb-4 opacity-20" />
+                  <p className="font-bold text-xs uppercase tracking-widest">Loading contacts...</p>
+                </div>
+              ) : (
+                <ContactsTable
+                  data={contactsData}
+                  isLoading={isLoading}
+                  onPageChange={handlePageChange}
+                  onEdit={handleEditContact}
+                  onDelete={requestDeleteContact}
+                  selectedContacts={selectedContacts}
+                  onSelectContact={handleSelectContact}
+                  onSelectAll={handleSelectAll}
+                  pageLimit={pageLimit}
+                  onPageLimitChange={handlePageLimitChange}
+                  onBulkDelete={requestBulkDelete}
+                  onBulkSend={handleBulkSend}
+                  onBulkTags={openManageTagsDialog}
+                  isBulkDeleting={bulkDeleteMutation.isPending}
+                />
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </main>
 
       {/* Contact Form Dialogs */}
       <ContactForm
@@ -463,64 +526,103 @@ export default function ContactsPage() {
         projectId={selectedProject?._id}
       />
 
-      <ConfirmationDialog
-        isOpen={deleteContactState.isOpen}
-        onClose={() => setDeleteContactState({ isOpen: false, contact: null })}
-        onConfirm={confirmDeleteContact}
-        title="Delete Contact"
-        description={`Are you sure you want to delete ${deleteContactState.contact?.firstName}? This action cannot be undone.`}
-        confirmText="Delete"
-        variant="destructive"
-        isLoading={deleteContactMutation.isPending}
-      />
+      {deleteContactState.isOpen && deleteContactState.contact && (
+        <ConfirmDeleteModal
+          setModal={(val) => {
+            if (!val) setDeleteContactState({ isOpen: false, contact: null });
+          }}
+          triggerDelete={confirmDeleteContact}
+          isLoading={deleteContactMutation.isPending}
+          itemName={deleteContactState.contact.firstName}
+        />
+      )}
 
-      <ConfirmationDialog
-        isOpen={isBulkDeleteDialogOpen}
-        onClose={() => setIsBulkDeleteDialogOpen(false)}
-        onConfirm={confirmBulkDelete}
-        title="Delete Multiple Contacts"
-        description={`Are you sure you want to delete ${selectedContacts.length} contact(s)? This action cannot be undone.`}
-        confirmText="Delete Contacts"
-        variant="destructive"
-        isLoading={bulkDeleteMutation.isPending}
-        requireOtpMatch={selectedContacts.length >= 50}
-      />
+      {isBulkDeleteDialogOpen && (
+        <ConfirmDeleteModal
+          setModal={(val) => {
+            if (!val) setIsBulkDeleteDialogOpen(false);
+          }}
+          triggerDelete={confirmBulkDelete}
+          isLoading={bulkDeleteMutation.isPending}
+          title={`Are you sure you want to delete ${selectedContacts.length} selected contact(s)?`}
+          itemName={`${selectedContacts.length} Contacts`}
+        />
+      )}
 
       <Dialog
         open={isBulkDeleteFailuresDialogOpen}
-        onOpenChange={(open) => setIsBulkDeleteFailuresDialogOpen(open)}
+        onOpenChange={(open) => !open && setIsBulkDeleteFailuresDialogOpen(false)}
       >
-        <DialogContent className="sm:max-w-2xl max-h-[70vh] overflow-auto">
-          <DialogHeader>
-            <DialogTitle>Some deletions failed</DialogTitle>
-          </DialogHeader>
-          <p className="text-sm text-muted-foreground">
-            These contacts couldn’t be deleted. They remain selected so you can retry.
-          </p>
-          <div className="rounded-lg border overflow-hidden mt-3">
-            <table className="w-full text-sm">
-              <thead className="bg-muted/30">
-                <tr className="text-left border-b">
-                  <th className="py-2 px-3 font-medium">Contact ID</th>
-                  <th className="py-2 px-3 font-medium">Error</th>
-                </tr>
-              </thead>
-              <tbody>
-                {bulkDeleteFailures.map((f) => (
-                  <tr key={f.contactId} className="border-b last:border-0">
-                    <td className="py-2 px-3 font-mono text-xs">{f.contactId}</td>
-                    <td className="py-2 px-3">{f.error}</td>
-                  </tr>
-                ))}
-                {bulkDeleteFailures.length === 0 && (
-                  <tr>
-                    <td colSpan={2} className="py-4 text-center text-muted-foreground">
-                      No failures to show.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+        <DialogContent
+          className="sm:max-w-[600px] border-0 bg-transparent p-0 shadow-none outline-none"
+          onPointerDownOutside={(e) => e.preventDefault()}
+          showCloseButton={false}
+        >
+          <div className="relative w-full rounded-2xl p-8 shadow-2xl flex flex-col bg-white border border-slate-200">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <div className="flex items-center gap-2 text-rose-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-1">
+                  <XCircle className="h-3 w-3" />
+                  Action Failed
+                </div>
+                <h3 className="text-xl font-bold text-slate-900">
+                  Bulk Deletion Issues
+                </h3>
+                <p className="text-xs font-medium text-slate-500 mt-1">
+                  The following contacts couldn't be removed. They remain selected for retry.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsBulkDeleteFailuresDialogOpen(false)}
+                className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-50 text-slate-400 transition-colors border border-transparent hover:border-slate-100"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="rounded-2xl border border-slate-100 overflow-hidden bg-slate-50/30">
+              <div className="max-h-[300px] overflow-auto custom-scrollbar">
+                <table className="w-full text-sm">
+                  <thead className="bg-white/80 sticky top-0 backdrop-blur-md z-10 border-b border-slate-100">
+                    <tr className="text-left">
+                      <th className="py-4 px-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Target Contact</th>
+                      <th className="py-4 px-6 font-black text-[10px] uppercase tracking-widest text-slate-400">Rejection Reason</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-50">
+                    {bulkDeleteFailures.map((f, index) => (
+                      <tr key={f.contactId || index} className="hover:bg-white transition-colors">
+                        <td className="py-4 px-6">
+                          <span className="font-mono text-[11px] font-bold text-slate-400">#{f.contactId || "Unknown"}</span>
+                        </td>
+                        <td className="py-4 px-6">
+                          <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 text-[10px] font-bold uppercase tracking-wider">
+                            {f.error || "Deletions failed"}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {bulkDeleteFailures.length === 0 && (
+                      <tr>
+                        <td colSpan={2} className="py-12 text-center text-slate-400 font-bold text-[10px] uppercase tracking-[0.2em]">
+                          No records found.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="mt-8 flex justify-end">
+              <Button
+                onClick={() => setIsBulkDeleteFailuresDialogOpen(false)}
+                className="h-12 px-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all shadow-lg shadow-slate-900/10"
+              >
+                Dismiss Report
+              </Button>
+            </div>
           </div>
         </DialogContent>
       </Dialog>

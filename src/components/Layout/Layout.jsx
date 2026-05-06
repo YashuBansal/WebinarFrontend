@@ -37,7 +37,7 @@ const Layout = () => {
       : 280
     : 0;
 
-  const isChatPage = location.pathname.includes('/chat');
+  const isChatPage = location.pathname.split('/').includes('chat');
 
   const handleMenuButtonClick = useCallback(() => {
     if (isMdUp) {

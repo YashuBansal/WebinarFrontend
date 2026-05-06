@@ -15,7 +15,7 @@ export default function DashboardLayout() {
   const { isLoading: isAuthLoading, isError: isAuthError, data: userData } = useCurrentUser();
   const dashboardBaseUrl = import.meta.env.VITE_REACT_APP_DASHBOARD_BASE_URL;
   const isLoggedOut = isAuthError || (!isAuthLoading && !userData);
-  const isChatPage = location.pathname.includes('/chat');
+  const isChatPage = location.pathname.split('/').includes('chat');
 
   useEffect(() => {
     if (!isLoggedOut || !dashboardBaseUrl?.trim()) return;

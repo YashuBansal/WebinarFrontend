@@ -76,162 +76,149 @@ export function ProgramApiExecutionDetailsDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="h-5 w-5" />
-            API Execution Details
-          </DialogTitle>
-          <DialogDescription>
-            Use this endpoint and payload from your external system to create a
-            program assignment.
-          </DialogDescription>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Create Assignment Endpoint
-                </p>
-                <p className="text-xs text-muted-foreground mb-1">
-                  HTTP method: <span className="font-mono">POST</span>
-                </p>
-                <p className="text-sm break-all font-mono">
-                  {assignmentEndpointUrl}
-                </p>
+      <DialogContent className="sm:max-w-2xl max-h-[90vh] overflow-y-auto p-0 border-none rounded-2xl shadow-2xl bg-white/95 backdrop-blur-xl">
+        <div className="p-8 space-y-8">
+          <DialogHeader>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                <FileText className="h-5 w-5" />
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  handleCopyToClipboard(assignmentEndpointUrl, "Endpoint URL")
-                }
-                className="flex items-center gap-2 shrink-0"
-              >
-                <Copy className="h-4 w-4" />
-                Copy
-              </Button>
-            </div>
-          </div>
-
-          <Separator />
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-muted-foreground">
-                Sample JSON payload (create)
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  handleCopyToClipboard(
-                    sampleAssignmentPayloadString,
-                    "Sample JSON",
-                  )
-                }
-                className="flex items-center gap-2"
-              >
-                <Copy className="h-4 w-4" />
-                Copy
-              </Button>
-            </div>
-            <div className="rounded-md bg-muted p-4 overflow-auto max-h-80">
-              <pre className="text-xs sm:text-sm font-mono whitespace-pre-wrap break-words">
-                {sampleAssignmentPayloadString}
-              </pre>
-            </div>
-
-            {requiredVariables?.length > 0 ? (
-              <p className="text-xs text-muted-foreground">
-                Required variables for this sequence:{" "}
-                <span className="font-mono">
-                  {requiredVariables.join(", ")}
-                </span>
-              </p>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                No required variables detected from this sequence’s template
-                mappings.
-              </p>
-            )}
-
-            <p className="text-xs text-muted-foreground">
-              Note: the assignment will be created for the program name under
-              your authenticated admin account. If an assignment for this phone
-              already exists for this program, the API returns 409.
-            </p>
-          </div>
-
-          <Separator />
-
-          <div className="space-y-2">
-            <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">
-                  Cancel Assignment Endpoint
-                </p>
-                <p className="text-xs text-muted-foreground mb-1">
-                  HTTP method: <span className="font-mono">POST</span>
-                </p>
-                <p className="text-sm break-all font-mono">
-                  {cancelAssignmentEndpointUrl}
-                </p>
+                <DialogTitle className="text-xl font-black text-slate-900 tracking-tight">
+                  API Integration
+                </DialogTitle>
+                <DialogDescription className="text-xs font-medium text-slate-500 mt-0.5">
+                  Automate sequence assignments from your external systems
+                </DialogDescription>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  handleCopyToClipboard(
-                    cancelAssignmentEndpointUrl,
-                    "Cancel endpoint URL",
-                  )
-                }
-                className="flex items-center gap-2 shrink-0"
-              >
-                <Copy className="h-4 w-4" />
-                Copy
-              </Button>
             </div>
+          </DialogHeader>
+
+          <div className="space-y-10">
+            {/* Create Assignment Section */}
+            <section className="space-y-4">
+              <div className="flex items-center gap-3 mb-4 px-1">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Create Assignment</span>
+                <div className="h-px flex-1 bg-slate-100" />
+              </div>
+
+              <div className="p-5 rounded-[24px] border border-slate-100 bg-slate-50/30 space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-md bg-green-50 text-[9px] font-black text-green-600 border border-green-100 uppercase tracking-widest">POST</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Endpoint URL</span>
+                    </div>
+                    <p className="text-xs font-mono text-slate-600 break-all bg-white p-3 rounded-xl border border-slate-100/50">
+                      {assignmentEndpointUrl}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleCopyToClipboard(assignmentEndpointUrl, "Endpoint URL")}
+                    className="h-10 w-10 rounded-xl border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-white transition-all shadow-sm shrink-0"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sample Payload</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCopyToClipboard(sampleAssignmentPayloadString, "Sample JSON")}
+                      className="h-8 px-3 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-white transition-all"
+                    >
+                      <Copy className="h-3 w-3 mr-2" />
+                      Copy JSON
+                    </Button>
+                  </div>
+                  <div className="rounded-2xl bg-slate-900 p-5 overflow-auto max-h-64 shadow-inner">
+                    <pre className="text-[11px] sm:text-xs font-mono text-blue-300 whitespace-pre-wrap break-words leading-relaxed">
+                      {sampleAssignmentPayloadString}
+                    </pre>
+                  </div>
+                </div>
+
+                {requiredVariables?.length > 0 ? (
+                  <div className="flex items-start gap-3 p-3 rounded-xl bg-blue-50/50 border border-blue-100/50 text-blue-600">
+                    <div className="text-[10px] font-black uppercase tracking-widest mt-0.5 shrink-0">Required:</div>
+                    <div className="text-[11px] font-mono break-all font-bold">
+                      {requiredVariables.join(", ")}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="text-[10px] font-bold text-slate-400 italic px-1">
+                    No body variables required for this sequence.
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* Cancel Assignment Section */}
+            <section className="space-y-4 pb-4">
+              <div className="flex items-center gap-3 mb-4 px-1">
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Cancel Assignment</span>
+                <div className="h-px flex-1 bg-slate-100" />
+              </div>
+
+              <div className="p-5 rounded-[24px] border border-slate-100 bg-slate-50/30 space-y-4">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="space-y-1.5 flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2 py-0.5 rounded-md bg-red-50 text-[9px] font-black text-red-600 border border-red-100 uppercase tracking-widest">POST</span>
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Endpoint URL</span>
+                    </div>
+                    <p className="text-xs font-mono text-slate-600 break-all bg-white p-3 rounded-xl border border-slate-100/50">
+                      {cancelAssignmentEndpointUrl}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => handleCopyToClipboard(cancelAssignmentEndpointUrl, "Cancel endpoint URL")}
+                    className="h-10 w-10 rounded-xl border-slate-200 text-slate-400 hover:text-slate-600 hover:bg-white transition-all shadow-sm shrink-0"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Sample Payload</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handleCopyToClipboard(sampleCancelPayloadString, "Cancel sample JSON")}
+                      className="h-8 px-3 rounded-lg text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-white transition-all"
+                    >
+                      <Copy className="h-3 w-3 mr-2" />
+                      Copy JSON
+                    </Button>
+                  </div>
+                  <div className="rounded-2xl bg-slate-900 p-5 overflow-auto max-h-64 shadow-inner">
+                    <pre className="text-[11px] sm:text-xs font-mono text-red-300/80 whitespace-pre-wrap break-words leading-relaxed">
+                      {sampleCancelPayloadString}
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </section>
           </div>
 
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <p className="text-sm font-medium text-muted-foreground">
-                Sample JSON payload (cancel)
-              </p>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() =>
-                  handleCopyToClipboard(
-                    sampleCancelPayloadString,
-                    "Cancel sample JSON",
-                  )
-                }
-                className="flex items-center gap-2"
-              >
-                <Copy className="h-4 w-4" />
-                Copy
-              </Button>
-            </div>
-            <div className="rounded-md bg-muted p-4 overflow-auto max-h-80">
-              <pre className="text-xs sm:text-sm font-mono whitespace-pre-wrap break-words">
-                {sampleCancelPayloadString}
-              </pre>
-            </div>
-            <p className="text-xs text-muted-foreground">
-              This endpoint cancels the assignment for the given{" "}
-              <span className="font-mono">programName</span> and{" "}
-              <span className="font-mono">phone</span> under your authenticated
-              admin account. If no such assignment exists, it returns 404.
-            </p>
+          <div className="flex justify-end pt-4">
+            <Button
+              onClick={() => onOpenChange(false)}
+              className="h-11 px-8 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm transition-all active:scale-[0.98] shadow-xl shadow-slate-900/10"
+            >
+              Done
+            </Button>
           </div>
         </div>
       </DialogContent>
     </Dialog>
   );
 }
-

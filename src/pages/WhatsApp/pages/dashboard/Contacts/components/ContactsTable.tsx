@@ -1,10 +1,26 @@
 import { useMemo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { Users } from 'lucide-react';
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationEllipsis, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from '@/components/ui/pagination';
+import { Users, LayoutList, ChevronDown, RefreshCw, Trash2, MessageSquare, Tags } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Contact, PaginatedContactsResponse } from '@/schemas/contactSchema';
 import ContactRow from './ContactRow';
 
@@ -19,6 +35,10 @@ interface ContactsTableProps {
   selectedContacts?: string[];
   onSelectContact?: (contactId: string) => void;
   onSelectAll?: () => void;
+  onBulkDelete?: () => void;
+  onBulkSend?: () => void;
+  onBulkTags?: () => void;
+  isBulkDeleting?: boolean;
 }
 
 export default function ContactsTable({ 
@@ -31,7 +51,11 @@ export default function ContactsTable({
   onDelete,
   selectedContacts = [],
   onSelectContact,
-  onSelectAll
+  onSelectAll,
+  onBulkDelete,
+  onBulkSend,
+  onBulkTags,
+  isBulkDeleting
 }: ContactsTableProps) {
   const contacts = data?.contacts || [];
   const pagination = data?.pagination;
@@ -41,7 +65,7 @@ export default function ContactsTable({
   const rowVirtualizer = useVirtualizer({
     count: contacts.length,
     getScrollElement: () => scrollRef.current,
-    estimateSize: () => 48,
+    estimateSize: () => 64,
     overscan: 10,
   });
   const virtualItems = rowVirtualizer.getVirtualItems();
@@ -53,98 +77,139 @@ export default function ContactsTable({
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Contacts List</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <p className="text-muted-foreground">Loading contacts...</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+        <RefreshCw className="h-10 w-10 animate-spin mb-4 opacity-20" />
+        <p className="font-bold text-xs uppercase tracking-widest">Fetching Audience...</p>
+      </div>
     );
   }
 
   if (contacts.length === 0) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Contacts List</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8">
-            <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">No contacts found</p>
-            <p className="text-sm text-muted-foreground">Create your first contact or import from CSV</p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="flex flex-col items-center justify-center py-24 text-slate-400">
+        <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-6">
+          <Users className="h-8 w-8 opacity-20" />
+        </div>
+        <p className="font-black text-sm uppercase tracking-widest text-slate-900 mb-1">No Contacts Found</p>
+        <p className="text-xs font-medium text-slate-500">Create your first contact or import from CSV to get started.</p>
+      </div>
     );
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="flex-shrink-0">
-        <div className="flex items-center justify-between gap-3">
-          <CardTitle>
-            Contacts List 
-            {pagination && (
-              <span className="text-sm font-normal text-muted-foreground ml-2">
-                ({pagination.totalCount} total)
-              </span>
-            )}
-            {selectedContacts.length > 0 && (
-              <span className="text-sm font-normal text-primary ml-2">
-                ({selectedContacts.length} selected)
-              </span>
-            )}
-          </CardTitle>
-          {onPageLimitChange && (
-            <div className="flex items-center gap-2">
-              <label htmlFor="pageLimit" className="text-sm font-medium text-gray-700">
-                Show:
-              </label>
-              <select
-                id="pageLimit"
-                value={pageLimit}
-                onChange={(e) => onPageLimitChange(Number(e.target.value))}
-                className="h-9 px-3 py-1 border border-gray-300 rounded-md bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value={5}>5</option>
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-                <option value={250}>250</option>
-                <option value={500}>500</option>
-                <option value={1000}>1000</option>
-              </select>
-              <span className="text-sm text-gray-500">per page</span>
+    <div className="flex flex-col h-full">
+      {/* List Header */}
+      <div className="px-5 py-3.5 flex items-center justify-between border-b border-slate-100 bg-white/80 backdrop-blur-sm sticky top-0 z-30">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+              <LayoutList className="h-4 w-4" />
             </div>
-          )}
+            <div>
+              <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-[0.15em]">Contacts List</h3>
+              {pagination && (
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">
+                  {pagination.totalCount} Total
+                </p>
+              )}
+            </div>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {selectedContacts.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -10 }}
+                className="flex items-center gap-2 pl-6 border-l border-slate-100"
+              >
+                <div className="flex items-center gap-1.5 p-1 bg-slate-50/50 rounded-xl border border-slate-100">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onBulkDelete}
+                    disabled={isBulkDeleting}
+                    className="h-8 px-3 rounded-lg text-rose-600 hover:text-rose-700 hover:bg-rose-50 font-black text-[10px] uppercase tracking-wider flex items-center gap-2"
+                  >
+                    <Trash2 className="w-3 h-3" />
+                    Delete ({selectedContacts.length})
+                  </Button>
+
+                  <div className="w-px h-3 bg-slate-200 mx-0.5" />
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onBulkSend}
+                    className="h-8 px-3 rounded-lg text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-black text-[10px] uppercase tracking-wider flex items-center gap-2"
+                  >
+                    <MessageSquare className="w-3 h-3" />
+                    Send Message
+                  </Button>
+
+                  <div className="w-px h-3 bg-slate-200 mx-0.5" />
+
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={onBulkTags}
+                    className="h-8 px-3 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 font-black text-[10px] uppercase tracking-wider flex items-center gap-2"
+                  >
+                    <Tags className="w-3 h-3" />
+                    Manage Tags
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </CardHeader>
-      <CardContent className="flex-1 flex flex-col min-h-0">
-        <div ref={scrollRef} className="rounded-md border flex-1 overflow-auto">
+
+        {onPageLimitChange && (
+          <div className="flex items-center gap-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Rows per page</span>
+            <Select
+              value={String(pageLimit)}
+              onValueChange={(v) => onPageLimitChange(Number(v))}
+            >
+              <SelectTrigger className="h-8 w-[70px] rounded-lg border border-slate-200 bg-white/50 text-xs font-bold text-slate-700 focus:ring-green-500/10 transition-all cursor-pointer">
+                <SelectValue placeholder={pageLimit} />
+              </SelectTrigger>
+              <SelectContent className="rounded-xl border-slate-100 shadow-xl min-w-[70px]">
+                {[5, 10, 25, 50, 100, 250, 500, 1000].map(limit => (
+                  <SelectItem 
+                    key={limit} 
+                    value={String(limit)}
+                    className="text-xs font-bold text-slate-600 focus:bg-slate-50 rounded-lg my-0.5"
+                  >
+                    {limit}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
+      </div>
+
+      <div className="flex-1 flex flex-col min-h-0 bg-white">
+        <div ref={scrollRef} className="flex-1 overflow-auto custom-scrollbar">
           <Table>
-            <TableHeader>
-              <TableRow>
+            <TableHeader className="sticky top-0 z-20 bg-slate-50/80 backdrop-blur-md">
+              <TableRow className="hover:bg-transparent border-b border-slate-100">
                 {onSelectAll && (
-                  <TableHead className="w-12">
+                  <TableHead className="w-12 px-6">
                     <Checkbox
                       checked={contacts.length > 0 && selectedContacts.length === contacts.length}
                       onCheckedChange={onSelectAll}
+                      className="rounded-md border-slate-300 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
                     />
                   </TableHead>
                 )}
-                <TableHead>First Name</TableHead>
-                <TableHead>Last Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Tags</TableHead>
-                {/* <TableHead>Status</TableHead> */}
-                <TableHead>Actions</TableHead>
+                <TableHead className="px-4 py-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Identity</TableHead>
+                <TableHead className="px-4 py-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Last Name</TableHead>
+                <TableHead className="px-4 py-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Contact Info</TableHead>
+                <TableHead className="px-4 py-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Phone</TableHead>
+                <TableHead className="px-4 py-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Tags</TableHead>
+                <TableHead className="px-4 py-4 text-right font-black text-[10px] uppercase tracking-widest text-slate-400">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -179,40 +244,26 @@ export default function ContactsTable({
         </div>
         
         {pagination && pagination.totalPages > 1 && onPageChange && (
-          <div className="flex justify-center pt-4 flex-shrink-0">
-            <Pagination>
-              <PaginationContent>
+          <div className="flex items-center justify-between px-6 py-4 border-t border-slate-50 bg-slate-50/30">
+            <div className="hidden sm:block">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                Page {pagination.page} of {pagination.totalPages}
+              </p>
+            </div>
+            
+            <Pagination className="w-auto mx-0">
+              <PaginationContent className="gap-1">
                 <PaginationItem>
                   <PaginationPrevious 
                     onClick={() => pagination.hasPrevPage && onPageChange(pagination.page - 1)}
-                    className={!pagination.hasPrevPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    className={`h-9 w-9 p-0 rounded-xl border-slate-200 text-slate-600 transition-all [&_span]:hidden ${!pagination.hasPrevPage ? 'opacity-50 pointer-events-none' : 'hover:bg-white hover:shadow-sm cursor-pointer'}`}
                   />
                 </PaginationItem>
                 
-                {/* Show first page */}
-                {pagination.page > 3 && (
-                  <>
-                    <PaginationItem>
-                      <PaginationLink 
-                        onClick={() => onPageChange(1)}
-                        className="cursor-pointer"
-                      >
-                        1
-                      </PaginationLink>
-                    </PaginationItem>
-                    {pagination.page > 4 && (
-                      <PaginationItem>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    )}
-                  </>
-                )}
-                
-                {/* Show pages around current page */}
+                {/* Simplified pagination for premium look */}
                 {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
                   const startPage = Math.max(1, pagination.page - 2);
                   const pageNum = startPage + i;
-                  
                   if (pageNum > pagination.totalPages) return null;
                   
                   return (
@@ -220,7 +271,7 @@ export default function ContactsTable({
                       <PaginationLink
                         onClick={() => onPageChange(pageNum)}
                         isActive={pageNum === pagination.page}
-                        className="cursor-pointer"
+                        className={`h-9 w-9 rounded-xl border-none font-bold text-xs transition-all cursor-pointer ${pageNum === pagination.page ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-500 hover:bg-white hover:shadow-sm'}`}
                       >
                         {pageNum}
                       </PaginationLink>
@@ -228,36 +279,17 @@ export default function ContactsTable({
                   );
                 })}
                 
-                {/* Show last page */}
-                {pagination.page < pagination.totalPages - 2 && (
-                  <>
-                    {pagination.page < pagination.totalPages - 3 && (
-                      <PaginationItem>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                    )}
-                    <PaginationItem>
-                      <PaginationLink 
-                        onClick={() => onPageChange(pagination.totalPages)}
-                        className="cursor-pointer"
-                      >
-                        {pagination.totalPages}
-                      </PaginationLink>
-                    </PaginationItem>
-                  </>
-                )}
-                
                 <PaginationItem>
                   <PaginationNext 
                     onClick={() => pagination.hasNextPage && onPageChange(pagination.page + 1)}
-                    className={!pagination.hasNextPage ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                    className={`h-9 w-9 p-0 rounded-xl border-slate-200 text-slate-600 transition-all [&_span]:hidden ${!pagination.hasNextPage ? 'opacity-50 pointer-events-none' : 'hover:bg-white hover:shadow-sm cursor-pointer'}`}
                   />
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   );
 }

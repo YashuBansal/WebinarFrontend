@@ -76,7 +76,7 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
     { name: "Chatbot", path: `/whatsapp/dashboard/${projectId}/chatbot`, icon: Bot },
     { name: "Zoom Templates", path: `/whatsapp/dashboard/${projectId}/configured-templates`, icon: Video },
     { name: "Contacts", path: `/whatsapp/dashboard/${projectId}/contacts`, icon: Users },
-    { name: "Opted Out Numbers", path: `/whatsapp/dashboard/${projectId}/hash`, icon: Hash },
+    { name: "Opted Out Numbers", path: `/whatsapp/dashboard/${projectId}/opted-out-numbers`, icon: Hash },
     { name: "Media Files", path: `/whatsapp/dashboard/${projectId}/media-files`, icon: FileText },
     { name: "Tags", path: `/whatsapp/dashboard/${projectId}/tags`, icon: Tag },
     { name: "Sequence", path: `/whatsapp/dashboard/${projectId}/programs`, icon: ListTree },

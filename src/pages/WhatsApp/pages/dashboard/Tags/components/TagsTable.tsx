@@ -1,19 +1,19 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
 } from '@/components/ui/table';
-import { Edit, Trash2, Search } from 'lucide-react';
+import { Edit, Trash2, Search, Tag, Calendar } from 'lucide-react';
 import type { WabaTag } from '@/schemas/tagSchema';
-import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
+import ConfirmDeleteModal from '../../../../../../components/ConfirmDeleteModal';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface TagsTableProps {
   tags: WabaTag[];
@@ -34,127 +34,139 @@ export function TagsTable({
   searchTerm,
   onSearchChange,
 }: TagsTableProps) {
-  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [deleteConfirmState, setDeleteConfirmState] = useState<{ isOpen: boolean; tag: WabaTag | null }>({
+    isOpen: false,
+    tag: null,
+  });
 
-  const handleDeleteClick = (tagId: string) => {
-    setDeleteConfirmId(tagId);
+  const handleDeleteClick = (tag: WabaTag) => {
+    setDeleteConfirmState({ isOpen: true, tag });
   };
 
   const handleDeleteConfirm = () => {
-    if (deleteConfirmId) {
-      onDelete(deleteConfirmId);
-      setDeleteConfirmId(null);
+    if (deleteConfirmState.tag) {
+      onDelete(deleteConfirmState.tag._id);
+      setDeleteConfirmState({ isOpen: false, tag: null });
     }
   };
 
   const handleDeleteCancel = () => {
-    setDeleteConfirmId(null);
+    setDeleteConfirmState({ isOpen: false, tag: null });
   };
 
-  if (isLoading) {
-    return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Tags</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="h-9 bg-gray-200 rounded animate-pulse" />
-            <div className="space-y-2">
-              {[...Array(5)].map((_, i) => (
-                <div key={i} className="h-12 bg-gray-200 rounded animate-pulse" />
-              ))}
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Tags</CardTitle>
-        <div className="flex items-center space-x-2">
-          <div className="relative flex-1 max-w-sm">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+    <div className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden">
+      <div className="absolute top-0 right-0 -mr-24 -mt-24 h-64 w-64 rounded-full bg-green-500/5 blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity" />
+
+      <div className="relative z-10">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+          <div>
+            <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
+              <Tag className="h-5 w-5 text-green-600" />
+              Manage Tags
+            </h2>
+            <p className="text-slate-500 text-xs font-medium mt-1">View and organize your custom WABA tags</p>
+          </div>
+
+          <div className="relative w-full sm:w-72">
+            <Search className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-slate-400 h-4 w-4" />
             <Input
               placeholder="Search tags..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10"
+              className="pl-10 h-10 bg-slate-50/50 border-slate-200 rounded-xl text-sm font-medium focus:bg-white transition-all"
             />
           </div>
         </div>
-      </CardHeader>
-      <CardContent>
-        {tags.length === 0 ? (
-          <div className="text-center py-8">
-            <p className="text-gray-500">No tags found</p>
+
+        {isLoading ? (
+          <div className="space-y-3">
+            {[...Array(5)].map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-xl" />
+            ))}
+          </div>
+        ) : tags.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 text-slate-400 bg-slate-50/30 rounded-2xl border border-dashed border-slate-200">
+            <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+              <Tag className="h-8 w-8 opacity-20" />
+            </div>
+            <p className="font-bold text-sm uppercase tracking-widest">No tags found</p>
             {searchTerm && (
-              <p className="text-sm text-gray-400 mt-2">
-                Try adjusting your search terms
-              </p>
+              <p className="text-xs font-medium mt-2">Try adjusting your search terms</p>
             )}
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {tags.map((tag) => (
-                <TableRow key={tag._id}>
-                  <TableCell>
-                    <Badge variant="secondary" className="font-medium">
-                      {tag.name}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(tag.createdAt).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEdit(tag)}
-                        title="Rename tag"
-                        aria-label="Rename tag"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDeleteClick(tag._id)}
-                        className="text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+          <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white">
+            <Table>
+              <TableHeader className="bg-slate-50/50">
+                <TableRow className="hover:bg-transparent border-slate-100">
+                  <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-400 pl-6">Tag Name</TableHead>
+                  <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-400">Created At</TableHead>
+                  <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right pr-6">Actions</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {tags.map((tag) => (
+                  <TableRow key={tag._id} className="group/row hover:bg-slate-50/50 border-slate-100 transition-colors">
+                    <TableCell className="py-4 pl-6">
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-lg bg-green-50 flex items-center justify-center text-green-600 font-bold text-xs">
+                          #
+                        </div>
+                        <span className="font-bold text-slate-700 text-sm">{tag.name}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4">
+                      <div className="flex items-center gap-2 text-slate-500 font-medium text-xs">
+                        <Calendar className="h-3.5 w-3.5 opacity-60" />
+                        {new Date(tag.createdAt).toLocaleDateString(undefined, {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric'
+                        })}
+                      </div>
+                    </TableCell>
+                    <TableCell className="py-4 text-right pr-6">
+                      <div className="flex justify-end items-center gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => onEdit(tag)}
+                          className="h-8 w-8 rounded-lg border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all"
+                          title="Edit tag"
+                        >
+                          <Edit className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleDeleteClick(tag)}
+                          className="h-8 w-8 rounded-lg border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all"
+                          title="Delete tag"
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
 
-        <ConfirmationDialog
-          isOpen={!!deleteConfirmId}
-          onClose={handleDeleteCancel}
-          onConfirm={handleDeleteConfirm}
-          title="Delete Tag"
-          description="Are you sure you want to delete this tag? If this tag is used on any contact, it will be removed from those contacts too."
-          confirmText="Delete"
-          variant="destructive"
-          isLoading={isDeleting}
-        />
-      </CardContent>
-    </Card>
+        {deleteConfirmState.isOpen && deleteConfirmState.tag && (
+          <ConfirmDeleteModal
+            setModal={(val) => {
+              if (!val) handleDeleteCancel();
+            }}
+            triggerDelete={handleDeleteConfirm}
+            title="Delete Tag"
+            isLoading={isDeleting}
+            itemName={deleteConfirmState.tag.name}
+          />
+        )}
+      </div>
+    </div>
   );
 }

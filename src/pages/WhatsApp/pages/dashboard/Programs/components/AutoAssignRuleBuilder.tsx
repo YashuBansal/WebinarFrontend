@@ -1,8 +1,10 @@
 import * as React from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Settings, ShieldCheck, HelpCircle, Save, Calculator, AlertCircle, Loader2 } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 import { FilterConditionCard } from '../../Campaigns/steps/WLHContacts/components/FilterConditionCard';
 import { WebinarSelector } from '../../Campaigns/steps/WLHContacts/components/WebinarSelector';
 import { createEmptyCondition } from '../../Campaigns/steps/WLHContacts/utils';
@@ -129,128 +131,194 @@ export function AutoAssignRuleBuilder({
   };
 
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4 border-b border-border">
-        <div className="space-y-1">
-          <CardTitle className="text-base text-foreground">Auto-Assign Rules configuration</CardTitle>
-          <CardDescription className="text-xs">
-            Configure rules for automatically assigning attendees directly to this program
-          </CardDescription>
-        </div>
-        <div className="flex items-center space-x-2">
-          <Switch
-            checked={isAutoAssignable}
-            onCheckedChange={disabled ? () => {} : onAutoAssignableChange}
-            id="auto-assign-rt"
-            disabled={disabled}
-          />
-          <Label htmlFor="auto-assign-rt" className="text-sm cursor-pointer whitespace-nowrap">
-            {isAutoAssignable ? 'Enabled' : 'Disabled'}
-          </Label>
+    <Card className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-xl shadow-slate-200/40">
+      <CardHeader className="bg-slate-50/50 p-6 sm:p-8 border-b border-slate-100">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="flex items-start gap-4">
+            <div className="h-12 w-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-600 border border-orange-100 shrink-0 shadow-sm">
+              <Settings className="h-6 w-6" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-orange-600 font-bold text-[10px] uppercase tracking-widest mb-1">
+                Automation Logic
+              </div>
+              <CardTitle className="text-xl font-black text-slate-900 tracking-tight">Auto-Assign Rules</CardTitle>
+              <CardDescription className="text-slate-500 text-xs font-medium max-w-md">
+                Configure rules for automatically assigning attendees directly to this sequence based on webinar and attendance data.
+              </CardDescription>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-sm self-start sm:self-center">
+            <div className="flex items-center gap-2 mr-2">
+              <div className={`h-2 w-2 rounded-full ${isAutoAssignable ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}`} />
+              <Label htmlFor="auto-assign-rt" className="text-[10px] font-black uppercase tracking-widest text-slate-500 cursor-pointer">
+                {isAutoAssignable ? 'Running' : 'Disabled'}
+              </Label>
+            </div>
+            <Switch
+              checked={isAutoAssignable}
+              onCheckedChange={disabled ? () => {} : onAutoAssignableChange}
+              id="auto-assign-rt"
+              disabled={disabled}
+              className="data-[state=checked]:bg-green-600"
+            />
+          </div>
         </div>
       </CardHeader>
 
-      {isAutoAssignable && (
-        <CardContent className="pt-6 space-y-6">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-medium text-muted-foreground">Webinars</span>
-              <WebinarSelector
-                webinars={webinarsData ?? []}
-                selectedWebinarIds={selectedWebinarIds}
-                onSelectionChange={setSelectedWebinarIds}
-                placeholder="Select webinars..."
-              />
-            </div>
+      <AnimatePresence>
+        {isAutoAssignable && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.4, ease: "easeInOut" }}
+          >
+            <CardContent className="p-6 sm:p-8 space-y-10">
+              {/* Primary Filters */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-3">
+                  <Label className="text-xs font-black uppercase tracking-widest text-slate-400">Target Webinars</Label>
+                  <WebinarSelector
+                    webinars={(webinarsData as any) ?? []}
+                    selectedWebinarIds={selectedWebinarIds}
+                    onSelectionChange={setSelectedWebinarIds}
+                    placeholder="Select webinars..."
+                  />
+                  <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium italic">
+                    <HelpCircle className="h-3 w-3" />
+                    Select one or more webinars to pull attendees from
+                  </div>
+                </div>
 
-            <div className="flex flex-col gap-2">
-              <span className="text-xs font-medium text-muted-foreground">Attendance</span>
-              <div className="flex gap-2">
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={isAttended === true ? 'default' : 'outline'}
-                  onClick={() => setIsAttended(true)}
-                >
-                  Sales
-                </Button>
-                <Button
-                  type="button"
-                  size="sm"
-                  variant={isAttended === false ? 'default' : 'outline'}
-                  onClick={() => setIsAttended(false)}
-                >
-                  Reminder
-                </Button>
+                <div className="space-y-3">
+                  <Label className="text-xs font-black uppercase tracking-widest text-slate-400">Attendance Status</Label>
+                  <div className="grid grid-cols-2 gap-3 p-1.5 bg-slate-50 rounded-2xl border border-slate-100">
+                    <Button
+                      type="button"
+                      variant={isAttended === true ? 'default' : 'ghost'}
+                      onClick={() => setIsAttended(true)}
+                      className={`h-11 rounded-xl text-xs font-bold transition-all ${
+                        isAttended === true 
+                        ? 'bg-white text-slate-900 shadow-md border-slate-200' 
+                        : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                    >
+                      <ShieldCheck className={`h-4 w-4 mr-2 ${isAttended === true ? 'text-green-500' : 'text-slate-400'}`} />
+                      Attended (Sales)
+                    </Button>
+                    <Button
+                      type="button"
+                      variant={isAttended === false ? 'default' : 'ghost'}
+                      onClick={() => setIsAttended(false)}
+                      className={`h-11 rounded-xl text-xs font-bold transition-all ${
+                        isAttended === false 
+                        ? 'bg-white text-slate-900 shadow-md border-slate-200' 
+                        : 'text-slate-500 hover:text-slate-900'
+                      }`}
+                    >
+                      <AlertCircle className={`h-4 w-4 mr-2 ${isAttended === false ? 'text-blue-500' : 'text-slate-400'}`} />
+                      Missed (Reminder)
+                    </Button>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-[10px] text-slate-400 font-medium italic">
+                    <HelpCircle className="h-3 w-3" />
+                    Determine which segment of leads to target
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
-          <div className="space-y-3">
-            <h3 className="text-sm font-medium text-foreground">Filter Conditions</h3>
-            <div className="space-y-3">
-              {conditions.map((condition, index) => (
-                <FilterConditionCard
-                  key={condition.id}
-                  condition={condition}
-                  index={index}
-                  webinars={webinarsData ?? []}
-                  tags={WLHTags ?? []}
-                  employees={employeesData ?? []}
-                  onUpdate={(updates) => handleConditionUpdate(condition.id, updates)}
-                  onRemove={() => handleRemoveCondition(condition.id)}
-                />
-              ))}
-            </div>
+              {/* Advanced Conditions */}
+              <div className="space-y-4 pt-4 border-t border-slate-100">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">Advanced Filter Conditions</h3>
+                  <Badge variant="outline" className="text-[10px] bg-blue-50 text-blue-600 border-blue-100">{conditions.length} Active</Badge>
+                </div>
+                
+                <div className="space-y-4">
+                  {conditions.map((condition, index) => (
+                    <motion.div
+                      key={condition.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                    >
+                      <FilterConditionCard
+                        condition={condition}
+                        index={index}
+                        webinars={(webinarsData as any) ?? []}
+                        tags={(WLHTags as any) ?? []}
+                        employees={employeesData ?? []}
+                        onUpdate={(updates) => handleConditionUpdate(condition.id, updates)}
+                        onRemove={() => handleRemoveCondition(condition.id)}
+                      />
+                    </motion.div>
+                  ))}
+                </div>
 
                 <Button
                   type="button"
                   variant="outline"
-                  size="sm"
                   onClick={handleAddCondition}
                   disabled={disabled}
-                  className="mt-4 gap-2 border-dashed w-full sm:w-auto text-muted-foreground hover:text-foreground hover:bg-muted"
+                  className="h-10 px-5 rounded-xl border-dashed border-slate-200 text-slate-500 font-bold text-xs gap-2 hover:bg-slate-50 transition-all active:scale-[0.98] w-full sm:w-auto"
                 >
-              <Plus className="h-4 w-4" />
-              Add Condition
-            </Button>
-          </div>
+                  <Plus className="h-4 w-4" />
+                  Add Additional Condition
+                </Button>
+              </div>
 
-          <div className="pt-4 border-t border-border flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-             <div className="flex items-center gap-4">
-               <Button
-                 type="button"
-                 variant="secondary"
-                 onClick={testCount}
-                 disabled={
-                   disabled ||
-                   isPending ||
-                   selectedWebinarIds.length === 0 ||
-                   isAttended === null
-                 }
-               >
-                 {isPending ? 'Calculating...' : 'Test Match Count'}
-               </Button>
-               {advanceCountData?.count !== undefined && (
-                  <p className="text-sm text-muted-foreground">
-                    <strong className="text-foreground">{advanceCountData.count}</strong> attendees currently match.
-                  </p>
-               )}
-             </div>
-             {onSave && (
-               <Button 
-                onClick={onSave} 
-                disabled={disabled || isSaving}
-              >
-                {isSaving ? (
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent mr-2" />
-                ) : null}
-                Update
-              </Button>
-             )}
-          </div>
-        </CardContent>
-      )}
+              {/* Action Bar */}
+              <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-6">
+                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+                   <Button
+                     type="button"
+                     variant="outline"
+                     onClick={testCount}
+                     disabled={disabled || isPending || selectedWebinarIds.length === 0 || isAttended === null}
+                     className="h-11 px-6 rounded-xl border-slate-200 text-slate-700 font-bold text-xs gap-2 bg-white shadow-sm hover:bg-slate-50 transition-all active:scale-[0.95]"
+                   >
+                     {isPending ? (
+                       <Loader2 className="h-4 w-4 animate-spin" />
+                     ) : (
+                       <Calculator className="h-4 w-4 text-blue-500" />
+                     )}
+                     Test Match Count
+                   </Button>
+                   
+                   {advanceCountData?.count !== undefined && (
+                      <motion.div 
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-100 text-blue-700 font-bold text-xs flex items-center gap-2 shadow-sm"
+                      >
+                        <span className="text-sm font-black underline decoration-2 underline-offset-4">{advanceCountData.count}</span>
+                        <span>Attendees match these rules</span>
+                      </motion.div>
+                   )}
+                 </div>
+
+                 {onSave && (
+                   <Button 
+                    onClick={onSave} 
+                    disabled={disabled || isSaving}
+                    className="h-11 px-10 rounded-xl bg-[#22B573] hover:bg-[#1da467] text-white font-bold text-xs shadow-lg shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] gap-2"
+                  >
+                    {isSaving ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                    Save Automation Rules
+                  </Button>
+                 )}
+              </div>
+            </CardContent>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </Card>
   );
 }
+
+

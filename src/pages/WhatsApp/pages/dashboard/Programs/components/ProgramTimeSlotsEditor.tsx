@@ -10,8 +10,9 @@ import {
 } from '@/components/ui/select';
 import type { ProgramTimeSlot, ProgramMessageConfig } from '@/schemas/programSchema';
 import { getDefaultProgramTimeSlot } from '@/schemas/programSchema';
-import { Plus, Trash2 } from 'lucide-react';
+import { Plus, Trash2, AlertCircle } from 'lucide-react';
 import { TemplateSelectionDialog } from '@/components/common/TemplateSelectionDialog';
+import { Badge } from '@/components/ui/badge';
 import type { VariableMapping } from '@/api/modules/autoMessage';
 
 type SetSlotsForOccurrence = (
@@ -84,22 +85,26 @@ function ProgramTimeSlotsEditorInner({
   );
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label className="text-sm font-semibold">Time slots</Label>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between px-3">
+        <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400">
+          <span>Message Queue</span>
+          <span className="h-1 w-1 rounded-full bg-slate-300" />
+          <span className="text-slate-500">{timeSlots.length} Slots</span>
+        </div>
         <Button
           type="button"
           variant="outline"
           size="sm"
           onClick={addTimeSlot}
-          className="gap-1"
+          className="h-8 px-3 rounded-lg border-slate-200 text-slate-600 font-bold text-[10px] uppercase tracking-wider gap-1.5 hover:bg-slate-50 transition-all active:scale-[0.98]"
         >
-          <Plus className="h-4 w-4" />
-          Add slot
+          <Plus className="h-3.5 w-3.5" />
+          Add Slot
         </Button>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         {timeSlots.map((slot, index) => (
           <ProgramTimeSlotRow
             key={index}
@@ -197,7 +202,6 @@ const ProgramTimeSlotRow = memo(function ProgramTimeSlotRow({
     return 'text';
   };
 
-  // For display, rely on persisted templateName so UI matches what will be saved.
   const effectiveTemplateName = slot.messageConfig.templateName;
   const effectiveTemplateType =
     effectiveTemplateName && selectedTemplate?.name === effectiveTemplateName
@@ -241,158 +245,169 @@ const ProgramTimeSlotRow = memo(function ProgramTimeSlotRow({
 
   useEffect(() => {
     setLocalTime(parseTime(slot.time));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slot.time]);
 
   const { hour12, minute, period } = localTime;
 
   return (
-    <div className="rounded-lg border bg-card shadow-sm p-4 space-y-4">
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex flex-col gap-0.5">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold">Slot {index + 1}</span>
-            <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-              {slot.time || 'Not set'}
-            </span>
-          </div>
-        </div>
+    <div className="group/slot relative rounded-2xl border border-slate-200 bg-white/50 backdrop-blur-sm p-5 space-y-5 transition-all hover:border-blue-200 hover:bg-white hover:shadow-lg hover:shadow-blue-900/5 overflow-hidden">
+      <div className="absolute top-2 right-2">
         <Button
           type="button"
           variant="ghost"
           size="icon"
           onClick={() => removeTimeSlot(index)}
           disabled={disableRemove}
-          className="h-7 w-7"
+          className="h-8 w-8 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
         >
-          <Trash2 className="h-4 w-4 text-destructive" />
+          <Trash2 className="h-4 w-4" />
         </Button>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-[minmax(0,0.4fr)_minmax(0,0.6fr)]">
-        <div className="space-y-2">
-          <Label className="text-xs font-medium">Send time</Label>
-          {error?.time && (
-            <p className="text-[11px] text-destructive">{error.time}</p>
-          )}
-          <div className="flex items-center gap-2">
-            {/* Hour select (01-12) */}
-            <Select
-              value={hour12 || undefined}
-              onValueChange={(value) => {
-                setLocalTime((prev) => ({ ...prev, hour12: value }));
-                const newTime = to24Hour(value, minute || '00', period);
-                updateTimeSlot(index, { ...slot, time: newTime });
-              }}
-            >
-              <SelectTrigger className="h-9 w-16 text-xs">
-                <SelectValue placeholder="HH" />
-              </SelectTrigger>
-              <SelectContent>
-                {Array.from({ length: 12 }, (_, i) => {
-                  const h = String(i + 1).padStart(2, '0');
-                  return (
-                    <SelectItem key={h} value={h}>
-                      {h}
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-
-            <span className="text-sm text-muted-foreground">:</span>
-
-            {/* Minute select (00-55 in steps of 5) */}
-            <Select
-              value={minute || undefined}
-              onValueChange={(value) => {
-                setLocalTime((prev) => ({ ...prev, minute: value }));
-                const safeHour = hour12 || '12';
-                const newTime = to24Hour(safeHour, value, period);
-                updateTimeSlot(index, { ...slot, time: newTime });
-              }}
-            >
-              <SelectTrigger className="h-9 w-24 text-xs">
-                <SelectValue placeholder="MM" />
-              </SelectTrigger>
-              <SelectContent className="grid grid-cols-3 gap-1">
-                {Array.from({ length: 12 }, (_, i) => {
-                  const total = i * 5;
-                  const m = String(total).padStart(2, '0');
-                  return (
-                    <SelectItem key={m} value={m} className="justify-center">
-                      {m}
-                    </SelectItem>
-                  );
-                })}
-              </SelectContent>
-            </Select>
-
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="h-9 px-3 text-xs"
-              onClick={() => {
-                const newPeriod = period === 'AM' ? 'PM' : 'AM';
-                setLocalTime((prev) => ({ ...prev, period: newPeriod }));
-                const safeHour = hour12 || '12';
-                const safeMinute = minute || '00';
-                const newTime = to24Hour(safeHour, safeMinute, newPeriod);
-                updateTimeSlot(index, { ...slot, time: newTime });
-              }}
-            >
-              {period}
-            </Button>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          <div className="h-9 w-9 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 font-bold text-xs group-hover/slot:text-blue-600 group-hover/slot:bg-blue-50 group-hover/slot:border-blue-100 transition-all">
+            S{index + 1}
+          </div>
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-black text-slate-900 tracking-tight">Slot Schedule</span>
+              {slot.time && (
+                <Badge variant="outline" className="bg-slate-50 text-[9px] font-black uppercase tracking-widest text-slate-400 border-slate-200 rounded-md py-0 px-2 h-5">
+                  {slot.time}
+                </Badge>
+              )}
+            </div>
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Content & Timing</p>
           </div>
         </div>
 
-        <div className="space-y-2">
-          <Label className="text-xs font-medium">Template</Label>
-          <div className="flex items-center gap-2">
-            <div className="flex-1 text-xs text-muted-foreground">
-              {effectiveTemplateName ? (
-                <>
-                  Template: {effectiveTemplateName}
-                  {effectiveTemplateType && (
-                    <span className="ml-1 text-[11px] text-muted-foreground">
-                      • {effectiveTemplateType}
-                    </span>
-                  )}
-                </>
-              ) : (
-                'No template selected'
-              )}
+        <div className="flex flex-wrap items-center gap-4">
+          {/* Time Picker */}
+          <div className="space-y-1.5">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Send Time</Label>
+            <div className="flex items-center gap-1.5 p-1 bg-slate-100/50 border border-slate-200 rounded-xl">
+              <Select
+                value={hour12 || undefined}
+                onValueChange={(value) => {
+                  setLocalTime((prev) => ({ ...prev, hour12: value }));
+                  const newTime = to24Hour(value, minute || '00', period);
+                  updateTimeSlot(index, { ...slot, time: newTime });
+                }}
+              >
+                <SelectTrigger className="h-8 w-14 bg-white border-none shadow-none text-xs font-bold focus:ring-0">
+                  <SelectValue placeholder="HH" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-slate-200">
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const h = String(i + 1).padStart(2, '0');
+                    return (
+                      <SelectItem key={h} value={h} className="rounded-lg text-xs font-bold">
+                        {h}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+
+              <span className="text-slate-300 font-bold text-xs">:</span>
+
+              <Select
+                value={minute || undefined}
+                onValueChange={(value) => {
+                  setLocalTime((prev) => ({ ...prev, minute: value }));
+                  const safeHour = hour12 || '12';
+                  const newTime = to24Hour(safeHour, value, period);
+                  updateTimeSlot(index, { ...slot, time: newTime });
+                }}
+              >
+                <SelectTrigger className="h-8 w-14 bg-white border-none shadow-none text-xs font-bold focus:ring-0">
+                  <SelectValue placeholder="MM" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-slate-200">
+                  {Array.from({ length: 12 }, (_, i) => {
+                    const m = String(i * 5).padStart(2, '0');
+                    return (
+                      <SelectItem key={m} value={m} className="rounded-lg text-xs font-bold">
+                        {m}
+                      </SelectItem>
+                    );
+                  })}
+                </SelectContent>
+              </Select>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const newPeriod = period === 'AM' ? 'PM' : 'AM';
+                  setLocalTime((prev) => ({ ...prev, period: newPeriod }));
+                  const safeHour = hour12 || '12';
+                  const safeMinute = minute || '00';
+                  const newTime = to24Hour(safeHour, safeMinute, newPeriod);
+                  updateTimeSlot(index, { ...slot, time: newTime });
+                }}
+                className={`
+                  h-8 px-2 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all
+                  ${period === 'AM' ? 'bg-blue-500 text-white shadow-sm' : 'bg-slate-900 text-white shadow-sm'}
+                `}
+              >
+                {period}
+              </button>
             </div>
-            <TemplateSelectionDialog
-              triggerLabel={
-                slot.messageConfig.templateName ? 'Change template' : 'Select template'
-              }
-              selectedTemplate={selectedTemplate}
-              setSelectedTemplate={setSelectedTemplate}
-              variableMappings={variableMappings}
-              setVariableMappings={setVariableMappings}
-              selectedMediaAsset={selectedMediaAsset}
-              setSelectedMediaAsset={handleSetSelectedMediaAsset}
-              uploadedFileName={uploadedFileName}
-              setUploadedFileName={setUploadedFileName}
-              onTemplateSelect={handleTemplateSelect}
-              onVariableMappingsChange={handleVariableMappingsChange}
-              showPreview
-              showHeaderMedia
-              allowDynamicFields
-            />
           </div>
-            {((error?.template && !slot.messageConfig?.templateName?.trim()) ||
-            error?.variables) && (
-            <p className="text-[11px] text-destructive">
-              {!slot.messageConfig?.templateName?.trim() && error?.template
-                ? error.template
-                : error?.variables}
+
+          {/* Template Picker */}
+          <div className="space-y-1.5 flex-1 min-w-[200px]">
+            <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Message Content</Label>
+            <div className="flex items-center gap-2">
+              <TemplateSelectionDialog
+                triggerLabel={
+                  slot.messageConfig.templateName ? slot.messageConfig.templateName : 'Select template'
+                }
+                selectedTemplate={selectedTemplate}
+                setSelectedTemplate={setSelectedTemplate}
+                variableMappings={variableMappings}
+                setVariableMappings={setVariableMappings}
+                selectedMediaAsset={selectedMediaAsset}
+                setSelectedMediaAsset={handleSetSelectedMediaAsset}
+                uploadedFileName={uploadedFileName}
+                setUploadedFileName={setUploadedFileName}
+                onTemplateSelect={handleTemplateSelect}
+                onVariableMappingsChange={handleVariableMappingsChange}
+                showPreview
+                showHeaderMedia
+                allowDynamicFields
+                triggerClassName={`
+                  flex-1 h-10 px-4 rounded-xl border border-slate-200 text-xs font-bold transition-all text-left
+                  ${slot.messageConfig.templateName 
+                    ? 'bg-blue-50/50 text-blue-700 border-blue-100 hover:bg-blue-50' 
+                    : 'bg-slate-50/50 text-slate-400 hover:bg-slate-50'}
+                `}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {(error?.time || error?.template || error?.variables) && (
+        <div className="pt-2 flex flex-wrap gap-x-4 gap-y-1 border-t border-slate-100 mt-2">
+          {error?.time && (
+            <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" /> Time: {error.time}
+            </p>
+          )}
+          {(!slot.messageConfig?.templateName?.trim() && error?.template) && (
+            <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" /> Template: {error.template}
+            </p>
+          )}
+          {error?.variables && (
+            <p className="text-[10px] font-bold text-red-500 uppercase tracking-wider flex items-center gap-1">
+              <AlertCircle className="h-3 w-3" /> Variables: {error.variables}
             </p>
           )}
         </div>
-      </div>
+      )}
     </div>
   );
 });

@@ -55,11 +55,17 @@ export interface GetContactsParams {
 }
 
 const getContacts = async (params?: GetContactsParams): Promise<PaginatedContactsResponse> => {
-  const flat: GetContactsParamsFlat = {
+  const flat: any = {
     ...(params?.filters ?? {}),
     ...(params?.page !== undefined && { page: params.page }),
     ...(params?.limit !== undefined && { limit: params.limit }),
   };
+
+  // Ensure tags are sent as a comma-separated string if it's an array
+  if (Array.isArray(flat.tags)) {
+    flat.tags = flat.tags.join(',');
+  }
+
   const query = Object.fromEntries(
     Object.entries(flat).filter(([, v]) => v !== undefined && v !== '')
   );
