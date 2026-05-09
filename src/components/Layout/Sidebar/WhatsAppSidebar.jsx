@@ -22,6 +22,7 @@ import {
   FolderOpen,
   CheckCircle,
   AlertTriangle,
+  Workflow,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { setSelectedProject } from "../../../features/slices/globalData";
@@ -74,6 +75,7 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
     { name: "API Campaigns", path: `/whatsapp/dashboard/${projectId}/api-campaigns`, icon: FileCode },
     { name: "Auto Message", path: `/whatsapp/dashboard/${projectId}/auto-message`, icon: Clock },
     { name: "Chatbot", path: `/whatsapp/dashboard/${projectId}/chatbot`, icon: Bot },
+    { name: "Flow Builder", path: `/whatsapp/dashboard/${projectId}/chatflow-builder`, icon: Workflow },
     { name: "Zoom Templates", path: `/whatsapp/dashboard/${projectId}/configured-templates`, icon: Video },
     { name: "Contacts", path: `/whatsapp/dashboard/${projectId}/contacts`, icon: Users },
     { name: "Opted Out Numbers", path: `/whatsapp/dashboard/${projectId}/opted-out-numbers`, icon: Hash },

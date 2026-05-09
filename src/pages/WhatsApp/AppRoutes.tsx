@@ -35,6 +35,7 @@ const ChatbotTriggersListPage = lazy(() => import("@/pages/dashboard/Chatbot/Cha
 const CreateChatbotTriggerPage = lazy(() => import("@/pages/dashboard/Chatbot/CreateChatbotTriggerPage").then(m => ({ default: m.default })));
 const EditChatbotTriggerPage = lazy(() => import("@/pages/dashboard/Chatbot/EditChatbotTriggerPage").then(m => ({ default: m.default })));
 const OptedOutNumbersPage = lazy(() => import("@/pages/dashboard/OptedOut/OptedOutNumbersPage").then(m => ({ default: m.default })));
+const ChatFlowBuilder = lazy(() => import("@/pages/dashboard/ChatFlowBuilder").then(m => ({ default: m.default })));
 
 
 const routes = [
@@ -72,6 +73,7 @@ const routes = [
       { path: "chatbot", element: <ConfigurationGuard><ChatbotTriggersListPage /></ConfigurationGuard> },
       { path: "chatbot/create", element: <ConfigurationGuard><CreateChatbotTriggerPage /></ConfigurationGuard> },
       { path: "chatbot/:triggerId/edit", element: <ConfigurationGuard><EditChatbotTriggerPage /></ConfigurationGuard> },
+      { path: "chatflow-builder", element: <ConfigurationGuard><ChatFlowBuilder /></ConfigurationGuard> },
       { path: "opted-out-numbers", element: <ConfigurationGuard><OptedOutNumbersPage /></ConfigurationGuard> },
       { path: "configuration", element: <Configuration /> },
       { path: "programs", element: <ConfigurationGuard><Programs /></ConfigurationGuard> },

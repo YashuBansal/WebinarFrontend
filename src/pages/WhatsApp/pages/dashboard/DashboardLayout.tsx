@@ -15,7 +15,7 @@ export default function DashboardLayout() {
   const { isLoading: isAuthLoading, isError: isAuthError, data: userData } = useCurrentUser();
   const dashboardBaseUrl = import.meta.env.VITE_REACT_APP_DASHBOARD_BASE_URL;
   const isLoggedOut = isAuthError || (!isAuthLoading && !userData);
-  const isChatPage = location.pathname.split('/').includes('chat');
+  const isChatPage = location.pathname.split('/').includes('chat') || location.pathname.includes('chatflow-builder');
 
   useEffect(() => {
     if (!isLoggedOut || !dashboardBaseUrl?.trim()) return;
@@ -124,11 +124,11 @@ export default function DashboardLayout() {
   }
 
   return (
-    <div className="flex w-full min-h-screen bg-transparent">
-      <div className="flex-1 flex flex-col min-w-0">
-        <main className={`flex-1 flex justify-center items-stretch min-w-0 ${isChatPage ? 'p-0' : ''}`}>
-          <div className={`w-full max-w-full flex flex-col min-w-0 ${isChatPage ? 'bg-transparent' : ''}`}>
-            <div className={`flex-1 min-w-0 ${isChatPage ? 'p-0' : 'p-0 md:p-4'}`}>
+    <div className="flex w-full h-full bg-transparent">
+      <div className={`flex-1 flex flex-col min-w-0 ${isChatPage ? 'h-full' : ''}`}>
+        <main className={`flex-1 flex justify-center items-stretch min-w-0 ${isChatPage ? 'p-0 h-full' : ''}`}>
+          <div className={`w-full max-w-full flex flex-col min-w-0 ${isChatPage ? 'bg-transparent h-full' : ''}`}>
+            <div className={`flex-1 min-w-0 ${isChatPage ? 'p-0 h-full' : 'p-0 md:p-4'}`}>
               <Suspense fallback={<div className='p-8 text-center text-muted-foreground'>Loading...</div>}>
                 <Outlet />
               </Suspense>
