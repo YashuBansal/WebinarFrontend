@@ -23,8 +23,10 @@ import { useDispatch, useSelector } from "react-redux";
 import useRoles from "../../../hooks/useRoles";
 import ComponentGuard from "../../AccessControl/ComponentGuard";
 import useUserSubscription from "../../../hooks/useUserSubscription";
+import { useTheme } from "../../../contexts/ThemeContext";
 
-const NavGlyph = ({ Icon, active, theme = "light" }) => {
+const NavGlyph = ({ Icon, active }) => {
+  const { theme } = useTheme();
   const inactive = theme === "dark" ? "#94a3b8" : "#64748b";
   return (
     <Icon
@@ -51,6 +53,7 @@ const DashboardSidebar = ({
   settingsActive,
   dashboardPathActive,
 }) => {
+  const { isDark } = useTheme();
   const { data: subscription } = useUserSubscription();
   const calendarFeatures = subscription?.plan?.calendarFeatures;
 
@@ -181,8 +184,8 @@ const DashboardSidebar = ({
             to="/"
             onClick={() => handleNavigation("/dashboard")}
             className={`flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium transition-colors ${dashboardPathActive
-              ? "bg-orange-50 text-orange-600"
-              : "text-gray-700 hover:bg-gray-50"
+              ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600"
+              : "text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"
               }`}
           >
             <NavGlyph Icon={LayoutDashboard} active={dashboardPathActive} />
@@ -199,7 +202,7 @@ const DashboardSidebar = ({
           <Link
             to="/"
             onClick={() => handleNavigation("/dashboard")}
-            className={`relative flex w-full items-center justify-center rounded-lg py-2.5 transition-colors hover:bg-black/[0.04] ${dashboardPathActive ? "bg-orange-500/10" : ""
+            className={`relative flex w-full items-center justify-center rounded-lg py-2.5 transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] ${dashboardPathActive ? "bg-orange-500/10" : ""
               }`}
           >
             {dashboardPathActive && (
@@ -218,7 +221,7 @@ const DashboardSidebar = ({
           <Link
             to="/"
             onClick={() => handleNavigation("/dashboard")}
-            className={`flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-medium hover:bg-black/[0.04] ${dashboardPathActive ? "text-orange-600" : "text-slate-800"
+            className={`flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-medium hover:bg-black/[0.04] dark:hover:bg-white/[0.04] ${dashboardPathActive ? "text-orange-600" : "text-slate-800 dark:text-slate-200"
               }`}
             style={{ fontFamily: "Inter, sans-serif" }}
           >
@@ -246,8 +249,8 @@ const DashboardSidebar = ({
                   rel="noopener noreferrer"
                   onClick={() => handleNavigation(item.path)}
                   className={`flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium transition-colors ${active
-                    ? "bg-orange-50 text-orange-600"
-                    : "text-gray-700 hover:bg-gray-50"
+                    ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600"
+                    : "text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"
                     }`}
                 >
                   <NavGlyph Icon={Icon} active={active} />
@@ -267,8 +270,8 @@ const DashboardSidebar = ({
                   to={item.path}
                   onClick={() => handleNavigation(item.path)}
                   className={`flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium transition-colors ${active
-                    ? "bg-orange-50 text-orange-600"
-                    : "text-gray-700 hover:bg-gray-50"
+                    ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600"
+                    : "text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"
                     }`}
                 >
                   <NavGlyph Icon={Icon} active={active} />
@@ -298,7 +301,7 @@ const DashboardSidebar = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => handleNavigation(item.path)}
-                  className={`relative flex w-full items-center justify-center rounded-lg py-2.5 transition-colors hover:bg-black/[0.04] ${active ? "bg-orange-500/10" : ""
+                  className={`relative flex w-full items-center justify-center rounded-lg py-2.5 transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] ${active ? "bg-orange-500/10" : ""
                     }`}
                 >
                   {active && (
@@ -310,7 +313,7 @@ const DashboardSidebar = ({
                 <Link
                   to={item.path}
                   onClick={() => handleNavigation(item.path)}
-                  className={`relative flex w-full items-center justify-center rounded-lg py-2.5 transition-colors hover:bg-black/[0.04] ${active ? "bg-orange-500/10" : ""
+                  className={`relative flex w-full items-center justify-center rounded-lg py-2.5 transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] ${active ? "bg-orange-500/10" : ""
                     }`}
                 >
                   {active && (
@@ -333,7 +336,7 @@ const DashboardSidebar = ({
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => handleNavigation(item.path)}
-                  className="flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-medium text-slate-800 hover:bg-black/[0.04]"
+                  className="flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
                   <span className="flex flex-wrap items-center gap-2">
@@ -351,7 +354,7 @@ const DashboardSidebar = ({
                 <Link
                   to={item.path}
                   onClick={() => handleNavigation(item.path)}
-                  className={`flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-medium hover:bg-black/[0.04] ${active ? "text-orange-600" : "text-slate-800"
+                  className={`flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-medium hover:bg-black/[0.04] dark:hover:bg-white/[0.04] ${active ? "text-orange-600" : "text-slate-800 dark:text-slate-200"
                     }`}
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
@@ -380,7 +383,7 @@ const DashboardSidebar = ({
           <button
             type="button"
             onClick={toggleImportantLinks}
-            className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left font-medium text-gray-700 hover:bg-gray-50"
+            className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"
           >
             <span className="flex items-center gap-3 min-w-0">
               <Link2 className="h-5 w-5 text-slate-500 shrink-0" strokeWidth={2} />
@@ -404,7 +407,7 @@ const DashboardSidebar = ({
                     }}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-100"
+                    className="block rounded-lg px-3 py-2 text-sm text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800"
                   >
                     {imp.title}
                   </a>
@@ -422,7 +425,7 @@ const DashboardSidebar = ({
           <button
             type="button"
             onClick={toggleImportantLinks}
-            className="flex w-full items-center justify-center rounded-lg py-2.5 hover:bg-black/[0.04]"
+            className="flex w-full items-center justify-center rounded-lg py-2.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
           >
             <Link2 className="h-5 w-5 text-slate-500" strokeWidth={2} />
           </button>
@@ -439,7 +442,7 @@ const DashboardSidebar = ({
             <Link
               to="/settings"
               onClick={() => handleNavigation("/settings")}
-              className={`relative flex w-full items-center justify-center rounded-lg py-2.5 hover:bg-black/[0.04] ${settingsActive ? "bg-orange-500/10" : ""
+              className={`relative flex w-full items-center justify-center rounded-lg py-2.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04] ${settingsActive ? "bg-orange-500/10" : ""
                 }`}
             >
               {settingsActive && (
@@ -456,7 +459,7 @@ const DashboardSidebar = ({
           <button
             type="button"
             onClick={handleLogout}
-            className="group flex w-full items-center justify-center rounded-lg py-2.5 hover:bg-red-50"
+            className="group flex w-full items-center justify-center rounded-lg py-2.5 hover:bg-red-50 dark:hover:bg-red-500/10"
             title="Sign out"
           >
             <LogOut
@@ -475,7 +478,7 @@ const DashboardSidebar = ({
           <button
             type="button"
             onClick={toggleImportantLinks}
-            className="flex w-full items-center justify-between rounded-lg px-2 py-2.5 text-left text-sm font-medium text-slate-800 hover:bg-black/[0.04]"
+            className="flex w-full items-center justify-between rounded-lg px-2 py-2.5 text-left text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
             <span className="truncate whitespace-nowrap">Important Links</span>
@@ -497,7 +500,7 @@ const DashboardSidebar = ({
                     }}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="block rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-black/[0.04]"
+                    className="block rounded-lg px-2 py-1.5 text-sm text-slate-600 dark:text-slate-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
                   >
                     {imp.title}
                   </a>
@@ -517,7 +520,7 @@ const DashboardSidebar = ({
             <Link
               to="/settings"
               onClick={() => handleNavigation("/settings")}
-              className={`flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-medium hover:bg-black/[0.04] ${settingsActive ? "text-orange-600" : "text-slate-800"
+              className={`flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-medium hover:bg-black/[0.04] dark:hover:bg-white/[0.04] ${settingsActive ? "text-orange-600" : "text-slate-800 dark:text-slate-200"
                 }`}
               style={{ fontFamily: "Inter, sans-serif" }}
             >
@@ -532,7 +535,7 @@ const DashboardSidebar = ({
           <button
             type="button"
             onClick={handleLogout}
-            className="group flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-medium text-slate-800 hover:bg-red-50 hover:text-red-600"
+            className="group flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
             Sign Out
@@ -554,8 +557,8 @@ const DashboardSidebar = ({
               to="/settings"
               onClick={() => handleNavigation("/settings")}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 font-medium transition-colors ${settingsActive
-                ? "bg-orange-50 text-orange-600"
-                : "text-gray-700 hover:bg-gray-50"
+                ? "bg-orange-50 dark:bg-orange-500/10 text-orange-600"
+                : "text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"
                 }`}
             >
               <NavGlyph Icon={Settings} active={settingsActive} />
@@ -570,7 +573,7 @@ const DashboardSidebar = ({
           <button
             type="button"
             onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left font-medium text-red-600 hover:bg-red-50"
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
           >
             <LogOut
               className="h-5 w-5 text-slate-500"

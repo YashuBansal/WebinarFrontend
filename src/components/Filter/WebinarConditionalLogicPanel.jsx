@@ -702,7 +702,7 @@ export default function WebinarConditionalLogicPanel({
             key={row.id}
             className="rounded-xl border p-3 sm:p-4"
             style={{
-              borderColor: isDark ? "#334155" : "#e2e8f0",
+              borderColor: isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0",
               backgroundColor: isDark ? "rgba(15,23,42,0.35)" : "#ffffff",
             }}
           >

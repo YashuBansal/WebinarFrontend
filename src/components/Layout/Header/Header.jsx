@@ -13,28 +13,11 @@ import NotificationBell from "../../Notification/NotificationBell";
 import ImportExportNotifications from "../../Notification/ImportExportNotifications";
 import { formatDateAsNumber } from "../../../utils/extra";
 import useMediaQuery from "../../../hooks/useMediaQuery";
-
-const THEME_STORAGE_KEY = "wlh-theme";
-
-function readStoredTheme() {
-  try {
-    const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    if (stored === "dark" || stored === "light") return stored;
-  } catch {
-    /* ignore */
-  }
-  if (
-    typeof window !== "undefined" &&
-    window.matchMedia("(prefers-color-scheme: dark)").matches
-  ) {
-    return "dark";
-  }
-  return "light";
-}
+import { useTheme } from "../../../contexts/ThemeContext";
 
 const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
   const [showExpiryNotice, setShowExpiryNotice] = useState(true);
-  const [theme, setTheme] = useState(readStoredTheme);
+  const { theme, toggleTheme, isDark } = useTheme();
   const dispatch = useDispatch();
   const roles = useRoles();
   const navigate = useNavigate();
@@ -46,19 +29,6 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
 
   const { showWarning, daysLeft, expiryDate } = usePlanExpiryWarning(15);
 
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    try {
-      localStorage.setItem(THEME_STORAGE_KEY, theme);
-    } catch {
-      /* ignore */
-    }
-  }, [theme]);
 
   useEffect(() => {
     if (location.pathname.startsWith("/whatsapp")) {
@@ -70,9 +40,6 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
     }
   }, [location.pathname, dispatch]);
 
-  const toggleTheme = () => {
-    setTheme((t) => (t === "light" ? "dark" : "light"));
-  };
 
   const handleProfileClick = () => {
     navigate("/profile");
@@ -104,15 +71,14 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
   const dashboardActive = location.pathname === "/";
   const whatsappActive = location.pathname.startsWith("/whatsapp");
   const zoomActive = location.pathname.startsWith("/zoom");
-  const isDark = theme === "dark";
 
   return (
     <>
       <header
         className="fixed left-0 right-0 top-0 z-[60] h-16 border-b transition-colors duration-500"
         style={{
-          backgroundColor: isDark ? "#1f2937" : "#ffffff",
-          borderColor: isDark ? "#374151" : "#e5e7eb",
+          backgroundColor: isDark ? "#0f172a" : "#ffffff",
+          borderColor: isDark ? "#1e293b" : "#e5e7eb",
           boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
         }}
       >
@@ -304,8 +270,8 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
               }
               className="flex h-8 w-8 items-center justify-center rounded-lg transition-all sm:h-9 sm:w-9 md:h-10 md:w-10"
               style={{
-                backgroundColor: isDark ? "#1f2937" : "#f9fafb",
-                border: isDark ? "1px solid #374151" : "1px solid #e5e7eb",
+                backgroundColor: isDark ? "#1e293b" : "#f9fafb",
+                border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
               }}
             >
               {theme === "light" ? (

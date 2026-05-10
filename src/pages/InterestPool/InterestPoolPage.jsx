@@ -250,10 +250,10 @@ const InterestPoolPage = () => {
           >
             <div className="flex flex-col gap-3 rounded-2xl border border-amber-200/90 bg-gradient-to-r from-amber-50 to-orange-50/80 px-4 py-4 dark:border-amber-500/30 dark:from-amber-950/40 dark:to-orange-950/30 sm:flex-row sm:items-center sm:justify-between">
               <div>
-                <p className="text-sm font-bold text-amber-900 dark:text-amber-100">
+                <p className="text-sm font-bold text-amber-900 dark:text-amber-200">
                   Account not configured
                 </p>
-                <p className="mt-1 text-sm text-amber-800/90 dark:text-amber-200/90">
+                <p className="mt-1 text-sm text-amber-800/90 dark:text-amber-300/80">
                   Add your Facebook Account ID and access token in Settings
                   before running searches.
                 </p>
@@ -426,11 +426,12 @@ const InterestPoolPage = () => {
           <div className="overflow-x-auto rounded-2xl border border-slate-100 dark:border-slate-700/80">
             <table className="w-full min-w-[720px] text-left text-sm">
               <thead>
-                <tr className="border-b border-blue-200/80 bg-blue-50/80 dark:border-blue-500/30 dark:bg-blue-950/40">
+                <tr className="border-b border-slate-200/50 bg-slate-50 dark:border-slate-800 dark:bg-slate-900/50">
                   {columns.map(({ key, label }) => (
                     <th
                       key={key}
                       className="whitespace-nowrap px-4 py-3.5 text-xs font-bold uppercase tracking-wider text-slate-500 first:pl-5 last:pr-5 dark:text-slate-400"
+                      style={{ fontFamily: "Inter, sans-serif" }}
                     >
                       {label}
                     </th>
@@ -474,7 +475,7 @@ const InterestPoolPage = () => {
       </motion.section>
 
       <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-        <DialogContent className="max-w-md rounded-2xl border-slate-200 bg-white p-0 dark:border-slate-700 dark:bg-slate-900">
+        <DialogContent className="max-w-md rounded-2xl border-slate-200 bg-white p-0 dark:border-slate-800 dark:bg-slate-900 shadow-2xl">
           <div className="border-b border-slate-100 px-6 py-5 dark:border-slate-800">
             <DialogHeader>
               <DialogTitle className="text-lg text-slate-900 dark:text-slate-50">
@@ -500,7 +501,7 @@ const InterestPoolPage = () => {
                 onChange={(e) => setSettingsAccountId(e.target.value)}
                 placeholder="e.g. 1234567890"
                 disabled={isSavingSettings}
-                className="h-10 rounded-xl border-slate-200 dark:border-slate-600"
+                className="h-10 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-wlh-brand/30 transition-all"
               />
             </div>
             <div>
@@ -517,7 +518,7 @@ const InterestPoolPage = () => {
                 onChange={(e) => setSettingsAccessToken(e.target.value)}
                 placeholder="Paste your Facebook access token"
                 disabled={isSavingSettings}
-                className="h-10 rounded-xl border-slate-200 dark:border-slate-600"
+                className="h-10 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-900 dark:text-slate-100 focus:ring-wlh-brand/30 transition-all"
               />
             </div>
             <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
@@ -530,7 +531,7 @@ const InterestPoolPage = () => {
                 variant="outline"
                 onClick={() => setIsSettingsOpen(false)}
                 disabled={isSavingSettings}
-                className="rounded-xl"
+                className="rounded-xl border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 Cancel
               </Button>

@@ -1,5 +1,6 @@
 /* eslint-disable react/prop-types -- internal dashboard modal; caller guarantees props */
 import { useEffect } from "react";
+import { useTheme } from "../../contexts/ThemeContext";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Controller } from "react-hook-form";
@@ -30,22 +31,22 @@ function ymdToLocalDateEnd(ymd) {
   return d;
 }
 
-const inputStyle = {
-  backgroundColor: "#ffffff",
-  border: "1px solid #e2e8f0",
-  color: "#0f172a",
+const getInputStyle = (isDark) => ({
+  backgroundColor: isDark ? "#1e293b" : "#ffffff",
+  border: isDark ? "1px solid #334155" : "1px solid #e2e8f0",
+  color: isDark ? "#f8fafc" : "#0f172a",
   fontFamily: "Inter, sans-serif",
-};
+});
 
-const labelStyle = {
-  color: "#475569",
+const getLabelStyle = (isDark) => ({
+  color: isDark ? "#94a3b8" : "#475569",
   fontSize: "11px",
   fontWeight: 600,
   marginBottom: "2px",
   display: "block",
   textTransform: "uppercase",
   letterSpacing: "0.5px",
-};
+});
 
 /**
  * Filter dialog for admin activity logs — matches `frontend UI New` AdminActivityLogs filter panel.
@@ -59,6 +60,7 @@ export default function AdminActivityLogsFilterModal({
   resetForm,
   actionOptions,
 }) {
+  const { isDark } = useTheme();
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -92,8 +94,8 @@ export default function AdminActivityLogsFilterModal({
             transition={{ type: "spring", duration: 0.4, bounce: 0 }}
             className="relative z-10 flex max-h-[90dvh] w-full max-w-[800px] flex-col overflow-hidden rounded-2xl shadow-2xl"
             style={{
-              backgroundColor: "#ffffff",
-              border: "1px solid #e5e7eb",
+              backgroundColor: isDark ? "#0f172a" : "#ffffff",
+              border: isDark ? "1px solid #1e293b" : "1px solid #e5e7eb",
             }}
             role="dialog"
             aria-modal="true"
@@ -101,12 +103,12 @@ export default function AdminActivityLogsFilterModal({
           >
             <div
               className="flex flex-shrink-0 items-center justify-between border-b p-4"
-              style={{ borderColor: "#e5e7eb" }}
+              style={{ borderColor: isDark ? "#1e293b" : "#e5e7eb" }}
             >
               <h3
                 id="admin-activity-filter-title"
                 className="flex items-center gap-2 text-lg font-bold"
-                style={{ color: "#0f172a", fontFamily: "Inter, sans-serif" }}
+                style={{ color: isDark ? "#f8fafc" : "#0f172a", fontFamily: "Inter, sans-serif" }}
               >
                 <Filter className="h-5 w-5 text-gray-500" />
                 User Activity Logs Filters
@@ -114,7 +116,7 @@ export default function AdminActivityLogsFilterModal({
               <button
                 type="button"
                 onClick={onClose}
-                className="rounded-lg p-1.5 transition-colors hover:bg-black/5"
+                className="rounded-lg p-1.5 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                 aria-label="Close filters"
               >
                 <X className="h-5 w-5 text-gray-500" />
@@ -127,7 +129,7 @@ export default function AdminActivityLogsFilterModal({
             >
               <div className="grid flex-1 grid-cols-1 gap-6 overflow-y-auto p-6 md:grid-cols-3">
                 <div>
-                  <span style={labelStyle}>Action</span>
+                  <span style={getLabelStyle(isDark)}>Action</span>
                   <Controller
                     name="action"
                     control={control}
@@ -137,7 +139,7 @@ export default function AdminActivityLogsFilterModal({
                         {...field}
                         value={field.value || ""}
                         className="w-full cursor-pointer appearance-none rounded-xl p-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#22B573]/35"
-                        style={inputStyle}
+                        style={getInputStyle(isDark)}
                       >
                         <option value="">All Actions</option>
                         {actionOptions.map((option) => (
@@ -150,7 +152,7 @@ export default function AdminActivityLogsFilterModal({
                   />
                 </div>
                 <div>
-                  <span style={labelStyle}>Date (From)</span>
+                  <span style={getLabelStyle(isDark)}>Date (From)</span>
                   <Controller
                     name="fromDate"
                     control={control}
@@ -163,13 +165,13 @@ export default function AdminActivityLogsFilterModal({
                           field.onChange(v ? ymdToLocalDateStart(v) : null);
                         }}
                         className="w-full rounded-xl p-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#22B573]/35"
-                        style={inputStyle}
+                        style={getInputStyle(isDark)}
                       />
                     )}
                   />
                 </div>
                 <div>
-                  <span style={labelStyle}>Date (To)</span>
+                  <span style={getLabelStyle(isDark)}>Date (To)</span>
                   <Controller
                     name="toDate"
                     control={control}
@@ -182,7 +184,7 @@ export default function AdminActivityLogsFilterModal({
                           field.onChange(v ? ymdToLocalDateEnd(v) : null);
                         }}
                         className="w-full rounded-xl p-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#22B573]/35"
-                        style={inputStyle}
+                        style={getInputStyle(isDark)}
                       />
                     )}
                   />
@@ -192,8 +194,8 @@ export default function AdminActivityLogsFilterModal({
               <div
                 className="flex-shrink-0 border-t p-4"
                 style={{
-                  borderColor: "#e5e7eb",
-                  backgroundColor: "#F9FAFB",
+                  borderColor: isDark ? "#1e293b" : "#e5e7eb",
+                  backgroundColor: isDark ? "#1e293b" : "#F9FAFB",
                 }}
               >
                 <div className="flex items-center justify-between">
@@ -203,11 +205,11 @@ export default function AdminActivityLogsFilterModal({
                       e.preventDefault();
                       resetForm();
                     }}
-                    className="flex items-center gap-2 rounded-xl px-4 py-2 font-medium transition-colors hover:bg-black/5"
+                    className="flex items-center gap-2 rounded-xl px-4 py-2 font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                     style={{
                       backgroundColor: "transparent",
-                      border: "1px solid #cbd5e1",
-                      color: "#475569",
+                      border: isDark ? "1px solid #334155" : "1px solid #cbd5e1",
+                      color: isDark ? "#94a3b8" : "#475569",
                       fontFamily: "Inter, sans-serif",
                     }}
                   >
@@ -218,11 +220,11 @@ export default function AdminActivityLogsFilterModal({
                     <button
                       type="button"
                       onClick={onClose}
-                      className="rounded-xl px-5 py-2 font-medium transition-colors hover:bg-black/5"
+                      className="rounded-xl px-5 py-2 font-medium transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                       style={{
                         backgroundColor: "transparent",
                         border: "none",
-                        color: "#64748b",
+                        color: isDark ? "#64748b" : "#64748b",
                         fontFamily: "Inter, sans-serif",
                       }}
                     >

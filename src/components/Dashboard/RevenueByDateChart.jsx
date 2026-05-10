@@ -10,8 +10,9 @@ import {
   LinearScale,
   PointElement,
 } from "chart.js";
-import { Card, Typography } from "@mui/material";
+import { Card, CardTitle, CardHeader, CardContent } from "../ui/card";
 import { useSelector } from "react-redux";
+import { useTheme } from "../../contexts/ThemeContext";
 
 ChartJS.register(
   Title,
@@ -24,26 +25,25 @@ ChartJS.register(
 );
 
 const RevenueByDateChart = () => {
-  // Revenue data trends
+  const { isDark } = useTheme();
   const { revenueGraphData = [] } = useSelector((state) => state.globalData);
 
-  // Extract labels (dates) and data (revenue) for the chart
   const labels = revenueGraphData.map((item) => item?.dateObj?.split("T")[0]);
   const revenues = revenueGraphData.map((item) => item?.totalRevenue);
 
   const data = {
-    labels, // Dates for X-axis
+    labels,
     datasets: [
       {
         label: "Revenue",
-        data: revenues, // Revenue values
+        data: revenues,
         fill: true,
-        backgroundColor: "rgba(255, 99, 132, 0.2)",
+        backgroundColor: isDark ? "rgba(255, 99, 132, 0.1)" : "rgba(255, 99, 132, 0.2)",
         borderColor: "rgba(255, 99, 132, 1)",
         borderWidth: 2,
         pointBackgroundColor: "rgba(255, 99, 132, 1)",
         pointBorderColor: "#fff",
-        tension: 0.4, // Smooth line curve
+        tension: 0.4,
       },
     ],
   };
@@ -53,60 +53,76 @@ const RevenueByDateChart = () => {
     maintainAspectRatio: false,
     plugins: {
       title: {
-        display: true,
-        text: "Revenue Over Time", // Title of the chart
+        display: false,
       },
       tooltip: {
         callbacks: {
           label: function (context) {
             return `${
               context.dataset.label
-            }: \u20B9${context.raw.toLocaleString()}`; // Tooltip formatting
+            }: \u20B9${context.raw.toLocaleString()}`;
           },
         },
       },
       legend: {
         display: true,
         position: "top",
+        labels: {
+          color: isDark ? "#94a3b8" : "#64748b",
+        }
       },
     },
     scales: {
       x: {
+        grid: {
+          color: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+        },
         title: {
           display: true,
           text: "Dates",
+          color: isDark ? "#94a3b8" : "#64748b",
         },
         ticks: {
-          autoSkip: true, // Automatically skip ticks if too many dates
-          maxTicksLimit: 10, // Limit the number of X-axis labels shown
+          autoSkip: true,
+          maxTicksLimit: 10,
+          color: isDark ? "#94a3b8" : "#64748b",
         },
       },
       y: {
+        grid: {
+          color: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+        },
         title: {
           display: true,
           text: "Revenue (in \u20B9)",
+          color: isDark ? "#94a3b8" : "#64748b",
         },
         beginAtZero: true,
         ticks: {
+          color: isDark ? "#94a3b8" : "#64748b",
           callback: function (value) {
-            return `\u20B9${value.toLocaleString()}`; // Format Y-axis labels as currency
+            return `\u20B9${value.toLocaleString()}`;
           },
         },
       },
     },
     layout: {
       padding: {
-        bottom: 30, // Add padding to the bottom to make space for labels
+        bottom: 10,
       },
     },
   };
 
   return (
-    <Card className="p-6 shadow w-full  h-[60vh] ">
-      <Typography variant="h6" gutterBottom>
-        Revenue Overview
-      </Typography>
-      <Line data={data} options={options} />
+    <Card className="shadow-sm w-full h-[60vh] border-none bg-transparent">
+      <CardHeader className="px-0 pt-0 pb-4">
+        <CardTitle className="text-lg font-bold text-slate-800 dark:text-slate-100">
+          Revenue Overview
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex-1 p-0 min-h-0">
+        <Line data={data} options={options} />
+      </CardContent>
     </Card>
   );
 };

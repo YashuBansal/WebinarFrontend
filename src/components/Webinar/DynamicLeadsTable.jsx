@@ -87,12 +87,19 @@ export const DynamicLeadsTable = ({
         return (
           <div className="flex items-center gap-1 whitespace-nowrap">
             {item.tags.slice(0, 2).map((tag, i) => (
-              <span key={i} className="px-2 py-0.5 bg-gray-100 text-gray-700 text-[10px] font-medium rounded-md truncate max-w-[80px]">
+              <span 
+                key={i} 
+                className="px-2 py-0.5 text-[10px] font-medium rounded-md truncate max-w-[80px]"
+                style={{
+                  backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "#f3f4f6",
+                  color: isDark ? "#cbd5e1" : "#374151"
+                }}
+              >
                 {tag.name || tag}
               </span>
             ))}
             {item.tags.length > 2 && (
-              <span className="text-[10px] font-bold text-blue-600 bg-blue-50 px-1.5 py-0.5 rounded-md shrink-0">
+              <span className="text-[10px] font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-1.5 py-0.5 rounded-md shrink-0">
                 +{item.tags.length - 2}
               </span>
             )}

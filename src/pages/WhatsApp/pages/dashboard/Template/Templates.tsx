@@ -28,19 +28,19 @@ export default function Templates() {
   const [activeTab, setActiveTab] = useState<'approved' | 'pending' | 'rejected'>('approved');
   const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
 
-  const { 
-    data: templatesResponse, 
-    isLoading, 
+  const {
+    data: templatesResponse,
+    isLoading,
     isRefetching,
-    error, 
-    refetch 
+    error,
+    refetch
   } = useTemplates(selectedProject?._id || '', {});
 
   const deleteTemplateMutation = useDeleteTemplate();
   const syncTemplatesMutation = useSyncTemplates();
 
   const allTemplates = templatesResponse?.data || [];
-  
+
   // Get last synced time from first template (all templates have same sync time)
   const lastSyncedAt = useMemo(() => {
     return allTemplates.length > 0 ? allTemplates[0]?.last_synced_at : null;
@@ -49,7 +49,7 @@ export default function Templates() {
   // Simple filtering
   const filteredTemplates = allTemplates.filter(template => {
     const matchesTab = template.status === activeTab.toUpperCase();
-    const matchesSearch = !searchTerm || 
+    const matchesSearch = !searchTerm ||
       template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       template.category.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTab && matchesSearch;
@@ -83,7 +83,7 @@ export default function Templates() {
 
   const handleSyncTemplates = async () => {
     if (!selectedProject?._id) return;
-    
+
     try {
       await syncTemplatesMutation.mutateAsync({ projectId: selectedProject._id });
     } catch (error) {
@@ -95,8 +95,8 @@ export default function Templates() {
   const hasPendingTemplates = allTemplates.some(t => t.status === 'PENDING');
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    
+    let interval: any;
+
     if (hasPendingTemplates && selectedProject?._id) {
       interval = setInterval(() => {
         // Only trigger sync if we are not already syncing
@@ -105,7 +105,7 @@ export default function Templates() {
         }
       }, 10 * 60 * 1000); // Sync pending templates every 10 minutes
     }
-    
+
     return () => {
       if (interval) clearInterval(interval);
     };
@@ -216,4 +216,4 @@ export default function Templates() {
       />
     </div>
   );
-}
+}

@@ -23,6 +23,7 @@ import AppLoader, { AppLoaderCenter } from "../../components/AppLoader";
 import { getIconConfig, statusToAccentColor } from "../../components/Dashboard/dashboardNewUiHelpers";
 import { motion } from "framer-motion";
 import { Card } from "../../components/ui/card";
+import { useTheme } from "../../contexts/ThemeContext";
 
 function toYMD(d) {
   if (!(d instanceof Date) || Number.isNaN(d.getTime())) return "";
@@ -40,6 +41,7 @@ function ymdToLocalDate(ymd) {
 const ClientDashboard = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { isDark } = useTheme();
 
   const employeeActivities = useSelector(selectEmployeeActivities);
   const { isLoading: adminDashboardRequestLoading, clientDashboardData } =
@@ -320,9 +322,10 @@ const ClientDashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
         style={{
-          backgroundColor: "#ffffff",
-          boxShadow:
-            "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+          backgroundColor: isDark ? "#0f172a" : "#ffffff",
+          boxShadow: isDark 
+            ? "0 4px 6px -1px rgba(0, 0, 0, 0.2), 0 2px 4px -1px rgba(0, 0, 0, 0.1)"
+            : "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
         }}
       >
         <div className="flex min-w-0 flex-col items-start justify-between gap-4 lg:flex-row lg:items-center lg:gap-6">
@@ -339,12 +342,12 @@ const ClientDashboard = () => {
                     : "cursor-not-allowed opacity-70"
                 }`}
                 style={{
-                  backgroundColor: "#F9FAFB",
-                  border: "1px solid #e5e7eb",
+                  backgroundColor: isDark ? "#1e293b" : "#F9FAFB",
+                  border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
                   fontFamily: "Inter, sans-serif",
                   fontSize: "14px",
                   fontWeight: 500,
-                  color: "#071028",
+                  color: isDark ? "#f8fafc" : "#071028",
                   textAlign: "left",
                 }}
               >
@@ -352,7 +355,7 @@ const ClientDashboard = () => {
                 <ChevronDown
                   className="h-4 w-4 shrink-0 transition-transform duration-200"
                   style={{
-                    color: "#64748b",
+                    color: isDark ? "#94a3b8" : "#64748b",
                     transform: webinarOpen ? "rotate(180deg)" : "rotate(0deg)",
                   }}
                 />
@@ -362,9 +365,9 @@ const ClientDashboard = () => {
                 <div
                   className="absolute left-0 top-full z-20 mt-2 w-full overflow-hidden rounded-xl"
                   style={{
-                    backgroundColor: "#ffffff",
-                    border: "1px solid #e5e7eb",
-                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1)",
+                    backgroundColor: isDark ? "#1e293b" : "#ffffff",
+                    border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
+                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)",
                   }}
                 >
                   <div className="custom-scrollbar max-h-[300px] overflow-y-auto">
@@ -376,8 +379,8 @@ const ClientDashboard = () => {
                         fontFamily: "Inter, sans-serif",
                         fontSize: "13px",
                         fontWeight: 500,
-                        color: "#94a3b8",
-                        borderBottom: "1px solid #f3f4f6",
+                        color: isDark ? "#64748b" : "#94a3b8",
+                        borderBottom: isDark ? "1px solid #334155" : "1px solid #f3f4f6",
                       }}
                     >
                       Select
@@ -385,12 +388,12 @@ const ClientDashboard = () => {
                     <button
                       type="button"
                       onClick={() => onWebinarPick("all")}
-                      className="w-full border-b border-gray-100 px-4 py-2.5 text-left transition-colors hover:bg-gray-50"
+                      className="w-full border-b border-gray-100 dark:border-slate-800 px-4 py-2.5 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-800"
                       style={{
                         fontFamily: "Inter, sans-serif",
                         fontSize: "13px",
                         fontWeight: 500,
-                        color: "#071028",
+                        color: isDark ? "#f8fafc" : "#071028",
                       }}
                     >
                       All
@@ -400,15 +403,15 @@ const ClientDashboard = () => {
                         type="button"
                         key={webinar._id || idx}
                         onClick={() => onWebinarPick(webinar._id)}
-                        className="w-full px-4 py-2.5 text-left transition-colors hover:bg-gray-50"
+                        className="w-full px-4 py-2.5 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-800"
                         style={{
                           fontFamily: "Inter, sans-serif",
                           fontSize: "13px",
                           fontWeight: 500,
-                          color: "#071028",
+                          color: isDark ? "#f8fafc" : "#071028",
                           borderBottom:
                             idx !== webinarData.length - 1
-                              ? "1px solid #f3f4f6"
+                              ? isDark ? "1px solid #334155" : "1px solid #f3f4f6"
                               : "none",
                         }}
                       >
@@ -423,14 +426,14 @@ const ClientDashboard = () => {
           </div>
 
           <div className="ml-auto flex w-full min-w-0 flex-col items-center gap-3 sm:flex-row sm:gap-4 lg:w-auto">
-            <div className="flex min-w-0 max-w-full flex-wrap items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-1.5 sm:gap-4">
+            <div className="flex min-w-0 max-w-full flex-wrap items-center gap-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50 p-1.5 sm:gap-4">
               <div className="flex items-center gap-2 px-3">
                 <span
                   style={{
                     fontFamily: "Inter, sans-serif",
                     fontSize: "12px",
                     fontWeight: 600,
-                    color: "#64748b",
+                    color: isDark ? "#94a3b8" : "#64748b",
                     textTransform: "uppercase",
                   }}
                 >
@@ -445,26 +448,26 @@ const ClientDashboard = () => {
                       const d = ymdToLocalDate(e.target.value);
                       if (d) handleStartDateChange(d);
                     }}
-                    className="max-w-full cursor-pointer rounded-lg py-1.5 pl-3 pr-2 outline-none transition-colors hover:bg-white"
+                    className="max-w-full cursor-pointer rounded-lg py-1.5 pl-3 pr-2 outline-none transition-all hover:bg-black/5 dark:hover:bg-white/5"
                     style={{
                       backgroundColor: "transparent",
-                      border: "1px solid #e5e7eb",
+                      border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
                       fontFamily: "Inter, sans-serif",
                       fontSize: "13px",
                       fontWeight: 500,
-                      color: "#071028",
+                      color: isDark ? "#f8fafc" : "#071028",
                     }}
                   />
                 </div>
               </div>
-              <div className="hidden h-4 w-px bg-gray-200 sm:block" />
+              <div className="hidden h-4 w-px bg-gray-200 dark:bg-slate-700 sm:block" />
               <div className="flex items-center gap-2 px-3">
                 <span
                   style={{
                     fontFamily: "Inter, sans-serif",
                     fontSize: "12px",
                     fontWeight: 600,
-                    color: "#64748b",
+                    color: isDark ? "#94a3b8" : "#64748b",
                     textTransform: "uppercase",
                   }}
                 >
@@ -480,14 +483,14 @@ const ClientDashboard = () => {
                       const d = ymdToLocalDate(e.target.value);
                       if (d) handleEndDateChange(d);
                     }}
-                    className="max-w-full cursor-pointer rounded-lg py-1.5 pl-3 pr-2 outline-none transition-colors hover:bg-white"
+                    className="max-w-full cursor-pointer rounded-lg py-1.5 pl-3 pr-2 outline-none transition-all hover:bg-black/5 dark:hover:bg-white/5"
                     style={{
                       backgroundColor: "transparent",
-                      border: "1px solid #e5e7eb",
+                      border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
                       fontFamily: "Inter, sans-serif",
                       fontSize: "13px",
                       fontWeight: 500,
-                      color: "#071028",
+                      color: isDark ? "#f8fafc" : "#071028",
                     }}
                   />
                 </div>
@@ -533,15 +536,17 @@ const ClientDashboard = () => {
         <Card
           className="border p-5 sm:p-6 lg:p-7"
           style={{
-            backgroundColor: "#ffffff",
-            borderColor: "#e5e7eb",
+            backgroundColor: isDark ? "#0f172a" : "#ffffff",
+            borderColor: isDark ? "#1e293b" : "#e5e7eb",
             borderRadius: "16px",
-            boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+            boxShadow: isDark 
+              ? "0 4px 6px -1px rgba(0, 0, 0, 0.2)"
+              : "0 1px 3px rgba(0, 0, 0, 0.05)",
           }}
         >
           <div
             className="mb-6 flex flex-col justify-between gap-4 pb-5 sm:flex-row sm:items-center"
-            style={{ borderBottom: "1px solid #e5e7eb" }}
+            style={{ borderBottom: isDark ? "1px solid #1e293b" : "1px solid #e5e7eb" }}
           >
             <h2
               className="mb-6"
@@ -549,7 +554,7 @@ const ClientDashboard = () => {
                 fontFamily: "Inter, sans-serif",
                 fontSize: "clamp(18px, 3vw, 22px)",
                 fontWeight: 700,
-                color: "#071028",
+                color: isDark ? "#f8fafc" : "#071028",
               }}
             >
               My Activity
@@ -559,11 +564,11 @@ const ClientDashboard = () => {
               onClick={() => navigate(`admin-logs`)}
               className="rounded-xl px-5 py-2.5 transition-all duration-200 hover:scale-105 hover:shadow-md"
               style={{
-                backgroundColor: "#071028",
+                backgroundColor: isDark ? "#f8fafc" : "#071028",
                 fontFamily: "Inter, sans-serif",
                 fontSize: "13px",
                 fontWeight: 600,
-                color: "#ffffff",
+                color: isDark ? "#0f172a" : "#ffffff",
                 border: "none",
               }}
             >
@@ -587,7 +592,7 @@ const ClientDashboard = () => {
                     fontFamily: "Inter, sans-serif",
                     fontSize: "12px",
                     fontWeight: 600,
-                    color: "#22B573",
+                    color: isDark ? "#94a3b8" : "#64748b",
                     textTransform: "uppercase",
                     letterSpacing: "0.5px",
                   }}
@@ -606,7 +611,7 @@ const ClientDashboard = () => {
                   fontFamily: "Inter, sans-serif",
                   fontSize: "clamp(20px, 3vw, 24px)",
                   fontWeight: 800,
-                  color: "#22B573",
+                  color: isDark ? "#22c55e" : "#22B573",
                 }}
               >
                 {adminDashboardData.totalWorked ?? 0}
@@ -624,8 +629,8 @@ const ClientDashboard = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: (index + 1) * 0.03 }}
                   style={{
-                    backgroundColor: "#F9FAFB",
-                    border: `1px solid ${c}30`,
+                    backgroundColor: isDark ? "#1e293b" : "#F9FAFB",
+                    border: `1px solid ${c}${isDark ? "40" : "30"}`,
                   }}
                 >
                   <div className="mb-2 flex items-start justify-between">
@@ -634,7 +639,7 @@ const ClientDashboard = () => {
                         fontFamily: "Inter, sans-serif",
                         fontSize: "12px",
                         fontWeight: 500,
-                        color: "#64748b",
+                        color: isDark ? "#94a3b8" : "#64748b",
                       }}
                     >
                       {statusItem.status}
@@ -676,7 +681,7 @@ const ClientDashboard = () => {
 
       {!isDataLoading && (!dashboardData || dashboardData.length === 0) && (
         <div
-          className="mb-6 rounded-2xl border border-gray-200 bg-slate-50 p-8 text-center"
+          className="mb-6 rounded-2xl border border-gray-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-8 text-center"
           style={{ fontFamily: "Inter, sans-serif" }}
         >
           <h3 className="mb-2 text-lg font-semibold text-slate-700">
@@ -712,15 +717,15 @@ const ClientDashboard = () => {
               <Card
                 className="border p-5 sm:p-6 lg:p-7"
                 style={{
-                  backgroundColor: "#ffffff",
-                  borderColor: "#e5e7eb",
+                  backgroundColor: isDark ? "#0f172a" : "#ffffff",
+                  borderColor: isDark ? "rgba(255,255,255,0.05)" : "#e5e7eb",
                   borderRadius: "16px",
-                  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05)",
+                  boxShadow: isDark ? "none" : "0 1px 3px rgba(0, 0, 0, 0.05)",
                 }}
               >
                 <div
                   className="mb-6 flex flex-col justify-between gap-4 pb-5 sm:flex-row sm:items-center"
-                  style={{ borderBottom: "1px solid #e5e7eb" }}
+                  style={{ borderBottom: isDark ? "1px solid #1e293b" : "1px solid #e5e7eb" }}
                 >
                   <div className="flex items-center gap-3">
                     <div className="relative flex items-center justify-center">
@@ -750,7 +755,7 @@ const ClientDashboard = () => {
                           fontFamily: "Inter, sans-serif",
                           fontSize: "clamp(14px, 2vw, 16px)",
                           fontWeight: 600,
-                          color: "#071028",
+                          color: isDark ? "#f8fafc" : "#071028",
                           marginBottom: "2px",
                         }}
                       >
@@ -771,7 +776,7 @@ const ClientDashboard = () => {
                           style={{
                             fontFamily: "Inter, sans-serif",
                             fontSize: "12px",
-                            color: "#64748b",
+                            color: isDark ? "#94a3b8" : "#64748b",
                           }}
                         >
                           • {formatDateAsNumberWithTime(item?.lastActivity)}
@@ -788,11 +793,11 @@ const ClientDashboard = () => {
                     }}
                     className="rounded-xl px-5 py-2.5 transition-all duration-200 hover:shadow-md"
                     style={{
-                      backgroundColor: "#071028",
+                      backgroundColor: isDark ? "#f8fafc" : "#071028",
                       fontFamily: "Inter, sans-serif",
                       fontSize: "13px",
                       fontWeight: 600,
-                      color: "#ffffff",
+                      color: isDark ? "#0f172a" : "#ffffff",
                       border: "none",
                     }}
                   >
@@ -807,7 +812,7 @@ const ClientDashboard = () => {
                       fontFamily: "Inter, sans-serif",
                       fontSize: "14px",
                       fontWeight: 600,
-                      color: "#071028",
+                      color: isDark ? "#f8fafc" : "#071028",
                       textTransform: "uppercase",
                       letterSpacing: "0.5px",
                     }}
@@ -828,10 +833,10 @@ const ClientDashboard = () => {
                         if (e.key === "Enter" || e.key === " ")
                           handleCardClick({ data: item, tabValue: "assignments" });
                       }}
-                      className="cursor-pointer rounded-2xl p-4"
+                      className="cursor-pointer rounded-2xl p-4 transition-all hover:shadow-lg"
                       style={{
-                        backgroundColor: "rgba(147, 197, 253, 0.15)",
-                        border: "1px solid rgba(59, 130, 246, 0.3)",
+                        backgroundColor: isDark ? "rgba(59, 130, 246, 0.1)" : "rgba(147, 197, 253, 0.15)",
+                        border: isDark ? "1px solid rgba(59, 130, 246, 0.2)" : "1px solid rgba(59, 130, 246, 0.3)",
                       }}
                     >
                       <div className="mb-2 flex items-start justify-between">
@@ -840,7 +845,7 @@ const ClientDashboard = () => {
                             fontFamily: "Inter, sans-serif",
                             fontSize: "11px",
                             fontWeight: 500,
-                            color: "#64748b",
+                            color: isDark ? "#94a3b8" : "#64748b",
                           }}
                         >
                           Assignments
@@ -891,7 +896,7 @@ const ClientDashboard = () => {
                             fontFamily: "Inter, sans-serif",
                             fontSize: "11px",
                             fontWeight: 500,
-                            color: "#64748b",
+                            color: isDark ? "#94a3b8" : "#64748b",
                           }}
                         >
                           Worked
@@ -950,7 +955,7 @@ const ClientDashboard = () => {
                             fontFamily: "Inter, sans-serif",
                             fontSize: "11px",
                             fontWeight: 500,
-                            color: "#64748b",
+                            color: isDark ? "#94a3b8" : "#64748b",
                           }}
                         >
                           Valid Calls
@@ -1001,7 +1006,7 @@ const ClientDashboard = () => {
                             fontFamily: "Inter, sans-serif",
                             fontSize: "11px",
                             fontWeight: 500,
-                            color: "#64748b",
+                            color: isDark ? "#94a3b8" : "#64748b",
                           }}
                         >
                           Pending
@@ -1037,7 +1042,7 @@ const ClientDashboard = () => {
                         fontFamily: "Inter, sans-serif",
                         fontSize: "14px",
                         fontWeight: 600,
-                        color: "#071028",
+                        color: isDark ? "#f8fafc" : "#071028",
                         textTransform: "uppercase",
                         letterSpacing: "0.5px",
                       }}
@@ -1073,8 +1078,8 @@ const ClientDashboard = () => {
                             }}
                             className="cursor-pointer rounded-xl p-3.5 transition-all duration-200 hover:shadow-sm"
                             style={{
-                              backgroundColor: "#F9FAFB",
-                              border: `1px solid ${c}30`,
+                              backgroundColor: isDark ? "#1e293b" : "#F9FAFB",
+                              border: `1px solid ${c}${isDark ? "40" : "30"}`,
                             }}
                           >
                             <div className="mb-2 flex items-start justify-between">
@@ -1083,7 +1088,7 @@ const ClientDashboard = () => {
                                   fontFamily: "Inter, sans-serif",
                                   fontSize: "11px",
                                   fontWeight: 500,
-                                  color: "#64748b",
+                                  color: isDark ? "#94a3b8" : "#64748b",
                                 }}
                               >
                                 {statusItem.status}

@@ -73,8 +73,12 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const WebinarAttendeesPage = (props) => {
+  const { isDark } = useTheme();
+  const theme = isDark ? "dark" : "light";
+
   const {
     tabValue,
     page,
@@ -106,8 +110,6 @@ const WebinarAttendeesPage = (props) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
-
-  const theme = "light";
 
   const {
     attendeeData,

@@ -55,6 +55,7 @@ import {
   FilterIcon,
 } from "../../components/SVGs";
 import useUserSubscription from "../../hooks/useUserSubscription";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const Webinar = () => {
   // ----------------------- ModalNames for Redux -----------------------
@@ -64,6 +65,7 @@ const Webinar = () => {
   const createWebinarModalName = "createWebinarModal";
 
   // ----------------------- etcetra -----------------------
+  const { isDark } = useTheme();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const logUserActivity = useAddUserActivity();
@@ -236,7 +238,7 @@ const Webinar = () => {
   const handleClose = () => setOpen(false);
 
   return (
-    <div className="px-6 md:px-10 pt-14">
+    <div className="px-6 md:px-10 pt-14 min-h-screen">
       <div className="flex flex-wrap gap-4 my-6 justify-between">
         <ComponentGuard conditions={[userData?.isActive]}>
           {assignmentMetrics && (
@@ -264,17 +266,24 @@ const Webinar = () => {
         </button>
       </div>
       <div
-        className={`bg-gray-50 transition-all duration-300 ${isMaximized
+        className={`transition-all duration-300 ${isMaximized
             ? "fixed top-0 left-0 inset-0 w-screen h-screen z-[100] overflow-auto p-6"
             : "relative p-6 rounded-lg"
           }`}
+        style={{
+          backgroundColor: isMaximized 
+            ? (isDark ? "#0f172a" : "#F2F4F6") 
+            : (isDark ? "rgba(30, 41, 59, 0.7)" : "rgba(249, 250, 251, 0.8)"),
+          backdropFilter: isMaximized ? "none" : "blur(16px)",
+          border: isMaximized ? "none" : `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
+        }}
       >
         <div className="flex gap-4 justify-between items-center">
-          <h2 className="text-2xl font-bold text-gray-700">{tableHeader}</h2>
+          <h2 className="text-2xl font-bold" style={{ color: isDark ? "#f8fafc" : "#334155" }}>{tableHeader}</h2>
 
           <div className="flex justify-center overflow-visible relative items-center gap-2">
             {tableData.totalRecords ? (
-              <span className="font-semibold text-neutral-800 mr-2">
+              <span className="font-semibold mr-2" style={{ color: isDark ? "#cbd5e1" : "#1e293b" }}>
                 Total Records:{" "}
                 <span className="text-indigo-500">
                   {tableData.totalRecords}
@@ -288,12 +297,13 @@ const Webinar = () => {
             <button
               onClick={toggleMaximize}
               title={isMaximized ? "Minimize" : "Maximize"}
-              className="p-2 hover:bg-gray-200 rounded-full group"
+              className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full group transition-colors"
             >
               <img
                 src={isMaximized ? MinimizeIcon : MaximizeIcon}
                 alt={isMaximized ? "Minimize" : "Maximize"}
-                className="h-5 w-5 text-gray-600"
+                className="h-5 w-5 opacity-70 group-hover:opacity-100"
+                style={{ filter: isDark ? "invert(1) brightness(2)" : "none" }}
               />
             </button>
 
@@ -309,14 +319,19 @@ const Webinar = () => {
                 {open && (
                   <div
                     ref={menuRef}
-                    className="absolute right-0 top-full px-2 mt-1 bg-white shadow-lg rounded-md py-2 border border-gray-100 z-50 min-w-max"
+                    className="absolute right-0 top-full px-2 mt-1 shadow-lg rounded-md py-2 z-50 min-w-max"
+                    style={{
+                      backgroundColor: isDark ? "#1e293b" : "#ffffff",
+                      border: `1px solid ${isDark ? "#334155" : "#e5e7eb"}`,
+                    }}
                   >
                     <button
                       onClick={() => {
                         dispatch(openModal({ modalName: exportModalName }));
                         handleClose();
                       }}
-                      className="w-full py-2 px-2 text-sm text-gray-700 hover:bg-gray-50 text-left flex items-center "
+                      className="w-full py-2 px-2 text-sm text-left flex items-center transition-colors rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
+                      style={{ color: isDark ? "#cbd5e1" : "#334155" }}
                     >
                       <img
                         src={GreenDownloadIcon}
@@ -379,27 +394,37 @@ const Webinar = () => {
           className="shadow-md rounded-lg overflow-auto max-h-[80vh]"
         >
           <table className="w-full text-sm">
-            <thead className="bg-gray-100 sticky top-0 z-10">
+            <thead className="sticky top-0 z-10" style={{ backgroundColor: isDark ? "#0f172a" : "#f8fafc" }}>
               <tr>
-                <th className="py-6 px-4 font-normal text-sm whitespace-nowrap text-start">
+                <th 
+                  className="py-6 px-4 font-normal text-sm whitespace-nowrap text-start"
+                  style={{ color: isDark ? "#94a3b8" : "#64748b" }}
+                >
                   S.No
                 </th>
                 {tableData?.columns?.map((column, index) => (
                   <th
                     key={index}
                     className="text-start px-4 text-sm font-normal py-6 whitespace-nowrap"
+                    style={{ color: isDark ? "#94a3b8" : "#64748b" }}
                   >
                     {column.header}
                   </th>
                 ))}
                 {Array.isArray(actionIcons) && actionIcons.length > 0 && (
-                  <th className="px-4 py-3 text-gray-700 font-normal text-sm sticky right-0 bg-gray-100 z-10">
+                  <th 
+                    className="px-4 py-3 font-normal text-sm sticky right-0 z-10"
+                    style={{ 
+                      color: isDark ? "#94a3b8" : "#64748b",
+                      backgroundColor: isDark ? "#0f172a" : "#f8fafc"
+                    }}
+                  >
                     Actions
                   </th>
                 )}
               </tr>
             </thead>
-            <tbody>
+            <tbody style={{ backgroundColor: isDark ? "#1e293b" : "#ffffff" }}>
               {isLoading ? (
                 Array.from({ length: LIMIT <= 10 ? LIMIT : 10 }).map(
                   (_, index) => (
@@ -422,10 +447,14 @@ const Webinar = () => {
                 tableData?.rows?.map((row, index) => (
                   <tr
                     key={row?._id}
-                    className={`${"bg-white"} hover:bg-gray-50 border-b whitespace-nowrap`}
+                    className="border-b whitespace-nowrap transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+                    style={{ 
+                      borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+                    }}
                   >
                     <td
-                      className={`px-4 py-2 h-14 text-gray-600 cursor-pointer`}
+                      className="px-4 py-2 h-14 cursor-pointer"
+                      style={{ color: isDark ? "#cbd5e1" : "#475569" }}
                       onClick={() => rowClick(row)}
                     >
                       {sortByOrder === "asc"
@@ -437,7 +466,8 @@ const Webinar = () => {
                     {tableData?.columns?.map((column, colIndex) => (
                       <td
                         key={colIndex}
-                        className={`px-4 py-2 text-gray-600 max-w-80 capitalize truncate`}
+                        className="px-4 py-2 max-w-80 capitalize truncate"
+                        style={{ color: isDark ? "#cbd5e1" : "#475569" }}
                         onClick={() => rowClick(row)}
                       >
                         {column.type === "Date" &&
@@ -464,13 +494,19 @@ const Webinar = () => {
                       </td>
                     ))}
                     {Array.isArray(actionIcons) && actionIcons.length > 0 && (
-                      <td className="px-4 py-2 sticky right-0 bg-white border-l">
+                      <td 
+                        className="px-4 py-2 sticky right-0 border-l"
+                        style={{ 
+                          backgroundColor: isDark ? "#1e293b" : "#ffffff",
+                          borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"
+                        }}
+                      >
                         <div className="flex gap-2">
                           {actionIcons.map((action, idx) => (
                             <div key={idx}>
                               <button
                                 disabled={action?.disabled ? true : false}
-                                className="p-2 hover:bg-gray-100 rounded-full group"
+                                className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full group transition-colors"
                                 onClick={() => action.onClick(row)}
                                 title={action.tooltip}
                               >

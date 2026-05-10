@@ -13,13 +13,14 @@ import AppLoader from "../AppLoader";
 import PageLimitEditor from "../PageLimitEditor";
 import useAddUserActivity from "../../hooks/useAddUserActivity";
 import { formatDateAsNumberWithTime } from "../../utils/extra";
+import { useTheme } from "../../contexts/ThemeContext";
 
-const inputStyle = {
-  backgroundColor: "#ffffff",
-  border: "1px solid #e2e8f0",
-  color: "#0f172a",
+const getInputStyle = (isDark) => ({
+  backgroundColor: isDark ? "#1e293b" : "#ffffff",
+  border: isDark ? "1px solid #334155" : "1px solid #e2e8f0",
+  color: isDark ? "#f8fafc" : "#0f172a",
   fontFamily: "Inter, sans-serif",
-};
+});
 
 /**
  * New UI shell for `/admin-logs` (aligned with frontend UI New `AdminActivityLogs` table).
@@ -42,6 +43,7 @@ export default function AdminActivityLogsTableShell({
   isRowClickable,
   hideHeader = false,
 }) {
+  const { isDark } = useTheme();
   const logUserActivity = useAddUserActivity();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,10 +84,14 @@ export default function AdminActivityLogsTableShell({
       className={`flex flex-col overflow-hidden rounded-2xl border transition-all duration-300 ${isFullscreen ? "min-h-0 flex-1 shadow-2xl" : ""
         }`}
       style={{
-        background: isFullscreen ? "#ffffff" : "rgba(255, 255, 255, 0.7)",
+        background: isFullscreen 
+          ? (isDark ? "#0f172a" : "#ffffff") 
+          : (isDark ? "rgba(15, 23, 42, 0.7)" : "rgba(255, 255, 255, 0.7)"),
         backdropFilter: isFullscreen ? "none" : "blur(16px)",
-        borderColor: "rgba(255,255,255,0.4)",
-        boxShadow: !isFullscreen ? "0 10px 40px rgba(7, 16, 40, 0.04)" : "none",
+        borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(255,255,255,0.4)",
+        boxShadow: !isFullscreen 
+          ? (isDark ? "0 10px 40px rgba(0, 0, 0, 0.4)" : "0 10px 40px rgba(7, 16, 40, 0.04)") 
+          : "none",
       }}
     >
       <div
@@ -100,7 +106,7 @@ export default function AdminActivityLogsTableShell({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full rounded-xl py-2 pl-9 pr-4 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#22B573]/35"
-            style={inputStyle}
+            style={getInputStyle(isDark)}
           />
         </div>
         <div className="flex w-full flex-shrink-0 items-center justify-end gap-2 self-end sm:w-auto sm:self-auto">
@@ -109,7 +115,7 @@ export default function AdminActivityLogsTableShell({
               type="button"
               onClick={onExportClick}
               className="flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 transition-colors hover:bg-black/5 sm:flex-none"
-              style={inputStyle}
+              style={getInputStyle(isDark)}
             >
               <Download className="h-4 w-4 text-gray-500" />
               <span className="hidden sm:inline">Export</span>
@@ -119,7 +125,7 @@ export default function AdminActivityLogsTableShell({
             type="button"
             onClick={onPresetsClick}
             className="flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 transition-colors hover:bg-black/5 sm:flex-none"
-            style={inputStyle}
+            style={getInputStyle(isDark)}
           >
             <Bookmark className="h-4 w-4 text-gray-500" />
             <span className="hidden sm:inline">Presets</span>
@@ -128,7 +134,7 @@ export default function AdminActivityLogsTableShell({
             type="button"
             onClick={onFiltersClick}
             className="flex flex-1 items-center gap-2 rounded-xl px-4 py-2 transition-colors hover:bg-black/5 sm:flex-none"
-            style={inputStyle}
+            style={getInputStyle(isDark)}
           >
             <Filter className="h-4 w-4 text-gray-500" />
             <span className="hidden sm:inline">Filters</span>
@@ -137,8 +143,8 @@ export default function AdminActivityLogsTableShell({
             type="button"
             title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
             onClick={() => setIsFullscreen((v) => !v)}
-            className="flex flex-shrink-0 items-center justify-center rounded-xl p-2.5 transition-colors hover:bg-black/5"
-            style={inputStyle}
+            className="flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 transition-colors hover:bg-black/5 sm:flex-none"
+            style={getInputStyle(isDark)}
           >
             {isFullscreen ? (
               <Minimize className="h-4 w-4 text-gray-500" />
@@ -155,28 +161,28 @@ export default function AdminActivityLogsTableShell({
       >
         <table className="w-full min-w-[800px] border-collapse text-left">
           <thead className={isFullscreen ? "sticky top-0 z-20" : ""}>
-            <tr style={{ backgroundColor: "#F9FAFB" }}>
+            <tr style={{ backgroundColor: isDark ? "#1e293b" : "#F9FAFB" }}>
               <th
-                className="whitespace-nowrap p-4 text-xs font-semibold uppercase tracking-wider"
-                style={{ color: "#64748b" }}
+                className="whitespace-nowrap p-4 text-xs font-semibold uppercase tracking-wider transition-colors"
+                style={{ color: isDark ? "#94a3b8" : "#64748b" }}
               >
                 S.No
               </th>
               <th
-                className="whitespace-nowrap p-4 text-xs font-semibold uppercase tracking-wider"
-                style={{ color: "#64748b" }}
+                className="whitespace-nowrap p-4 text-xs font-semibold uppercase tracking-wider transition-colors"
+                style={{ color: isDark ? "#94a3b8" : "#64748b" }}
               >
                 Actions
               </th>
               <th
-                className="whitespace-nowrap p-4 text-xs font-semibold uppercase tracking-wider"
-                style={{ color: "#64748b" }}
+                className="whitespace-nowrap p-4 text-xs font-semibold uppercase tracking-wider transition-colors"
+                style={{ color: isDark ? "#94a3b8" : "#64748b" }}
               >
                 Details
               </th>
               <th
-                className="whitespace-nowrap p-4 text-xs font-semibold uppercase tracking-wider"
-                style={{ color: "#64748b" }}
+                className="whitespace-nowrap p-4 text-xs font-semibold uppercase tracking-wider transition-colors"
+                style={{ color: isDark ? "#94a3b8" : "#64748b" }}
               >
                 Date
               </th>
@@ -202,8 +208,8 @@ export default function AdminActivityLogsTableShell({
               <tr>
                 <td
                   colSpan={4}
-                  className="p-8 text-center"
-                  style={{ color: "#64748b" }}
+                  className="p-8 text-center transition-colors"
+                  style={{ color: isDark ? "#94a3b8" : "#64748b" }}
                 >
                   <p style={{ fontFamily: "Inter, sans-serif" }}>
                     No activity logs found.
@@ -214,8 +220,8 @@ export default function AdminActivityLogsTableShell({
               <tr>
                 <td
                   colSpan={4}
-                  className="p-8 text-center"
-                  style={{ color: "#64748b" }}
+                  className="p-8 text-center transition-colors"
+                  style={{ color: isDark ? "#94a3b8" : "#64748b" }}
                 >
                   <p style={{ fontFamily: "Inter, sans-serif" }}>
                     No activity logs found matching your filters.
@@ -238,15 +244,15 @@ export default function AdminActivityLogsTableShell({
                     transition={{ delay: index * 0.03 }}
                     onClick={() => isRowClickable && rowClick?.(row)}
                     className={`border-b transition-colors ${isRowClickable
-                      ? "cursor-pointer hover:bg-black/5"
-                      : "hover:bg-black/5"
+                      ? "cursor-pointer hover:bg-black/5 dark:hover:bg-white/5"
+                      : "hover:bg-black/5 dark:hover:bg-white/5"
                       }`}
-                    style={{ borderColor: "#e2e8f0" }}
+                    style={{ borderColor: isDark ? "#1e293b" : "#e2e8f0" }}
                   >
                     <td
-                      className="p-4 text-sm font-medium"
+                      className="p-4 text-sm font-medium transition-colors"
                       style={{
-                        color: "#64748b",
+                        color: isDark ? "#94a3b8" : "#64748b",
                         fontFamily: "Inter, sans-serif",
                       }}
                     >
@@ -255,25 +261,25 @@ export default function AdminActivityLogsTableShell({
                     <td
                       className="whitespace-nowrap p-4 text-sm"
                       style={{
-                        color: "#334155",
+                        color: isDark ? "#cbd5e1" : "#334155",
                         fontFamily: "Inter, sans-serif",
                       }}
                     >
                       {row?.action ?? "—"}
                     </td>
                     <td
-                      className="p-4 text-sm"
+                      className="p-4 text-sm transition-colors"
                       style={{
-                        color: "#334155",
+                        color: isDark ? "#cbd5e1" : "#334155",
                         fontFamily: "Inter, sans-serif",
                       }}
                     >
-                      {row?.details ?? "—"}
+                      <span className={isDark ? "text-slate-100" : "text-slate-900"}>{row?.details ?? "—"}</span>
                     </td>
                     <td
-                      className="whitespace-nowrap p-4 text-sm"
+                      className="whitespace-nowrap p-4 text-sm transition-colors"
                       style={{
-                        color: "#475569",
+                        color: isDark ? "#94a3b8" : "#475569",
                         fontFamily: "Inter, sans-serif",
                       }}
                     >
@@ -293,8 +299,8 @@ export default function AdminActivityLogsTableShell({
       <div
         className="flex flex-shrink-0 flex-col gap-4 border-t p-4 sm:flex-row sm:items-center sm:justify-between"
         style={{
-          borderColor: "rgba(0,0,0,0.05)",
-          backgroundColor: "#F9FAFB",
+          borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+          backgroundColor: isDark ? "#1e293b" : "#F9FAFB",
         }}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
@@ -330,8 +336,12 @@ export default function AdminActivityLogsTableShell({
               }
             }}
             disabled={Number(page) === 1}
-            className="rounded-lg border px-3 py-1.5 text-sm transition-colors hover:bg-black/5 disabled:opacity-50"
-            style={{ borderColor: "#e2e8f0", color: "#0f172a" }}
+            className="rounded-lg border px-3 py-1.5 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50"
+            style={{ 
+              borderColor: isDark ? "#334155" : "#e2e8f0", 
+              color: isDark ? "#f8fafc" : "#0f172a",
+              backgroundColor: isDark ? "#1e293b" : "transparent"
+            }}
           >
             Previous
           </button>
@@ -359,7 +369,7 @@ export default function AdminActivityLogsTableShell({
                   }}
                   className={`flex h-8 w-8 items-center justify-center rounded-lg text-sm transition-colors ${Number(page) === pageNum
                     ? "bg-blue-600 text-white"
-                    : "text-[#0f172a] hover:bg-black/5"
+                    : `${isDark ? "text-slate-300 hover:bg-white/5" : "text-[#0f172a] hover:bg-black/5"}`
                     }`}
                 >
                   {pageNum}
@@ -380,8 +390,12 @@ export default function AdminActivityLogsTableShell({
               }
             }}
             disabled={Number(page) === maxPage}
-            className="rounded-lg border px-3 py-1.5 text-sm transition-colors hover:bg-black/5 disabled:opacity-50"
-            style={{ borderColor: "#e2e8f0", color: "#0f172a" }}
+            className="rounded-lg border px-3 py-1.5 text-sm transition-colors hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50"
+            style={{ 
+              borderColor: isDark ? "#334155" : "#e2e8f0", 
+              color: isDark ? "#f8fafc" : "#0f172a",
+              backgroundColor: isDark ? "#1e293b" : "transparent"
+            }}
           >
             Next
           </button>
@@ -404,7 +418,7 @@ export default function AdminActivityLogsTableShell({
     return (
       <div
         className="fixed inset-0 z-[100] flex flex-col"
-        style={{ backgroundColor: "#F2F4F6" }}
+        style={{ backgroundColor: isDark ? "#0f172a" : "#F2F4F6" }}
       >
         <div className="flex min-h-0 flex-1 flex-col overflow-hidden p-4 sm:p-6">
           {TableCard}
@@ -422,7 +436,7 @@ export default function AdminActivityLogsTableShell({
               <button
                 type="button"
                 onClick={onBackClick}
-                className="rounded-xl p-2 text-slate-600 transition-colors hover:bg-gray-200"
+                className="rounded-xl p-2 text-slate-600 dark:text-slate-400 transition-colors hover:bg-gray-200 dark:hover:bg-slate-800"
                 aria-label="Go back"
               >
                 <ChevronLeft className="h-5 w-5" />
@@ -431,7 +445,7 @@ export default function AdminActivityLogsTableShell({
             <h2
               className="text-2xl font-bold tracking-tight"
               style={{
-                color: "#071028",
+                color: isDark ? "#f8fafc" : "#071028",
                 fontFamily: "Inter, sans-serif",
               }}
             >

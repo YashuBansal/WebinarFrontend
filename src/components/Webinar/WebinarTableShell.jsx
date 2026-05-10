@@ -29,18 +29,6 @@ import {
 import { formatDateAsNumber } from "../../utils/extra";
 import { motion } from "framer-motion";
 
-const inputStyle = {
-  backgroundColor: "#ffffff",
-  border: "1px solid #e2e8f0",
-  color: "#0f172a",
-  fontFamily: "Inter, sans-serif",
-};
-
-const cardStyle = {
-  backgroundColor: "white",
-  borderColor: "#e5e7eb",
-  boxShadow: "0 1px 3px rgba(0, 0, 0, 0.04)",
-};
 
 export default function WebinarTableShell({
   tableHeader,
@@ -69,8 +57,19 @@ export default function WebinarTableShell({
   sortDirection,
   onSort,
 }) {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
+  const { isDark } = useTheme();
+  const inputStyle = {
+    backgroundColor: isDark ? "#0f172a" : "#ffffff",
+    border: `1px solid ${isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0"}`,
+    color: isDark ? "#f8fafc" : "#0f172a",
+    fontFamily: "Inter, sans-serif",
+  };
+
+  const cardStyle = {
+    backgroundColor: isDark ? "#1e293b" : "white",
+    borderColor: isDark ? "rgba(255,255,255,0.05)" : "#e5e7eb",
+    boxShadow: isDark ? "none" : "0 1px 3px rgba(0, 0, 0, 0.04)",
+  };
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState(() => new Set());
@@ -176,7 +175,7 @@ export default function WebinarTableShell({
     >
       <div
         className="p-4 border-b flex flex-col sm:flex-row items-center justify-between gap-4"
-        style={{ borderColor: "rgba(0,0,0,0.05)" }}
+        style={{ borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }}
       >
         <div className="relative w-full sm:w-80 flex-shrink-0">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
@@ -185,7 +184,7 @@ export default function WebinarTableShell({
             placeholder="Search webinars..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 pr-9 py-2 w-full rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#22B573]/35 transition-all"
+            className="pl-9 pr-9 py-2 w-full rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[#22B573]/35 transition-all outline-none"
             style={inputStyle}
           />
         </div>
@@ -247,13 +246,13 @@ export default function WebinarTableShell({
           }`}
       >
         <table className="w-full min-w-[1180px] text-left border-collapse">
-          <thead className={isFullscreen ? "sticky top-0 z-20" : ""}>
-            <tr style={{ backgroundColor: "#F9FAFB" }}>
+          <thead className={isFullscreen ? "sticky top-0 z-20" : "sticky top-0 z-10"}>
+            <tr style={{ backgroundColor: isDark ? "#0f172a" : "#F9FAFB" }}>
               <th
-                className="p-4 text-left align-middle font-semibold text-xs uppercase tracking-wider sticky left-0 z-30"
+                className="p-4 text-left align-middle font-semibold text-xs uppercase tracking-wider sticky left-0 z-30 transition-colors"
                 style={{
-                  backgroundColor: "#F9FAFB",
-                  color: "#64748b",
+                  backgroundColor: isDark ? "#0f172a" : "#F9FAFB",
+                  color: isDark ? "#94a3b8" : "#64748b",
                   width: 52,
                   minWidth: 52,
                 }}
@@ -270,69 +269,69 @@ export default function WebinarTableShell({
                 />
               </th>
               <th
-                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 transition-colors"
+                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 onClick={() => onSort?.("serial")}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>
                   S.NO
                   <SortIcon field="serial" />
                 </div>
               </th>
               <th
-                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 transition-colors"
+                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 onClick={() => onSort?.("name")}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>
                   Webinar Name
                   <SortIcon field="name" />
                 </div>
               </th>
               <th
-                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 transition-colors"
+                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 onClick={() => onSort?.("date")}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>
                   Date
                   <SortIcon field="date" />
                 </div>
               </th>
               <th
-                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 transition-colors"
+                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 onClick={() => onSort?.("registrations")}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>
                   Registrations
                   <SortIcon field="registrations" />
                 </div>
               </th>
               <th
-                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 transition-colors"
+                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 onClick={() => onSort?.("participants")}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>
                   Participants
                   <SortIcon field="participants" />
                 </div>
               </th>
               <th
-                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 transition-colors"
+                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 onClick={() => onSort?.("attendees")}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>
                   Attendees
                   <SortIcon field="attendees" />
                 </div>
               </th>
               <th
-                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 transition-colors"
+                className="p-4 text-left font-semibold text-xs uppercase tracking-wider text-gray-500 cursor-pointer hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
                 onClick={() => onSort?.("unAttended")}
               >
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>
                   Un-Attended
                   <SortIcon field="unAttended" />
                 </div>
               </th>
-              <th className="p-4 text-center font-semibold text-xs uppercase tracking-wider text-gray-500 sticky right-0 bg-[#F9FAFB] z-10">
+              <th className="p-4 text-center font-semibold text-xs uppercase tracking-wider text-gray-500 sticky right-0 z-10 transition-colors" style={{ backgroundColor: isDark ? "#0f172a" : "#F9FAFB", color: isDark ? "#94a3b8" : "#64748b" }}>
                 Actions
               </th>
             </tr>
@@ -375,19 +374,19 @@ export default function WebinarTableShell({
                   formatDateAsNumber(row?.webinarDate) ||
                   row?.webinarDate ||
                   "N/A";
-                const selectedBg = "#f0fdf4";
+                const selectedBg = isDark ? "rgba(34, 181, 115, 0.15)" : "#f0fdf4";
                 const cellBg = isSelected ? selectedBg : undefined;
-                const stickyEdgeBg = isSelected ? selectedBg : "#ffffff";
+                const stickyEdgeBg = isSelected ? selectedBg : (isDark ? "#1e293b" : "#ffffff");
                 return (
                   <motion.tr
                     key={row?._id || index}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.03 }}
-                    className={`group border-b transition-all duration-200 ${isSelected ? "" : "hover:bg-black/5"
+                    className={`group border-b transition-all duration-200 ${isSelected ? "" : "hover:bg-black/5 dark:hover:bg-white/5"
                       }`}
                     style={{
-                      borderColor: "rgba(0,0,0,0.05)",
+                      borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
                       backgroundColor: cellBg,
                     }}
                   >
@@ -406,7 +405,7 @@ export default function WebinarTableShell({
                     </td>
                     <td
                       className="p-4 text-sm font-medium transition-colors"
-                      style={{ color: "#64748b", backgroundColor: cellBg }}
+                      style={{ color: isDark ? "#94a3b8" : "#64748b", backgroundColor: cellBg }}
                       onClick={() => onView(row)}
                     >
                       {serial}
@@ -416,7 +415,7 @@ export default function WebinarTableShell({
                       style={{ backgroundColor: cellBg }}
                       onClick={() => onView(row)}
                     >
-                      <button className="hover:underline text-sm font-semibold text-[#071028] text-left whitespace-nowrap">
+                      <button className={`hover:underline text-sm font-semibold text-left whitespace-nowrap ${isDark ? "text-slate-100" : "text-[#071028]"}`}>
                         {row?.webinarName || "N/A"}
                       </button>
                     </td>
@@ -425,19 +424,19 @@ export default function WebinarTableShell({
                       style={{ backgroundColor: cellBg }}
                       onClick={() => onView(row)}
                     >
-                      <div className="flex items-center gap-2 whitespace-nowrap text-sm font-medium text-[#64748b]">
-                        <Calendar className="w-4 h-4 text-gray-400" />
+                      <div className={`flex items-center gap-2 whitespace-nowrap text-sm font-medium ${isDark ? "text-slate-400" : "text-[#64748b]"}`}>
+                        <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
                         <span>{webinarDate}</span>
                       </div>
                     </td>
                     <td
-                      className="p-4 text-sm font-bold text-[#071028] transition-colors"
+                      className={`p-4 text-sm font-bold transition-colors ${isDark ? "text-slate-200" : "text-[#071028]"}`}
                       style={{ backgroundColor: cellBg }}
                     >
                       {row?.totalRegistrations ?? 0}
                     </td>
                     <td
-                      className="p-4 text-sm font-bold text-[#071028] transition-colors"
+                      className={`p-4 text-sm font-bold transition-colors ${isDark ? "text-slate-200" : "text-[#071028]"}`}
                       style={{ backgroundColor: cellBg }}
                     >
                       {row?.totalParticipants ?? 0}
@@ -455,13 +454,13 @@ export default function WebinarTableShell({
                       {row?.totalAttendees ?? 0}
                     </td>
                     <td
-                      className="p-4 text-sm font-bold transition-colors"
+                      className={`p-4 text-sm font-bold transition-colors ${
+                        Number(row?.totalUnAttended || 0) > 0
+                          ? "#ef4444"
+                          : isDark ? "#94a3b8" : "#64748b"
+                      }`}
                       style={{
                         backgroundColor: cellBg,
-                        color:
-                          Number(row?.totalUnAttended || 0) > 0
-                            ? "#ef4444"
-                            : "#64748b",
                       }}
                     >
                       {row?.totalUnAttended ?? 0}
@@ -555,8 +554,11 @@ export default function WebinarTableShell({
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03 }}
-                className={`rounded-xl border p-4 border-gray-200 ${isSelected ? "bg-green-50/80 ring-1 ring-[#22B573]/25" : "bg-white"
-                  }`}
+                className={`rounded-xl border p-4 transition-colors ${
+                  isSelected 
+                    ? (isDark ? "bg-[#22B573]/10 border-[#22B573]/30" : "bg-green-50/80 border-[#22B573]/25") 
+                    : (isDark ? "bg-[#1e293b] border-slate-800" : "bg-white border-gray-200")
+                }`}
               >
                 <div className="flex items-start justify-between mb-3 gap-2">
                   <div className="flex items-start gap-2 min-w-0 flex-1">
@@ -572,12 +574,12 @@ export default function WebinarTableShell({
                     </div>
                     <button
                       onClick={() => onView(row)}
-                      className="text-base font-bold text-slate-800 text-left min-w-0"
+                      className={`text-base font-bold text-left min-w-0 transition-colors ${isDark ? "text-slate-100" : "text-slate-800"}`}
                     >
                       {row?.webinarName || "N/A"}
                     </button>
                   </div>
-                  <span className="text-xs rounded bg-slate-100 px-2 py-1 text-slate-600 shrink-0">
+                  <span className={`text-xs rounded px-2 py-1 shrink-0 transition-colors ${isDark ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-600"}`}>
                     #{serial}
                   </span>
                 </div>
@@ -586,29 +588,29 @@ export default function WebinarTableShell({
                   <span>{webinarDate}</span>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
-                  <div className="rounded-lg px-3 py-2 bg-violet-50">
+                  <div className={`rounded-lg px-3 py-2 transition-colors ${isDark ? "bg-violet-500/10" : "bg-violet-50"}`}>
                     <p className="text-[11px] text-slate-500 mb-1">
                       Registrations
                     </p>
-                    <p className="text-base font-bold text-slate-800">
+                    <p className={`text-base font-bold transition-colors ${isDark ? "text-slate-200" : "text-slate-800"}`}>
                       {row?.totalRegistrations ?? 0}
                     </p>
                   </div>
-                  <div className="rounded-lg px-3 py-2 bg-blue-50">
+                  <div className={`rounded-lg px-3 py-2 transition-colors ${isDark ? "bg-blue-500/10" : "bg-blue-50"}`}>
                     <p className="text-[11px] text-slate-500 mb-1">
                       Participants
                     </p>
-                    <p className="text-base font-bold text-slate-800">
+                    <p className={`text-base font-bold transition-colors ${isDark ? "text-slate-200" : "text-slate-800"}`}>
                       {row?.totalParticipants ?? 0}
                     </p>
                   </div>
-                  <div className="rounded-lg px-3 py-2 bg-green-50">
+                  <div className={`rounded-lg px-3 py-2 transition-colors ${isDark ? "bg-green-500/10" : "bg-green-50"}`}>
                     <p className="text-[11px] text-slate-500 mb-1">Attendees</p>
                     <p className="text-base font-bold text-[#22B573]">
                       {row?.totalAttendees ?? 0}
                     </p>
                   </div>
-                  <div className="rounded-lg px-3 py-2 bg-red-50">
+                  <div className={`rounded-lg px-3 py-2 transition-colors ${isDark ? "bg-red-500/10" : "bg-red-50"}`}>
                     <p className="text-[11px] text-slate-500 mb-1">
                       Un-Attended
                     </p>
@@ -658,10 +660,10 @@ export default function WebinarTableShell({
       </div>
 
       <div
-        className="p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 flex-shrink-0"
+        className="p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 flex-shrink-0 transition-colors"
         style={{
-          borderColor: "rgba(0,0,0,0.05)",
-          backgroundColor: "#F9FAFB",
+          borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
+          backgroundColor: isDark ? "#0f172a" : "#F9FAFB",
         }}
       >
         <div className="text-sm text-slate-500">
@@ -681,8 +683,8 @@ export default function WebinarTableShell({
               }
             }}
             disabled={Number(page) === 1}
-            className="px-3 py-1.5 rounded-lg text-sm border hover:bg-black/5 disabled:opacity-50"
-            style={{ borderColor: "#e2e8f0", color: "#0f172a" }}
+            className="px-3 py-1.5 rounded-lg text-sm border hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50 transition-colors"
+            style={{ borderColor: isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0", color: isDark ? "#cbd5e1" : "#0f172a" }}
           >
             Previous
           </button>
@@ -707,12 +709,12 @@ export default function WebinarTableShell({
                       details: `User changed page For ${tableHeader} to ${pageNum} `,
                     });
                   }}
-                  className={`w-8 h-8 rounded-lg text-sm flex items-center justify-center transition-colors ${Number(page) === pageNum
+                  className={`w-8 h-8 rounded-lg text-sm flex items-center justify-center transition-all ${Number(page) === pageNum
                       ? "bg-blue-600 text-white"
-                      : "hover:bg-black/5"
+                      : "hover:bg-black/5 dark:hover:bg-white/5"
                     }`}
                   style={{
-                    color: Number(page) !== pageNum ? "#0f172a" : undefined,
+                    color: Number(page) !== pageNum ? (isDark ? "#cbd5e1" : "#0f172a") : undefined,
                   }}
                 >
                   {pageNum}
@@ -733,8 +735,8 @@ export default function WebinarTableShell({
               }
             }}
             disabled={Number(page) === (totalPages || 1)}
-            className="px-3 py-1.5 rounded-lg text-sm border hover:bg-black/5 disabled:opacity-50"
-            style={{ borderColor: "#e2e8f0", color: "#0f172a" }}
+            className="px-3 py-1.5 rounded-lg text-sm border hover:bg-black/5 dark:hover:bg-white/5 disabled:opacity-50 transition-colors"
+            style={{ borderColor: isDark ? "rgba(255,255,255,0.1)" : "#e2e8f0", color: isDark ? "#cbd5e1" : "#0f172a" }}
           >
             Next
           </button>
@@ -755,20 +757,20 @@ export default function WebinarTableShell({
         transition={{ duration: 0.35 }}
       >
         <div>
-          <h2 className="text-2xl font-bold tracking-tight flex items-center gap-3 text-[#071028]">
+          <h2 className={`text-2xl font-bold tracking-tight flex items-center gap-3 transition-colors ${isDark ? "text-slate-100" : "text-[#071028]"}`}>
             All Webinars
-            <span className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-green-50 text-[#22B573] border border-green-100">
+            <span className={`text-xs font-semibold px-2.5 py-1 rounded-lg border transition-colors ${isDark ? "bg-green-500/10 text-[#22B573] border-green-500/20" : "bg-green-50 text-[#22B573] border-green-100"}`}>
               Total: {totalRecords}
             </span>
           </h2>
           <div className="flex flex-wrap items-center gap-3 mt-1">
-            <p className="text-sm text-gray-500">
+            <p className={`text-sm transition-colors ${isDark ? "text-gray-400" : "text-gray-500"}`}>
               Manage your scheduled webinars, track attendance, and assign
               teams.
             </p>
             <button
               onClick={onAssignmentMetrics}
-              className="rounded-lg flex items-center justify-center gap-1.5 px-2.5 py-1 text-xs font-bold transition-all hover:scale-105 text-blue-500 border border-blue-200 bg-blue-50"
+              className={`rounded-lg flex items-center justify-center gap-1.5 px-2.5 py-1 text-xs font-bold transition-all hover:scale-105 ${isDark ? "text-blue-400 border-blue-500/30 bg-blue-500/10" : "text-blue-500 border-blue-200 bg-blue-50"}`}
             >
               <TrendingUp className="w-3.5 h-3.5" />
               Assignment Metrics
@@ -778,9 +780,9 @@ export default function WebinarTableShell({
         <div className="flex flex-wrap items-center gap-3">
           <button
             onClick={onExportClick}
-            className="rounded-xl flex items-center gap-2 px-4 py-2 text-sm font-medium transition-transform hover:scale-105 bg-white border border-slate-200 text-[#071028]"
+            className={`rounded-xl flex items-center gap-2 px-4 py-2 text-sm font-medium transition-all hover:scale-105 border ${isDark ? "bg-[#1e293b] border-slate-800 text-slate-100" : "bg-white border-slate-200 text-[#071028]"}`}
           >
-            <Download className="w-4 h-4 text-gray-500" />
+            <Download className="w-4 h-4 text-gray-500 dark:text-gray-400" />
             <span className="hidden sm:inline">Export</span>
           </button>
           <button
@@ -801,11 +803,11 @@ export default function WebinarTableShell({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0 }}
         >
-          <div className="w-8 h-8 rounded-md flex items-center justify-center bg-violet-100">
+          <div className={`w-8 h-8 rounded-md flex items-center justify-center transition-colors ${isDark ? "bg-violet-500/20" : "bg-violet-100"}`}>
             <Users className="w-4 h-4 text-violet-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-slate-800">
+            <h3 className={`text-xl font-bold transition-colors ${isDark ? "text-slate-100" : "text-slate-800"}`}>
               {stats.registrations}
             </h3>
             <p className="text-xs text-slate-500">Total Registrations</p>
@@ -819,11 +821,11 @@ export default function WebinarTableShell({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.03 }}
         >
-          <div className="w-8 h-8 rounded-md flex items-center justify-center bg-blue-100">
+          <div className={`w-8 h-8 rounded-md flex items-center justify-center transition-colors ${isDark ? "bg-blue-500/20" : "bg-blue-100"}`}>
             <Users className="w-4 h-4 text-blue-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-slate-800">
+            <h3 className={`text-xl font-bold transition-colors ${isDark ? "text-slate-100" : "text-slate-800"}`}>
               {stats.participants}
             </h3>
             <p className="text-xs text-slate-500">Total Participants</p>
@@ -837,11 +839,11 @@ export default function WebinarTableShell({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.06 }}
         >
-          <div className="w-8 h-8 rounded-md flex items-center justify-center bg-green-100">
+          <div className={`w-8 h-8 rounded-md flex items-center justify-center transition-colors ${isDark ? "bg-green-500/20" : "bg-green-100"}`}>
             <UserCheck className="w-4 h-4 text-[#22B573]" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-slate-800">
+            <h3 className={`text-xl font-bold transition-colors ${isDark ? "text-slate-100" : "text-slate-800"}`}>
               {stats.attendees}
             </h3>
             <p className="text-xs text-slate-500">Total Attendees</p>
@@ -854,11 +856,11 @@ export default function WebinarTableShell({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.09 }}
         >
-          <div className="w-8 h-8 rounded-md flex items-center justify-center bg-red-100">
+          <div className={`w-8 h-8 rounded-md flex items-center justify-center transition-colors ${isDark ? "bg-red-500/20" : "bg-red-100"}`}>
             <UserX className="w-4 h-4 text-red-500" />
           </div>
           <div className="flex-1 min-w-0">
-            <h3 className="text-xl font-bold text-slate-800">
+            <h3 className={`text-xl font-bold transition-colors ${isDark ? "text-slate-100" : "text-slate-800"}`}>
               {stats.unAttended}
             </h3>
             <p className="text-xs text-slate-500">Un-Attended</p>

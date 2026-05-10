@@ -81,8 +81,7 @@ const Layout = () => {
 
   return (
     <div
-      className="flex min-h-screen w-full max-w-full flex-col overflow-hidden font-sans transition-colors duration-300"
-      style={{ backgroundColor: "#F2F4F6" }}
+      className="flex min-h-screen w-full max-w-full flex-col overflow-hidden font-sans transition-colors duration-300 bg-[#F2F4F6] dark:bg-slate-950"
     >
       <Header
         toggleButtonRef={toggleRef}

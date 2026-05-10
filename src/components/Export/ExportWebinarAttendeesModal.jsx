@@ -21,6 +21,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Checkbox } from "../ui/checkbox";
 import { Download, X } from "lucide-react";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const tableName = "Webinar Attendees Export";
 const FONT = "Inter, sans-serif";
@@ -42,6 +43,7 @@ const ExportWebinarAttendeesModal = ({
   sort,
   flag = "attendee",
 }) => {
+  const { isDark } = useTheme();
   const dispatch = useDispatch();
   const { data: subscription } = useUserSubscription();
   const tableConfig = subscription?.plan?.attendeeTableConfig || {};
@@ -260,10 +262,10 @@ const ExportWebinarAttendeesModal = ({
   return (
     <Dialog open={Boolean(open)} onOpenChange={(v) => !v && handleClose()}>
       <DialogContent className="w-[92vw] max-w-[980px] p-0 bg-transparent shadow-none border-0">
-        <div className="flex max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl">
-          <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+        <div className="flex max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-5 py-4">
             <h2
-              className="flex items-center gap-2 text-lg font-bold text-slate-900"
+              className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-slate-100"
               style={{ fontFamily: FONT }}
             >
               <Download className="h-5 w-5 text-gray-500" />
@@ -272,7 +274,7 @@ const ExportWebinarAttendeesModal = ({
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-black/5"
+              className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
               aria-label="Close"
             >
               <X className="h-5 w-5" />
@@ -319,7 +321,7 @@ const ExportWebinarAttendeesModal = ({
                       e.preventDefault();
                     }
                   }}
-                  className="h-10 rounded-xl border-slate-200 bg-white text-slate-800 focus:ring-[#22B573]/35"
+                  className="h-10 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200 focus:ring-[#22B573]/35"
                   style={{ fontFamily: FONT }}
                 />
               </div>
@@ -336,7 +338,7 @@ const ExportWebinarAttendeesModal = ({
                     <select
                       value={selectedPresetId}
                       onChange={(e) => handleApplyPreset(e.target.value)}
-                      className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition-all focus:ring-2 focus:ring-[#22B573]/35"
+                      className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-sm text-slate-700 dark:text-slate-300 outline-none transition-all focus:ring-2 focus:ring-[#22B573]/35"
                       style={{ fontFamily: FONT }}
                     >
                       <option value="">Default Columns</option>
@@ -351,7 +353,7 @@ const ExportWebinarAttendeesModal = ({
                         type="button"
                         disabled={isPresetLoading}
                         onClick={() => dispatch(deleteFilterPreset(selectedPresetId))}
-                        className="rounded-xl border border-slate-200 bg-white p-2.5 transition-colors hover:bg-red-50"
+                        className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-2.5 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10"
                         title="Delete selected preset"
                       >
                         <img
@@ -368,7 +370,7 @@ const ExportWebinarAttendeesModal = ({
 
             <div className="mb-2 mt-5 flex items-center justify-between gap-2">
               <h3
-                className="text-base font-bold text-slate-900"
+                className="text-base font-bold text-slate-900 dark:text-slate-100"
                 style={{ fontFamily: FONT }}
               >
                 Select Columns for Export
@@ -378,7 +380,7 @@ const ExportWebinarAttendeesModal = ({
                   variant="outline"
                   size="sm"
                   onClick={handleSelectAllToggle}
-                  className="rounded-xl border-slate-300 bg-white text-slate-700"
+                  className="rounded-xl border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300"
                   style={{ fontFamily: FONT }}
                 >
                   {areAllSelected ? "Deselect All" : "Select All"}
@@ -386,11 +388,11 @@ const ExportWebinarAttendeesModal = ({
               )}
             </div>
 
-            <div className="mb-3 grid max-h-[250px] grid-cols-2 gap-x-3 gap-y-1 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-3 sm:grid-cols-3">
+            <div className="mb-3 grid max-h-[250px] grid-cols-2 gap-x-3 gap-y-1 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 p-3 sm:grid-cols-3">
               {columns.map((column) => (
                 <label
                   key={column.key}
-                  className="flex cursor-pointer items-center gap-2 py-1 text-sm text-slate-700"
+                  className="flex cursor-pointer items-center gap-2 py-1 text-sm text-slate-700 dark:text-slate-300"
                   style={{ fontFamily: FONT }}
                 >
                   <Checkbox
@@ -416,7 +418,7 @@ const ExportWebinarAttendeesModal = ({
             {enablePresets && (
               <>
                 <h3
-                  className="mb-2 mt-4 text-base font-bold text-slate-900"
+                  className="mb-2 mt-4 text-base font-bold text-slate-900 dark:text-slate-100"
                   style={{ fontFamily: FONT }}
                 >
                   Save Current Selection as Preset
@@ -426,7 +428,7 @@ const ExportWebinarAttendeesModal = ({
                     placeholder="New preset name"
                     value={presetNameInput}
                     onChange={(e) => setPresetNameInput(e.target.value)}
-                    className="h-10 rounded-xl border-slate-200 bg-white text-slate-800 focus:ring-[#22B573]/35"
+                    className="h-10 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200 focus:ring-[#22B573]/35"
                     style={{ fontFamily: FONT }}
                   />
                   <Button
@@ -437,7 +439,7 @@ const ExportWebinarAttendeesModal = ({
                       selectedColumns.length === 0 ||
                       duplicatePresetName
                     }
-                    className="rounded-xl border-slate-300 bg-white px-5 text-slate-600"
+                    className="rounded-xl border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-5 text-slate-600 dark:text-slate-400"
                     style={{ fontFamily: FONT }}
                   >
                     Save Preset
@@ -452,9 +454,9 @@ const ExportWebinarAttendeesModal = ({
             )}
           </div>
 
-          <div className="flex flex-col gap-3 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
             <label
-              className="flex cursor-pointer items-center gap-2 text-sm text-slate-600"
+              className="flex cursor-pointer items-center gap-2 text-sm text-slate-600 dark:text-slate-400"
               style={{ fontFamily: FONT }}
             >
               <Checkbox
@@ -468,7 +470,7 @@ const ExportWebinarAttendeesModal = ({
               <Button
                 variant="outline"
                 onClick={handleClose}
-                className="min-w-[110px] rounded-xl border-slate-300 bg-white text-slate-600"
+                className="min-w-[110px] rounded-xl border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400"
                 style={{ fontFamily: FONT }}
               >
                 Cancel

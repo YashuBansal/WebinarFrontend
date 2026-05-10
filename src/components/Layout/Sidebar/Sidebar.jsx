@@ -29,6 +29,7 @@ import useMediaQuery from "../../../hooks/useMediaQuery";
 import useUserSubscription from "../../../hooks/useUserSubscription";
 import DashboardSidebar from "./DashboardSidebar";
 import WhatsAppSidebar from "./WhatsAppSidebar";
+import { useTheme } from "../../../contexts/ThemeContext";
 
 const PANEL_W = 200;
 
@@ -39,6 +40,7 @@ const Sidebar = ({
   isPinned,
   setIsPinned,
 }) => {
+  const { isDark } = useTheme();
   const dispatch = useDispatch();
   const roles = useRoles();
   const logUserActivity = useAddUserActivity();
@@ -297,20 +299,20 @@ const Sidebar = ({
 
   const mobileShell = (
     <div
-      className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-white shadow-2xl transition-transform duration-300 ease-in-out md:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+      className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-white dark:bg-slate-900 border-r dark:border-slate-800 shadow-2xl transition-all duration-300 ease-in-out md:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       ref={mobileShellRef}
     >
-      <div className="flex h-16 items-center justify-between border-b px-4">
+      <div className="flex h-16 items-center justify-between border-b dark:border-slate-800 px-4">
         <div className="flex items-center gap-2">
           <img src="/wlh-logo.png" alt="Logo" className="h-8 w-8" />
-          <span className="font-bold text-slate-800">WLH Dashboard</span>
+          <span className="font-bold text-slate-800 dark:text-slate-100">WLH Dashboard</span>
         </div>
         <button
           onClick={() => dispatch(setSidebarOpen(false))}
-          className="rounded-lg p-1 hover:bg-slate-100"
+          className="rounded-lg p-1 hover:bg-slate-100 dark:hover:bg-slate-800"
         >
-          <X className="h-6 w-6 text-slate-500" />
+          <X className="h-6 w-6 text-slate-500 dark:text-slate-400" />
         </button>
       </div>
       <div className="flex-1 overflow-hidden flex flex-col relative">
@@ -344,11 +346,11 @@ const Sidebar = ({
 
   const railAside = (
     <aside
-      className="flex h-full w-[80px] flex-col border-r border-gray-200 bg-white shadow-sm"
+      className="flex h-full w-[80px] flex-col border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-colors duration-300"
       onMouseEnter={enterDesktopSidebar}
       onMouseLeave={leaveDesktopSidebar}
     >
-      <div className="border-b border-gray-200 px-3 pb-2 pt-3">
+      <div className="border-b border-gray-200 dark:border-slate-800 px-3 pb-2 pt-3">
         <button
           type="button"
           onClick={togglePin}
@@ -396,7 +398,7 @@ const Sidebar = ({
 
   const labelsAside = (
     <aside
-      className="flex h-full flex-col overflow-hidden border-r border-gray-200 bg-white shadow-sm transition-[width,opacity] duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+      className="flex h-full flex-col overflow-hidden border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
       style={{
         width: panelOpen ? PANEL_W : 0,
         opacity: panelOpen ? 1 : 0,
@@ -404,7 +406,7 @@ const Sidebar = ({
       onMouseEnter={enterDesktopSidebar}
       onMouseLeave={leaveDesktopSidebar}
     >
-      <div className="border-b border-gray-200 px-3 pb-2 pt-3">
+      <div className="border-b border-gray-200 dark:border-slate-800 px-3 pb-2 pt-3">
         <button
           type="button"
           onClick={togglePin}
@@ -413,7 +415,7 @@ const Sidebar = ({
           <span
             className="text-sm font-medium"
             style={{
-              color: isPinned ? themeColor : "#1e293b",
+              color: isPinned ? themeColor : (isDark ? "#cbd5e1" : "#1e293b"),
               fontFamily: "Inter, sans-serif",
             }}
           >

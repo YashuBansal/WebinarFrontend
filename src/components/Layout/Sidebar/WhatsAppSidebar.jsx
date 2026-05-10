@@ -27,6 +27,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setSelectedProject } from "../../../features/slices/globalData";
 import { projectsApi } from "../../../pages/WhatsApp/api/modules/projectsAPI";
 import { isProjectConfigured } from "../../../pages/WhatsApp/lib/projectUtils";
+import { useTheme } from "../../../contexts/ThemeContext";
 
 const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
   const dispatch = useDispatch();
@@ -100,13 +101,13 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
   if (section === "top") {
     if (variant === "rail") {
       return (
-        <div className="flex flex-col items-center justify-center py-3 border-b border-gray-100 bg-white h-[68px]">
+        <div className="flex flex-col items-center justify-center py-3 border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 h-[68px]">
           <Link
             to="/whatsapp"
             onClick={() => handleNavigation("/whatsapp")}
             className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-all ${
-              selectedProject ? "border-green-500 bg-green-50" : "border-slate-200 bg-slate-50"
-            } hover:bg-green-50 hover:border-green-400`}
+              selectedProject ? "border-green-500 bg-green-50 dark:bg-green-500/10" : "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800"
+            } hover:bg-green-50 dark:hover:bg-green-500/20 hover:border-green-400`}
             title="View All Projects"
           >
             <FolderOpen className={`h-5 w-5 ${selectedProject ? "text-green-600" : "text-slate-400"}`} />
@@ -115,11 +116,11 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
       );
     }
     return (
-      <div className="px-4 py-3 border-b border-gray-100 bg-white h-[68px] flex flex-col justify-center">
+      <div className="px-4 py-3 border-b border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 h-[68px] flex flex-col justify-center">
         <Link
           to="/whatsapp"
           onClick={() => handleNavigation("/whatsapp")}
-          className="flex items-center gap-2 text-slate-800 hover:text-green-600 transition-colors"
+          className="flex items-center gap-2 text-slate-800 dark:text-slate-100 hover:text-green-600 dark:hover:text-green-400 transition-colors"
         >
           <FolderOpen className="h-4 w-4 text-green-500" />
           <span className="text-sm font-bold tracking-tight" style={{ fontFamily: "Inter, sans-serif" }}>
@@ -129,7 +130,7 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
         {selectedProject && (
           <div className="mt-2 flex items-center gap-1.5 px-0.5">
             <div className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 truncate max-w-[150px]">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 truncate max-w-[150px]">
               {selectedProject.projectName}
             </span>
           </div>
@@ -142,7 +143,7 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
     if (!selectedProject) return null;
     if (variant === "rail") {
       return (
-        <div className="flex items-center justify-center py-3 border-t border-gray-100 bg-gray-50/50 h-[55px]">
+        <div className="flex items-center justify-center py-3 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50 h-[55px]">
           <div className={`flex h-[32px] w-[32px] items-center justify-center rounded-lg ${
             isConfigured ? "bg-green-100" : "bg-yellow-100"
           }`}>
@@ -155,10 +156,10 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
       );
     }
     return (
-      <div className="px-4 py-3 border-t border-gray-100 bg-gray-50/50 h-[55px] flex flex-col justify-center">
+      <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50 h-[55px] flex flex-col justify-center">
         <div
           className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold ${
-            isConfigured ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
+            isConfigured ? "bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400" : "bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400"
           }`}
         >
           {isConfigured ? (
@@ -188,11 +189,11 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
                   isDisabled
                     ? "cursor-not-allowed opacity-50 grayscale pointer-events-none"
                     : active
-                    ? "bg-green-50 text-green-600"
-                    : "text-gray-700 hover:bg-gray-50"
+                    ? "bg-green-50 dark:bg-green-500/10 text-green-600"
+                    : "text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"
                 }`}
               >
-                <Icon className={`h-5 w-5 shrink-0 ${active ? "text-green-500" : "text-slate-500"}`} strokeWidth={2} />
+                <Icon className={`h-5 w-5 shrink-0 ${active ? "text-green-500" : "text-slate-500 dark:text-slate-400"}`} strokeWidth={2} />
                 <span>{item.name}</span>
               </Link>
             </li>
@@ -205,14 +206,14 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
               <Link
                 to={item.path}
                 onClick={() => handleNavigation(item.path)}
-                className={`relative flex w-full items-center justify-center rounded-lg py-2.5 transition-colors hover:bg-black/[0.04] ${
+                className={`relative flex w-full items-center justify-center rounded-lg py-2.5 transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04] ${
                   isDisabled ? "cursor-not-allowed opacity-50 grayscale pointer-events-none" : active ? "bg-green-500/10" : ""
                 }`}
               >
                 {active && (
                   <div className="absolute bottom-0 left-0 top-0 w-[3px] rounded-r-sm bg-green-500" />
                 )}
-                <Icon className={`h-5 w-5 shrink-0 ${active ? "text-green-500" : "text-slate-400"}`} strokeWidth={2} />
+                <Icon className={`h-5 w-5 shrink-0 ${active ? "text-green-500" : "text-slate-400 dark:text-slate-500"}`} strokeWidth={2} />
               </Link>
             </li>
           );
@@ -223,12 +224,12 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
             <Link
               to={item.path}
               onClick={() => handleNavigation(item.path)}
-              className={`flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-medium hover:bg-black/[0.04] ${
+              className={`flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-medium hover:bg-black/[0.04] dark:hover:bg-white/[0.04] ${
                 isDisabled
                   ? "cursor-not-allowed opacity-40 grayscale pointer-events-none"
                   : active
                   ? "text-green-600"
-                  : "text-slate-800"
+                  : "text-slate-800 dark:text-slate-200"
               }`}
               style={{ fontFamily: "Inter, sans-serif" }}
             >

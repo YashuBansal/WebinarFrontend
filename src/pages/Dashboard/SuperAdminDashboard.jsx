@@ -17,6 +17,7 @@ import {
 } from "../../components/Dashboard";
 import { errorToast } from "../../utils/extra";
 import { resetDashboardData } from "../../features/slices/globalData";
+import { useTheme } from "../../contexts/ThemeContext";
 
 function toYMD(d) {
   if (!(d instanceof Date) || Number.isNaN(d.getTime())) return "";
@@ -35,46 +36,46 @@ const metricPalette = (color) => {
   switch (color) {
     case "primary":
       return {
-        border: "border-blue-200",
-        bg: "bg-blue-50/90",
-        value: "text-blue-700",
-        label: "text-blue-600/80",
+        border: "border-blue-200 dark:border-blue-900/50",
+        bg: "bg-blue-50/90 dark:bg-blue-500/10",
+        value: "text-blue-700 dark:text-blue-400",
+        label: "text-blue-600/80 dark:text-blue-300/80",
       };
     case "success":
       return {
-        border: "border-emerald-200",
-        bg: "bg-emerald-50/90",
-        value: "text-emerald-700",
-        label: "text-emerald-600/80",
+        border: "border-emerald-200 dark:border-emerald-900/50",
+        bg: "bg-emerald-50/90 dark:bg-emerald-500/10",
+        value: "text-emerald-700 dark:text-emerald-400",
+        label: "text-emerald-600/80 dark:text-emerald-300/80",
       };
     case "error":
       return {
-        border: "border-red-200",
-        bg: "bg-red-50/90",
-        value: "text-red-700",
-        label: "text-red-600/80",
+        border: "border-red-200 dark:border-red-900/50",
+        bg: "bg-red-50/90 dark:bg-red-500/10",
+        value: "text-red-700 dark:text-red-400",
+        label: "text-red-600/80 dark:text-red-300/80",
       };
     case "warning":
       return {
-        border: "border-amber-200",
-        bg: "bg-amber-50/90",
-        value: "text-amber-800",
-        label: "text-amber-700/80",
+        border: "border-amber-200 dark:border-amber-900/50",
+        bg: "bg-amber-50/90 dark:bg-amber-500/10",
+        value: "text-amber-800 dark:text-amber-400",
+        label: "text-amber-700/80 dark:text-amber-300/80",
       };
     case "secondary":
       return {
-        border: "border-violet-200",
-        bg: "bg-violet-50/90",
-        value: "text-violet-800",
-        label: "text-violet-700/80",
+        border: "border-violet-200 dark:border-violet-900/50",
+        bg: "bg-violet-50/90 dark:bg-violet-500/10",
+        value: "text-violet-800 dark:text-violet-400",
+        label: "text-violet-700/80 dark:text-violet-300/80",
       };
     case "textPrimary":
     default:
       return {
-        border: "border-slate-200",
-        bg: "bg-slate-50/90",
-        value: "text-slate-800",
-        label: "text-slate-600",
+        border: "border-slate-200 dark:border-slate-800",
+        bg: "bg-slate-50/90 dark:bg-slate-800/50",
+        value: "text-slate-800 dark:text-slate-200",
+        label: "text-slate-600 dark:text-slate-400",
       };
   }
 };
@@ -106,6 +107,7 @@ function SuperMetricTile({ label, value, color, staggerIndex = 0 }) {
 
 const SuperAdminDashboard = () => {
   const dispatch = useDispatch();
+  const { isDark } = useTheme();
   const { dashBoardCardsData } = useSelector((state) => state.globalData);
 
   const apiUrl = `${
@@ -337,21 +339,22 @@ const SuperAdminDashboard = () => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35 }}
         style={{
-          backgroundColor: "#ffffff",
-          boxShadow:
-            "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
+          backgroundColor: isDark ? "#0f172a" : "#ffffff",
+          boxShadow: isDark 
+            ? "0 4px 6px -1px rgba(0, 0, 0, 0.2)"
+            : "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
         }}
       >
         <div className="flex min-w-0 flex-col items-start justify-between gap-4 lg:flex-row lg:items-center lg:gap-6">
           <div className="flex min-w-0 w-full flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center lg:w-auto">
-            <div className="flex min-w-0 max-w-full flex-wrap items-center gap-3 rounded-xl border border-gray-100 bg-gray-50/50 p-1.5 sm:gap-4">
+            <div className="flex min-w-0 max-w-full flex-wrap items-center gap-3 rounded-xl border border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50 p-1.5 sm:gap-4">
               <div className="flex items-center gap-2 px-3">
                 <span
                   style={{
                     fontFamily: "Inter, sans-serif",
                     fontSize: "12px",
                     fontWeight: 600,
-                    color: "#64748b",
+                    color: isDark ? "#94a3b8" : "#64748b",
                     textTransform: "uppercase",
                   }}
                 >
@@ -369,23 +372,23 @@ const SuperAdminDashboard = () => {
                     className="max-w-full cursor-pointer rounded-lg py-1.5 pl-3 pr-2 outline-none transition-colors hover:bg-white"
                     style={{
                       backgroundColor: "transparent",
-                      border: "1px solid #e5e7eb",
+                      border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
                       fontFamily: "Inter, sans-serif",
                       fontSize: "13px",
                       fontWeight: 500,
-                      color: "#071028",
+                      color: isDark ? "#f8fafc" : "#071028",
                     }}
                   />
                 </div>
               </div>
-              <div className="hidden h-4 w-px bg-gray-200 sm:block" />
+              <div className="hidden h-4 w-px bg-gray-200 dark:bg-slate-700 sm:block" />
               <div className="flex items-center gap-2 px-3">
                 <span
                   style={{
                     fontFamily: "Inter, sans-serif",
                     fontSize: "12px",
                     fontWeight: 600,
-                    color: "#64748b",
+                    color: isDark ? "#94a3b8" : "#64748b",
                     textTransform: "uppercase",
                   }}
                 >
@@ -404,11 +407,11 @@ const SuperAdminDashboard = () => {
                     className="max-w-full cursor-pointer rounded-lg py-1.5 pl-3 pr-2 outline-none transition-colors hover:bg-white"
                     style={{
                       backgroundColor: "transparent",
-                      border: "1px solid #e5e7eb",
+                      border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
                       fontFamily: "Inter, sans-serif",
                       fontSize: "13px",
                       fontWeight: 500,
-                      color: "#071028",
+                      color: isDark ? "#f8fafc" : "#071028",
                     }}
                   />
                 </div>
@@ -434,7 +437,7 @@ const SuperAdminDashboard = () => {
           <button
             type="button"
             onClick={handleToggleModal}
-            className="w-full rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-semibold text-slate-800 shadow-sm transition hover:bg-slate-50 lg:ml-auto lg:w-auto"
+            className="w-full rounded-xl border border-slate-300 dark:border-slate-800 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-semibold text-slate-800 dark:text-slate-200 shadow-sm transition hover:bg-slate-50 dark:hover:bg-slate-700 lg:ml-auto lg:w-auto"
             style={{ fontFamily: "Inter, sans-serif" }}
           >
             Filter Cards
@@ -452,7 +455,7 @@ const SuperAdminDashboard = () => {
 
       <div className="mt-10">
         <h2
-          className="mb-4 text-lg font-bold text-[#071028]"
+          className="mb-4 text-lg font-bold text-[#071028] dark:text-slate-100"
           style={{ fontFamily: "Inter, sans-serif" }}
         >
           WhatsApp Message Analytics
@@ -532,7 +535,7 @@ const SuperAdminDashboard = () => {
           role="presentation"
         >
           <div
-            className="custom-scrollbar max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl bg-white p-6 shadow-xl"
+            className="custom-scrollbar max-h-[90vh] w-full max-w-md overflow-y-auto rounded-xl bg-white dark:bg-slate-900 p-6 shadow-xl border dark:border-slate-800"
             onClick={(e) => e.stopPropagation()}
             role="dialog"
             aria-modal="true"
@@ -540,22 +543,22 @@ const SuperAdminDashboard = () => {
           >
             <h2
               id="super-admin-filter-cards-title"
-              className="mb-3 text-lg font-semibold text-[#071028]"
+              className="mb-3 text-lg font-semibold text-[#071028] dark:text-slate-100"
               style={{ fontFamily: "Inter, sans-serif" }}
             >
               Select Cards to Display
             </h2>
-            <div className="my-3 border-t border-gray-200" />
+            <div className="my-3 border-t border-gray-200 dark:border-slate-800" />
             <div className="custom-scrollbar grid max-h-[50vh] grid-cols-1 gap-2 overflow-y-auto pr-1 sm:grid-cols-2">
               {cardData.map((item, index) => (
                 <label
                   key={index}
-                  className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm hover:bg-gray-50"
+                  className="flex cursor-pointer items-center gap-2 rounded-lg px-2 py-2 text-sm hover:bg-gray-50 dark:hover:bg-slate-800 dark:text-slate-300"
                   style={{ fontFamily: "Inter, sans-serif" }}
                 >
                   <input
                     type="checkbox"
-                    className="h-4 w-4 rounded border-gray-300"
+                    className="h-4 w-4 rounded border-gray-300 dark:border-slate-700 dark:bg-slate-800"
                     checked={visibleCards.includes(item.label)}
                     onChange={() => handleCardSelection(item.label)}
                   />
@@ -563,11 +566,11 @@ const SuperAdminDashboard = () => {
                 </label>
               ))}
             </div>
-            <div className="mt-5 flex justify-end gap-3 border-t border-gray-100 pt-4">
+            <div className="mt-5 flex justify-end gap-3 border-t border-gray-100 dark:border-slate-800 pt-4">
               <button
                 type="button"
                 onClick={handleToggleModal}
-                className="rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                className="rounded-xl border border-slate-300 dark:border-slate-800 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
               >
                 Cancel
               </button>

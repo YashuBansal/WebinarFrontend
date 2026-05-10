@@ -24,6 +24,7 @@ import {
   X,
   Tag
 } from "lucide-react";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const Pullbacks = lazy(() => import("./Pullbacks"));
 const Enrollments = lazy(() => import("./Enrollments"));
@@ -58,6 +59,7 @@ const WebinarWebhooksListDialog = lazy(() =>
 );
 
 const WebinarAttendees = () => {
+  const { isDark } = useTheme();
   const { id } = useParams();
   const dispatch = useDispatch();
   const logUserActivity = useAddUserActivity();
@@ -155,12 +157,11 @@ const WebinarAttendees = () => {
     setPage(1);
   };
 
-  const theme = "light"; // Hardcoded for consistency with new UI, can be dynamic
-  const cardBg = "rgba(255, 255, 255, 0.7)";
-  const cardBorder = "rgba(0, 0, 0, 0.06)";
+  const cardBg = isDark ? "rgba(30, 41, 59, 0.7)" : "rgba(255, 255, 255, 0.7)";
+  const cardBorder = isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.06)";
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 md:p-8 space-y-6 font-sans">
+    <div className={`min-h-screen p-4 md:p-8 space-y-6 font-sans transition-colors duration-300 ${isDark ? "bg-[#0f172a]" : "bg-[#F8FAFC]"}`}>
       {/* Glassmorphic Header Card */}
       <div
         className="rounded-2xl p-6 border transition-all duration-300"
@@ -174,10 +175,10 @@ const WebinarAttendees = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
           <div className="space-y-2">
             <div className="flex items-center gap-3">
-              <Link to="/webinars" className="p-2 rounded-xl hover:bg-black/5 transition-colors">
-                <ArrowLeft className="w-5 h-5 text-slate-600" />
+              <Link to="/webinars" className="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
               </Link>
-              <h1 className="text-2xl font-bold text-slate-900 tracking-tight">
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
                 {webinarData?.webinarName || "Webinar Attendees"}
               </h1>
             </div>
@@ -195,7 +196,7 @@ const WebinarAttendees = () => {
             {tabValueRef.current === "postWebinar" && (
               <Link
                 to={`/webinar-participants/${id}`}
-                className="flex-1 md:flex-none px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
+                className="flex-1 md:flex-none px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
               >
                 Participants
               </Link>
@@ -205,20 +206,20 @@ const WebinarAttendees = () => {
                 {tabValueRef.current === "preWebinar" && (
                   <button
                     onClick={() => setWebhookDialogOpen(true)}
-                    className="flex-1 md:flex-none px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
+                    className="flex-1 md:flex-none px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
                   >
                     Webhooks
                   </button>
                 )}
                 <button
                   onClick={() => setSettingModalOpen(true)}
-                  className="flex-1 md:flex-none px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
+                  className="flex-1 md:flex-none px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Settings2 className="w-4 h-4" /> Settings
                 </button>
                 <button
                   onClick={() => setApplyTagsModalOpen(true)}
-                  className="flex-1 md:flex-none px-5 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm"
+                  className="flex-1 md:flex-none px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Tag className="w-4 h-4" /> Apply Tag
                 </button>
@@ -229,7 +230,7 @@ const WebinarAttendees = () => {
         </div>
 
         {/* Custom Tab Toggles */}
-        <div className="mt-8 flex items-center p-1.5 bg-slate-100/50 rounded-2xl w-full md:w-fit">
+        <div className="mt-8 flex items-center p-1.5 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl w-full md:w-fit">
           {[
             { label: "Reminder", value: "preWebinar" },
             { label: "Sales", value: "postWebinar" },
@@ -239,8 +240,8 @@ const WebinarAttendees = () => {
               key={tab.value}
               onClick={() => handleTabChange(tab.value)}
               className={`px-8 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${tabValueRef.current === tab.value
-                ? "bg-white text-blue-600 shadow-sm"
-                : "text-slate-500 hover:text-slate-700"
+                ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                 }`}
             >
               {tab.label}
@@ -258,19 +259,19 @@ const WebinarAttendees = () => {
               <>
                 <button
                   onClick={() => setSwapOpen(true)}
-                  className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all shadow-sm"
+                  className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
                 >
                   Swap Columns
                 </button>
                 <button
                   onClick={() => setShowModal(true)}
-                  className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
+                  className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2"
                 >
                   <Upload className="w-4 h-4" /> Import
                 </button>
                 <button
                   onClick={() => setBulkEnrollOpen(true)}
-                  className="px-4 py-2 bg-white border border-slate-200 text-slate-700 rounded-xl text-sm font-bold hover:bg-slate-50 transition-all shadow-sm flex items-center gap-2"
+                  className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2"
                 >
                   Create Enrollments
                 </button>
@@ -288,7 +289,7 @@ const WebinarAttendees = () => {
           </div>
 
           {tabValueRef.current !== "enrollments" && (
-            <div className="flex items-center p-1 bg-white border border-slate-200 rounded-xl">
+            <div className="flex items-center p-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
               {[
                 { label: "Attendees", value: "attendees", count: 0 },
                 { label: "Pullbacks", value: AssignmentStatus.REASSIGN_APPROVED, count: reAssignCounts?.pullbacks || 0 },
@@ -298,13 +299,13 @@ const WebinarAttendees = () => {
                   key={subTab.value}
                   onClick={() => handleSubTabChange(subTab.value)}
                   className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${subTabValueRef.current === subTab.value
-                    ? "bg-slate-900 text-white"
-                    : "text-slate-500 hover:bg-slate-50"
+                    ? "bg-slate-900 dark:bg-slate-700 text-white"
+                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
                     }`}
                 >
                   {subTab.label}
                   {subTab.count > 0 && (
-                    <span className={`px-1.5 py-0.5 rounded ${subTabValueRef.current === subTab.value ? "bg-slate-700" : "bg-blue-50 text-blue-600"}`}>
+                    <span className={`px-1.5 py-0.5 rounded ${subTabValueRef.current === subTab.value ? "bg-slate-700 dark:bg-slate-600" : "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"}`}>
                       {subTab.count}
                     </span>
                   )}
@@ -335,6 +336,7 @@ const WebinarAttendees = () => {
               setApplyTagsModalOpen={setApplyTagsModalOpen}
               bulkEnrollOpen={bulkEnrollOpen}
               setBulkEnrollOpen={setBulkEnrollOpen}
+              theme={isDark ? "dark" : "light"}
             />
           ) : (
             <Pullbacks

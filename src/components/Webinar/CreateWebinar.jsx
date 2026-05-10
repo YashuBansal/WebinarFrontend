@@ -10,6 +10,7 @@ import { getAllProductsByAdminId } from "../../features/actions/product";
 import useAddUserActivity from "../../hooks/useAddUserActivity";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 import { MultiSelectDropdown } from "../MultiSelectDropdown";
+import { useTheme } from "../../contexts/ThemeContext";
 
 function toDateInputValue(date) {
   if (!date) return "";
@@ -19,6 +20,7 @@ function toDateInputValue(date) {
 }
 
 const CreateWebinar = ({ modalName }) => {
+  const { isDark } = useTheme();
   const dispatch = useDispatch();
   const logUserActivity = useAddUserActivity();
   const { isCreating, isSuccess } = useSelector((state) => state.webinarContact);
@@ -126,16 +128,16 @@ const CreateWebinar = ({ modalName }) => {
       <DialogContent
         className="sm:max-w-[750px] rounded-2xl p-6"
         style={{
-          backgroundColor: "#ffffff",
-          borderColor: "#e2e8f0",
+          backgroundColor: isDark ? "#1e293b" : "#ffffff",
+          borderColor: isDark ? "#334155" : "#e2e8f0",
           borderWidth: "1px",
           borderStyle: "solid",
-          boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
+          boxShadow: isDark ? "0 20px 25px -5px rgba(0, 0, 0, 0.4)" : "0 20px 25px -5px rgba(0, 0, 0, 0.1)",
         }}
       >
-        <DialogHeader className="pb-4 border-b" style={{ borderColor: "#e2e8f0" }}>
+        <DialogHeader className="pb-4 border-b" style={{ borderColor: isDark ? "#334155" : "#e2e8f0" }}>
           <div className="flex items-center justify-between gap-4">
-            <DialogTitle className="text-xl font-bold" style={{ color: "#0f172a" }}>
+            <DialogTitle className="text-xl font-bold" style={{ color: isDark ? "#f8fafc" : "#0f172a" }}>
               {modalData ? "Edit Webinar" : "Create Webinar"}
             </DialogTitle>
             <DialogDescription className="hidden">Create a new webinar</DialogDescription>
@@ -150,9 +152,9 @@ const CreateWebinar = ({ modalName }) => {
                 placeholder="Webinar Name"
                 className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-all"
                 style={{
-                  backgroundColor: "#ffffff",
-                  borderColor: "#e2e8f0",
-                  color: "#0f172a",
+                  backgroundColor: isDark ? "#0f172a" : "#ffffff",
+                  borderColor: isDark ? "#334155" : "#e2e8f0",
+                  color: isDark ? "#f8fafc" : "#0f172a",
                 }}
                 {...register("webinarName", { required: "Webinar Name is required" })}
               />
@@ -175,9 +177,9 @@ const CreateWebinar = ({ modalName }) => {
                 }}
                 className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-all"
                 style={{
-                  backgroundColor: "#ffffff",
-                  borderColor: "#e2e8f0",
-                  color: "#0f172a",
+                  backgroundColor: isDark ? "#0f172a" : "#ffffff",
+                  borderColor: isDark ? "#334155" : "#e2e8f0",
+                  color: isDark ? "#f8fafc" : "#0f172a",
                 }}
               />
             </div>
@@ -202,15 +204,15 @@ const CreateWebinar = ({ modalName }) => {
               label="Assign Product"
             />
 
-            <div className="flex gap-3 mt-4 pt-4 border-t" style={{ borderColor: "#e2e8f0" }}>
+            <div className="flex gap-3 mt-4 pt-4 border-t" style={{ borderColor: isDark ? "#334155" : "#e2e8f0" }}>
               <button
                 type="button"
                 onClick={handleClose}
                 className="flex-1 px-6 py-2.5 rounded-xl text-sm font-medium transition-colors hover:bg-opacity-80"
                 style={{
-                  backgroundColor: "#f1f5f9",
-                  color: "#475569",
-                  border: "1px solid #e2e8f0",
+                  backgroundColor: isDark ? "#334155" : "#f1f5f9",
+                  color: isDark ? "#94a3b8" : "#475569",
+                  border: isDark ? "1px solid #475569" : "1px solid #e2e8f0",
                 }}
               >
                 Cancel
