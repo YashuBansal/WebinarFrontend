@@ -38,8 +38,8 @@ export const ConfigurationGuard = ({
         <Card className="w-full max-w-md">
           <CardHeader>
             <div className="flex items-center gap-2">
-              <AlertCircle className="h-6 w-6 text-red-600" />
-              <CardTitle className="text-red-600">Access Restricted</CardTitle>
+              <AlertCircle className="h-6 w-6 text-red-600 dark:text-red-400" />
+              <CardTitle className="text-red-600 dark:text-red-400">Access Restricted</CardTitle>
             </div>
             <CardDescription>
               This feature requires WhatsApp Business Account configuration.

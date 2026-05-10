@@ -116,7 +116,7 @@ const RevenueByDateChart = () => {
   return (
     <Card className="shadow-sm w-full h-[60vh] border-none bg-transparent">
       <CardHeader className="px-0 pt-0 pb-4">
-        <CardTitle className="text-lg font-bold text-slate-800 dark:text-slate-100">
+        <CardTitle className="text-lg font-bold text-slate-800 dark:text-slate-200 dark:text-slate-100">
           Revenue Overview
         </CardTitle>
       </CardHeader>

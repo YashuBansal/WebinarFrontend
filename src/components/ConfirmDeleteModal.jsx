@@ -49,7 +49,7 @@ export default function ConfirmDeleteModal({
 
   const shellBorder = isDark ? "#334155" : "#e5e7eb";
   const titleColor = isDark ? "#f8fafc" : "#0f172a";
-  const footerBg = isDark ? "rgba(15,23,42,0.85)" : "#F9FAFB";
+  const footerBg = isDark ? "#0f172a" : "#F9FAFB";
 
   const labelStyle = {
     fontFamily: FONT,
@@ -77,7 +77,7 @@ export default function ConfirmDeleteModal({
 
   return (
     <Dialog open={true} onOpenChange={handleClose}>
-      <DialogContent className="max-w-[450px] p-0 overflow-hidden rounded-2xl shadow-2xl border" style={{ backgroundColor: isDark ? "#1e293b" : "#ffffff", borderColor: shellBorder }}>
+      <DialogContent className="max-w-[450px] p-0 overflow-hidden rounded-2xl shadow-2xl border" style={{ backgroundColor: isDark ? "#0f172a" : "#ffffff", borderColor: shellBorder }}>
         <div className="flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b flex-shrink-0" style={{ borderColor: shellBorder }}>
@@ -103,7 +103,7 @@ export default function ConfirmDeleteModal({
             </div>
 
             <div className="space-y-4">
-              <div className="flex flex-col items-center gap-2 p-5 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-dashed border-slate-200 dark:border-slate-700">
+              <div className="flex flex-col items-center gap-2 p-5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800">
                 <span style={labelStyle} className="mb-0">Security Verification Code</span>
                 <div className="flex items-center gap-4">
                   <span className="text-3xl font-black tracking-[0.5em] text-red-500 select-none">
@@ -136,9 +136,9 @@ export default function ConfirmDeleteModal({
                       "w-full h-14 rounded-2xl border-2 text-center text-2xl font-black tracking-[0.3em] focus:outline-none transition-all duration-300",
                       userInput.length === 6
                         ? userInput === confirmationCode
-                          ? "border-emerald-500 bg-emerald-50/10 text-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.1)]"
-                          : "border-red-500 bg-red-50/10 text-red-600"
-                        : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100"
+                          ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900 text-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.1)]"
+                          : "border-red-500 bg-red-50 dark:bg-red-900 text-red-600"
+                        : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
                     )}
                     style={{
                       fontFamily: FONT,

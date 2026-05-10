@@ -69,18 +69,18 @@ export default function ExportDialog({ isOpen, onClose, contacts }: ExportDialog
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent 
-        className="sm:max-w-[400px] border-0 bg-transparent p-0 shadow-none outline-none"
+        className="sm:max-w-[400px] border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-0 overflow-hidden rounded-2xl shadow-2xl"
         onPointerDownOutside={(e) => e.preventDefault()}
         showCloseButton={false}
       >
-        <div className="relative w-full rounded-2xl p-8 shadow-2xl flex flex-col bg-white border border-slate-200">
+        <div className="relative w-full p-8 flex flex-col">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <div className="flex items-center gap-2 text-blue-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-1">
+              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-1">
                 <Share2 className="h-3 w-3" />
                 Data Portability
               </div>
-              <DialogTitle className="text-xl font-bold text-slate-900">
+              <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
                 Export Audience
               </DialogTitle>
               <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
@@ -90,7 +90,7 @@ export default function ExportDialog({ isOpen, onClose, contacts }: ExportDialog
             <button
               type="button"
               onClick={onClose}
-              className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-50 text-slate-400 transition-colors border border-transparent hover:border-slate-100"
+              className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-400 transition-colors border border-transparent hover:border-slate-100"
             >
               <X className="w-5 h-5" />
             </button>
@@ -99,27 +99,27 @@ export default function ExportDialog({ isOpen, onClose, contacts }: ExportDialog
           <div className="space-y-4">
             <button
               onClick={handleExportJson}
-              className="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-blue-200 hover:shadow-lg hover:shadow-blue-900/5 transition-all group"
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-900/5 transition-all group"
             >
-              <div className="h-12 w-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-blue-600 group-hover:border-blue-100 transition-all">
+              <div className="h-12 w-12 rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-400 group-hover:text-blue-600 group-hover:border-blue-100 transition-all">
                 <FileJson className="h-6 w-6" />
               </div>
               <div className="flex flex-col items-start">
-                <span className="text-sm font-bold text-slate-900">Copy as JSON</span>
-                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Clip to clipboard</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">Copy as JSON</span>
+                <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Clip to clipboard</span>
               </div>
             </button>
 
             <button
               onClick={handleExportCsv}
-              className="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:border-green-200 hover:shadow-lg hover:shadow-green-900/5 transition-all group"
+              className="w-full flex items-center gap-4 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 hover:bg-white dark:hover:bg-slate-800 hover:border-green-200 hover:shadow-lg hover:shadow-green-900/5 dark:hover:shadow-green-500/10 transition-all group"
             >
-              <div className="h-12 w-12 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 group-hover:border-green-100 transition-all">
+              <div className="h-12 w-12 rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-400 group-hover:text-green-600 group-hover:border-green-100 transition-all">
                 <FileSpreadsheet className="h-6 w-6" />
               </div>
               <div className="flex flex-col items-start">
-                <span className="text-sm font-bold text-slate-900">Download CSV</span>
-                <span className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">Excel compatible file</span>
+                <span className="text-sm font-bold text-slate-900 dark:text-white">Download CSV</span>
+                <span className="text-[10px] font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Excel compatible file</span>
               </div>
             </button>
           </div>
@@ -129,7 +129,7 @@ export default function ExportDialog({ isOpen, onClose, contacts }: ExportDialog
               type="button"
               variant="outline"
               onClick={onClose}
-              className="h-11 px-6 rounded-xl font-bold text-slate-600 border-slate-200 hover:bg-slate-50 transition-all"
+              className="h-11 px-6 rounded-xl font-bold text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
             >
               Cancel
             </Button>

@@ -88,10 +88,10 @@ const routes = [
 ];
 
 const LoadingFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50">
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-800/50">
     <div className="flex flex-col items-center space-y-4">
       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      <p className="text-sm text-gray-600">Loading page...</p>
+      <p className="text-sm text-gray-600 dark:text-slate-400">Loading page...</p>
     </div>
   </div>
 );

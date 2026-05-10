@@ -276,11 +276,11 @@ export default function CreateProgram() {
 
   if (!selectedProject) {
     return (
-      <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+      <div className="min-h-full flex items-center justify-center p-8 bg-white dark:bg-slate-950 shadow-sm">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border border-red-100 dark:border-red-900/50 shadow-2xl bg-white dark:bg-slate-900">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">No Project Selected</AlertTitle>
-          <AlertDescription className="text-slate-600 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">No Project Selected</AlertTitle>
+          <AlertDescription className="text-slate-600 dark:text-slate-400 font-medium">
             Please select a project to configure sequences.
           </AlertDescription>
         </Alert>
@@ -293,10 +293,10 @@ export default function CreateProgram() {
       <div className="min-h-[400px] flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
-            <div className="h-12 w-12 rounded-full border-4 border-green-100 border-t-green-500 animate-spin" />
+            <div className="h-12 w-12 rounded-full border-4 border-green-100 dark:border-green-500/20 border-t-green-500 animate-spin" />
             <Loader2 className="h-6 w-6 text-green-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
           </div>
-          <p className="text-slate-600 font-bold text-xs uppercase tracking-widest animate-pulse">Loading sequence...</p>
+          <p className="text-slate-600 dark:text-slate-400 font-bold text-xs uppercase tracking-widest animate-pulse">Loading sequence...</p>
         </div>
       </div>
     );
@@ -305,14 +305,14 @@ export default function CreateProgram() {
   if (isEditMode && (programError || (!program && !programLoading))) {
     return (
       <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white dark:bg-slate-800/50">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Error Loading Sequence</AlertTitle>
-          <AlertDescription className="text-slate-600 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">Error Loading Sequence</AlertTitle>
+          <AlertDescription className="text-slate-600 dark:text-slate-400 font-medium">
             Failed to load sequence. It may not exist or you don't have access.
           </AlertDescription>
           <Link to={`/whatsapp/dashboard/${projectId}/programs`} className="mt-6 block">
-            <Button variant="outline" className="w-full rounded-xl border-slate-200">Back to Sequences</Button>
+            <Button variant="outline" className="w-full rounded-xl border-slate-200 dark:border-slate-800">Back to Sequences</Button>
           </Link>
         </Alert>
       </div>
@@ -325,32 +325,29 @@ export default function CreateProgram() {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200 p-4 sm:p-5 bg-white dark:bg-slate-900 shadow-sm dark:border-slate-800"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <Link
                 to={isEditMode && programId ? `/whatsapp/dashboard/${projectId}/programs/${programId}` : `/whatsapp/dashboard/${projectId}/programs`}
-                className="h-10 w-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+                className="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Link>
               <div>
-                <div className="flex items-center gap-1.5 text-green-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-0.5">
+                <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-0.5">
                   <ListTree className="h-3 w-3" />
                   Sequence Builder
                 </div>
-                <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl flex items-center gap-2">
+                <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-2xl flex items-center gap-2">
                   {isEditMode ? 'Edit Sequence' : 'Create Sequence'}
                 </h1>
-                <p className="text-slate-600 text-xs font-medium mt-1">
+                <p className="text-slate-600 dark:text-slate-400 text-xs font-medium mt-1">
                   {isEditMode
                     ? 'Update sequence name and time slots for your automated workflow.'
                     : 'Design a recurring message sequence with custom schedules and templates.'}
@@ -363,7 +360,7 @@ export default function CreateProgram() {
             <Button
               variant="outline"
               onClick={() => navigate(-1)}
-              className="h-11 px-6 rounded-xl border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50"
+              className="h-11 px-6 rounded-xl border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold text-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800"
             >
               Cancel
             </Button>
@@ -398,24 +395,24 @@ export default function CreateProgram() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-2xl p-6 sm:p-8 transition-all duration-300 overflow-hidden"
+              className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-2xl p-6 sm:p-8 transition-all duration-300 overflow-hidden"
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 group-hover:text-green-600 transition-colors">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-slate-600 dark:text-slate-400 group-hover:text-green-600 transition-colors">
                   <ListTodo className="h-4 w-4" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Sequence Configuration</span>
+                <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Sequence Configuration</span>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div className="space-y-2.5 md:col-span-2">
-                  <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-600 ml-1">Sequence Name</Label>
+                  <Label htmlFor="name" className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">Sequence Name</Label>
                   <Input
                     id="name"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Welcome Series - Premium"
-                    className="h-11 bg-slate-50/50 border-slate-200 rounded-xl focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                    className="h-11 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                     required
                     maxLength={100}
                   />
@@ -427,22 +424,22 @@ export default function CreateProgram() {
                 </div>
 
                 <div className="space-y-2.5">
-                  <Label htmlFor="occurrenceCount" className="text-[10px] font-black uppercase tracking-widest text-slate-600 ml-1">Total Occurrences</Label>
+                  <Label htmlFor="occurrenceCount" className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">Total Occurrences</Label>
                   <Input
                     id="occurrenceCount"
                     type="number"
                     min={1}
                     value={occurrenceCount}
                     onChange={(e) => setOccurrenceCount(Number(e.target.value) || 1)}
-                    className="h-11 bg-slate-50/50 border-slate-200 rounded-xl focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                    className="h-11 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                   />
                 </div>
 
                 {isEditMode ? (
                   <div className="space-y-2.5">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-600 ml-1">Frequency</Label>
-                    <div className="h-11 px-4 flex items-center gap-2 bg-slate-100/50 border border-slate-200 rounded-xl text-slate-600 font-bold text-xs italic">
-                      <Calendar className="h-3.5 w-3.5 text-slate-600" />
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">Frequency</Label>
+                    <div className="h-11 px-4 flex items-center gap-2 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl text-slate-600 dark:text-slate-400 font-bold text-xs italic">
+                      <Calendar className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
                       {intervalUnit === 'day'
                         ? `Every ${intervalValue} day${intervalValue !== 1 ? 's' : ''}`
                         : weekdays.length > 0
@@ -453,12 +450,12 @@ export default function CreateProgram() {
                 ) : (
                   <>
                     <div className="space-y-2.5">
-                      <Label htmlFor="intervalUnit" className="text-[10px] font-black uppercase tracking-widest text-slate-600 ml-1">Interval Unit</Label>
+                      <Label htmlFor="intervalUnit" className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">Interval Unit</Label>
                       <Select value={intervalUnit} onValueChange={handleIntervalUnitChange}>
-                        <SelectTrigger id="intervalUnit" className="h-11 bg-slate-50/50 border-slate-200 rounded-xl font-medium text-sm focus:ring-green-500/20 focus:border-green-500">
+                        <SelectTrigger id="intervalUnit" className="h-11 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl font-medium text-sm focus:ring-green-500/20 focus:border-green-500">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="rounded-xl border-slate-200">
+                        <SelectContent className="rounded-xl border-slate-200 dark:border-slate-700/50">
                           {INTERVAL_UNITS.map((u) => (
                             <SelectItem key={u.value} value={u.value} className="rounded-lg py-2.5 text-sm">
                               {u.label}
@@ -471,19 +468,19 @@ export default function CreateProgram() {
                     <div className="md:col-span-2 lg:col-span-4 space-y-4 pt-2">
                       {intervalUnit === 'day' ? (
                         <div className="max-w-xs space-y-2.5">
-                          <Label htmlFor="intervalValue" className="text-[10px] font-black uppercase tracking-widest text-slate-600 ml-1">Interval (Every N Days)</Label>
+                          <Label htmlFor="intervalValue" className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">Interval (Every N Days)</Label>
                           <Input
                             id="intervalValue"
                             type="number"
                             min={1}
                             value={intervalValue}
                             onChange={(e) => setIntervalValue(Number(e.target.value) || 1)}
-                            className="h-11 bg-slate-50/50 border-slate-200 rounded-xl focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                            className="h-11 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                           />
                         </div>
                       ) : (
                         <div className="space-y-3">
-                          <Label className="text-[10px] font-black uppercase tracking-widest text-slate-600 ml-1">Select Repeat Days</Label>
+                          <Label className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">Select Repeat Days</Label>
                           <div className="flex flex-wrap gap-2.5">
                             {WEEKDAY_OPTIONS.map((opt) => (
                               <label
@@ -491,8 +488,8 @@ export default function CreateProgram() {
                                 className={`
                                   flex items-center gap-2 rounded-xl px-4 py-2 border transition-all cursor-pointer
                                   ${weekdays.includes(opt.value)
-                                    ? "bg-green-50 border-green-200 text-green-700 shadow-sm"
-                                    : "bg-slate-50/50 border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-50"}
+                                    ? "bg-green-50 dark:bg-green-950 border-green-200 text-green-700 dark:text-green-400 shadow-sm"
+                                    : "bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:border-slate-300 hover:bg-slate-50 dark:hover:bg-slate-900"}
                                 `}
                               >
                                 <Checkbox
@@ -522,13 +519,13 @@ export default function CreateProgram() {
               <div className="flex items-center justify-between px-2">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <div className="h-8 w-8 rounded-lg bg-green-50 flex items-center justify-center text-green-600 border border-green-100">
+                    <div className="h-8 w-8 rounded-lg bg-green-50 dark:bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400 border border-green-100 dark:border-green-500/20">
                       <Clock className="h-4 w-4" />
                     </div>
-                    <h3 className="text-lg font-black text-slate-900 tracking-tight">Timeline & Content</h3>
+                    <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Timeline & Content</h3>
                   </div>
-                  <p className="text-slate-600 text-[10px] font-medium ml-10">
-                    Configure message templates for each of the <span className="text-slate-900 font-bold">{totalOccurrences} scheduled occurrences</span>.
+                  <p className="text-slate-600 dark:text-slate-400 text-[10px] font-medium ml-10">
+                    Configure message templates for each of the <span className="text-slate-900 dark:text-white font-bold">{totalOccurrences} scheduled occurrences</span>.
                   </p>
                 </div>
               </div>
@@ -540,15 +537,15 @@ export default function CreateProgram() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 + occIndex * 0.05 }}
-                    className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[24px] p-6 sm:p-8 transition-all duration-300 overflow-hidden"
+                    className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[24px] p-6 sm:p-8 transition-all duration-300 overflow-hidden"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6 mb-6">
                       <div className="flex items-center gap-4">
-                        <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 group-hover:text-green-600 group-hover:bg-green-50 group-hover:border-green-100 transition-all font-black text-sm">
+                        <div className="h-10 w-10 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-slate-600 dark:text-slate-400 group-hover:text-green-600 group-hover:bg-green-50 group-hover:border-green-100 transition-all font-black text-sm">
                           {occIndex + 1}
                         </div>
                         <div>
-                          <h4 className="text-lg font-black text-slate-900 tracking-tight">
+                          <h4 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">
                             {getOccurrenceLabel(
                               intervalUnit,
                               intervalValue,
@@ -556,7 +553,7 @@ export default function CreateProgram() {
                               occIndex,
                             )}
                           </h4>
-                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 mt-0.5">Occurrence Entry</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 mt-0.5">Occurrence Entry</p>
                         </div>
                       </div>
 
@@ -573,10 +570,10 @@ export default function CreateProgram() {
                               }
                             }}
                           >
-                            <SelectTrigger className="w-[200px] h-10 bg-slate-50/50 border-slate-200 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 focus:ring-green-500/20 focus:border-green-500">
+                            <SelectTrigger className="w-[200px] h-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 focus:ring-green-500/20 focus:border-green-500">
                               <SelectValue placeholder="Copy from other day..." />
                             </SelectTrigger>
-                            <SelectContent className="rounded-xl border-slate-200">
+                            <SelectContent className="rounded-xl border-slate-200 dark:border-slate-700/50">
                               {occurrenceTimeSlots.map((_, i) => {
                                 if (i === occIndex) return null;
                                 return (
@@ -596,7 +593,7 @@ export default function CreateProgram() {
                       )}
                     </div>
 
-                    <div className="rounded-2xl bg-slate-50/30 border border-slate-100/50 p-1 transition-all group-hover:bg-white group-hover:border-slate-100">
+                    <div className="rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-5 sm:p-6 transition-all group-hover:bg-white dark:group-hover:bg-slate-900 group-hover:border-slate-100 dark:group-hover:border-slate-800">
                       <ProgramTimeSlotsEditor
                         timeSlots={slots}
                         occIndex={occIndex}

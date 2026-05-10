@@ -160,12 +160,12 @@ export default function ProjectsPage() {
       <div className="flex h-screen items-center justify-center bg-[#f8fafc]">
         <div className="flex flex-col items-center gap-4">
           <div className="relative">
-            <div className="h-12 w-12 rounded-full border-4 border-green-100 border-t-green-500 animate-spin" />
+            <div className="h-12 w-12 rounded-full border-4 border-green-100 dark:border-green-500/20 border-t-green-500 animate-spin" />
             <div className="absolute inset-0 flex items-center justify-center">
               <Globe className="h-5 w-5 text-green-500" />
             </div>
           </div>
-          <p className="text-sm font-medium text-slate-500 animate-pulse">Establishing secure connection...</p>
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400 animate-pulse">Establishing secure connection...</p>
         </div>
       </div>
     );
@@ -175,25 +175,22 @@ export default function ProjectsPage() {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 lg:p-4 xl:p-6 2xl:p-8">
       {/* Premium Header motion.div */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.02), 0 8px 10px -6px rgba(0, 0, 0, 0.02)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-1">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-xs uppercase tracking-widest mb-1">
               <LayoutGrid className="h-3.5 w-3.5" />
               WhatsApp Module
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
               Projects
             </h1>
-            <div className="flex items-center gap-2 text-slate-500 text-xs font-medium">
+            <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
               <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,181,115,0.6)]" />
               {projectsResponse?.results.length || 0} active projects
             </div>
@@ -227,7 +224,7 @@ export default function ProjectsPage() {
                     />
                   ) : (
                     <div className="flex items-center justify-center py-12">
-                      <Loader2 className="h-8 w-8 animate-spin text-green-600" />
+                      <Loader2 className="h-8 w-8 animate-spin text-green-600 dark:text-green-400" />
                     </div>
                   )}
                 </div>
@@ -246,23 +243,23 @@ export default function ProjectsPage() {
             ))}
           </div>
         ) : isProjectsError ? (
-          <div className="flex flex-col items-center justify-center py-20 bg-white rounded-[32px] border border-dashed border-red-200">
+          <div className="flex flex-col items-center justify-center py-20 bg-white dark:bg-slate-800/50 rounded-[32px] border border-dashed border-red-200">
             <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
-            <h3 className="text-xl font-bold text-slate-900">Unable to load projects</h3>
-            <p className="text-slate-500 max-w-sm text-center mt-2 font-medium">{projectsError?.message || "An unexpected error occurred while fetching your projects."}</p>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white">Unable to load projects</h3>
+            <p className="text-slate-500 dark:text-slate-400 max-w-sm text-center mt-2 font-medium">{projectsError?.message || "An unexpected error occurred while fetching your projects."}</p>
           </div>
         ) : filteredProjects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-32 bg-white/50 backdrop-blur-sm rounded-[40px] border-2 border-dashed border-slate-200">
-            <div className="h-24 w-24 rounded-3xl bg-slate-100 flex items-center justify-center mb-6">
+          <div className="flex flex-col items-center justify-center py-32 bg-white/50 backdrop-blur-sm rounded-[40px] border-2 border-dashed border-slate-200 dark:border-slate-700/50">
+            <div className="h-24 w-24 rounded-3xl bg-slate-100 dark:bg-slate-800/80 flex items-center justify-center mb-6">
               <FolderOpen className="h-12 w-12 text-slate-300" />
             </div>
-            <h3 className="text-2xl font-black text-slate-900">No projects found</h3>
-            <p className="text-slate-500 mt-2 mb-10 font-medium">
+            <h3 className="text-2xl font-black text-slate-900 dark:text-white">No projects found</h3>
+            <p className="text-slate-500 dark:text-slate-400 mt-2 mb-10 font-medium">
               {searchQuery ? `No results match "${searchQuery}"` : "Get started by creating your first WhatsApp project."}
             </p>
             <Button
               variant="outline"
-              className="rounded-2xl border-slate-200 px-10 py-6 h-auto text-base font-bold transition-all hover:bg-slate-50"
+              className="rounded-2xl border-slate-200 dark:border-slate-700/50 px-10 py-6 h-auto text-base font-bold transition-all hover:bg-slate-50 dark:hover:bg-slate-800"
               onClick={() => searchQuery ? setSearchQuery("") : setIsDialogOpen(true)}
             >
               {searchQuery ? "Clear Search" : "Create My First Project"}
@@ -285,23 +282,23 @@ export default function ProjectsPage() {
                 >
                   <div
                     onClick={() => handleSelectProject(project)}
-                    className="group relative flex flex-col bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-5 sm:p-6 transition-all duration-300 cursor-pointer overflow-hidden"
+                    className="group relative flex flex-col bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-5 sm:p-6 transition-all duration-300 cursor-pointer overflow-hidden"
                   >
                     {/* Hover Glow Effect */}
                     <div className="absolute top-0 right-0 -mr-16 -mt-16 h-40 w-40 rounded-full bg-green-500/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
 
                     <div className="flex items-start justify-between mb-4 relative z-10">
-                      <div className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-green-50 text-green-600 group-hover:bg-green-600 group-hover:text-white transition-all duration-300 shadow-sm">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-[14px] bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 group-hover:bg-green-600 group-hover:text-white transition-all duration-300 shadow-sm">
                         <MessageCircle className="h-6 w-6" />
                       </div>
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+                          <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-colors">
                             <MoreVertical className="h-5 w-5" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-2xl border-slate-200 shadow-2xl p-2 min-w-[160px]">
+                        <DropdownMenuContent align="end" className="rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-2xl p-2 min-w-[160px]">
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
@@ -317,7 +314,7 @@ export default function ProjectsPage() {
                               e.stopPropagation();
                               handleDeleteProject(project);
                             }}
-                            className="gap-3 px-4 py-3 rounded-xl text-red-600 cursor-pointer focus:text-red-600 font-medium"
+                            className="gap-3 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 cursor-pointer focus:text-red-600 font-medium"
                           >
                             <Trash2 className="h-4 w-4" />
                             <span>Delete Project</span>
@@ -327,22 +324,22 @@ export default function ProjectsPage() {
                     </div>
 
                     <div className="mb-6 relative z-10">
-                      <h3 className="text-lg font-bold text-slate-900 group-hover:text-green-700 transition-colors line-clamp-1 mb-1.5">
+                      <h3 className="text-lg font-bold text-slate-900 dark:text-white group-hover:text-green-700 transition-colors line-clamp-1 mb-1.5">
                         {project.projectName}
                       </h3>
-                      <div className="flex items-center gap-2 text-slate-500 text-xs font-semibold">
-                        <div className="px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-600 text-[9px] uppercase tracking-tighter font-black">Phone</div>
+                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-semibold">
+                        <div className="px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-400 text-[9px] uppercase tracking-tighter font-black">Phone</div>
                         <span className="font-mono tracking-tight">{project.phone || "Not Set"}</span>
                       </div>
                     </div>
 
-                    <div className="mt-auto pt-4 border-t border-slate-100 flex items-center justify-between relative z-10">
+                    <div className="mt-auto pt-4 border-t border-slate-100 dark:border-slate-700/50 flex items-center justify-between relative z-10">
                       <div className="flex items-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
                         <Calendar className="h-3 w-3" />
                         {formatDate12(project.createdAt)}
                       </div>
 
-                      <div className="flex items-center gap-1.5 text-green-600 text-xs font-black opacity-0 group-hover:opacity-100 -translate-x-3 group-hover:translate-x-0 transition-all duration-300">
+                      <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 text-xs font-black opacity-0 group-hover:opacity-100 -translate-x-3 group-hover:translate-x-0 transition-all duration-300">
                         OPEN <ArrowRight className="h-4 w-4" />
                       </div>
                     </div>
@@ -391,9 +388,9 @@ export default function ProjectsPage() {
           onPointerDownOutside={(e) => e.preventDefault()}
           showCloseButton={false}
         >
-          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white border border-slate-200">
+          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-bold text-slate-900">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                 Rename Project
               </h3>
               <button
@@ -401,7 +398,7 @@ export default function ProjectsPage() {
                 onClick={closeRenameDialog}
                 className="p-1.5 rounded-lg hover:bg-black/5 transition-colors"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
               </button>
             </div>
 
@@ -417,7 +414,7 @@ export default function ProjectsPage() {
                   value={renameProjectName}
                   onChange={(e) => setRenameProjectName(e.target.value)}
                   placeholder="Enter new project name"
-                  className="pl-9 rounded-xl border-slate-200 focus:ring-green-500/20 py-6 text-base font-medium shadow-sm bg-white"
+                  className="pl-9 rounded-xl border-slate-200 dark:border-slate-700/50 focus:ring-green-500/20 py-6 text-base font-medium shadow-sm bg-white dark:bg-slate-800/50"
                 />
               </div>
             </div>
@@ -428,7 +425,7 @@ export default function ProjectsPage() {
                 variant="outline"
                 onClick={closeRenameDialog}
                 disabled={isRenaming}
-                className="rounded-xl px-4 py-2.5 font-medium border-slate-200 text-slate-600 hover:bg-slate-50"
+                className="rounded-xl px-4 py-2.5 font-medium border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 Cancel
               </Button>

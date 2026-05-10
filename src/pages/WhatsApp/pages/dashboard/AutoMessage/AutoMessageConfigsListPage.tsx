@@ -11,25 +11,22 @@ export default function AutoMessageConfigsListPage() {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-1">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-xs uppercase tracking-widest mb-1">
               <MessageSquare className="h-3.5 w-3.5" />
               Automations
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
               Auto Message Configurations
             </h1>
-            <p className="text-slate-500 text-xs font-medium">
-              Manage automatic WhatsApp messages for <span className="text-slate-900 font-bold">Webinar Registrations</span>
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+              Manage automatic WhatsApp messages for <span className="text-slate-900 dark:text-white font-bold">Webinar Registrations</span>
             </p>
           </div>
 

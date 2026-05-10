@@ -117,7 +117,7 @@ export default function AdminActivityLogsTableShell({
               className="flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 transition-colors hover:bg-black/5 sm:flex-none"
               style={getInputStyle(isDark)}
             >
-              <Download className="h-4 w-4 text-gray-500" />
+              <Download className="h-4 w-4 text-gray-500 dark:text-slate-400" />
               <span className="hidden sm:inline">Export</span>
             </button>
           )}
@@ -127,7 +127,7 @@ export default function AdminActivityLogsTableShell({
             className="flex flex-1 items-center justify-center gap-2 rounded-xl px-4 py-2 transition-colors hover:bg-black/5 sm:flex-none"
             style={getInputStyle(isDark)}
           >
-            <Bookmark className="h-4 w-4 text-gray-500" />
+            <Bookmark className="h-4 w-4 text-gray-500 dark:text-slate-400" />
             <span className="hidden sm:inline">Presets</span>
           </button>
           <button
@@ -136,7 +136,7 @@ export default function AdminActivityLogsTableShell({
             className="flex flex-1 items-center gap-2 rounded-xl px-4 py-2 transition-colors hover:bg-black/5 sm:flex-none"
             style={getInputStyle(isDark)}
           >
-            <Filter className="h-4 w-4 text-gray-500" />
+            <Filter className="h-4 w-4 text-gray-500 dark:text-slate-400" />
             <span className="hidden sm:inline">Filters</span>
           </button>
           <button
@@ -147,9 +147,9 @@ export default function AdminActivityLogsTableShell({
             style={getInputStyle(isDark)}
           >
             {isFullscreen ? (
-              <Minimize className="h-4 w-4 text-gray-500" />
+              <Minimize className="h-4 w-4 text-gray-500 dark:text-slate-400" />
             ) : (
-              <Maximize className="h-4 w-4 text-gray-500" />
+              <Maximize className="h-4 w-4 text-gray-500 dark:text-slate-400" />
             )}
           </button>
         </div>
@@ -274,7 +274,7 @@ export default function AdminActivityLogsTableShell({
                         fontFamily: "Inter, sans-serif",
                       }}
                     >
-                      <span className={isDark ? "text-slate-100" : "text-slate-900"}>{row?.details ?? "—"}</span>
+                      <span className={isDark ? "text-slate-100" : "text-slate-900 dark:text-white"}>{row?.details ?? "—"}</span>
                     </td>
                     <td
                       className="whitespace-nowrap p-4 text-sm transition-colors"
@@ -304,7 +304,7 @@ export default function AdminActivityLogsTableShell({
         }}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
-          <div className="text-sm text-slate-500">
+          <div className="text-sm text-slate-500 dark:text-slate-400">
             {rangeTotal > 0
               ? `Showing ${Math.min(startIndex, rangeTotal)} to ${Math.min(endIndex, rangeTotal)} of ${rangeTotal} activity logs`
               : "Showing 0 to 0 of 0 activity logs"}

@@ -99,14 +99,14 @@ export default function OptedOutNumbersPage() {
 
   if (isError) {
     return (
-      <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+      <div className="min-h-full flex items-center justify-center p-8 bg-white dark:bg-slate-950 shadow-sm">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border border-red-100 dark:border-red-900/50 shadow-2xl bg-white dark:bg-slate-900">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Error Loading Numbers</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">Error Loading Numbers</AlertTitle>
+          <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
             Failed to load opted out numbers. Please check your connection and try again.
           </AlertDescription>
-          <Button onClick={() => refetch()} variant="outline" className="mt-6 w-full rounded-xl border-slate-200">
+          <Button onClick={() => refetch()} variant="outline" className="mt-6 w-full rounded-xl border-slate-200 dark:border-slate-800">
             Retry Connection
           </Button>
         </Alert>
@@ -119,24 +119,21 @@ export default function OptedOutNumbersPage() {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-900 shadow-sm dark:border-slate-800"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-1.5 text-red-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-0.5">
+            <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-0.5">
               <ShieldCheck className="h-3.5 w-3.5" />
               Compliance Management
             </div>
-            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl flex items-center gap-2">
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-2xl flex items-center gap-2">
               Opted Out Numbers
             </h1>
-            <p className="text-slate-500 text-xs font-medium">
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
               People who asked not to get messages from this number. They can text START anytime to re-subscribe.
             </p>
           </div>
@@ -151,7 +148,7 @@ export default function OptedOutNumbersPage() {
               {autoRefreshEnabled && (
                 <div className="flex items-center gap-1.5 mt-1">
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Live Sync Active</span>
+                  <span className="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">Live Sync Active</span>
                 </div>
               )}
             </div>
@@ -160,7 +157,7 @@ export default function OptedOutNumbersPage() {
               onClick={handleRefresh}
               variant="outline"
               disabled={isRefreshing || !projectId}
-              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold text-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Syncing...' : 'Sync Now'}
@@ -169,8 +166,8 @@ export default function OptedOutNumbersPage() {
             <Button
               onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
               className={`h-11 px-6 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${autoRefreshEnabled
-                ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/10'
-                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                ? 'bg-slate-900 dark:bg-green-500/10 text-white dark:text-green-400 border-slate-900 dark:border-green-500/20 shadow-slate-900/10'
+                : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
             >
               <motion.div
@@ -192,16 +189,16 @@ export default function OptedOutNumbersPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500"
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl transition-all duration-500"
         >
-          <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/30">
+          <div className="p-6 sm:p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50/30 dark:bg-slate-950/40">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div>
-                <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-                  <UserX className="h-5 w-5 text-red-600" />
+                <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+                  <UserX className="h-5 w-5 text-red-600 dark:text-red-400" />
                   Blocklist Management
                 </h2>
-                <p className="text-slate-500 text-xs font-medium mt-1">View and manage recipients who opted out of communications</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-1">View and manage recipients who opted out of communications</p>
               </div>
 
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
@@ -212,7 +209,7 @@ export default function OptedOutNumbersPage() {
                       type="date"
                       value={startDate}
                       onChange={(event) => setStartDate(event.target.value)}
-                      className="h-10 rounded-xl border-slate-200 bg-white/50 focus:bg-white text-xs font-bold"
+                      className="h-10 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:bg-white text-xs font-bold dark:[color-scheme:dark]"
                     />
                   </div>
                   <div className="space-y-1 min-w-[140px]">
@@ -221,7 +218,7 @@ export default function OptedOutNumbersPage() {
                       type="date"
                       value={endDate}
                       onChange={(event) => setEndDate(event.target.value)}
-                      className="h-10 rounded-xl border-slate-200 bg-white/50 focus:bg-white text-xs font-bold"
+                      className="h-10 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 focus:bg-white text-xs font-bold dark:[color-scheme:dark]"
                     />
                   </div>
                 </div>
@@ -231,7 +228,7 @@ export default function OptedOutNumbersPage() {
                     variant="ghost"
                     size="icon"
                     onClick={() => { setStartDate(''); setEndDate(''); }}
-                    className="h-10 w-10 mt-5 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 transition-all"
+                    className="h-10 w-10 mt-5 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
                   >
                     <X className="h-4 w-4" />
                   </Button>
@@ -243,14 +240,14 @@ export default function OptedOutNumbersPage() {
           <div className="p-4 sm:p-8">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-                <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                <div className="h-16 w-16 bg-slate-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-800">
                   <Loader2 className="h-8 w-8 animate-spin text-red-500" />
                 </div>
                 <p className="font-bold text-sm uppercase tracking-widest">Loading Records...</p>
               </div>
             ) : rows.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-24 text-slate-400 bg-slate-50/20 rounded-[20px] border border-dashed border-slate-100">
-                <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-slate-50">
+              <div className="flex flex-col items-center justify-center py-24 text-slate-400 bg-slate-50 dark:bg-slate-900/40 rounded-[20px] border border-dashed border-slate-100 dark:border-slate-800">
+                <div className="h-16 w-16 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-slate-50 dark:border-slate-800">
                   <ShieldCheck className="h-8 w-8 opacity-20" />
                 </div>
                 <p className="font-bold text-sm uppercase tracking-widest">No opted out numbers</p>
@@ -264,10 +261,10 @@ export default function OptedOutNumbersPage() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.03 }}
-                    className="group flex flex-col sm:flex-row sm:items-center gap-6 p-5 rounded-2xl border border-slate-100 bg-white hover:bg-slate-50/50 hover:border-red-400/20 hover:shadow-lg hover:shadow-slate-200/40 transition-all duration-300"
+                    className="group flex flex-col sm:flex-row sm:items-center gap-6 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 hover:border-red-400/20 transition-all duration-300"
                   >
                     {/* Number Icon */}
-                    <div className="h-12 w-12 rounded-2xl bg-red-50 border border-red-100 flex items-center justify-center text-red-600 shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform">
+                    <div className="h-12 w-12 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 flex items-center justify-center text-red-600 dark:text-red-400 shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform">
                       <Hash className="h-5 w-5" />
                     </div>
 
@@ -275,11 +272,11 @@ export default function OptedOutNumbersPage() {
                     <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 items-center">
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="outline" className="rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-none bg-red-50 text-red-600">
+                          <Badge variant="outline" className="rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-none bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400">
                             Opted Out
                           </Badge>
                         </div>
-                        <h3 className="font-black text-slate-900 text-lg tracking-tight group-hover:text-red-600 transition-colors">
+                        <h3 className="font-black text-slate-900 dark:text-white text-lg tracking-tight group-hover:text-red-600 transition-colors">
                           {item.phoneNumber}
                         </h3>
                       </div>
@@ -289,7 +286,7 @@ export default function OptedOutNumbersPage() {
                           <AlertCircle className="h-3 w-3 text-slate-400" />
                           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Reason</span>
                         </div>
-                        <p className="text-sm font-bold text-slate-600 italic">
+                        <p className="text-sm font-bold text-slate-600 dark:text-slate-400 italic">
                           {item.reason || 'No specific reason provided'}
                         </p>
                       </div>
@@ -299,7 +296,7 @@ export default function OptedOutNumbersPage() {
                           <Calendar className="h-3 w-3 text-slate-400" />
                           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Event Date</span>
                         </div>
-                        <p className="text-xs font-bold text-slate-500">
+                        <p className="text-xs font-bold text-slate-500 dark:text-slate-400">
                           {new Date(item.createdAt).toLocaleString(undefined, {
                             dateStyle: 'medium',
                             timeStyle: 'short'

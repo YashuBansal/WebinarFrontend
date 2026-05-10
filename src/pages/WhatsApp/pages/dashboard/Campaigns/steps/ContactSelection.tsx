@@ -91,22 +91,22 @@ const CampaignContactTableRow = memo(function CampaignContactTableRow({
       </TableCell>
       <TableCell>
         <div className="flex flex-col">
-          <span className="font-bold text-slate-700">{contact.firstName || "-"}</span>
+          <span className="font-bold text-slate-700 dark:text-slate-300">{contact.firstName || "-"}</span>
           <span className="text-[10px] font-medium text-slate-400 uppercase tracking-tight">First Name</span>
         </div>
       </TableCell>
       <TableCell>
         <div className="flex flex-col">
-          <span className="font-bold text-slate-700">{contact.lastName || "-"}</span>
+          <span className="font-bold text-slate-700 dark:text-slate-300">{contact.lastName || "-"}</span>
           <span className="text-[10px] font-medium text-slate-400 uppercase tracking-tight">Last Name</span>
         </div>
       </TableCell>
       <TableCell>
         <div className="flex items-center gap-2 group/info">
-          <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 group-hover/info:bg-blue-100 transition-colors">
+          <div className="h-8 w-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center shrink-0 group-hover/info:bg-blue-100 transition-colors">
             <Mail className="h-4 w-4 text-blue-500" />
           </div>
-          <span className="text-sm font-medium text-slate-600 truncate max-w-[150px]">{contact.email || "-"}</span>
+          <span className="text-sm font-medium text-slate-600 dark:text-slate-400 truncate max-w-[150px]">{contact.email || "-"}</span>
         </div>
       </TableCell>
       <TableCell>
@@ -114,14 +114,14 @@ const CampaignContactTableRow = memo(function CampaignContactTableRow({
           <div className="h-8 w-8 rounded-lg bg-[#22B573]/5 flex items-center justify-center shrink-0 group-hover/info:bg-[#22B573]/10 transition-colors">
             <Phone className="h-4 w-4 text-[#22B573]" />
           </div>
-          <span className="text-sm font-bold text-slate-700">{contact.phone || "-"}</span>
+          <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{contact.phone || "-"}</span>
         </div>
       </TableCell>
       <TableCell className="pr-4">
         {contact.tags && contact.tags.length > 0 ? (
           <div className="flex flex-wrap gap-1.5 justify-end">
             {displayTags.map((tag, index) => (
-              <Badge key={index} variant="secondary" className="bg-slate-100 text-slate-600 border-none hover:bg-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-md">
+              <Badge key={index} variant="secondary" className="bg-slate-100 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 border-none hover:bg-slate-200 text-[10px] font-bold px-2 py-0.5 rounded-md">
                 {tag}
               </Badge>
             ))}
@@ -260,7 +260,7 @@ const ContactSelection = ({
     return (
       <div className="flex flex-col items-center justify-center h-96 gap-4">
         <div className="relative">
-          <div className="h-16 w-16 rounded-full border-4 border-slate-100 border-t-[#22B573] animate-spin" />
+          <div className="h-16 w-16 rounded-full border-4 border-slate-100 dark:border-slate-700/50 border-t-[#22B573] animate-spin" />
           <Users className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-6 w-6 text-[#22B573]" />
         </div>
         <p className="text-sm font-black uppercase tracking-widest text-slate-400">Syncing Audience Data...</p>
@@ -276,7 +276,7 @@ const ContactSelection = ({
         className="w-full"
       >
         <div className="flex items-center justify-between mb-6">
-          <TabsList className="h-12 p-1 bg-slate-100 rounded-xl border border-slate-200">
+          <TabsList className="h-12 p-1 bg-slate-100 dark:bg-slate-900/60 rounded-xl border border-slate-200 dark:border-slate-700/50">
             <TabsTrigger 
               value="whatsapp" 
               className="px-6 rounded-lg font-bold text-sm data-[state=active]:bg-white data-[state=active]:text-slate-900 data-[state=active]:shadow-sm transition-all"
@@ -294,7 +294,7 @@ const ContactSelection = ({
           <div className="hidden md:flex items-center gap-4">
             <div className="flex flex-col items-end">
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Target Audience</span>
-              <span className="text-sm font-bold text-slate-900">
+              <span className="text-sm font-bold text-slate-900 dark:text-white">
                 {contactType === 'whatsapp' 
                   ? `${selectedContacts.length} / ${filteredContacts.length} Selected` 
                   : `${wlhAttendeeFilters.contactCount} Recipients`}
@@ -324,7 +324,7 @@ const ContactSelection = ({
                       placeholder="Search by name, email, or phone number..."
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
-                      className="h-12 pl-12 rounded-2xl border-slate-200 bg-slate-50/50 text-sm font-medium focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all"
+                      className="h-12 pl-12 rounded-2xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 text-sm font-medium focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all"
                     />
                   </div>
                 </div>
@@ -337,12 +337,12 @@ const ContactSelection = ({
                   >
                     <SelectTrigger 
                       id="tag-filter"
-                      className="h-12 pl-12 rounded-2xl border-slate-200 bg-slate-50/50 text-sm font-medium focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all relative group"
+                      className="h-12 pl-12 rounded-2xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 text-sm font-medium focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all relative group"
                     >
                       <Filter className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus:text-[#22B573] transition-colors" />
                       <SelectValue placeholder="All Segments" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-2xl border-slate-200 shadow-xl p-1">
+                    <SelectContent className="rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-xl p-1">
                       <SelectItem value="all" className="rounded-xl py-3 focus:bg-[#22B573]/5 focus:text-[#22B573] transition-colors">
                         <div className="flex items-center gap-2">
                           <Filter className="h-3.5 w-3.5" />
@@ -370,11 +370,11 @@ const ContactSelection = ({
 
               <div className="flex items-center justify-between px-1">
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-slate-100 flex items-center justify-center">
-                    <Users className="h-4 w-4 text-slate-500" />
+                  <div className="h-8 w-8 rounded-lg bg-slate-100 dark:bg-slate-900/60 flex items-center justify-center">
+                    <Users className="h-4 w-4 text-slate-500 dark:text-slate-400" />
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-xs font-bold text-slate-700">Database View</span>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Database View</span>
                     <span className="text-[10px] font-medium text-slate-400">
                       Showing {filteredContacts.length} matching contacts in your directory
                     </span>
@@ -395,15 +395,15 @@ const ContactSelection = ({
                 )}
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+              <div className="rounded-2xl border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/50 overflow-hidden shadow-sm">
                 {filteredContacts.length === 0 ? (
                   <div className="p-12 flex flex-col items-center justify-center text-center space-y-4">
-                    <div className="h-16 w-16 rounded-full bg-slate-50 flex items-center justify-center">
+                    <div className="h-16 w-16 rounded-full bg-slate-50 dark:bg-slate-900/50 flex items-center justify-center">
                       <Search className="h-8 w-8 text-slate-300" />
                     </div>
                     <div className="space-y-1">
-                      <p className="text-base font-bold text-slate-900">No contacts found</p>
-                      <p className="text-sm text-slate-500 max-w-[280px]">Adjust your search or filters to find the right audience for this campaign.</p>
+                      <p className="text-base font-bold text-slate-900 dark:text-white">No contacts found</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400 max-w-[280px]">Adjust your search or filters to find the right audience for this campaign.</p>
                     </div>
                   </div>
                 ) : (
@@ -412,7 +412,7 @@ const ContactSelection = ({
                     className="h-[450px] overflow-y-auto custom-scrollbar"
                   >
                     <Table>
-                      <TableHeader className="bg-slate-50/80 sticky top-0 z-10 backdrop-blur-md">
+                      <TableHeader className="bg-slate-50/80 dark:bg-slate-900/60 sticky top-0 z-10 backdrop-blur-md">
                         <TableRow className="hover:bg-transparent border-b-slate-200">
                           <TableHead className="w-12 pl-4">
                             <Checkbox
@@ -487,11 +487,11 @@ const ContactSelection = ({
           </TabsContent>
         </AnimatePresence>
 
-        <div className="flex items-center justify-between pt-8 border-t border-slate-100 mt-4">
+        <div className="flex items-center justify-between pt-8 border-t border-slate-100 dark:border-slate-700/50 mt-4">
           <Button
             variant="ghost"
             onClick={onPrevious}
-            className="h-12 px-6 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 transition-all"
+            className="h-12 px-6 rounded-xl text-slate-500 dark:text-slate-400 font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Previous Step

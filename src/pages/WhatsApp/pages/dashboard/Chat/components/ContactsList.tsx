@@ -239,7 +239,7 @@ export function ContactsList({ projectId, activePhone, onContactSelect }: Contac
 
         <div className="relative flex-shrink-0">
           <Avatar className={`h-11 w-11 md:h-13 md:w-13 border-2 transition-transform duration-300 group-hover:scale-105 ${isSelected ? 'border-teal-200' : 'border-white shadow-sm'}`}>
-            <AvatarFallback className={`${isSelected ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-500'} text-[12px] md:text-[13px] font-bold`}>
+            <AvatarFallback className={`${isSelected ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 dark:bg-slate-900/50 text-gray-500 dark:text-slate-400'} text-[12px] md:text-[13px] font-bold`}>
               {(() => {
                 const initials = getInitials(contact.name, contact.phoneNumber);
                 return initials ? initials : <User className="h-5 w-5 md:h-6 md:w-6 text-gray-400" />;
@@ -258,7 +258,7 @@ export function ContactsList({ projectId, activePhone, onContactSelect }: Contac
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-between mb-0.5 md:mb-1">
-            <h3 className={`font-bold text-[13px] md:text-[14px] truncate transition-colors ${isSelected ? 'text-teal-900' : 'text-gray-900 group-hover:text-teal-600'}`}>
+            <h3 className={`font-bold text-[13px] md:text-[14px] truncate transition-colors ${isSelected ? 'text-teal-900' : 'text-gray-900 dark:text-white group-hover:text-teal-600'}`}>
               {contact.name || contact.phoneNumber}
             </h3>
             <span className={`text-[9px] md:text-[10px] font-bold tracking-tight whitespace-nowrap ml-2 ${type === 'all' && contact.unreadCount && contact.unreadCount > 0 ? 'text-teal-600' : 'text-gray-400'}`}>
@@ -268,12 +268,12 @@ export function ContactsList({ projectId, activePhone, onContactSelect }: Contac
           <div className="flex flex-col gap-1 md:gap-1.5">
             <div className="flex items-center gap-1.5 min-w-0">
               {contact.lastMessageDirection === 'outbound' && getStatusIcon(contact.lastMessageStatus)}
-              <p className="text-[11.5px] md:text-[12.5px] text-gray-500 truncate font-medium">
+              <p className="text-[11.5px] md:text-[12.5px] text-gray-500 dark:text-slate-400 truncate font-medium">
                 {contact.lastMessagePreview || (type === 'all' ? 'New conversation' : 'Active session')}
               </p>
             </div>
             {type === 'active' && contact.timeRemaining !== undefined && (
-              <div className={`inline-flex items-center gap-1 md:gap-1.5 px-2 py-0.5 rounded-full w-fit ${contact.timeRemaining < 1000 * 60 * 60 * 2 ? 'bg-amber-100 text-amber-700' : 'bg-teal-100/50 text-teal-700'}`}>
+              <div className={`inline-flex items-center gap-1 md:gap-1.5 px-2 py-0.5 rounded-full w-fit ${contact.timeRemaining < 1000 * 60 * 60 * 2 ? 'bg-amber-100 text-amber-700 dark:text-amber-400' : 'bg-teal-100/50 text-teal-700'}`}>
                 <Clock className="h-2.5 w-2.5" />
                 <span className="text-[8px] md:text-[9px] font-extrabold uppercase tracking-widest">
                   {formatTimeRemaining(contact.timeRemaining)}
@@ -287,7 +287,7 @@ export function ContactsList({ projectId, activePhone, onContactSelect }: Contac
   };
 
   return (
-    <aside className="w-full flex-shrink-0 md:w-[380px] lg:w-[450px] flex flex-col h-full bg-white border-r border-gray-100/80 overflow-hidden shadow-[1px_0_0_0_rgba(0,0,0,0.02)]">
+    <aside className="w-full flex-shrink-0 md:w-[380px] lg:w-[450px] flex flex-col h-full bg-white dark:bg-slate-800/50 border-r border-gray-100/80 overflow-hidden shadow-[1px_0_0_0_rgba(0,0,0,0.02)]">
       {/* Sidebar Header */}
       <div className="p-4 md:p-5 flex flex-col gap-3 md:gap-4 border-b border-gray-100/50 flex-shrink-0 bg-white/50 backdrop-blur-sm">
         <div className="flex items-center justify-between">
@@ -299,10 +299,10 @@ export function ContactsList({ projectId, activePhone, onContactSelect }: Contac
               </div>
             </div>
             <div>
-              <h2 className="text-[15px] md:text-[16px] font-extrabold text-gray-900 leading-tight tracking-tight">Messages</h2>
+              <h2 className="text-[15px] md:text-[16px] font-extrabold text-gray-900 dark:text-white leading-tight tracking-tight">Messages</h2>
               <div className="flex items-center gap-1.5">
                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></div>
-                <p className="text-[10px] md:text-[11px] text-gray-500 font-semibold uppercase tracking-wider">Manage your conversation</p>
+                <p className="text-[10px] md:text-[11px] text-gray-500 dark:text-slate-400 font-semibold uppercase tracking-wider">Manage your conversation</p>
               </div>
             </div>
           </div>
@@ -334,7 +334,7 @@ export function ContactsList({ projectId, activePhone, onContactSelect }: Contac
               >
                 All Chats
                 {allPhoneNumbers && allPhoneNumbers.count > 0 && (
-                  <Badge variant="secondary" className="ml-1.5 md:ml-2 h-4 md:h-4.5 min-w-[16px] md:min-w-[18px] px-1 bg-gray-200/50 text-gray-600 border-none text-[8px] md:text-[9px]">
+                  <Badge variant="secondary" className="ml-1.5 md:ml-2 h-4 md:h-4.5 min-w-[16px] md:min-w-[18px] px-1 bg-gray-200/50 text-gray-600 dark:text-slate-400 border-none text-[8px] md:text-[9px]">
                     {allPhoneNumbers.count}
                   </Badge>
                 )}
@@ -345,7 +345,7 @@ export function ContactsList({ projectId, activePhone, onContactSelect }: Contac
               >
                 Active
                 {eligibleContacts && eligibleContacts.count > 0 && (
-                  <Badge variant="secondary" className="ml-1.5 md:ml-2 h-4 md:h-4.5 min-w-[16px] md:min-w-[18px] px-1 bg-emerald-100 text-emerald-600 border-none text-[8px] md:text-[9px]">
+                  <Badge variant="secondary" className="ml-1.5 md:ml-2 h-4 md:h-4.5 min-w-[16px] md:min-w-[18px] px-1 bg-emerald-100 text-emerald-600 dark:text-emerald-400 border-none text-[8px] md:text-[9px]">
                     {eligibleContacts.count}
                   </Badge>
                 )}
@@ -361,7 +361,7 @@ export function ContactsList({ projectId, activePhone, onContactSelect }: Contac
               </div>
             ) : processedAllContacts.length === 0 ? (
               <div className="p-8 md:p-12 text-center flex flex-col items-center gap-2 md:gap-3">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-50 flex items-center justify-center">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-50 dark:bg-slate-800/50 flex items-center justify-center">
                   <Search className="h-5 w-5 md:h-6 md:w-6 text-gray-300" />
                 </div>
                 <p className="text-[11px] md:text-xs text-gray-400 font-medium">
@@ -383,7 +383,7 @@ export function ContactsList({ projectId, activePhone, onContactSelect }: Contac
               </div>
             ) : processedEligibleContacts.length === 0 ? (
               <div className="p-8 md:p-12 text-center flex flex-col items-center gap-2 md:gap-3">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-50 flex items-center justify-center">
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gray-50 dark:bg-slate-800/50 flex items-center justify-center">
                   <Clock className="h-5 w-5 md:h-6 md:w-6 text-gray-300" />
                 </div>
                 <p className="text-[11px] md:text-xs text-gray-400 font-medium">

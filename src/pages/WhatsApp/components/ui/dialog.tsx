@@ -71,7 +71,7 @@ const DialogOverlay = React.forwardRef<
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className={cn(
-        "fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm",
+        "fixed inset-0 z-[100] bg-black/60",
         className
       )}
     />
@@ -105,7 +105,7 @@ const DialogContent = React.forwardRef<
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ type: "spring", duration: 0.4, bounce: 0 }}
                 className={cn(
-                  "bg-background pointer-events-auto relative z-[100] grid w-full max-w-lg gap-4 rounded-lg border p-6 shadow-lg",
+                  "bg-white dark:bg-slate-900 pointer-events-auto relative z-[100] grid w-full max-w-lg gap-4 rounded-lg border p-6 shadow-lg",
                   className
                 )}
               >

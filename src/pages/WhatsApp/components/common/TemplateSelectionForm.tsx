@@ -301,8 +301,8 @@ export default function TemplateSelectionForm({
             </div>
 
             {templatesLoading ? (
-              <div className="h-12 bg-slate-50 rounded-xl border border-slate-100 flex items-center px-4">
-                <Loader2 className="h-4 w-4 mr-2 animate-spin text-green-600" />
+              <div className="h-12 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-700/50 flex items-center px-4">
+                <Loader2 className="h-4 w-4 mr-2 animate-spin text-green-600 dark:text-green-400" />
                 <span className="text-sm font-medium text-slate-400">Loading templates...</span>
               </div>
             ) : (
@@ -310,22 +310,22 @@ export default function TemplateSelectionForm({
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
-                    className={`w-full justify-between h-12 bg-white border-slate-200 rounded-xl px-4 hover:bg-slate-50/50 hover:border-slate-300 transition-all ${showValidationErrors && isTemplateMissing ? "border-red-300 ring-2 ring-red-50" : ""
+                    className={`w-full justify-between h-12 bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/50 rounded-xl px-4 hover:bg-slate-50/50 hover:border-slate-300 transition-all ${showValidationErrors && isTemplateMissing ? "border-red-300 ring-2 ring-red-50" : ""
                       }`}
                   >
                     <div className="flex items-center gap-3 overflow-hidden text-left">
-                      <div className="h-6 w-6 rounded-lg bg-green-50 flex items-center justify-center text-green-600 flex-shrink-0">
+                      <div className="h-6 w-6 rounded-lg bg-green-50 dark:bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400 flex-shrink-0">
                         <FileText className="h-3.5 w-3.5" />
                       </div>
-                      <span className="truncate text-sm font-bold text-slate-900">
+                      <span className="truncate text-sm font-bold text-slate-900 dark:text-white">
                         {selectedTemplate?.name || "Choose a WhatsApp template..."}
                       </span>
                     </div>
                     <ChevronsUpDown className="h-4 w-4 text-slate-400 shrink-0" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-slate-200 shadow-2xl rounded-2xl overflow-hidden" align="start">
-                  <Command className="bg-white">
+                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-slate-200 dark:border-slate-700/50 shadow-2xl rounded-2xl overflow-hidden" align="start">
+                  <Command className="bg-white dark:bg-slate-800/50">
                     <CommandInput placeholder="Search templates..." className="h-12 border-none focus:ring-0 focus-visible:ring-0 focus-visible:outline-none" />
                     <CommandList className="max-h-[300px]">
                       <CommandEmpty className="py-6 text-center text-sm text-slate-400 font-medium">No templates found.</CommandEmpty>
@@ -338,14 +338,14 @@ export default function TemplateSelectionForm({
                               handleTemplateSelect(t);
                               setTemplatePopoverOpen(false);
                             }}
-                            className="cursor-pointer p-3 hover:bg-slate-50 transition-colors"
+                            className="cursor-pointer p-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
                           >
                             <div className="flex flex-col gap-1 w-full">
                               <div className="flex items-center justify-between">
-                                <span className="font-bold text-slate-900 text-sm">{t.name}</span>
-                                <Badge variant="secondary" className="bg-slate-100 text-slate-500 text-[10px] uppercase font-black">{t.language}</Badge>
+                                <span className="font-bold text-slate-900 dark:text-white text-sm">{t.name}</span>
+                                <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-[10px] uppercase font-black">{t.language}</Badge>
                               </div>
-                              <p className="text-xs text-slate-500 line-clamp-1 font-medium">{t.category}</p>
+                              <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 font-medium">{t.category}</p>
                             </div>
                           </CommandItem>
                         ))}
@@ -388,14 +388,14 @@ export default function TemplateSelectionForm({
                   <Button
                     type="button"
                     variant="outline"
-                    className={`w-full justify-between h-12 bg-white border-slate-200 rounded-xl px-4 hover:bg-slate-50/50 transition-all ${showValidationErrors && isMediaRequiredMissing ? "border-red-300 ring-2 ring-red-50" : ""
+                    className={`w-full justify-between h-12 bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/50 rounded-xl px-4 hover:bg-slate-50/50 transition-all ${showValidationErrors && isMediaRequiredMissing ? "border-red-300 ring-2 ring-red-50" : ""
                       }`}
                   >
                     <div className="flex items-center gap-3 truncate">
-                      <div className="h-6 w-6 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 flex-shrink-0">
+                      <div className="h-6 w-6 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400 flex-shrink-0">
                         <ImageIcon className="h-3.5 w-3.5" />
                       </div>
-                      <span className="truncate text-sm font-bold text-slate-900">
+                      <span className="truncate text-sm font-bold text-slate-900 dark:text-white">
                         {uploadedFileName || selectedMediaAsset?.fileName || `Upload ${getHeaderFormat(selectedTemplate)?.toLowerCase()}...`}
                       </span>
                     </div>
@@ -415,12 +415,12 @@ export default function TemplateSelectionForm({
 
             <div className="space-y-4">
               {selectedTemplate && variableMappings.length === 0 && (
-                <div className="p-6 rounded-2xl bg-slate-50/50 border border-slate-100 flex flex-col items-center justify-center text-center">
-                  <div className="h-10 w-10 bg-white rounded-xl border border-slate-100 flex items-center justify-center text-green-500 mb-3">
+                <div className="p-6 rounded-2xl bg-slate-50/50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/50 flex flex-col items-center justify-center text-center">
+                  <div className="h-10 w-10 bg-white dark:bg-slate-800/50 rounded-xl border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-green-500 mb-3">
                     <CheckCircle2 className="h-5 w-5" />
                   </div>
-                  <p className="text-sm font-bold text-slate-900">No variables needed</p>
-                  <p className="text-xs text-slate-500 mt-1 font-medium">This template is ready to send as-is.</p>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white">No variables needed</p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">This template is ready to send as-is.</p>
                 </div>
               )}
 
@@ -433,9 +433,9 @@ export default function TemplateSelectionForm({
                     initial={{ opacity: 0, x: -10 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    className={`p-5 rounded-2xl bg-white border transition-all duration-300 ${showValidationErrors && !isValid
+                    className={`p-5 rounded-2xl bg-white dark:bg-slate-800/50 border transition-all duration-300 ${showValidationErrors && !isValid
                         ? "border-red-200 bg-red-50/30"
-                        : "border-slate-100 hover:border-slate-200 hover:shadow-md"
+                        : "border-slate-100 dark:border-slate-700/50 hover:border-slate-200 hover:shadow-md"
                       }`}
                   >
                     <div className="flex items-center justify-between mb-4">
@@ -443,17 +443,17 @@ export default function TemplateSelectionForm({
                         <Badge className="bg-slate-900 text-white font-black text-[10px] px-2 h-5 rounded-md">
                           {vm.variable}
                         </Badge>
-                        <span className="text-xs font-bold text-slate-600 uppercase tracking-tight">Configuration</span>
+                        <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-tight">Configuration</span>
                       </div>
 
                       {allowDynamicFields && (
-                        <div className="flex items-center gap-2 px-2 py-1 bg-slate-50 rounded-lg border border-slate-100">
+                        <div className="flex items-center gap-2 px-2 py-1 bg-slate-50 dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700/50">
                           <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Dynamic</span>
                           <input
                             type="checkbox"
                             checked={isDynamic}
                             onChange={(e) => updateMapping(idx, { isDynamic: e.target.checked })}
-                            className="h-3.5 w-3.5 rounded border-slate-300 text-green-600 focus:ring-green-500 cursor-pointer"
+                            className="h-3.5 w-3.5 rounded border-slate-300 text-green-600 dark:text-green-400 focus:ring-green-500 cursor-pointer"
                           />
                         </div>
                       )}
@@ -467,7 +467,7 @@ export default function TemplateSelectionForm({
                             <PopoverTrigger asChild>
                               <Button
                                 variant="outline"
-                                className="w-full justify-between h-11 bg-slate-50/50 border-slate-200 rounded-xl px-3 hover:bg-white transition-all text-sm font-bold text-slate-700"
+                                className="w-full justify-between h-11 bg-slate-50/50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700/50 rounded-xl px-3 hover:bg-white transition-all text-sm font-bold text-slate-700 dark:text-slate-300"
                               >
                                 <div className="flex items-center gap-2">
                                   <User className="h-3.5 w-3.5 text-slate-400" />
@@ -476,7 +476,7 @@ export default function TemplateSelectionForm({
                                 <ChevronsUpDown className="h-4 w-4 text-slate-400 shrink-0" />
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-slate-200 rounded-xl overflow-hidden" align="start">
+                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-slate-200 dark:border-slate-700/50 rounded-xl overflow-hidden" align="start">
                               <Command>
                                 <CommandList>
                                   <CommandGroup>
@@ -485,9 +485,9 @@ export default function TemplateSelectionForm({
                                         key={option.value}
                                         value={option.value}
                                         onSelect={() => updateMapping(idx, { contactField: option.value })}
-                                        className="cursor-pointer p-2 font-bold text-slate-700 text-sm hover:bg-slate-50"
+                                        className="cursor-pointer p-2 font-bold text-slate-700 dark:text-slate-300 text-sm hover:bg-slate-50 dark:hover:bg-slate-800"
                                       >
-                                        <Check className={`mr-2 h-4 w-4 text-green-600 ${vm.contactField === option.value ? "opacity-100" : "opacity-0"}`} />
+                                        <Check className={`mr-2 h-4 w-4 text-green-600 dark:text-green-400 ${vm.contactField === option.value ? "opacity-100" : "opacity-0"}`} />
                                         {option.label}
                                       </CommandItem>
                                     ))}
@@ -503,7 +503,7 @@ export default function TemplateSelectionForm({
                             value={vm.fallbackValue || ""}
                             onChange={(e) => updateMapping(idx, { fallbackValue: e.target.value })}
                             placeholder="Type fallback content..."
-                            className="h-11 bg-slate-50/50 border-slate-200 rounded-xl px-4 text-sm font-medium focus:ring-green-500 focus:border-green-500 transition-all"
+                            className="h-11 bg-slate-50/50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700/50 rounded-xl px-4 text-sm font-medium focus:ring-green-500 focus:border-green-500 transition-all"
                           />
                         </div>
                       </div>
@@ -514,7 +514,7 @@ export default function TemplateSelectionForm({
                           value={vm.staticValue || ""}
                           onChange={(e) => updateMapping(idx, { staticValue: e.target.value })}
                           placeholder="Enter the value for this variable..."
-                          className="min-h-[100px] bg-slate-50/50 border-slate-200 rounded-xl p-4 text-sm font-medium focus:ring-green-500/20 focus:border-green-500 transition-all resize-none shadow-inner"
+                          className="min-h-[100px] bg-slate-50/50 dark:bg-slate-900/60 border-slate-200 dark:border-slate-700/50 rounded-xl p-4 text-sm font-medium focus:ring-green-500/20 focus:border-green-500 transition-all resize-none shadow-inner"
                         />
                       </div>
                     )}
@@ -530,10 +530,10 @@ export default function TemplateSelectionForm({
       <div className="lg:col-span-5">
         <div className="sticky top-10">
           <div className="flex items-center gap-2 mb-4">
-            <div className="h-7 w-7 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600">
+            <div className="h-7 w-7 rounded-lg bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400">
               <ImageIcon className="h-4 w-4" />
             </div>
-            <h2 className="text-sm font-black text-slate-900 uppercase tracking-widest">Real-time Preview</h2>
+            <h2 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">Real-time Preview</h2>
           </div>
 
           <div className="relative">
@@ -567,12 +567,12 @@ export default function TemplateSelectionForm({
                 })()}
               </motion.div>
             ) : (
-              <div className="h-[400px] rounded-[32px] border-4 border-dashed border-slate-200 bg-slate-50/50 flex flex-col items-center justify-center p-8 text-center">
-                <div className="h-16 w-16 bg-white rounded-3xl shadow-sm border border-slate-100 flex items-center justify-center text-slate-200 mb-4">
+              <div className="h-[400px] rounded-[32px] border-4 border-dashed border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-900/40 flex flex-col items-center justify-center p-8 text-center">
+                <div className="h-16 w-16 bg-white dark:bg-slate-800/50 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-slate-200 mb-4">
                   <FileText className="h-8 w-8" />
                 </div>
-                <p className="text-sm font-black text-slate-900 uppercase tracking-widest">No Template Selected</p>
-                <p className="text-xs text-slate-500 mt-2 font-medium">Choose a template from the list to see how it will look on your customers' phones.</p>
+                <p className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest">No Template Selected</p>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 font-medium">Choose a template from the list to see how it will look on your customers' phones.</p>
               </div>
             )}
           </div>

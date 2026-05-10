@@ -21,7 +21,7 @@ export default function Navbar() {
         <h2 className="text-xl font-semibold tracking-tight">Dashboard</h2>
       </div>
       {selectedProject && (
-        <div className="flex items-center gap-2 text-gray-600 dark:text-gray-300">
+        <div className="flex items-center gap-2 text-gray-600 dark:text-slate-400 dark:text-gray-300">
           <span className="hidden sm:inline">Project:</span>
           <strong className="truncate max-w-[120px] md:max-w-[200px]">{selectedProject.projectName}</strong>
           <Button

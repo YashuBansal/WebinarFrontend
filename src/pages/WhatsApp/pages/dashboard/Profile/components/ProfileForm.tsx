@@ -317,7 +317,7 @@ export const ProfileForm = ({
                       href={website}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sm text-blue-600 hover:underline block"
+                      className="text-sm text-blue-600 dark:text-blue-400 hover:underline block"
                     >
                       {website}
                     </a>
@@ -335,7 +335,7 @@ export const ProfileForm = ({
               type="button"
               variant="outline"
               onClick={onCancel}
-              className="h-11 px-8 rounded-xl font-bold text-slate-500 border-slate-200 hover:bg-slate-50 transition-all"
+              className="h-11 px-8 rounded-xl font-bold text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all"
             >
               Cancel
             </Button>

@@ -206,22 +206,22 @@ const CampaignDetails = () => {
   const getStatusStyles = (status: string) => {
     switch (status) {
       case 'completed':
-        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+        return 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/20';
       case 'in-progress':
-        return 'bg-blue-50 text-blue-600 border-blue-100';
+        return 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-500/20';
       case 'failed':
-        return 'bg-red-50 text-red-600 border-red-100';
+        return 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-100 dark:border-red-500/20';
       case 'draft':
-        return 'bg-slate-50 text-slate-600 border-slate-100';
+        return 'bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-400 border-slate-100 dark:border-slate-700/50';
       default:
-        return 'bg-amber-50 text-amber-600 border-amber-100';
+        return 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-500/20';
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'completed':
-        return <CheckCircle className="h-4 w-4" />;
+        return <CheckCircle className="h-4 w-4 bg-white dark:bg-slate-800/50 shadow-sm" />;
       case 'in-progress':
         return <RefreshCw className="h-4 w-4 animate-spin-slow" />;
       case 'failed':
@@ -265,7 +265,7 @@ const CampaignDetails = () => {
                   e.preventDefault();
                   if (hasPrevPage) handleReportPageChange(page - 1);
                 }}
-                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasPrevPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+                className={`rounded-xl border-slate-200 dark:border-slate-700/50 h-10 px-4 font-bold text-slate-600 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 ${!hasPrevPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
               />
             </PaginationItem>
 
@@ -277,7 +277,7 @@ const CampaignDetails = () => {
                       e.preventDefault();
                       handleReportPageChange(1);
                     }}
-                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 dark:border-slate-700/50 font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50"
                   >
                     1
                   </PaginationLink>
@@ -302,7 +302,7 @@ const CampaignDetails = () => {
                     className={`cursor-pointer h-10 w-10 rounded-xl font-bold transition-all ${
                       pageNum === page 
                         ? 'bg-[#22B573] text-white border-[#22B573] shadow-lg shadow-green-600/20' 
-                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                        : 'border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50'
                     }`}
                   >
                     {pageNum}
@@ -320,7 +320,7 @@ const CampaignDetails = () => {
                       e.preventDefault();
                       handleReportPageChange(totalPages);
                     }}
-                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 dark:border-slate-700/50 font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50"
                   >
                     {totalPages}
                   </PaginationLink>
@@ -334,7 +334,7 @@ const CampaignDetails = () => {
                   e.preventDefault();
                   if (hasNextPage) handleReportPageChange(page + 1);
                 }}
-                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasNextPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+                className={`rounded-xl border-slate-200 dark:border-slate-700/50 h-10 px-4 font-bold text-slate-600 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 ${!hasNextPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
               />
             </PaginationItem>
           </PaginationContent>
@@ -346,7 +346,7 @@ const CampaignDetails = () => {
   if (isLoading) {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center py-24 text-slate-400">
-        <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+        <div className="h-16 w-16 bg-slate-50 dark:bg-slate-900/50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-700/50">
           <Loader2 className="h-8 w-8 animate-spin text-[#22B573]" />
         </div>
         <p className="font-bold text-sm uppercase tracking-widest">Loading Details...</p>
@@ -357,10 +357,10 @@ const CampaignDetails = () => {
   if (error || !campaign) {
     return (
       <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white dark:bg-slate-800/50">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Campaign Not Found</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">Campaign Not Found</AlertTitle>
+          <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
             Failed to load campaign: {(error as any)?.response?.data?.message || 'The requested campaign could not be found.'}
           </AlertDescription>
         </Alert>
@@ -384,13 +384,10 @@ const CampaignDetails = () => {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -398,7 +395,7 @@ const CampaignDetails = () => {
               variant="ghost"
               size="icon"
               onClick={() => navigate(`/whatsapp/dashboard/${projectId}/campaigns`)}
-              className="h-10 w-10 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100 transition-all text-slate-500"
+              className="h-10 w-10 rounded-xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all text-slate-500 dark:text-slate-400"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -408,15 +405,15 @@ const CampaignDetails = () => {
                 Campaign Intel
               </div>
               <div className="flex items-center gap-3">
-                <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+                <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
                   {campaign.name}
                 </h1>
                 <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-none shadow-sm ${getStatusStyles(campaign.status)}`}>
                   {campaign.status}
                 </Badge>
               </div>
-              <p className="text-slate-500 text-xs font-medium">
-                Deep analytics for <span className="text-slate-900 font-bold">{campaign.messageTemplate.templateName}</span>
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                Deep analytics for <span className="text-slate-900 dark:text-white font-bold">{campaign.messageTemplate.templateName}</span>
               </p>
             </div>
           </div>
@@ -426,7 +423,7 @@ const CampaignDetails = () => {
               onClick={handleRefresh}
               variant="outline"
               disabled={isRefreshing}
-              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 font-bold text-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:scale-[1.02] active:scale-[0.98]"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Syncing...' : 'Sync Data'}
@@ -453,9 +450,9 @@ const CampaignDetails = () => {
             animate={{ opacity: 1, x: 0 }}
             className="lg:col-span-1 space-y-6"
           >
-            <Card className="rounded-[24px] border-slate-200 shadow-sm overflow-hidden h-full">
-              <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
-                <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+            <Card className="rounded-[24px] border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden h-full">
+              <CardHeader className="bg-slate-50/50 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-700/50 p-6">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
                   <Settings2 className="h-4 w-4 text-[#22B573]" />
                   Campaign Settings
                 </CardTitle>
@@ -470,7 +467,7 @@ const CampaignDetails = () => {
                     { label: "Scheduled For", value: campaign.scheduledAt ? formatDateTime12(campaign.scheduledAt) : 'Immediate', icon: Clock },
                   ].map((item, i) => (
                     <div key={i} className="flex items-start gap-4 group">
-                      <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-[#22B573] group-hover:border-[#22B573]/20 transition-all">
+                      <div className="h-10 w-10 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-slate-400 group-hover:text-[#22B573] group-hover:border-[#22B573]/20 transition-all">
                         <item.icon className="h-5 w-5" />
                       </div>
                       <div className="space-y-0.5">
@@ -480,7 +477,7 @@ const CampaignDetails = () => {
                             {item.value}
                           </Badge>
                         ) : (
-                          <p className="text-sm font-bold text-slate-900">{item.value}</p>
+                          <p className="text-sm font-bold text-slate-900 dark:text-white">{item.value}</p>
                         )}
                       </div>
                     </div>
@@ -509,18 +506,18 @@ const CampaignDetails = () => {
             {/* Stats Cards */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: "Total Target", value: campaign.analyticsSummary.total, icon: Users, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
-                { label: "Successfully Sent", value: campaign.analyticsSummary.sent, icon: Send, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100" },
-                { label: "Total Delivered", value: campaign.analyticsSummary.delivered, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
-                { label: "Total Read", value: campaign.analyticsSummary.read, icon: Eye, color: "text-purple-600", bg: "bg-purple-50", border: "border-purple-100" },
+                { label: "Total Target", value: campaign.analyticsSummary.total, icon: Users, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-500/10", border: "border-blue-100 dark:border-blue-500/20" },
+                { label: "Successfully Sent", value: campaign.analyticsSummary.sent, icon: Send, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-500/10", border: "border-amber-100 dark:border-amber-500/20" },
+                { label: "Total Delivered", value: campaign.analyticsSummary.delivered, icon: CheckCircle2, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-100 dark:border-emerald-500/20" },
+                { label: "Total Read", value: campaign.analyticsSummary.read, icon: Eye, color: "text-purple-600 dark:text-purple-400", bg: "bg-purple-50 dark:bg-purple-500/10", border: "border-purple-100 dark:border-purple-500/20" },
               ].map((stat, i) => (
                 <Card key={i} className={`rounded-2xl border ${stat.border} ${stat.bg} shadow-sm group hover:shadow-md transition-all duration-300`}>
                   <CardContent className="p-5 flex flex-col items-center text-center gap-3">
-                    <div className={`h-12 w-12 rounded-xl bg-white border ${stat.border} flex items-center justify-center ${stat.color} shadow-sm group-hover:scale-110 transition-transform`}>
+                    <div className={`h-12 w-12 rounded-xl bg-white dark:bg-slate-800/50 border ${stat.border} flex items-center justify-center ${stat.color} shadow-sm group-hover:scale-110 transition-transform`}>
                       <stat.icon className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">{stat.label}</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-0.5">{stat.label}</p>
                       <h4 className={`text-2xl font-black ${stat.color}`}>{stat.value}</h4>
                     </div>
                   </CardContent>
@@ -529,9 +526,9 @@ const CampaignDetails = () => {
             </div>
 
             {/* Performance Visualizer */}
-            <Card className="rounded-[24px] border-slate-200 shadow-sm overflow-hidden">
-              <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
-                <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+            <Card className="rounded-[24px] border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden">
+              <CardHeader className="bg-slate-50/50 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-700/50 p-6">
+                <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
                   <TrendingUp className="h-4 w-4 text-[#22B573]" />
                   Success Benchmarks
                 </CardTitle>
@@ -547,11 +544,11 @@ const CampaignDetails = () => {
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           <div className={`h-2 w-2 rounded-full ${metric.color}`} />
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">{metric.label}</span>
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{metric.label}</span>
                         </div>
-                        <span className="text-xl font-black text-slate-900">{metric.value}%</span>
+                        <span className="text-xl font-black text-slate-900 dark:text-white">{metric.value}%</span>
                       </div>
-                      <div className="h-3 w-full bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-3 w-full bg-slate-100 dark:bg-slate-900/60 rounded-full overflow-hidden">
                         <motion.div 
                           initial={{ width: 0 }}
                           animate={{ width: `${metric.value}%` }}
@@ -574,8 +571,8 @@ const CampaignDetails = () => {
             onClick={handleShowReport}
             className={`h-12 px-8 rounded-2xl flex items-center gap-3 font-black uppercase tracking-widest text-xs transition-all hover:scale-[1.02] active:scale-[0.98] ${
               showReport 
-                ? 'bg-slate-100 text-slate-600 hover:bg-slate-200 shadow-none' 
-                : 'bg-white border-2 border-[#22B573] text-[#22B573] hover:bg-[#22B573]/5 shadow-xl shadow-green-600/10'
+                ? 'bg-slate-100 dark:bg-slate-900/60 text-slate-600 dark:text-slate-400 hover:bg-slate-200 shadow-none' 
+                : 'bg-white dark:bg-slate-800/50 border-2 border-[#22B573] text-[#22B573] hover:bg-[#22B573]/5 shadow-xl shadow-green-600/10'
             }`}
           >
             <FileText className="h-5 w-5" />
@@ -591,18 +588,18 @@ const CampaignDetails = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 20 }}
-              className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-xl shadow-slate-200/50"
+              className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-[24px] overflow-hidden shadow-xl shadow-slate-200/50"
             >
-              <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/30 flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="p-6 sm:p-8 border-b border-slate-100 dark:border-slate-700/50 bg-slate-50/30 dark:bg-slate-800/30 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                  <h2 className="text-xl font-black text-slate-900">Message Audit Log</h2>
-                  <p className="text-slate-500 text-xs font-medium mt-1">Granular message-level delivery tracking</p>
+                  <h2 className="text-xl font-black text-slate-900 dark:text-white">Message Audit Log</h2>
+                  <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-1">Granular message-level delivery tracking</p>
                 </div>
                 <Button 
                   onClick={handleDownloadReport} 
                   variant="outline" 
                   disabled={isDownloadingReport}
-                  className="h-10 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50"
+                  className="h-10 px-6 rounded-xl flex items-center gap-2 border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-900/50"
                 >
                   {isDownloadingReport ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                   Export CSV
@@ -612,20 +609,20 @@ const CampaignDetails = () => {
               <div className="p-4 sm:p-8">
                 {messagesLoading ? (
                   <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-                    <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                    <div className="h-16 w-16 bg-slate-50 dark:bg-slate-900/50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-700/50">
                       <Loader2 className="h-8 w-8 animate-spin text-[#22B573]" />
                     </div>
                     <p className="font-bold text-sm uppercase tracking-widest">Loading Logs...</p>
                   </div>
                 ) : messagesError ? (
-                  <Alert variant="destructive" className="bg-red-50 border-red-200 rounded-2xl">
-                    <AlertCircle className="h-4 w-4 text-red-600" />
+                  <Alert variant="destructive" className="bg-red-50 dark:bg-red-500/10 border-red-200 rounded-2xl">
+                    <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                     <AlertTitle className="text-red-800 font-bold">Log Fetch Failed</AlertTitle>
                     <AlertDescription className="text-red-700 font-medium">We couldn't retrieve the message logs for this campaign.</AlertDescription>
                   </Alert>
                 ) : !campaignMessagesData || campaignMessagesData.wabaMessages.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-                    <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                    <div className="h-16 w-16 bg-slate-50 dark:bg-slate-900/50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-700/50">
                       <Search className="h-8 w-8 opacity-20" />
                     </div>
                     <p className="font-bold text-sm uppercase tracking-widest">No logs available</p>
@@ -638,15 +635,15 @@ const CampaignDetails = () => {
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
-                        className="group flex flex-col xl:flex-row xl:items-center gap-6 p-6 rounded-2xl border border-slate-100 bg-white hover:bg-slate-50/50 hover:border-[#22B573]/20 transition-all duration-300"
+                        className="group flex flex-col xl:flex-row xl:items-center gap-6 p-6 rounded-2xl border border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800/50 hover:bg-slate-50/50 hover:border-[#22B573]/20 transition-all duration-300"
                       >
                         {/* Status Icon */}
                         <div className={`h-12 w-12 rounded-xl border flex items-center justify-center shadow-sm flex-shrink-0 transition-transform group-hover:scale-105 ${
-                          message.status === 'read' ? 'bg-green-50 text-green-600 border-green-100' :
-                          message.status === 'delivered' ? 'bg-emerald-50 text-emerald-600 border-emerald-100' :
-                          message.status === 'sent' ? 'bg-blue-50 text-blue-600 border-blue-100' :
-                          message.status === 'failed' ? 'bg-red-50 text-red-600 border-red-100' :
-                          'bg-slate-50 text-slate-400 border-slate-100'
+                          message.status === 'read' ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-100 dark:border-green-500/20' :
+                          message.status === 'delivered' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/20' :
+                          message.status === 'sent' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-500/20' :
+                          message.status === 'failed' ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-100 dark:border-red-500/20' :
+                          'bg-slate-50 dark:bg-slate-900/50 text-slate-400 border-slate-100 dark:border-slate-700/50'
                         }`}>
                           {getMessageStatusIcon(message.status)}
                         </div>
@@ -656,18 +653,18 @@ const CampaignDetails = () => {
                           <div className="space-y-1">
                             <div className="flex items-center gap-2 mb-1">
                               <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-none shadow-sm ${
-                                message.status === 'read' ? 'bg-green-50 text-green-600' :
-                                message.status === 'delivered' ? 'bg-emerald-50 text-emerald-600' :
-                                message.status === 'sent' ? 'bg-blue-50 text-blue-600' :
-                                message.status === 'failed' ? 'bg-red-50 text-red-600' :
-                                'bg-slate-50 text-slate-400'
+                                message.status === 'read' ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400' :
+                                message.status === 'delivered' ? 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' :
+                                message.status === 'sent' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400' :
+                                message.status === 'failed' ? 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400' :
+                                'bg-slate-50 dark:bg-slate-900/50 text-slate-400'
                               }`}>
                                 {message.status}
                               </Badge>
                             </div>
                             <div className="flex items-center gap-2">
                               <Phone className="h-3.5 w-3.5 text-slate-400" />
-                              <h3 className="font-bold text-slate-900 text-base">{message.phoneNumber}</h3>
+                              <h3 className="font-bold text-slate-900 dark:text-white text-base">{message.phoneNumber}</h3>
                             </div>
                             <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest break-all">ID: {message.wabaMessageId || 'N/A'}</p>
                           </div>
@@ -675,41 +672,41 @@ const CampaignDetails = () => {
                           <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
                               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Created</span>
-                              <span className="text-xs font-bold text-slate-600">{formatDateTime12(message.createdAt)}</span>
+                              <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{formatDateTime12(message.createdAt)}</span>
                             </div>
                             {message.sentAt && (
                               <div className="space-y-1">
                                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block">Sent</span>
-                                <span className="text-xs font-bold text-slate-600">{formatDateTime12(message.sentAt)}</span>
+                                <span className="text-xs font-bold text-slate-600 dark:text-slate-400">{formatDateTime12(message.sentAt)}</span>
                               </div>
                             )}
                             {message.deliveredAt && (
                               <div className="space-y-1">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block text-emerald-600">Delivered</span>
-                                <span className="text-xs font-bold text-emerald-600">{formatDateTime12(message.deliveredAt)}</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block text-emerald-600 dark:text-emerald-400">Delivered</span>
+                                <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{formatDateTime12(message.deliveredAt)}</span>
                               </div>
                             )}
                             {message.readAt && (
                               <div className="space-y-1">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block text-green-600">Read</span>
-                                <span className="text-xs font-bold text-green-600">{formatDateTime12(message.readAt)}</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 block text-green-600 dark:text-green-400">Read</span>
+                                <span className="text-xs font-bold text-green-600 dark:text-green-400">{formatDateTime12(message.readAt)}</span>
                               </div>
                             )}
                           </div>
 
                           <div className="flex flex-col justify-center">
                             {message.failureReason ? (
-                              <div className="p-3 rounded-xl bg-red-50 border border-red-100 flex items-start gap-2.5">
+                              <div className="p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 flex items-start gap-2.5">
                                 <AlertCircle className="h-3.5 w-3.5 text-red-500 mt-0.5 flex-shrink-0" />
                                 <div className="min-w-0">
-                                  <p className="text-[10px] font-black text-red-600 uppercase tracking-widest leading-none mb-1">Error Trace</p>
+                                  <p className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest leading-none mb-1">Error Trace</p>
                                   <p className="text-[11px] font-medium text-red-700 leading-tight line-clamp-2">{message.failureReason}</p>
                                 </div>
                               </div>
                             ) : (
                               <div className="p-3 rounded-xl bg-emerald-50/50 border border-emerald-100/50 flex items-center gap-2.5">
                                 <Trophy className="h-3.5 w-3.5 text-emerald-500 flex-shrink-0" />
-                                <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest">No issues detected</span>
+                                <span className="text-[10px] font-black text-emerald-600 dark:text-emerald-400 uppercase tracking-widest">No issues detected</span>
                               </div>
                             )}
                           </div>

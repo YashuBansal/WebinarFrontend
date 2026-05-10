@@ -42,10 +42,10 @@ import { toastUtils } from "@/lib/utils";
 import { apiCampaignApi } from "@/api/modules/apiCampaignAPI";
 
 const getStatusStyles = (campaign?: { isDeleted?: boolean; isActive?: boolean }) => {
-  if (!campaign) return { label: "Unknown", color: "text-slate-400", bg: "bg-slate-50", border: "border-slate-100", icon: AlertCircle };
-  if (campaign.isDeleted) return { label: "Cancelled", color: "text-red-600", bg: "bg-red-50", border: "border-red-100", icon: AlertCircle };
-  if (campaign.isActive === false) return { label: "Inactive", color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100", icon: Clock };
-  return { label: "Active", color: "text-[#22B573]", bg: "bg-emerald-50", border: "border-emerald-100", icon: CheckCircle2 };
+  if (!campaign) return { label: "Unknown", color: "text-slate-400", bg: "bg-slate-50 dark:bg-slate-900/50", border: "border-slate-100 dark:border-slate-700/50", icon: AlertCircle };
+  if (campaign.isDeleted) return { label: "Cancelled", color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-500/10", border: "border-red-100 dark:border-red-500/20", icon: AlertCircle };
+  if (campaign.isActive === false) return { label: "Inactive", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-500/10", border: "border-amber-100 dark:border-amber-500/20", icon: Clock };
+  return { label: "Active", color: "text-[#22B573]", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-100 dark:border-emerald-500/20", icon: CheckCircle2 };
 };
 
 const ApiCampaignDetails = () => {
@@ -180,8 +180,8 @@ const ApiCampaignDetails = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-[400px] flex flex-col items-center justify-center py-24 text-slate-400">
-        <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+      <div className="min-h-[400px] flex flex-col items-center justify-center py-24 text-slate-400 bg-white dark:bg-slate-800/50 shadow-sm">
+        <div className="h-16 w-16 bg-slate-50 dark:bg-slate-900/50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-700/50">
           <Loader2 className="h-8 w-8 animate-spin text-[#22B573]" />
         </div>
         <p className="font-bold text-sm uppercase tracking-widest">Hydrating API Details...</p>
@@ -192,10 +192,10 @@ const ApiCampaignDetails = () => {
   if (error || !campaign) {
     return (
       <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white dark:bg-slate-800/50">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Campaign Error</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">Campaign Error</AlertTitle>
+          <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
             {error ? (error as any)?.response?.data?.message || error.message : "The requested campaign data could not be retrieved."}
           </AlertDescription>
         </Alert>
@@ -212,10 +212,7 @@ const ApiCampaignDetails = () => {
         className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -223,7 +220,7 @@ const ApiCampaignDetails = () => {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100 transition-all text-slate-500"
+                className="h-10 w-10 rounded-xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all text-slate-500 dark:text-slate-400"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
@@ -233,7 +230,7 @@ const ApiCampaignDetails = () => {
                 <Code className="h-3.5 w-3.5" />
                 API Endpoint
               </div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
                 {campaign.name}
               </h1>
               <div className="flex items-center gap-2">
@@ -251,14 +248,14 @@ const ApiCampaignDetails = () => {
           <div className="flex flex-wrap items-center gap-3">
             <div className="hidden sm:flex flex-col items-end mr-2">
               <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Last Synced</p>
-              <p className="text-xs font-bold text-slate-600">{lastRefreshTime ? lastRefreshTime.toLocaleTimeString() : "Just now"}</p>
+              <p className="text-xs font-bold text-slate-600 dark:text-slate-400">{lastRefreshTime ? lastRefreshTime.toLocaleTimeString() : "Just now"}</p>
             </div>
 
             <Button
               onClick={handleRefresh}
               variant="outline"
               disabled={isRefreshing}
-              className="h-11 px-5 rounded-xl border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+              className="h-11 px-5 rounded-xl border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 font-bold text-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:scale-[1.02] active:scale-[0.98]"
             >
               <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
               Sync
@@ -268,7 +265,7 @@ const ApiCampaignDetails = () => {
               onClick={handleDownloadReport}
               variant="outline"
               disabled={isDownloadingReport}
-              className="h-11 px-5 rounded-xl border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+              className="h-11 px-5 rounded-xl border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 font-bold text-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:scale-[1.02] active:scale-[0.98]"
             >
               {isDownloadingReport ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Download className="h-4 w-4 mr-2" />}
               Export CSV
@@ -289,19 +286,19 @@ const ApiCampaignDetails = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
         {[
-          { label: "Volume", val: analytics.total, icon: Activity, color: "text-slate-600", bg: "bg-slate-50" },
-          { label: "Dispatched", val: analytics.sent, icon: Zap, color: "text-[#22B573]", bg: "bg-emerald-50" },
-          { label: "Received", val: analytics.delivered, icon: CheckCircle2, color: "text-blue-600", bg: "bg-blue-50" },
-          { label: "Viewed", val: analytics.read, icon: TrendingUp, color: "text-indigo-600", bg: "bg-indigo-50" },
-          { label: "Actions", val: analytics.clicked, icon: Target, color: "text-amber-600", bg: "bg-amber-50" },
-          { label: "Anomalies", val: analytics.failed, icon: AlertCircle, color: "text-red-600", bg: "bg-red-50" },
+          { label: "Volume", val: analytics.total, icon: Activity, color: "text-slate-600 dark:text-slate-400", bg: "bg-slate-50 dark:bg-slate-900/50" },
+          { label: "Dispatched", val: analytics.sent, icon: Zap, color: "text-[#22B573]", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
+          { label: "Received", val: analytics.delivered, icon: CheckCircle2, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-500/10" },
+          { label: "Viewed", val: analytics.read, icon: TrendingUp, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-500/10" },
+          { label: "Actions", val: analytics.clicked, icon: Target, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-500/10" },
+          { label: "Anomalies", val: analytics.failed, icon: AlertCircle, color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-500/10" },
         ].map((stat, i) => (
           <motion.div
             key={i}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: i * 0.05 }}
-            className="rounded-[24px] border border-slate-200 bg-white p-5 hover:shadow-lg hover:shadow-slate-100 transition-all group"
+            className="rounded-2xl border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/50 p-6 hover:shadow-lg hover:shadow-slate-100 transition-all group"
           >
             <div className={`h-10 w-10 rounded-xl ${stat.bg} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
               <stat.icon className={`h-5 w-5 ${stat.color}`} />
@@ -318,9 +315,9 @@ const ApiCampaignDetails = () => {
           animate={{ opacity: 1, x: 0 }}
           className="lg:col-span-1 space-y-6"
         >
-          <Card className="rounded-[32px] border-slate-200 shadow-sm overflow-hidden h-full">
-            <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
-              <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+          <Card className="rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden h-full">
+            <CardHeader className="bg-slate-50/50 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-700/50 p-6">
+              <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
                 <Settings2 className="h-4 w-4 text-[#22B573]" />
                 Endpoint Specs
               </CardTitle>
@@ -329,13 +326,13 @@ const ApiCampaignDetails = () => {
               <div className="space-y-6">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Blueprint Template</p>
-                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 border border-slate-100 group">
-                    <div className="h-10 w-10 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-[#22B573]">
+                  <div className="flex items-center gap-3 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50 group">
+                    <div className="h-10 w-10 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-[#22B573]">
                       <MessageSquare className="h-5 w-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-black text-slate-900 truncate uppercase tracking-tight">{campaign.messageTemplate.templateName}</p>
-                      <p className="text-[10px] font-bold text-slate-500">Live Production Template</p>
+                      <p className="text-sm font-black text-slate-900 dark:text-white truncate uppercase tracking-tight">{campaign.messageTemplate.templateName}</p>
+                      <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400">Live Production Template</p>
                     </div>
                   </div>
                 </div>
@@ -343,11 +340,11 @@ const ApiCampaignDetails = () => {
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-1">
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Deployed At</p>
-                    <p className="text-xs font-bold text-slate-700">{formatDateTime12(campaign.createdAt)}</p>
+                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{formatDateTime12(campaign.createdAt)}</p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Last Mutation</p>
-                    <p className="text-xs font-bold text-slate-700">{formatDateTime12(campaign.updatedAt)}</p>
+                    <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{formatDateTime12(campaign.updatedAt)}</p>
                   </div>
                 </div>
 
@@ -360,11 +357,11 @@ const ApiCampaignDetails = () => {
                       { label: "Protocol Stability", val: analytics.total > 0 ? 100 - Math.round((analytics.failed / analytics.total) * 100) : 100, color: "bg-[#22B573]" },
                     ].map((bar, i) => (
                       <div key={i} className="space-y-1.5">
-                        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-500">
+                        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                           <span>{bar.label}</span>
                           <span>{bar.val}%</span>
                         </div>
-                        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                        <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-900/60 rounded-full overflow-hidden">
                           <motion.div
                             initial={{ width: 0 }}
                             animate={{ width: `${bar.val}%` }}
@@ -386,8 +383,8 @@ const ApiCampaignDetails = () => {
           animate={{ opacity: 1, x: 0 }}
           className="lg:col-span-2"
         >
-          <Card className="rounded-[32px] border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden h-full">
-            <CardHeader className="bg-slate-900 border-b border-slate-800 p-6 sm:p-8">
+          <Card className="rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 overflow-hidden h-full">
+            <CardHeader className="bg-slate-900 border-b border-slate-800 p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <CardTitle className="text-white text-lg font-black uppercase tracking-widest flex items-center gap-2">
@@ -403,10 +400,10 @@ const ApiCampaignDetails = () => {
                 </div>
               </div>
             </CardHeader>
-            <CardContent className="p-6 sm:p-8 space-y-8 bg-slate-950">
+            <CardContent className="p-6 space-y-8 bg-slate-950">
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">Target Endpoint (POST)</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Target Endpoint (POST)</p>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -425,7 +422,7 @@ const ApiCampaignDetails = () => {
 
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500">JSON Blueprint Payload</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">JSON Blueprint Payload</p>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -462,15 +459,15 @@ const ApiCampaignDetails = () => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
       >
-        <Card className="rounded-[32px] border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden bg-white">
-          <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6 sm:p-8">
+        <Card className="rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 overflow-hidden bg-white dark:bg-slate-800/50">
+          <CardHeader className="bg-slate-50/50 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-700/50 p-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
               <div>
-                <CardTitle className="text-lg font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+                <CardTitle className="text-lg font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
                   <History className="h-5 w-5 text-[#22B573]" />
                   Protocol Audit Log
                 </CardTitle>
-                <CardDescription className="text-slate-500 font-medium mt-1">
+                <CardDescription className="text-slate-500 dark:text-slate-400 font-medium mt-1">
                   Granular verification of every dispatched message.
                 </CardDescription>
               </div>
@@ -480,7 +477,7 @@ const ApiCampaignDetails = () => {
                   <input
                     type="text"
                     placeholder="Search phone..."
-                    className="h-10 pl-9 pr-4 rounded-xl border-slate-200 bg-white text-xs font-bold focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all w-full sm:w-48"
+                    className="h-10 pl-9 pr-4 rounded-xl border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/50 text-xs font-bold focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all w-full sm:w-48"
                   />
                 </div>
               </div>
@@ -495,22 +492,22 @@ const ApiCampaignDetails = () => {
             ) : messagesError ? (
               <div className="p-12 text-center">
                 <AlertCircle className="h-10 w-10 text-red-500 mx-auto mb-4" />
-                <p className="text-slate-900 font-black uppercase tracking-widest text-sm">Synchronize Error</p>
-                <p className="text-slate-500 text-xs font-medium mt-1">Failed to retrieve message logs. Please try manual refresh.</p>
+                <p className="text-slate-900 dark:text-white font-black uppercase tracking-widest text-sm">Synchronize Error</p>
+                <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-1">Failed to retrieve message logs. Please try manual refresh.</p>
               </div>
             ) : !campaignMessagesData || campaignMessagesData.wabaMessages.length === 0 ? (
               <div className="py-24 text-center">
-                <div className="h-20 w-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-slate-200">
+                <div className="h-20 w-20 bg-slate-50 dark:bg-slate-900/50 rounded-full flex items-center justify-center mx-auto mb-4 border border-dashed border-slate-200 dark:border-slate-700/50">
                   <LayoutGrid className="h-8 w-8 text-slate-300" />
                 </div>
-                <h3 className="text-slate-900 font-black uppercase tracking-widest text-sm">No Logs Generated</h3>
-                <p className="text-slate-500 text-xs font-medium mt-1 max-w-xs mx-auto">This campaign hasn't triggered any messages via the API endpoint yet.</p>
+                <h3 className="text-slate-900 dark:text-white font-black uppercase tracking-widest text-sm">No Logs Generated</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-1 max-w-xs mx-auto">This campaign hasn't triggered any messages via the API endpoint yet.</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <Table>
-                  <TableHeader className="bg-slate-50/50">
-                    <TableRow className="hover:bg-transparent border-slate-100">
+                  <TableHeader className="bg-slate-50/50 dark:bg-slate-900/60">
+                    <TableRow className="hover:bg-transparent border-slate-100 dark:border-slate-700/50">
                       <TableHead className="w-[180px] py-5 pl-8 text-[10px] font-black uppercase tracking-widest text-slate-400">Destination</TableHead>
                       <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Identity</TableHead>
                       <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">State</TableHead>
@@ -527,39 +524,39 @@ const ApiCampaignDetails = () => {
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: i * 0.03 }}
-                          className="group border-slate-50 hover:bg-slate-50/80 transition-colors"
+                          className="group border-slate-50 dark:border-slate-700/30 hover:bg-slate-50/80 dark:hover:bg-slate-900/40 transition-colors"
                         >
                           <TableCell className="py-4 pl-8">
                             <div className="flex items-center gap-3">
-                              <div className="h-9 w-9 rounded-xl bg-white border border-slate-100 flex items-center justify-center text-[#22B573] shadow-sm group-hover:scale-110 transition-transform">
+                              <div className="h-9 w-9 rounded-xl bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-[#22B573] shadow-sm group-hover:scale-110 transition-transform">
                                 <Zap className="h-4 w-4" />
                               </div>
-                              <span className="text-sm font-black text-slate-900 tracking-tight">{msg.phoneNumber}</span>
+                              <span className="text-sm font-black text-slate-900 dark:text-white tracking-tight">{msg.phoneNumber}</span>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <span className="text-xs font-bold text-slate-600 uppercase tracking-tight">{msg.templateName}</span>
+                            <span className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-tight">{msg.templateName}</span>
                           </TableCell>
                           <TableCell>
                             <Badge
                               variant="outline"
-                              className={`rounded-lg font-black text-[9px] uppercase tracking-widest px-2 py-0.5 border-none shadow-sm ${msg.status === "read" ? "bg-indigo-50 text-indigo-600" :
-                                  msg.status === "delivered" ? "bg-emerald-50 text-[#22B573]" :
-                                    msg.status === "sent" ? "bg-blue-50 text-blue-600" :
-                                      msg.status === "failed" ? "bg-red-50 text-red-600" : "bg-slate-50 text-slate-500"
+                              className={`rounded-lg font-black text-[9px] uppercase tracking-widest px-2 py-0.5 border-none shadow-sm ${msg.status === "read" ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" :
+                                  msg.status === "delivered" ? "bg-emerald-50 dark:bg-emerald-500/10 text-[#22B573]" :
+                                    msg.status === "sent" ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400" :
+                                      msg.status === "failed" ? "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400" : "bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400"
                                 }`}
                             >
                               {msg.status}
                             </Badge>
                           </TableCell>
                           <TableCell className="text-center">
-                            <Badge variant="outline" className="rounded-lg font-bold text-[10px] text-slate-400 border-slate-100 bg-white">
+                            <Badge variant="outline" className="rounded-lg font-bold text-[10px] text-slate-400 border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800/50">
                               {msg.messageType || "TEXT"}
                             </Badge>
                           </TableCell>
                           <TableCell>
                             <div className="flex flex-col gap-0.5">
-                              <span className="text-[11px] font-black text-slate-900 leading-none">
+                              <span className="text-[11px] font-black text-slate-900 dark:text-white leading-none">
                                 {msg.readAt ? formatDateTime12(msg.readAt) : msg.deliveredAt ? formatDateTime12(msg.deliveredAt) : formatDateTime12(msg.createdAt)}
                               </span>
                               <span className="text-[10px] font-bold text-slate-400 leading-none tracking-tight">
@@ -569,7 +566,7 @@ const ApiCampaignDetails = () => {
                           </TableCell>
                           <TableCell className="pr-8">
                             {msg.failureReason ? (
-                              <div className="flex items-center gap-1.5 text-red-600 bg-red-50 px-3 py-1 rounded-lg border border-red-100 w-fit">
+                              <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-500/10 px-3 py-1 rounded-lg border border-red-100 dark:border-red-500/20 w-fit">
                                 <AlertCircle className="h-3.5 w-3.5 shrink-0" />
                                 <span className="text-[10px] font-black uppercase tracking-tight truncate max-w-[120px]">{msg.failureReason}</span>
                               </div>
@@ -586,7 +583,7 @@ const ApiCampaignDetails = () => {
             )}
 
             {campaignMessagesData && campaignMessagesData.totalPages > 1 && (
-              <div className="p-8 border-t border-slate-100 flex justify-center">
+              <div className="p-8 border-t border-slate-100 dark:border-slate-700/50 flex justify-center">
                 <Pagination>
                   <PaginationContent className="gap-2">
                     <PaginationItem>
@@ -595,7 +592,7 @@ const ApiCampaignDetails = () => {
                           e.preventDefault();
                           if (reportPage > 1) handleReportPageChange(reportPage - 1);
                         }}
-                        className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${reportPage <= 1 ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+                        className={`rounded-xl border-slate-200 dark:border-slate-700/50 h-10 px-4 font-bold text-slate-600 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 ${reportPage <= 1 ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
                       />
                     </PaginationItem>
 
@@ -608,7 +605,7 @@ const ApiCampaignDetails = () => {
                           <PaginationLink
                             onClick={(e) => { e.preventDefault(); handleReportPageChange(pageNum); }}
                             isActive={pageNum === reportPage}
-                            className={`cursor-pointer h-10 w-10 rounded-xl font-bold transition-all ${pageNum === reportPage ? 'bg-[#22B573] text-white border-[#22B573] shadow-lg shadow-green-600/20' : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                            className={`cursor-pointer h-10 w-10 rounded-xl font-bold transition-all ${pageNum === reportPage ? 'bg-[#22B573] text-white border-[#22B573] shadow-lg shadow-green-600/20' : 'border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50'
                               }`}
                           >
                             {pageNum}
@@ -623,7 +620,7 @@ const ApiCampaignDetails = () => {
                           e.preventDefault();
                           if (reportPage < campaignMessagesData.totalPages) handleReportPageChange(reportPage + 1);
                         }}
-                        className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${reportPage >= campaignMessagesData.totalPages ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+                        className={`rounded-xl border-slate-200 dark:border-slate-700/50 h-10 px-4 font-bold text-slate-600 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 ${reportPage >= campaignMessagesData.totalPages ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
                       />
                     </PaginationItem>
                   </PaginationContent>

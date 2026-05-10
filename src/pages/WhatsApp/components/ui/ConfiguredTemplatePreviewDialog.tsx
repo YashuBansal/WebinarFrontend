@@ -52,16 +52,16 @@ export function ConfiguredTemplatePreviewDialog({
 
   const shellBorder = isDark ? "#334155" : "#e5e7eb";
   const titleColor = isDark ? "#f8fafc" : "#0f172a";
-  const footerBg = isDark ? "rgba(15,23,42,0.85)" : "#F9FAFB";
+  const footerBg = isDark ? "#0f172a" : "#F9FAFB";
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent showCloseButton={false} className="max-w-2xl p-0 overflow-hidden rounded-2xl shadow-2xl border" style={{ backgroundColor: isDark ? "#1e293b" : "#ffffff", borderColor: shellBorder }}>
+      <DialogContent showCloseButton={false} className="max-w-2xl p-0 overflow-hidden rounded-2xl shadow-2xl border" style={{ backgroundColor: isDark ? "#0f172a" : "#ffffff", borderColor: shellBorder }}>
         <div className="flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b flex-shrink-0" style={{ borderColor: shellBorder }}>
             <div className="flex items-center gap-3">
-              <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${configuredTemplate?.isActive ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
+              <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 shadow-sm ${configuredTemplate?.isActive ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-slate-50 dark:bg-slate-800 text-slate-400'}`}>
                 <MessageSquare className="w-5 h-5 shrink-0" />
               </div>
               <div>
@@ -69,11 +69,11 @@ export function ConfiguredTemplatePreviewDialog({
                   <h3 className="text-lg font-bold" style={{ fontFamily: FONT, color: titleColor }}>
                     {configuredTemplate?.configuredTemplateName || 'Template Preview'}
                   </h3>
-                  <Badge variant="outline" className={`rounded-lg px-2 py-0 h-5 text-[10px] font-black uppercase tracking-wider ${configuredTemplate?.isActive ? 'bg-green-50 text-green-600 border-green-100' : 'bg-slate-50 text-slate-400 border-slate-100'}`}>
+                  <Badge variant="outline" className={`rounded-lg px-2 py-0 h-5 text-[10px] font-black uppercase tracking-wider ${configuredTemplate?.isActive ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-100 dark:border-green-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-400 border-slate-100 dark:border-slate-700/50'}`}>
                     {configuredTemplate?.isActive ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
-                <p className="text-[10px] text-slate-500">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400">
                   Base Template: <span className="font-bold text-blue-500">{configuredTemplate?.templateName}</span>
                 </p>
               </div>
@@ -86,14 +86,14 @@ export function ConfiguredTemplatePreviewDialog({
           {/* Content */}
           <div className="p-2 space-y-1 overflow-y-auto custom-scrollbar max-h-[75vh]">
             {/* Variables Info */}
-            <div className="flex items-center gap-3 p-2 rounded-xl bg-blue-50/50 border border-blue-100/50">
-              <div className="h-8 w-8 rounded-lg bg-white flex items-center justify-center text-blue-600 shadow-sm">
+            <div className="flex items-center gap-3 p-2 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20">
+              <div className="h-8 w-8 rounded-lg bg-white dark:bg-slate-900 flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-sm border border-blue-100 dark:border-blue-500/20">
                 <Info className="h-4 w-4" />
               </div>
               <div className="flex-1">
-                <p className="text-[10px] font-bold text-blue-900 uppercase tracking-widest leading-none mb-1">Variable Mappings</p>
-                <p className="text-[10px] text-blue-700 font-medium leading-tight">
-                  This template uses {configuredTemplate?.variableMappings?.length || 0} configured variables.
+                <p className="text-[10px] font-black text-blue-900 dark:text-blue-400 uppercase tracking-widest leading-none mb-1">Variable Mappings</p>
+                <p className="text-[9px] text-blue-700 dark:text-blue-300 font-medium leading-tight">
+                  This template uses <span className="font-bold">{configuredTemplate?.variableMappings?.length || 0}</span> configured variables.
                 </p>
               </div>
             </div>
@@ -117,7 +117,7 @@ export function ConfiguredTemplatePreviewDialog({
                   />
                 ) : (
                   <div className="py-12 flex flex-col items-center justify-center text-center">
-                    <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-slate-100">
+                    <div className="h-16 w-16 bg-white dark:bg-slate-900 rounded-2xl flex items-center justify-center mb-4 shadow-sm border border-slate-100 dark:border-slate-800">
                       <Sparkles className="h-8 w-8 text-slate-200" />
                     </div>
                     <p className="text-slate-400 font-bold text-xs uppercase tracking-widest">Base Template Not Found</p>

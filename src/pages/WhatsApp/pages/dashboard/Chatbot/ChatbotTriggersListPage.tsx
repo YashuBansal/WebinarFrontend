@@ -99,25 +99,22 @@ export default function ChatbotTriggersListPage() {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-1">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-xs uppercase tracking-widest mb-1">
               <Bot className="h-3.5 w-3.5" />
               Automations
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
               Chatbot Triggers
             </h1>
-            <p className="text-slate-500 text-xs font-medium">
-              Configure keyword-based <span className="text-slate-900 font-bold">Auto Replies</span> for your WhatsApp messages
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+              Configure keyword-based <span className="text-slate-900 dark:text-white font-bold">Auto Replies</span> for your WhatsApp messages
             </p>
           </div>
 
@@ -138,7 +135,7 @@ export default function ChatbotTriggersListPage() {
       <main className="container mx-auto pb-12">
         {isLoading ? (
           <div className="flex flex-col items-center justify-center py-24 space-y-4">
-            <div className="h-12 w-12 rounded-2xl bg-green-50 flex items-center justify-center">
+            <div className="h-12 w-12 rounded-2xl bg-green-50 dark:bg-green-500/10 flex items-center justify-center">
               <div className="h-6 w-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
             </div>
             <p className="text-slate-400 text-sm font-medium animate-pulse">Fetching triggers...</p>
@@ -147,19 +144,19 @@ export default function ChatbotTriggersListPage() {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center justify-center py-24 px-4 text-center bg-white border border-dashed border-slate-200 rounded-[32px]"
+            className="flex flex-col items-center justify-center py-24 px-4 text-center bg-white dark:bg-slate-800/50 border border-dashed border-slate-200 dark:border-slate-700/50 rounded-2xl"
           >
-            <div className="h-20 w-20 rounded-3xl bg-slate-50 flex items-center justify-center mb-6">
+            <div className="h-20 w-20 rounded-3xl bg-slate-50 dark:bg-slate-900/50 flex items-center justify-center mb-6">
               <Zap className="h-10 w-10 text-slate-300" />
             </div>
-            <h3 className="text-xl font-bold text-slate-900 mb-2">No Triggers Found</h3>
-            <p className="text-slate-500 text-sm max-w-xs mb-8">
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No Triggers Found</h3>
+            <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xs mb-8">
               Start by creating your first chatbot trigger to automate your customer interactions.
             </p>
             <Link to={`/whatsapp/dashboard/${projectId}/chatbot/create`}>
               <Button
                 variant="outline"
-                className="h-11 px-8 rounded-xl font-bold text-sm hover:bg-slate-50 transition-all active:scale-95"
+                className="h-11 px-8 rounded-xl font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all active:scale-95"
               >
                 Create your first trigger
               </Button>
@@ -175,22 +172,22 @@ export default function ChatbotTriggersListPage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.95 }}
                   transition={{ delay: index * 0.05 }}
-                  className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-5 sm:p-6 transition-all duration-300 overflow-hidden"
+                  className="group relative bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-2xl p-5 sm:p-6 transition-all duration-300 overflow-hidden"
                 >
                   <div className="absolute top-0 right-0 -mr-12 -mt-12 h-32 w-32 rounded-full bg-green-500/5 blur-[40px] opacity-0 group-hover:opacity-100 transition-opacity" />
 
                   <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${trigger.enabled ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
+                        <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${trigger.enabled ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-slate-50 dark:bg-slate-900/50 text-slate-400'}`}>
                           <MessageSquare className="h-5 w-5" />
                         </div>
                         <div className="min-w-0">
                           <div className="flex items-center gap-2 mb-0.5">
-                            <h3 className="text-lg font-black text-slate-900 truncate">
+                            <h3 className="text-lg font-black text-slate-900 dark:text-white truncate">
                               &quot;{trigger.keyword}&quot;
                             </h3>
-                            <Badge variant="outline" className={`rounded-lg px-2 py-0 h-5 text-[10px] font-bold uppercase tracking-wider ${trigger.responseType === 'link' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-green-50 text-green-600 border-green-100'}`}>
+                            <Badge variant="outline" className={`rounded-lg px-2 py-0 h-5 text-[10px] font-bold uppercase tracking-wider ${trigger.responseType === 'link' ? 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-500/20' : 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-100 dark:border-green-500/20'}`}>
                               {trigger.responseType === 'link' ? (
                                 <span className="flex items-center gap-1"><ExternalLink className="h-2.5 w-2.5" /> Link</span>
                               ) : (
@@ -198,7 +195,7 @@ export default function ChatbotTriggersListPage() {
                               )}
                             </Badge>
                           </div>
-                          <p className="text-slate-500 text-xs font-medium truncate max-w-md">
+                          <p className="text-slate-500 dark:text-slate-400 text-xs font-medium truncate max-w-md">
                             Response: {preview(trigger)}
                           </p>
                         </div>
@@ -206,15 +203,15 @@ export default function ChatbotTriggersListPage() {
                     </div>
 
                     <div className="flex items-center gap-2 shrink-0">
-                      <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl p-1 gap-1">
+                      <div className="flex items-center bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50 rounded-xl p-1 gap-1">
                         <Button
                           variant="ghost"
                           size="sm"
                           onClick={() => handleToggleClick(trigger)}
                           disabled={toggling}
                           className={`h-9 px-3 rounded-lg flex items-center gap-2 font-bold text-xs transition-all ${trigger.enabled
-                            ? "bg-white text-green-600 shadow-sm border border-slate-100"
-                            : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                            ? "bg-white dark:bg-slate-800/50 text-green-600 dark:text-green-400 shadow-sm border border-slate-100 dark:border-slate-700/50"
+                            : "text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-900/60"
                             }`}
                         >
                           {trigger.enabled ? <Power className="h-3.5 w-3.5" /> : <PowerOff className="h-3.5 w-3.5" />}
@@ -225,7 +222,7 @@ export default function ChatbotTriggersListPage() {
                           <Button
                             variant="ghost"
                             size="sm"
-                            className="h-9 w-9 p-0 rounded-lg text-slate-400 hover:text-slate-900 hover:bg-slate-200/50 transition-all"
+                            className="h-9 w-9 p-0 rounded-lg text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/50 transition-all"
                           >
                             <Pencil className="h-4 w-4" />
                           </Button>
@@ -236,7 +233,7 @@ export default function ChatbotTriggersListPage() {
                           size="sm"
                           onClick={() => handleDeleteClick(trigger)}
                           disabled={deleting}
-                          className="h-9 w-9 p-0 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                          className="h-9 w-9 p-0 rounded-lg text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
@@ -280,13 +277,13 @@ export default function ChatbotTriggersListPage() {
           onPointerDownOutside={(e) => e.preventDefault()}
           showCloseButton={false}
         >
-          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white border border-slate-200">
+          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-3">
-                <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${selected?.enabled ? 'bg-orange-50 text-orange-500' : 'bg-green-50 text-green-500'}`}>
+                <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${selected?.enabled ? 'bg-orange-50 text-orange-500' : 'bg-green-50 dark:bg-green-500/10 text-green-500'}`}>
                   {selected?.enabled ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                 </div>
-                <h3 className="text-lg font-bold text-slate-900">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                   {selected?.enabled ? 'Pause' : 'Activate'} Trigger
                 </h3>
               </div>
@@ -298,13 +295,13 @@ export default function ChatbotTriggersListPage() {
                 }}
                 className="p-1.5 rounded-lg hover:bg-black/5 transition-colors"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
               </button>
             </div>
 
             <div className="mb-8">
-              <p className="text-sm font-medium text-slate-500 leading-relaxed">
-                Are you sure you want to <span className={`font-bold ${selected?.enabled ? 'text-orange-600' : 'text-green-600'}`}>{selected?.enabled ? 'pause' : 'activate'}</span> the chatbot trigger for <span className="text-slate-900 font-bold">"{selected?.keyword}"</span>?
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+                Are you sure you want to <span className={`font-bold ${selected?.enabled ? 'text-orange-600' : 'text-green-600 dark:text-green-400'}`}>{selected?.enabled ? 'pause' : 'activate'}</span> the chatbot trigger for <span className="text-slate-900 dark:text-white font-bold">"{selected?.keyword}"</span>?
               </p>
               {selected?.enabled && (
                 <div className="mt-4 p-3 rounded-xl bg-orange-50 border border-orange-100 flex items-start gap-3">
@@ -325,7 +322,7 @@ export default function ChatbotTriggersListPage() {
                   setSelected(null);
                 }}
                 disabled={toggling}
-                className="rounded-xl px-4 py-2.5 font-medium border-slate-200 text-slate-600 hover:bg-slate-50 flex-1"
+                className="rounded-xl px-4 py-2.5 font-medium border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 flex-1"
               >
                 Cancel
               </Button>

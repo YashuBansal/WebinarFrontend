@@ -295,11 +295,11 @@ const CreateCampaign = () => {
 
     if (!selectedProject) {
         return (
-            <div className="min-h-full flex items-center justify-center p-8">
-                <Alert className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+            <div className="min-h-full flex items-center justify-center p-8 bg-white dark:bg-slate-800/50 shadow-sm">
+                <Alert className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white dark:bg-slate-800/50">
                     <AlertCircle className="h-8 w-8 mb-4 text-[#22B573]" />
-                    <AlertTitle className="text-xl font-black text-slate-900 mb-2">Project Required</AlertTitle>
-                    <AlertDescription className="text-slate-500 font-medium">
+                    <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">Project Required</AlertTitle>
+                    <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
                         Please select a project from the sidebar to start building your campaign.
                     </AlertDescription>
                 </Alert>
@@ -311,13 +311,10 @@ const CreateCampaign = () => {
         <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
             {/* Premium Header */}
             <motion.div
-                className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+                className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                style={{
-                    backgroundColor: "#ffffff",
-                    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-                }}
+                
             >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
@@ -325,7 +322,7 @@ const CreateCampaign = () => {
                             variant="ghost"
                             size="icon"
                             onClick={() => navigate(`/whatsapp/dashboard/${projectId}/campaigns`)}
-                            className="h-10 w-10 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100 transition-all text-slate-500"
+                            className="h-10 w-10 rounded-xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all text-slate-500 dark:text-slate-400"
                         >
                             <ArrowLeft className="h-5 w-5" />
                         </Button>
@@ -334,22 +331,22 @@ const CreateCampaign = () => {
                                 <Sparkles className="h-3.5 w-3.5" />
                                 Campaign Architect
                             </div>
-                            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+                            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
                                 Create New Campaign
                             </h1>
-                            <p className="text-slate-500 text-xs font-medium">
+                            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
                                 Design and deploy high-impact WhatsApp campaigns in minutes.
                             </p>
                         </div>
                     </div>
 
                     {/* Progress Badge */}
-                    <div className="flex items-center gap-4 bg-slate-50 border border-slate-100 rounded-2xl px-5 py-3">
+                    <div className="flex items-center gap-4 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50 rounded-2xl px-5 py-3">
                         <div className="text-right">
                             <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 leading-none mb-1">Architecture Progress</p>
                             <p className="text-sm font-black text-[#22B573] leading-none">{Math.round((currentStep / STEPS.length) * 100)}% Complete</p>
                         </div>
-                        <div className="h-10 w-10 rounded-full border-2 border-[#22B573] border-t-slate-200 flex items-center justify-center font-black text-xs text-[#22B573] bg-white animate-spin-slow">
+                        <div className="h-10 w-10 rounded-full border-2 border-[#22B573] border-t-slate-200 flex items-center justify-center font-black text-xs text-[#22B573] bg-white dark:bg-slate-800/50 animate-spin-slow">
                             {currentStep}
                         </div>
                     </div>
@@ -363,14 +360,14 @@ const CreateCampaign = () => {
                     animate={{ opacity: 1, x: 0 }}
                     className="xl:col-span-1 space-y-6"
                 >
-                    <Card className="rounded-[24px] border-slate-200 shadow-sm overflow-hidden sticky top-6">
-                        <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
-                            <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900">Campaign Blueprint</CardTitle>
+                    <Card className="rounded-[24px] border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden sticky top-6">
+                        <CardHeader className="bg-slate-50/50 dark:bg-slate-800/50 border-b border-slate-100 p-6">
+                            <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white">Campaign Blueprint</CardTitle>
                         </CardHeader>
                         <CardContent className="p-4 sm:p-6">
                             <div className="relative space-y-2">
                                 {/* Connecting line */}
-                                <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-slate-100" />
+                                <div className="absolute left-6 top-6 bottom-6 w-0.5 bg-slate-100 dark:bg-slate-900/60" />
                                 
                                 {STEPS.map((step, index) => {
                                     const Icon = step.icon;
@@ -389,18 +386,18 @@ const CreateCampaign = () => {
                                                     ? 'bg-[#22B573] text-white shadow-lg shadow-green-600/20' 
                                                     : isActive 
                                                         ? 'bg-slate-900 text-white shadow-lg shadow-slate-900/10' 
-                                                        : 'bg-white border-2 border-slate-100 text-slate-400'
+                                                        : 'bg-white dark:bg-slate-800/50 border-2 border-slate-100 dark:border-slate-700/50 text-slate-400'
                                             }`}>
                                                 {isCompleted ? <CheckCircle2 className="h-3.5 w-3.5" /> : step.id}
                                             </div>
                                             <div className="flex-1 min-w-0">
                                                 <p className={`text-[11px] font-black uppercase tracking-widest leading-none mb-0.5 ${
-                                                    isActive ? 'text-[#22B573]' : isCompleted ? 'text-slate-900' : 'text-slate-400'
+                                                    isActive ? 'text-[#22B573]' : isCompleted ? 'text-slate-900 dark:text-white' : 'text-slate-400'
                                                 }`}>
                                                     {step.title}
                                                 </p>
                                                 <p className={`text-[10px] font-bold truncate leading-none ${
-                                                    isActive ? 'text-slate-600' : 'text-slate-400'
+                                                    isActive ? 'text-slate-600 dark:text-slate-400' : 'text-slate-400'
                                                 }`}>
                                                     {step.description}
                                                 </p>
@@ -416,9 +413,9 @@ const CreateCampaign = () => {
                                 })}
                             </div>
 
-                            <div className="mt-8 pt-6 border-t border-slate-100">
-                                <div className="p-4 rounded-2xl bg-amber-50 border border-amber-100">
-                                    <div className="flex items-center gap-2 text-amber-700 font-black text-[10px] uppercase tracking-widest mb-2">
+                            <div className="mt-8 pt-6 border-t border-slate-100 dark:border-slate-700/50">
+                                <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20">
+                                    <div className="flex items-center gap-2 text-amber-700 dark:text-amber-400 font-black text-[10px] uppercase tracking-widest mb-2">
                                         <Zap className="h-3.5 w-3.5" />
                                         Pro Tip
                                     </div>
@@ -437,18 +434,18 @@ const CreateCampaign = () => {
                     animate={{ opacity: 1, x: 0 }}
                     className="xl:col-span-3"
                 >
-                    <Card className="rounded-[32px] border-slate-200 shadow-xl shadow-slate-200/50 bg-white">
-                        <CardHeader className="bg-slate-50/30 border-b border-slate-100 px-6 sm:px-10 py-8">
+                    <Card className="rounded-[32px] border-slate-200 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 bg-white dark:bg-slate-800/50">
+                        <CardHeader className="bg-slate-50/30 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-700/50 px-6 sm:px-10 py-8">
                             <div className="flex items-center justify-between">
                                 <div className="space-y-1">
-                                    <CardTitle className="text-2xl font-black text-slate-900 tracking-tight">
+                                    <CardTitle className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
                                         {STEPS[currentStep - 1].title}
                                     </CardTitle>
-                                    <CardDescription className="text-slate-500 font-medium">
+                                    <CardDescription className="text-slate-500 dark:text-slate-400 font-medium">
                                         {STEPS[currentStep - 1].description}
                                     </CardDescription>
                                 </div>
-                                <div className="h-14 w-14 rounded-2xl bg-white border border-slate-100 shadow-sm flex items-center justify-center text-[#22B573]">
+                                <div className="h-14 w-14 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 shadow-sm flex items-center justify-center text-[#22B573]">
                                     {(() => {
                                         const Icon = STEPS[currentStep - 1].icon;
                                         return <Icon className="h-7 w-7" />;
@@ -468,7 +465,7 @@ const CreateCampaign = () => {
                             animate={{ opacity: 1, y: 0 }}
                             className="mt-6"
                         >
-                            <Alert variant="destructive" className="rounded-2xl border-none shadow-lg bg-red-50">
+                            <Alert variant="destructive" className="rounded-2xl border-none shadow-lg bg-red-50 dark:bg-red-500/10">
                                 <AlertCircle className="h-5 w-5 text-red-500" />
                                 <AlertTitle className="font-bold text-red-900">Deployment Failed</AlertTitle>
                                 <AlertDescription className="text-red-700 font-medium text-sm">

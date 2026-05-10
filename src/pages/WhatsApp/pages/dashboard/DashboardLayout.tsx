@@ -93,10 +93,10 @@ export default function DashboardLayout() {
   // Show loading while we're determining the project
   if (projectId && !selectedProject && isProjectsLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-800/50">
         <div className="flex flex-col items-center space-y-4">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-          <p className="text-sm text-gray-600">Loading project...</p>
+          <p className="text-sm text-gray-600 dark:text-slate-400">Loading project...</p>
         </div>
       </div>
     );
@@ -105,12 +105,12 @@ export default function DashboardLayout() {
   // If we have projectId but no project found after loading, show error
   if (projectId && !selectedProject && !isProjectsLoading && projectsResponse) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-800/50">
         <div className="w-full max-w-md shadow-lg border-none bg-white/90 dark:bg-gray-900/90">
           <div className="pt-6">
             <div className="text-center">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Project Not Found</h3>
-              <p className="text-gray-600 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Project Not Found</h3>
+              <p className="text-gray-600 dark:text-slate-400 mb-4">
                 The project you're looking for doesn't exist or you don't have access to it.
               </p>
               <Button onClick={() => navigate("/whatsapp")} className="w-full">

@@ -155,7 +155,7 @@ const ApiCampaignsList = () => {
   const getStatusBadge = (campaign: any) => {
     if (campaign.isDeleted) {
       return (
-        <Badge variant="outline" className="rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-red-100 bg-red-50 text-red-600 shadow-sm">
+        <Badge variant="outline" className="rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-red-100 dark:border-red-900 bg-red-50 dark:bg-red-900 text-red-600 dark:text-red-400 shadow-sm">
           Cancelled
         </Badge>
       );
@@ -163,14 +163,14 @@ const ApiCampaignsList = () => {
 
     if (campaign.isActive === false) {
       return (
-        <Badge variant="outline" className="rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-slate-100 bg-slate-50 text-slate-500 shadow-sm">
+        <Badge variant="outline" className="rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 text-slate-500 dark:text-slate-400 shadow-sm">
           Inactive
         </Badge>
       );
     }
 
     return (
-      <Badge variant="outline" className="rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-emerald-100 bg-emerald-50 text-emerald-600 shadow-sm">
+      <Badge variant="outline" className="rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-emerald-100 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900 text-emerald-600 dark:text-emerald-400 shadow-sm">
         Active
       </Badge>
     );
@@ -190,7 +190,7 @@ const ApiCampaignsList = () => {
                   e.preventDefault();
                   if (hasPrevPage) handlePageChange(currentPage - 1);
                 }}
-                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasPrevPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+                className={`rounded-xl border-slate-200 dark:border-slate-700/50 h-10 px-4 font-bold text-slate-600 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 ${!hasPrevPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
               />
             </PaginationItem>
 
@@ -202,7 +202,7 @@ const ApiCampaignsList = () => {
                       e.preventDefault();
                       handlePageChange(1);
                     }}
-                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 dark:border-slate-700/50 font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50"
                   >
                     1
                   </PaginationLink>
@@ -226,7 +226,7 @@ const ApiCampaignsList = () => {
                     isActive={pageNum === currentPage}
                     className={`cursor-pointer h-10 w-10 rounded-xl font-bold transition-all ${pageNum === currentPage
                         ? 'bg-[#22B573] text-white border-[#22B573] shadow-lg shadow-green-600/20'
-                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                        : 'border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50'
                       }`}
                   >
                     {pageNum}
@@ -244,7 +244,7 @@ const ApiCampaignsList = () => {
                       e.preventDefault();
                       handlePageChange(totalPages);
                     }}
-                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 dark:border-slate-700/50 font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50"
                   >
                     {totalPages}
                   </PaginationLink>
@@ -258,7 +258,7 @@ const ApiCampaignsList = () => {
                   e.preventDefault();
                   if (hasNextPage) handlePageChange(currentPage + 1);
                 }}
-                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasNextPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+                className={`rounded-xl border-slate-200 dark:border-slate-700/50 h-10 px-4 font-bold text-slate-600 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 ${!hasNextPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
               />
             </PaginationItem>
           </PaginationContent>
@@ -270,10 +270,10 @@ const ApiCampaignsList = () => {
   if (!selectedProject) {
     return (
       <div className="min-h-full flex items-center justify-center p-8">
-        <Alert className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+        <Alert className="max-w-md rounded-[32px] p-8 border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900">
           <AlertCircle className="h-8 w-8 mb-4 text-[#22B573]" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Project Required</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">Project Required</AlertTitle>
+          <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
             Please select a project from the sidebar to view your API campaigns.
           </AlertDescription>
         </Alert>
@@ -284,7 +284,7 @@ const ApiCampaignsList = () => {
   if (isLoading) {
     return (
       <div className="min-h-[400px] flex flex-col items-center justify-center py-24 text-slate-400">
-        <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+        <div className="h-16 w-16 bg-slate-50 dark:bg-slate-900 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-800">
           <Loader2 className="h-8 w-8 animate-spin text-[#22B573]" />
         </div>
         <p className="font-bold text-sm uppercase tracking-widest">Initializing API Hub...</p>
@@ -295,10 +295,10 @@ const ApiCampaignsList = () => {
   if (error) {
     return (
       <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border border-red-100 dark:border-red-900/50 shadow-2xl bg-white dark:bg-slate-900">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Connection Error</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">Connection Error</AlertTitle>
+          <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
             Failed to load API campaigns: {(error as any)?.response?.data?.message || error.message}
           </AlertDescription>
         </Alert>
@@ -312,13 +312,10 @@ const ApiCampaignsList = () => {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200 p-4 sm:p-5 bg-white dark:bg-slate-900 shadow-sm dark:border-slate-800"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -327,10 +324,10 @@ const ApiCampaignsList = () => {
                 <Sparkles className="h-3.5 w-3.5" />
                 API Hub
               </div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
                 API Campaigns
               </h1>
-              <p className="text-slate-500 text-xs font-medium">
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
                 Programmatically triggered template messaging hub.
               </p>
             </div>
@@ -346,7 +343,7 @@ const ApiCampaignsList = () => {
               {autoRefreshEnabled && (
                 <div className="flex items-center gap-1.5 mt-1">
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Live Sync Active</span>
+                  <span className="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">Live Sync Active</span>
                 </div>
               )}
             </div>
@@ -355,7 +352,7 @@ const ApiCampaignsList = () => {
               onClick={handleRefresh}
               variant="outline"
               disabled={isRefreshing}
-              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold text-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Syncing...' : 'Sync Now'}
@@ -365,8 +362,8 @@ const ApiCampaignsList = () => {
               onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
               className={`h-11 px-6 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${
                 autoRefreshEnabled 
-                  ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/10' 
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  ? 'bg-slate-900 dark:bg-green-900/50 text-white dark:text-green-400 border-slate-900 dark:border-green-500 shadow-slate-900/10' 
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
               <motion.div
@@ -395,14 +392,14 @@ const ApiCampaignsList = () => {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center justify-center py-24 px-8 border border-dashed border-slate-200 rounded-[32px] bg-slate-50/50 text-center space-y-6"
+            className="flex flex-col items-center justify-center py-24 px-8 border border-dashed border-slate-200 dark:border-slate-800 rounded-[32px] bg-slate-50 dark:bg-slate-950 text-center space-y-6"
           >
-            <div className="h-24 w-24 bg-white rounded-3xl flex items-center justify-center shadow-xl shadow-slate-200/50">
+            <div className="h-24 w-24 bg-white dark:bg-slate-800/50 rounded-3xl flex items-center justify-center shadow-xl shadow-slate-200/50">
               <Sparkles className="h-12 w-12 text-[#22B573]" />
             </div>
             <div className="space-y-2">
-              <h3 className="text-2xl font-black text-slate-900 tracking-tight">No API Campaigns Found</h3>
-              <p className="text-slate-500 text-sm font-medium max-w-sm mx-auto">
+              <h3 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">No API Campaigns Found</h3>
+              <p className="text-slate-500 dark:text-slate-400 text-sm font-medium max-w-sm mx-auto">
                 Trigger high-volume template sends directly from your own systems via our robust API interface.
               </p>
             </div>
@@ -422,11 +419,11 @@ const ApiCampaignsList = () => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ delay: index * 0.05 }}
-                  className="group relative flex flex-col h-full rounded-[24px] border border-slate-200 bg-white p-5 hover:border-[#22B573]/30 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300"
+                  className="group relative flex flex-col h-full rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 hover:shadow-xl transition-all duration-300"
                 >
                   {/* Status Indicator */}
                   <div className="flex items-center justify-between mb-4">
-                    <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-[#22B573] group-hover:bg-[#22B573]/5 group-hover:border-[#22B573]/20 transition-all duration-300">
+                    <div className="h-10 w-10 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-slate-400 group-hover:text-[#22B573] group-hover:bg-[#22B573]/5 group-hover:border-[#22B573]/20 transition-all duration-300">
                       <Target className="h-5 w-5" />
                     </div>
                     {getStatusBadge(campaign)}
@@ -435,26 +432,26 @@ const ApiCampaignsList = () => {
                   {/* Body */}
                   <div className="flex-1 space-y-4">
                     <div className="space-y-1">
-                      <h3 className="text-lg font-black text-slate-900 tracking-tight group-hover:text-[#22B573] transition-colors line-clamp-1">
+                      <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight group-hover:text-[#22B573] transition-colors line-clamp-1">
                         {campaign.name}
                       </h3>
                       <div className="flex items-center gap-2">
                         <MessageSquare className="h-3.5 w-3.5 text-slate-400" />
-                        <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider truncate">
+                        <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider truncate">
                           {campaign.messageTemplate.templateName}
                         </span>
                       </div>
                     </div>
 
                     {/* Metadata Grid */}
-                    <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100">
+                    <div className="grid grid-cols-2 gap-3 pt-4 border-t border-slate-100 dark:border-slate-700/50">
                       <div className="space-y-0.5">
                         <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Created</p>
-                        <p className="text-[11px] font-bold text-slate-600">{campaign.createdAt ? formatDate12(campaign.createdAt) : "—"}</p>
+                        <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400">{campaign.createdAt ? formatDate12(campaign.createdAt) : "—"}</p>
                       </div>
                       <div className="space-y-0.5">
                         <p className="text-[9px] font-black uppercase tracking-widest text-slate-400">Parameters</p>
-                        <p className="text-[11px] font-bold text-slate-600">
+                        <p className="text-[11px] font-bold text-slate-600 dark:text-slate-400">
                           {campaign.messageTemplate.bodyVariables?.length || 0} Variable(s)
                         </p>
                       </div>
@@ -470,7 +467,7 @@ const ApiCampaignsList = () => {
                       <Button
                         variant="outline"
                         disabled={campaign.isDeleted}
-                        className="w-full h-10 rounded-xl border-slate-100 bg-slate-50/50 text-slate-600 font-bold text-xs uppercase tracking-widest hover:bg-[#22B573] hover:text-white hover:border-[#22B573] transition-all duration-300 disabled:opacity-30"
+                        className="w-full h-10 rounded-xl border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 text-slate-600 dark:text-slate-400 font-bold text-xs uppercase tracking-widest hover:bg-[#22B573] hover:text-white hover:border-[#22B573] transition-all duration-300 disabled:opacity-30"
                       >
                         <Eye className="h-3.5 w-3.5 mr-2" />
                         Explore
@@ -482,7 +479,7 @@ const ApiCampaignsList = () => {
                         size="icon"
                         onClick={() => handleCancelApiCampaign(campaign._id)}
                         disabled={deleteApiCampaignMutation.isPending}
-                        className="h-10 w-10 rounded-xl border-slate-100 bg-slate-50/50 text-slate-400 hover:text-red-600 hover:bg-red-50 hover:border-red-100 transition-all duration-300"
+                        className="h-10 w-10 rounded-xl border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:border-red-100 transition-all duration-300"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

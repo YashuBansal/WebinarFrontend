@@ -229,7 +229,7 @@ export function ChatWindow({
 
         {/* Template Form - Bottom-anchored overlay (grows up to header, then scrolls) */}
         {showTemplateForm && (
-          <div className="absolute bottom-0 left-0 right-0 max-h-full bg-white z-50 overflow-y-auto animate-in slide-in-from-bottom-4 duration-300 shadow-[0_-12px_40px_rgba(0,0,0,0.15)] border-t border-gray-100">
+          <div className="absolute bottom-0 left-0 right-0 max-h-full bg-white dark:bg-slate-800/50 z-50 overflow-y-auto animate-in slide-in-from-bottom-4 duration-300 shadow-[0_-12px_40px_rgba(0,0,0,0.15)] border-t border-gray-100 dark:border-slate-700/50">
             <TemplateForm
               templates={templates}
               mediaAssetsData={mediaAssetsData}

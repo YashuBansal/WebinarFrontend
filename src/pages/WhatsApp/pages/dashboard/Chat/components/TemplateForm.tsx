@@ -141,12 +141,12 @@ export function TemplateForm({
   };
 
   return (
-    <div className="flex flex-col bg-white overflow-hidden">
+    <div className="flex flex-col bg-white dark:bg-slate-800/50 overflow-hidden">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+      <div className="px-6 py-4 border-b border-gray-100 dark:border-slate-700/50 flex items-center justify-between bg-gray-50/50">
         <div>
-          <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider">Send Template</h3>
-          <p className="text-[11px] text-gray-500 font-medium">Choose a template and fill required variables</p>
+          <h3 className="text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">Send Template</h3>
+          <p className="text-[11px] text-gray-500 dark:text-slate-400 font-medium">Choose a template and fill required variables</p>
         </div>
         <Button variant="ghost" size="icon" onClick={onCancel} className="h-8 w-8 rounded-full">
           <X className="h-4 w-4" />
@@ -159,10 +159,10 @@ export function TemplateForm({
           <Label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">WABA Template</Label>
           <Popover open={isDropdownOpen} onOpenChange={setIsDropdownOpen}>
             <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full justify-between h-12 px-4 border-gray-200 hover:border-teal-500/50 hover:bg-teal-50/10 transition-all rounded-xl">
+              <Button variant="outline" className="w-full justify-between h-12 px-4 border-gray-200 dark:border-slate-700/50 hover:border-teal-500/50 hover:bg-teal-50/10 transition-all rounded-xl">
                 {selectedTemplate ? (
                   <div className="flex flex-col items-start">
-                    <span className="font-semibold text-gray-700">{selectedTemplate.name}</span>
+                    <span className="font-semibold text-gray-700 dark:text-slate-300">{selectedTemplate.name}</span>
                     <span className="text-[10px] text-gray-400 uppercase">{selectedTemplate.language} • {selectedTemplate.category}</span>
                   </div>
                 ) : (
@@ -172,7 +172,7 @@ export function TemplateForm({
               </Button>
             </PopoverTrigger>
             <PopoverContent 
-              className="w-[var(--radix-popover-trigger-width)] p-0 shadow-2xl border-gray-100 rounded-2xl overflow-hidden z-[100]" 
+              className="w-[var(--radix-popover-trigger-width)] p-0 shadow-2xl border-gray-100 dark:border-slate-700/50 rounded-2xl overflow-hidden z-[100]" 
               align="start"
               side="top"
               sideOffset={8}
@@ -191,7 +191,7 @@ export function TemplateForm({
                       >
                         <Check className={`mr-2 h-4 w-4 text-teal-600 ${selectedTemplate?.name === t.name ? 'opacity-100' : 'opacity-0'}`} />
                         <div className="flex flex-col">
-                          <span className="font-bold text-sm text-gray-700">{t.name}</span>
+                          <span className="font-bold text-sm text-gray-700 dark:text-slate-300">{t.name}</span>
                           <span className="text-[10px] text-gray-400 uppercase font-bold tracking-tight">{t.category} • {t.language}</span>
                         </div>
                       </CommandItem>
@@ -224,7 +224,7 @@ export function TemplateForm({
                     fileType={getHeaderFormat()}
                     title={`Select ${getHeaderFormat()} File`}
                   >
-                    <Button variant="outline" className="w-full justify-start h-12 rounded-xl border-dashed border-2 hover:border-teal-500/50 hover:bg-teal-50/5 text-gray-500 transition-all">
+                    <Button variant="outline" className="w-full justify-start h-12 rounded-xl border-dashed border-2 hover:border-teal-500/50 hover:bg-teal-50/5 text-gray-500 dark:text-slate-400 transition-all">
                       <Image className="h-4 w-4 mr-2 text-teal-500" />
                       {selectedMediaAsset ? selectedMediaAsset.fileName : `Pick a ${getHeaderFormat()?.toLowerCase()}...`}
                     </Button>
@@ -243,13 +243,13 @@ export function TemplateForm({
                   <div className="grid gap-4">
                     {bodyVariables.map((_, idx) => (
                       <div key={idx} className="space-y-1.5 group">
-                        <Label htmlFor={`var-${idx}`} className="text-[10px] font-bold text-gray-500 ml-1 group-focus-within:text-teal-600 transition-colors">
+                        <Label htmlFor={`var-${idx}`} className="text-[10px] font-bold text-gray-500 dark:text-slate-400 ml-1 group-focus-within:text-teal-600 transition-colors">
                           Variable {'{{'}{extractVariables(selectedTemplate.components.find((c: any) => c.type?.toUpperCase() === 'BODY')?.text || '')[idx]}{'}}'}
                         </Label>
                         <Input
                           id={`var-${idx}`}
                           placeholder="Type value here..."
-                          className="h-12 rounded-xl border-gray-200 focus:ring-4 focus:ring-teal-500/5 focus:border-teal-500 transition-all"
+                          className="h-12 rounded-xl border-gray-200 dark:border-slate-700/50 focus:ring-4 focus:ring-teal-500/5 focus:border-teal-500 transition-all"
                           value={bodyVariables[idx]}
                           onChange={(e) => {
                             const newVars = [...bodyVariables];
@@ -261,9 +261,9 @@ export function TemplateForm({
                     ))}
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-100 rounded-2xl bg-gray-50/30 animate-in fade-in zoom-in-95 duration-300">
+                  <div className="flex flex-col items-center justify-center p-8 border-2 border-dashed border-gray-100 dark:border-slate-700/50 rounded-2xl bg-gray-50/30 animate-in fade-in zoom-in-95 duration-300">
                     <p className="text-[11px] font-bold text-gray-400 uppercase tracking-widest text-center">No variables required</p>
-                    <p className="text-[10px] text-gray-500 mt-1 text-center">This template has no placeholders to fill.</p>
+                    <p className="text-[10px] text-gray-500 dark:text-slate-400 mt-1 text-center">This template has no placeholders to fill.</p>
                   </div>
                 )}
               </div>
@@ -272,10 +272,10 @@ export function TemplateForm({
             {/* Right Column: Real-time Preview */}
             <div className="space-y-3">
               <Label className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Message Preview</Label>
-              <div className="bg-[#efeae2] rounded-2xl p-6 shadow-inner border border-gray-200 min-h-[160px] relative overflow-hidden flex items-start justify-start">
+              <div className="bg-[#efeae2] rounded-2xl p-6 shadow-inner border border-gray-200 dark:border-slate-700/50 min-h-[160px] relative overflow-hidden flex items-start justify-start">
                 {/* Mock Chat Bubble */}
-                <div className="bg-white rounded-2xl rounded-tl-none p-4 shadow-md max-w-[90%] border border-gray-100 z-10 relative animate-in zoom-in-95 duration-300">
-                  <p className="text-[14px] leading-relaxed text-gray-800 whitespace-pre-wrap">{previewText}</p>
+                <div className="bg-white dark:bg-slate-800/50 rounded-2xl rounded-tl-none p-4 shadow-md max-w-[90%] border border-gray-100 dark:border-slate-700/50 z-10 relative animate-in zoom-in-95 duration-300">
+                  <p className="text-[14px] leading-relaxed text-gray-800 dark:text-slate-200 whitespace-pre-wrap">{previewText}</p>
                 </div>
                 {/* WhatsApp Pattern Overlay */}
                 <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-repeat bg-[url('/whatsapp-bg.png')] z-0" style={{ backgroundSize: '300px' }}></div>
@@ -286,8 +286,8 @@ export function TemplateForm({
       </div>
 
       {/* Footer Buttons */}
-      <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex gap-3 justify-end items-center">
-        <Button variant="ghost" onClick={onCancel} className="rounded-xl font-bold text-gray-500 uppercase tracking-widest text-[10px] hover:bg-gray-200/50">
+      <div className="px-6 py-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-100 dark:border-slate-700/50 flex gap-3 justify-end items-center">
+        <Button variant="ghost" onClick={onCancel} className="rounded-xl font-bold text-gray-500 dark:text-slate-400 uppercase tracking-widest text-[10px] hover:bg-gray-200/50">
           Cancel
         </Button>
         <Button

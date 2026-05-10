@@ -138,11 +138,11 @@ export default function ProgramDetails() {
 
   if (!programId || !selectedProject) {
     return (
-      <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+      <div className="min-h-full flex items-center justify-center p-8 bg-white dark:bg-slate-950 shadow-sm">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border border-red-100 dark:border-red-900/50 shadow-2xl bg-white dark:bg-slate-900">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Missing Context</AlertTitle>
-          <AlertDescription className="text-slate-600 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">Missing Context</AlertTitle>
+          <AlertDescription className="text-slate-600 dark:text-slate-400 font-medium">
             Please select a project and a valid sequence to view details.
           </AlertDescription>
         </Alert>
@@ -155,10 +155,10 @@ export default function ProgramDetails() {
       <div className="min-h-[400px] flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <div className="relative">
-            <div className="h-12 w-12 rounded-full border-4 border-green-100 border-t-green-500 animate-spin" />
+            <div className="h-12 w-12 rounded-full border-4 border-green-100 dark:border-green-500/20 border-t-green-500 animate-spin" />
             <Loader2 className="h-6 w-6 text-green-500 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 animate-pulse" />
           </div>
-          <p className="text-slate-600 font-bold text-xs uppercase tracking-widest animate-pulse">Loading sequence details...</p>
+          <p className="text-slate-600 dark:text-slate-400 font-bold text-xs uppercase tracking-widest animate-pulse">Loading sequence details...</p>
         </div>
       </div>
     );
@@ -167,14 +167,14 @@ export default function ProgramDetails() {
   if (programError || !program) {
     return (
       <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border border-red-100 dark:border-red-900/50 shadow-2xl bg-white dark:bg-slate-900">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Error Loading Sequence</AlertTitle>
-          <AlertDescription className="text-slate-600 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">Error Loading Sequence</AlertTitle>
+          <AlertDescription className="text-slate-600 dark:text-slate-400 font-medium">
             Failed to load sequence details. It may not exist or you don't have access.
           </AlertDescription>
           <Link to={`/whatsapp/dashboard/${projectId}/programs`} className="mt-6 block">
-            <Button variant="outline" className="w-full rounded-xl border-slate-200">Back to Sequences</Button>
+            <Button variant="outline" className="w-full rounded-xl border-slate-200 dark:border-slate-800">Back to Sequences</Button>
           </Link>
         </Alert>
       </div>
@@ -187,51 +187,48 @@ export default function ProgramDetails() {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200 p-4 sm:p-5 bg-white dark:bg-slate-900 shadow-sm dark:border-slate-800"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <Link
                 to={`/whatsapp/dashboard/${projectId}/programs`}
-                className="h-10 w-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-600 hover:text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+                className="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Link>
               <div>
-                <div className="flex items-center gap-1.5 text-green-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-0.5">
+                <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-0.5">
                   <ListTree className="h-3 w-3" />
                   Sequence Analytics
                 </div>
-                <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl flex items-center gap-2">
+                <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-2xl flex items-center gap-2">
                   {program.name}
                 </h1>
                 <div className="flex flex-wrap items-center gap-4 mt-2">
-                  <div className="flex items-center gap-1.5 text-slate-600 font-bold text-[10px] uppercase tracking-wider">
-                    <Calendar className="h-3.5 w-3.5 text-slate-600" />
+                  <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-bold text-[10px] uppercase tracking-wider">
+                    <Calendar className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
                     {formatInterval(program)}
                   </div>
-                  <div className="flex items-center gap-1.5 text-slate-600 font-bold text-[10px] uppercase tracking-wider">
-                    <Clock className="h-3.5 w-3.5 text-slate-600" />
+                  <div className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 font-bold text-[10px] uppercase tracking-wider">
+                    <Clock className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
                     {getTotalOccurrenceCount(program)} Occurrences
                   </div>
                   <div className="flex items-center gap-2">
                     {program.isDeleted ? (
-                      <Badge variant="secondary" className="bg-red-50 text-red-600 border-red-100 rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                      <Badge variant="secondary" className="bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-100 dark:border-red-500/20 rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
                         Cancelled
                       </Badge>
                     ) : program.isActive ? (
-                      <Badge className="bg-green-50 text-green-600 border-green-100 rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                      <Badge className="bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-100 dark:border-green-500/20 rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
                         Active
                       </Badge>
                     ) : (
-                      <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-slate-200 rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                      <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
                         Inactive
                       </Badge>
                     )}
@@ -245,7 +242,7 @@ export default function ProgramDetails() {
             <Button
               variant="outline"
               onClick={() => setApiDialogOpen(true)}
-              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 hover:bg-slate-50 font-bold text-sm transition-all active:scale-[0.98] shadow-sm"
+              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 font-bold text-sm transition-all active:scale-[0.98] shadow-sm"
             >
               <FileText className="h-4 w-4" />
               API Details
@@ -272,10 +269,10 @@ export default function ProgramDetails() {
             transition={{ delay: 0.1 }}
           >
             <div className="flex items-center gap-3 mb-6 px-2">
-              <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+              <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400">
                 <Activity className="h-4 w-4" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Sequence Timeline</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Sequence Timeline</span>
             </div>
             <ProgramTimeSlotsCard program={program} />
           </motion.section>
@@ -286,10 +283,10 @@ export default function ProgramDetails() {
             transition={{ delay: 0.2 }}
           >
             <div className="flex items-center gap-3 mb-6 px-2">
-              <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+              <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400">
                 <Zap className="h-4 w-4" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Active Assignments</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Active Assignments</span>
             </div>
             <ProgramAssignmentsSection programId={programId} program={program} />
           </motion.section>
@@ -300,10 +297,10 @@ export default function ProgramDetails() {
             transition={{ delay: 0.3 }}
           >
             <div className="flex items-center gap-3 mb-6 px-2">
-              <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600">
+              <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400">
                 <Settings className="h-4 w-4" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600">Automation Rules</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Automation Rules</span>
             </div>
             <AutoAssignRuleBuilder
               isAutoAssignable={isAutoAssignable}

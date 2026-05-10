@@ -34,8 +34,8 @@ export default function ContactSearch({
 }: ContactSearchProps) {
   const { data: wabaTags = [] } = useWabaTags({ projectId });
 
-  const inputStyles = "h-10 rounded-xl border-slate-200 bg-white/50 focus:bg-white focus:ring-green-500/10 focus:border-green-500/50 transition-all text-xs font-bold text-slate-700 placeholder:text-slate-300";
-  const labelStyles = "text-[10px] font-black uppercase tracking-[0.15em] text-slate-900 mb-2 flex items-center gap-1.5";
+  const inputStyles = "h-10 rounded-xl border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-900 focus:bg-white dark:focus:bg-slate-800 focus:ring-green-500/10 focus:border-green-500/50 transition-all text-xs font-bold text-slate-700 dark:text-slate-300 placeholder:text-slate-400 dark:placeholder:text-slate-500";
+  const labelStyles = "text-[10px] font-black uppercase tracking-[0.15em] text-slate-900 dark:text-white mb-2 flex items-center gap-1.5";
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-6">
@@ -131,12 +131,12 @@ export default function ContactSearch({
           }
           disabled={filters.tags.length === 0}
         >
-          <SelectTrigger className={cn(inputStyles, filters.tags.length === 0 && "opacity-50 cursor-not-allowed bg-slate-100")}>
+          <SelectTrigger className={cn(inputStyles, filters.tags.length === 0 && "opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-900/60")}>
             <SelectValue placeholder="Condition" />
           </SelectTrigger>
-          <SelectContent className="rounded-xl border-slate-100 shadow-xl">
-            <SelectItem value="has_any" className="text-xs font-bold text-slate-600 focus:bg-slate-50 rounded-lg my-0.5">Has selected tags</SelectItem>
-            <SelectItem value="not_has_any" className="text-xs font-bold text-slate-600 focus:bg-slate-50 rounded-lg my-0.5">Doesn't have selected tags</SelectItem>
+          <SelectContent className="rounded-xl border-slate-100 dark:border-slate-700/50 shadow-xl">
+            <SelectItem value="has_any" className="text-xs font-bold text-slate-600 dark:text-slate-400 focus:bg-slate-50 rounded-lg my-0.5">Has selected tags</SelectItem>
+            <SelectItem value="not_has_any" className="text-xs font-bold text-slate-600 dark:text-slate-400 focus:bg-slate-50 rounded-lg my-0.5">Doesn't have selected tags</SelectItem>
           </SelectContent>
         </Select>
       </div>

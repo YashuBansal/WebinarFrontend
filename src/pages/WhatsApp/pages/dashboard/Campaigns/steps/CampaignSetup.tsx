@@ -32,7 +32,7 @@ const CampaignSetup = ({ register, errors, onNext, watchedValues }: CampaignSetu
             <Input
               id="name"
               placeholder="e.g. Q4 Global Outreach"
-              className={`h-14 rounded-2xl border-slate-200 bg-slate-50/50 pl-12 text-base font-bold transition-all focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] ${errors.name ? 'border-red-300 ring-red-50' : ''}`}
+              className={`h-14 rounded-2xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 pl-12 text-base font-bold transition-all focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] ${errors.name ? 'border-red-300 ring-red-50' : ''}`}
               {...register('name')}
             />
             <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#22B573] transition-colors" />
@@ -41,7 +41,7 @@ const CampaignSetup = ({ register, errors, onNext, watchedValues }: CampaignSetu
             <motion.p 
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
-              className="text-xs font-bold text-red-600 flex items-center gap-1.5 pl-2"
+              className="text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1.5 pl-2"
             >
               <AlertCircle className="h-3.5 w-3.5" />
               {errors.name.message}
@@ -49,8 +49,8 @@ const CampaignSetup = ({ register, errors, onNext, watchedValues }: CampaignSetu
           )}
         </div>
         
-        <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
-          <p className="text-xs font-medium text-slate-500 leading-relaxed">
+        <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50">
+          <p className="text-xs font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
             Establishing a clear campaign identity helps you track performance benchmarks and historical data across your dashboard more effectively.
           </p>
         </div>

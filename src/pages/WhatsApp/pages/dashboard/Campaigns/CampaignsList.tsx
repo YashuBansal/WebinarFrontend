@@ -178,23 +178,23 @@ const CampaignsList = () => {
   };
 
   const getStatusStyles = (status: string, isDeleted: boolean) => {
-    if (isDeleted) return 'bg-red-50 text-red-600 border-red-100';
+    if (isDeleted) return 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-100 dark:border-red-500/20';
     switch (status) {
       case 'completed':
-        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+        return 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/20';
       case 'in-progress':
-        return 'bg-blue-50 text-blue-600 border-blue-100';
+        return 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-500/20';
       case 'failed':
-        return 'bg-red-50 text-red-600 border-red-100';
+        return 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-100 dark:border-red-500/20';
       case 'draft':
-        return 'bg-slate-50 text-slate-600 border-slate-100';
+        return 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-100 dark:border-slate-800';
       default:
-        return 'bg-amber-50 text-amber-600 border-amber-100';
+        return 'bg-amber-50 dark:bg-amber-900 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-800';
     }
   };
 
   const getStatusIcon = (status: string, isDeleted: boolean) => {
-    if (isDeleted) return <X className="h-4 w-4" />;
+    if (isDeleted) return <X className="h-4 w-4 bg-white dark:bg-slate-800/50 shadow-sm" />;
     switch (status) {
       case 'completed':
         return <CheckCircle className="h-4 w-4" />;
@@ -226,7 +226,7 @@ const CampaignsList = () => {
                   e.preventDefault();
                   if (hasPrevPage) handlePageChange(page - 1);
                 }}
-                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasPrevPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+                className={`rounded-xl border-slate-200 dark:border-slate-800 h-10 px-4 font-bold text-slate-600 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-800 ${!hasPrevPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
               />
             </PaginationItem>
 
@@ -238,7 +238,7 @@ const CampaignsList = () => {
                       e.preventDefault();
                       handlePageChange(1);
                     }}
-                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 dark:border-slate-700/50 font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50"
                   >
                     1
                   </PaginationLink>
@@ -263,7 +263,7 @@ const CampaignsList = () => {
                     className={`cursor-pointer h-10 w-10 rounded-xl font-bold transition-all ${
                       pageNum === page 
                         ? 'bg-[#22B573] text-white border-[#22B573] shadow-lg shadow-green-600/20' 
-                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                        : 'border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50'
                     }`}
                   >
                     {pageNum}
@@ -281,7 +281,7 @@ const CampaignsList = () => {
                       e.preventDefault();
                       handlePageChange(totalPages);
                     }}
-                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 dark:border-slate-700/50 font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50"
                   >
                     {totalPages}
                   </PaginationLink>
@@ -295,7 +295,7 @@ const CampaignsList = () => {
                   e.preventDefault();
                   if (hasNextPage) handlePageChange(page + 1);
                 }}
-                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasNextPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+                className={`rounded-xl border-slate-200 dark:border-slate-700/50 h-10 px-4 font-bold text-slate-600 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 ${!hasNextPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
               />
             </PaginationItem>
           </PaginationContent>
@@ -307,10 +307,10 @@ const CampaignsList = () => {
   if (!selectedProject) {
     return (
       <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border border-red-100 dark:border-red-900/50 shadow-2xl bg-white dark:bg-slate-900">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Project Required</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">Project Required</AlertTitle>
+          <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
             Please select a project to view and manage campaigns.
           </AlertDescription>
         </Alert>
@@ -333,33 +333,33 @@ const CampaignsList = () => {
       label: "Total Campaigns", 
       value: campaignsData?.pagination?.totalCount || 0, 
       icon: MessageSquare, 
-      color: "text-blue-600", 
-      bg: "bg-blue-50", 
-      border: "border-blue-100" 
+      color: "text-blue-600 dark:text-blue-400", 
+      bg: "bg-blue-50 dark:bg-blue-500/10", 
+      border: "border-blue-100 dark:border-blue-500/20" 
     },
     { 
       label: "Completed", 
       value: globalCampaigns.filter(c => c.status === 'completed').length, 
       icon: CheckCircle, 
-      color: "text-emerald-600", 
-      bg: "bg-emerald-50", 
-      border: "border-emerald-100" 
+      color: "text-emerald-600 dark:text-emerald-400", 
+      bg: "bg-emerald-50 dark:bg-emerald-500/10", 
+      border: "border-emerald-100 dark:border-emerald-500/20" 
     },
     { 
       label: "In Progress", 
       value: globalCampaigns.filter(c => c.status === 'in-progress').length, 
       icon: TrendingUp, 
-      color: "text-blue-600", 
-      bg: "bg-blue-50", 
-      border: "border-blue-100" 
+      color: "text-blue-600 dark:text-blue-400", 
+      bg: "bg-blue-50 dark:bg-blue-500/10", 
+      border: "border-blue-100 dark:border-blue-500/20" 
     },
     { 
       label: "Failed/Cancelled", 
       value: globalCampaigns.filter(c => c.status === 'failed' || c.isDeleted).length, 
       icon: X, 
-      color: "text-red-600", 
-      bg: "bg-red-50", 
-      border: "border-red-100" 
+      color: "text-red-600 dark:text-red-400", 
+      bg: "bg-red-50 dark:bg-red-500/10", 
+      border: "border-red-100 dark:border-red-500/20" 
     },
   ];
 
@@ -367,13 +367,10 @@ const CampaignsList = () => {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200 p-4 sm:p-5 bg-white dark:bg-slate-900 shadow-sm dark:border-slate-800"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -382,11 +379,11 @@ const CampaignsList = () => {
                 <BarChart3 className="h-3.5 w-3.5" />
                 Marketing Hub
               </div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
                 Campaigns
               </h1>
-              <p className="text-slate-500 text-xs font-medium">
-                Manage your bulk messaging campaigns for <span className="text-slate-900 font-bold">{selectedProject?.projectName || 'Project'}</span>
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                Manage your bulk messaging campaigns for <span className="text-slate-900 dark:text-white font-bold">{selectedProject?.projectName || 'Project'}</span>
               </p>
             </div>
           </div>
@@ -401,7 +398,7 @@ const CampaignsList = () => {
               {autoRefreshEnabled && (
                 <div className="flex items-center gap-1.5 mt-1">
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Live Sync Active</span>
+                  <span className="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">Live Sync Active</span>
                 </div>
               )}
             </div>
@@ -410,7 +407,7 @@ const CampaignsList = () => {
               onClick={handleRefresh}
               variant="outline"
               disabled={isRefreshing}
-              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold text-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-800 hover:scale-[1.02] active:scale-[0.98]"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Syncing...' : 'Sync Now'}
@@ -420,8 +417,8 @@ const CampaignsList = () => {
               onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
               className={`h-11 px-6 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${
                 autoRefreshEnabled 
-                  ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/10' 
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  ? 'bg-slate-900 dark:bg-green-900/50 text-white dark:text-green-400 border-slate-900 dark:border-green-500 shadow-slate-900/10' 
+                  : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
               <motion.div
@@ -458,11 +455,11 @@ const CampaignsList = () => {
               {stats.map((stat, i) => (
                 <Card key={i} className={`rounded-2xl border ${stat.border} ${stat.bg} shadow-sm group hover:shadow-md transition-all duration-300`}>
                   <CardContent className="p-5 flex items-center gap-4">
-                    <div className={`h-12 w-12 rounded-xl bg-white border ${stat.border} flex items-center justify-center ${stat.color} shadow-sm group-hover:scale-110 transition-transform`}>
+                    <div className={`h-12 w-12 rounded-xl bg-white dark:bg-slate-800/50 border ${stat.border} flex items-center justify-center ${stat.color} shadow-sm group-hover:scale-110 transition-transform`}>
                       <stat.icon className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">{stat.label}</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-0.5">{stat.label}</p>
                       <h4 className={`text-2xl font-black ${stat.color}`}>{stat.value}</h4>
                     </div>
                   </CardContent>
@@ -477,20 +474,20 @@ const CampaignsList = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500"
+          className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-[24px] overflow-hidden shadow-sm transition-all duration-500"
         >
-          <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/30">
+          <div className="p-6 sm:p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-950">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div>
-                <h2 className="text-xl font-black text-slate-900">Campaign History</h2>
-                <p className="text-slate-500 text-xs font-medium mt-1">Monitor and manage your marketing outreach</p>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white">Campaign History</h2>
+                <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-1">Monitor and manage your marketing outreach</p>
               </div>
 
               <div className="relative w-full lg:w-96 group">
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400 group-focus-within:text-[#22B573] transition-colors" />
                 <Input
                   placeholder="Search campaigns..."
-                  className="h-11 pl-11 rounded-xl border-slate-200 bg-white/50 focus:bg-white transition-all"
+                  className="h-11 pl-11 rounded-xl border-slate-200 dark:border-slate-700/50 bg-white/50 dark:bg-slate-900/60 focus:bg-white transition-all"
                 />
               </div>
             </div>
@@ -499,20 +496,20 @@ const CampaignsList = () => {
           <div className="p-4 sm:p-8">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-                <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                <div className="h-16 w-16 bg-slate-50 dark:bg-slate-900/50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-700/50">
                   <Loader2 className="h-8 w-8 animate-spin text-[#22B573]" />
                 </div>
                 <p className="font-bold text-sm uppercase tracking-widest">Loading Campaigns...</p>
               </div>
             ) : error ? (
-              <Alert variant="destructive" className="bg-red-50 border-red-200 rounded-2xl">
-                <AlertCircle className="h-4 w-4 text-red-600" />
+              <Alert variant="destructive" className="bg-red-50 dark:bg-red-500/10 border-red-200 rounded-2xl">
+                <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                 <AlertTitle className="text-red-800 font-bold">Failed to load</AlertTitle>
                 <AlertDescription className="text-red-700 font-medium">Please check your connection and try again.</AlertDescription>
               </Alert>
             ) : campaigns.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-                <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                <div className="h-16 w-16 bg-slate-50 dark:bg-slate-900/50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-700/50">
                   <Search className="h-8 w-8 opacity-20" />
                 </div>
                 <p className="font-bold text-sm uppercase tracking-widest">No campaigns found</p>
@@ -531,7 +528,7 @@ const CampaignsList = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="group flex flex-col xl:flex-row xl:items-center gap-6 p-6 rounded-2xl border border-slate-100 bg-white hover:bg-slate-50/50 hover:border-[#22B573]/20 hover:shadow-lg hover:shadow-slate-200/40 transition-all duration-300"
+                    className="group flex flex-col xl:flex-row xl:items-center gap-6 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-300"
                   >
                     {/* Status Icon */}
                     <div className={`h-14 w-14 rounded-2xl border flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform ${getStatusStyles(campaign.status, campaign.isDeleted)}`}>
@@ -542,14 +539,14 @@ const CampaignsList = () => {
                     <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-tighter px-2 py-0.5 border-slate-200 bg-slate-50 text-slate-500`}>
+                          <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-tighter px-2 py-0.5 border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400`}>
                             {campaign.messageTemplate?.templateName || 'Direct Campaign'}
                           </Badge>
                           <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-none shadow-sm ${getStatusStyles(campaign.status, campaign.isDeleted)}`}>
                             {campaign.isDeleted ? 'Cancelled' : campaign.status}
                           </Badge>
                         </div>
-                        <h3 className="font-black text-slate-900 text-lg line-clamp-1 group-hover:text-[#22B573] transition-colors">
+                        <h3 className="font-black text-slate-900 dark:text-white text-lg line-clamp-1 group-hover:text-[#22B573] transition-colors">
                           {campaign.name}
                         </h3>
                         <div className="flex items-center gap-2 text-slate-400">
@@ -567,14 +564,14 @@ const CampaignsList = () => {
                           <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                             <div className="flex flex-col">
                               <span className="text-[10px] font-bold text-slate-400 uppercase">Scheduled</span>
-                              <span className="text-[11px] font-medium text-slate-600">
+                              <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">
                                 {campaign.scheduledAt ? formatDateTime12(campaign.scheduledAt) : 'Immediate'}
                               </span>
                             </div>
                             {campaign.completedAt && (
                               <div className="flex flex-col">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase">Completed</span>
-                                <span className="text-[11px] font-medium text-emerald-600">{formatDateTime12(campaign.completedAt)}</span>
+                                <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">{formatDateTime12(campaign.completedAt)}</span>
                               </div>
                             )}
                           </div>
@@ -583,16 +580,16 @@ const CampaignsList = () => {
 
                       <div className="flex flex-col justify-center gap-3">
                         <div className="flex items-center gap-4">
-                          <div className="flex-1 p-3 rounded-xl bg-slate-50 border border-slate-100 flex flex-col items-center">
+                          <div className="flex-1 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50 flex flex-col items-center">
                             <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sent</span>
-                            <span className="text-sm font-black text-slate-900">{campaign.analyticsSummary?.sent || 0}</span>
+                            <span className="text-sm font-black text-slate-900 dark:text-white">{campaign.analyticsSummary?.sent || 0}</span>
                           </div>
-                          <div className="flex-1 p-3 rounded-xl bg-emerald-50 border border-emerald-100 flex flex-col items-center">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600">Read</span>
+                          <div className="flex-1 p-3 rounded-xl bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 flex flex-col items-center">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">Read</span>
                             <span className="text-sm font-black text-emerald-700">{campaign.analyticsSummary?.read || 0}</span>
                           </div>
-                          <div className="flex-1 p-3 rounded-xl bg-red-50 border border-red-100 flex flex-col items-center">
-                            <span className="text-[10px] font-black uppercase tracking-widest text-red-600">Failed</span>
+                          <div className="flex-1 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 flex flex-col items-center">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-red-600 dark:text-red-400">Failed</span>
                             <span className="text-sm font-black text-red-700">{campaign.analyticsSummary?.failed || 0}</span>
                           </div>
                         </div>
@@ -609,7 +606,7 @@ const CampaignsList = () => {
                           variant="outline" 
                           size="icon" 
                           disabled={campaign.isDeleted}
-                          className="h-10 w-10 rounded-xl border-slate-200 text-slate-500 hover:text-[#22B573] hover:border-[#22B573]/30 hover:bg-[#22B573]/5 transition-all disabled:opacity-30"
+                          className="h-10 w-10 rounded-xl border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 hover:text-[#22B573] hover:border-[#22B573] hover:bg-[#22B573]/10 transition-all disabled:opacity-30"
                         >
                           <Eye className="h-4 w-4" />
                         </Button>
@@ -621,7 +618,7 @@ const CampaignsList = () => {
                           size="icon"
                           onClick={() => handleDeleteCampaign(campaign._id)}
                           disabled={deleteCampaignMutation.isPending}
-                          className="h-10 w-10 rounded-xl border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all"
+                          className="h-10 w-10 rounded-xl border-slate-200 dark:border-slate-700/50 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
                         >
                           {deleteCampaignMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Trash2 className="h-4 w-4" />}
                         </Button>
@@ -640,34 +637,34 @@ const CampaignsList = () => {
 
       {/* Reschedule Dialog (Kept for future use or hidden if not used) */}
       <Dialog open={rescheduleDialogOpen} onOpenChange={setRescheduleDialogOpen}>
-        <DialogContent className="rounded-2xl p-8 border-none shadow-2xl bg-white">
+        <DialogContent className="rounded-2xl p-8 border-none shadow-2xl bg-white dark:bg-slate-800/50">
           <DialogHeader>
-            <DialogTitle className="text-xl font-black text-slate-900">Reschedule Campaign</DialogTitle>
+            <DialogTitle className="text-xl font-black text-slate-900 dark:text-white">Reschedule Campaign</DialogTitle>
           </DialogHeader>
           <div className="space-y-6 mt-4">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">New Date</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">New Date</Label>
                 <Input
                   type="date"
                   value={newScheduledDate}
                   onChange={(e) => setNewScheduledDate(e.target.value)}
                   min={new Date().toISOString().split('T')[0]}
-                  className="rounded-xl border-slate-200 focus:ring-[#22B573]/20"
+                  className="rounded-xl border-slate-200 dark:border-slate-700/50 focus:ring-[#22B573]/20"
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500">New Time</Label>
+                <Label className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">New Time</Label>
                 <Input
                   type="time"
                   value={newScheduledTime}
                   onChange={(e) => setNewScheduledTime(e.target.value)}
-                  className="rounded-xl border-slate-200 focus:ring-[#22B573]/20"
+                  className="rounded-xl border-slate-200 dark:border-slate-700/50 focus:ring-[#22B573]/20"
                 />
               </div>
             </div>
             
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-50 border border-blue-100 text-xs text-blue-600 font-medium">
+            <div className="flex items-center gap-2 p-3 rounded-xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 text-xs text-blue-600 dark:text-blue-400 font-medium">
               <Clock className="h-4 w-4" />
               <span>Timezone: {Intl.DateTimeFormat().resolvedOptions().timeZone}</span>
             </div>
@@ -676,7 +673,7 @@ const CampaignsList = () => {
               <Button
                 variant="outline"
                 onClick={() => setRescheduleDialogOpen(false)}
-                className="rounded-xl h-11 px-6 font-bold text-slate-600 border-slate-200 hover:bg-slate-50"
+                className="rounded-xl h-11 px-6 font-bold text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-900/50"
               >
                 Cancel
               </Button>

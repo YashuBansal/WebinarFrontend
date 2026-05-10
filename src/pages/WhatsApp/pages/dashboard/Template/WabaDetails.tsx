@@ -48,11 +48,11 @@ export default function WabaDetails() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900/60 p-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-12">
             <RefreshCw className="w-8 h-8 animate-spin mx-auto mb-4 text-gray-400" />
-            <p className="text-gray-600">Loading WhatsApp Business Account details...</p>
+            <p className="text-gray-600 dark:text-slate-400">Loading WhatsApp Business Account details...</p>
           </div>
         </div>
       </div>
@@ -61,13 +61,13 @@ export default function WabaDetails() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900/60 p-6">
         <div className="max-w-4xl mx-auto">
           <Card>
             <CardContent className="p-6 text-center">
               <XCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to Load WABA Details</h3>
-              <p className="text-gray-600 mb-4">
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Failed to Load WABA Details</h3>
+              <p className="text-gray-600 dark:text-slate-400 mb-4">
                 {(error.response?.data as any)?.message || 'An error occurred while fetching WhatsApp Business Account details.'}
               </p>
               <Button onClick={() => refetch()}>
@@ -82,12 +82,12 @@ export default function WabaDetails() {
 
   if (!wabaData) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900/60 p-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-12">
             <AlertCircle className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">No WhatsApp Business Account</h2>
-            <p className="text-gray-600 mb-6">No WhatsApp Business Account is configured for this project.</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No WhatsApp Business Account</h2>
+            <p className="text-gray-600 dark:text-slate-400 mb-6">No WhatsApp Business Account is configured for this project.</p>
           </div>
         </div>
       </div>
@@ -99,13 +99,13 @@ export default function WabaDetails() {
   const isAppConfigured = !!(wabaData.appId && wabaData.appSecret);
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900/60 p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">WhatsApp Business Account</h1>
-            <p className="text-gray-600 mt-2">
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">WhatsApp Business Account</h1>
+            <p className="text-gray-600 dark:text-slate-400 mt-2">
               Manage your WhatsApp Business Account configuration
             </p>
           </div>
@@ -130,13 +130,13 @@ export default function WabaDetails() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">Project Name</label>
-                <p className="text-lg font-semibold text-gray-900">{wabaData.projectName}</p>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Project Name</label>
+                <p className="text-lg font-semibold text-gray-900 dark:text-white">{wabaData.projectName}</p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">Project ID</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Project ID</label>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-mono text-gray-600">{wabaData._id}</p>
+                  <p className="text-sm font-mono text-gray-600 dark:text-slate-400">{wabaData._id}</p>
                   <Button
                     variant="ghost"
                     size="sm"
@@ -147,14 +147,14 @@ export default function WabaDetails() {
                 </div>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">Created</label>
-                <p className="text-sm text-gray-600">
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Created</label>
+                <p className="text-sm text-gray-600 dark:text-slate-400">
                   {new Date(wabaData.createdAt).toLocaleDateString()}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">Last Updated</label>
-                <p className="text-sm text-gray-600">
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Last Updated</label>
+                <p className="text-sm text-gray-600 dark:text-slate-400">
                   {new Date(wabaData.updatedAt).toLocaleDateString()}
                 </p>
               </div>
@@ -175,12 +175,12 @@ export default function WabaDetails() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/60 rounded-lg">
                 <div className="flex items-center gap-3">
                   {getStatusIcon(isWabaConfigured)}
                   <div>
                     <p className="font-medium">WhatsApp Business Account</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-slate-400">
                       {isWabaConfigured ? 'Configured' : 'Not configured'}
                     </p>
                   </div>
@@ -190,12 +190,12 @@ export default function WabaDetails() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/60 rounded-lg">
                 <div className="flex items-center gap-3">
                   {getStatusIcon(isPhoneConfigured)}
                   <div>
                     <p className="font-medium">Phone Number</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-slate-400">
                       {isPhoneConfigured ? 'Configured' : 'Not configured'}
                     </p>
                   </div>
@@ -205,12 +205,12 @@ export default function WabaDetails() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-900/60 rounded-lg">
                 <div className="flex items-center gap-3">
                   {getStatusIcon(isAppConfigured)}
                   <div>
                     <p className="font-medium">App Configuration</p>
-                    <p className="text-sm text-gray-600">
+                    <p className="text-sm text-gray-600 dark:text-slate-400">
                       {isAppConfigured ? 'Configured' : 'Not configured'}
                     </p>
                   </div>
@@ -235,9 +235,9 @@ export default function WabaDetails() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">WABA ID</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300">WABA ID</label>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-mono text-gray-600">
+                  <p className="text-sm font-mono text-gray-600 dark:text-slate-400">
                     {wabaData.wabaId || 'Not configured'}
                   </p>
                   {wabaData.wabaId && (
@@ -253,9 +253,9 @@ export default function WabaDetails() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">Phone Number ID</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Phone Number ID</label>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-mono text-gray-600">
+                  <p className="text-sm font-mono text-gray-600 dark:text-slate-400">
                     {wabaData.phoneNumberId || 'Not configured'}
                   </p>
                   {wabaData.phoneNumberId && (
@@ -271,8 +271,8 @@ export default function WabaDetails() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">Phone Number</label>
-                <p className="text-sm text-gray-600">
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Phone Number</label>
+                <p className="text-sm text-gray-600 dark:text-slate-400">
                   {wabaData.phone || 'Not configured'}
                 </p>
               </div>
@@ -289,9 +289,9 @@ export default function WabaDetails() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <label className="text-sm font-medium text-gray-700">App ID</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300">App ID</label>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-mono text-gray-600">
+                  <p className="text-sm font-mono text-gray-600 dark:text-slate-400">
                     {wabaData.appId || 'Not configured'}
                   </p>
                   {wabaData.appId && (
@@ -307,9 +307,9 @@ export default function WabaDetails() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">App Secret</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300">App Secret</label>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-mono text-gray-600">
+                  <p className="text-sm font-mono text-gray-600 dark:text-slate-400">
                     {maskToken(wabaData.appSecret || '')}
                   </p>
                   {wabaData.appSecret && (
@@ -334,9 +334,9 @@ export default function WabaDetails() {
               </div>
 
               <div>
-                <label className="text-sm font-medium text-gray-700">Access Token</label>
+                <label className="text-sm font-medium text-gray-700 dark:text-slate-300">Access Token</label>
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-mono text-gray-600">
+                  <p className="text-sm font-mono text-gray-600 dark:text-slate-400">
                     {maskToken(wabaData.permanentAccessToken || '')}
                   </p>
                   {wabaData.permanentAccessToken && (
@@ -377,17 +377,17 @@ export default function WabaDetails() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <p className="text-gray-600">
+                <p className="text-gray-600 dark:text-slate-400">
                   To use WhatsApp Business features, you need to complete the setup process:
                 </p>
-                <ol className="list-decimal list-inside space-y-2 text-gray-600">
+                <ol className="list-decimal list-inside space-y-2 text-gray-600 dark:text-slate-400">
                   <li>Create a Meta App in the Meta for Developers console</li>
                   <li>Add WhatsApp Business API to your app</li>
                   <li>Configure your WhatsApp Business Account</li>
                   <li>Get your App ID, App Secret, and Access Token</li>
                   <li>Add your phone number and get the Phone Number ID</li>
                 </ol>
-                <div className="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-md">
+                <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-500/10 border border-blue-200 rounded-md">
                   <p className="text-sm text-blue-800">
                     <strong>Note:</strong> You can use the exchange code feature to automatically 
                     set up your WhatsApp Business Account if you have the authorization code from Meta.

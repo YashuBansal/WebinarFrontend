@@ -48,13 +48,13 @@ export function ConfirmationDialog({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent 
-        className="max-w-sm border-0 bg-transparent p-0 shadow-none outline-none"
+        className="max-w-sm border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-0 overflow-hidden rounded-2xl shadow-2xl"
         showCloseButton={false}
       >
-        <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white border border-slate-200 overflow-hidden">
+        <div className="relative w-full p-6 flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between mb-5">
-            <h3 className="text-lg font-bold text-slate-900">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white">
               {title}
             </h3>
             <button
@@ -62,23 +62,23 @@ export function ConfirmationDialog({
               onClick={onClose}
               className="p-1.5 rounded-lg hover:bg-black/5 transition-colors"
             >
-              <X className="w-5 h-5 text-gray-500" />
+              <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
             </button>
           </div>
 
           {/* Body */}
           <div className="space-y-6 mb-8">
-            <p className="text-sm font-medium text-slate-600 leading-relaxed">
+            <p className="text-sm font-medium text-slate-600 dark:text-slate-400 leading-relaxed">
               {description}
             </p>
 
             {requireSecurityCode && (
-              <div className="space-y-3 p-4 rounded-xl bg-slate-50 border border-slate-100">
+              <div className="space-y-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50">
                 <div className="flex items-center justify-between">
-                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-600">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
                     Security Verification
                   </label>
-                  <span className="text-lg font-black tracking-[0.3em] text-slate-900 select-none bg-white px-3 py-1 rounded-lg border border-slate-200">
+                  <span className="text-lg font-black tracking-[0.3em] text-slate-900 dark:text-white select-none bg-white dark:bg-slate-900 px-3 py-1 rounded-lg border border-slate-200 dark:border-slate-800">
                     {targetCode}
                   </span>
                 </div>
@@ -87,7 +87,7 @@ export function ConfirmationDialog({
                   placeholder="Type the 6-digit code above"
                   value={securityCode}
                   onChange={(e) => setSecurityCode(e.target.value)}
-                  className="h-12 text-center text-lg font-bold tracking-[0.2em] bg-white border-slate-200 rounded-xl focus:ring-slate-500/20"
+                  className="h-12 text-center text-lg font-bold tracking-[0.2em] bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl focus:ring-slate-500"
                   maxLength={6}
                 />
               </div>
@@ -100,7 +100,7 @@ export function ConfirmationDialog({
               variant="outline"
               onClick={onClose}
               disabled={isLoading}
-              className="rounded-xl px-4 py-2.5 font-medium border-slate-200 text-slate-600 hover:bg-slate-50"
+              className="rounded-xl px-4 py-2.5 font-medium border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
             >
               {cancelText}
             </Button>

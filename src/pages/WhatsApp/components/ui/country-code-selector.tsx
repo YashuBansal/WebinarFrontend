@@ -132,18 +132,18 @@ export function CountryCodeSelector({ value, onChange, disabled }: CountryCodeSe
           variant="outline"
           role="combobox"
           aria-expanded={open}
-          className="w-full justify-between"
+          className="w-full justify-between h-12 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all px-4"
           disabled={disabled}
         >
           {selectedCountry ? (
-            <span>{selectedCountry.flag} {selectedCountry.dialCode}</span>
+            <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{selectedCountry.flag} {selectedCountry.dialCode}</span>
           ) : (
-            <span>Select country code</span>
+            <span className="text-sm font-medium text-slate-400">Select country code</span>
           )}
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50 text-slate-400" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-full p-0">
+      <PopoverContent className="w-full p-0 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl rounded-2xl overflow-hidden">
         <Command>
           <CommandInput placeholder="Search country..." />
           <CommandEmpty>No country found.</CommandEmpty>

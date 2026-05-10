@@ -351,7 +351,7 @@ export default function CreateTemplatePage() {
 
   const getActionIcon = (type: InteractiveAction['type']) => {
     switch (type) {
-      case 'QUICK_REPLY': return <Plus className="w-4 h-4" />;
+      case 'QUICK_REPLY': return <Plus className="w-4 h-4 bg-white dark:bg-slate-900/60 shadow-sm" />;
       case 'URL': return <Link className="w-4 h-4" />;
       case 'PHONE_NUMBER': return <Phone className="w-4 h-4" />;
       case 'OTP': return <Copy className="w-4 h-4" />;
@@ -416,33 +416,30 @@ export default function CreateTemplatePage() {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-900/60 shadow-sm dark:border-slate-700/30"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <RouterLink
                 to={`/whatsapp/dashboard/${selectedProject?._id}/templates`}
-                className="h-10 w-10 rounded-xl border border-slate-200 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
+                className="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-700/30 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all shadow-sm"
               >
                 <ArrowLeft className="h-5 w-5" />
               </RouterLink>
               <div>
-                <div className="flex items-center gap-1.5 text-green-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-0.5">
+                <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-0.5">
                   <Plus className="h-3 w-3" />
                   New Template
                 </div>
-                <h1 className="text-xl font-extrabold tracking-tight text-slate-900 sm:text-2xl flex items-center gap-2">
+                <h1 className="text-xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-2xl flex items-center gap-2">
                   Create Template
                 </h1>
-                <p className="text-slate-500 text-xs font-medium mt-1">
-                  Design and submit a new message template for <span className="text-slate-900 font-bold">{selectedProject?.projectName}</span>
+                <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-1">
+                  Design and submit a new message template for <span className="text-slate-900 dark:text-white font-bold">{selectedProject?.projectName}</span>
                 </p>
               </div>
             </div>
@@ -452,7 +449,7 @@ export default function CreateTemplatePage() {
             <Button
               variant="outline"
               onClick={() => navigate(-1)}
-              className="h-11 px-6 rounded-xl border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50"
+              className="h-11 px-6 rounded-xl border-slate-200 dark:border-slate-700/30 text-slate-600 dark:text-slate-400 font-bold text-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50"
             >
               Cancel
             </Button>
@@ -488,10 +485,10 @@ export default function CreateTemplatePage() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+                className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                  <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
                     <LayoutGrid className="h-4 w-4" />
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Category</span>
@@ -499,7 +496,7 @@ export default function CreateTemplatePage() {
                 <div className="relative">
                   <select
                     {...register('category')}
-                    className="w-full h-11 px-4 py-2 border border-slate-200 rounded-xl bg-slate-50/50 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                    className="w-full h-11 px-4 py-2 border border-slate-200 dark:border-slate-700/30 rounded-xl bg-slate-50/50 dark:bg-slate-900/60 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                   >
                     {categories.map(category => (
                       <option key={category} value={category}>{category}</option>
@@ -517,10 +514,10 @@ export default function CreateTemplatePage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05 }}
-                className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+                className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                  <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
                     <Type className="h-4 w-4" />
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Language</span>
@@ -528,7 +525,7 @@ export default function CreateTemplatePage() {
                 <div className="relative">
                   <select
                     {...register('language')}
-                    className="w-full h-11 px-4 py-2 border border-slate-200 rounded-xl bg-slate-50/50 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                    className="w-full h-11 px-4 py-2 border border-slate-200 dark:border-slate-700/30 rounded-xl bg-slate-50/50 dark:bg-slate-900/60 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                   >
                     <option value="">Select language</option>
                     {languages.map(language => (
@@ -548,10 +545,10 @@ export default function CreateTemplatePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+              className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
                   <Info className="h-4 w-4" />
                 </div>
                 <div>
@@ -563,7 +560,7 @@ export default function CreateTemplatePage() {
                 type="text"
                 placeholder="e.g. order_confirmation_v1"
                 {...register('name')}
-                className="h-11 rounded-xl border-slate-200 bg-slate-50/50 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                className="h-11 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
               />
               {errors.name && (
                 <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.name.message}</p>
@@ -575,10 +572,10 @@ export default function CreateTemplatePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.15 }}
-              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+              className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
                   <Paperclip className="h-4 w-4" />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Header Type</span>
@@ -595,8 +592,8 @@ export default function CreateTemplatePage() {
                       className={`
                         flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition-all
                         ${isSelected
-                          ? 'border-green-500 bg-green-50 text-green-700 shadow-sm'
-                          : 'border-slate-100 bg-slate-50/50 text-slate-400 hover:border-slate-200 hover:bg-slate-100/50'}
+                          ? 'border-green-500 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 shadow-sm'
+                          : 'border-slate-100 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 text-slate-400 hover:border-slate-200 hover:bg-slate-100/50'}
                       `}
                     >
                       <Icon className="h-5 w-5" />
@@ -614,11 +611,11 @@ export default function CreateTemplatePage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+              className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
             >
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                  <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
                     <MessageSquare className="h-4 w-4" />
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Template Body</span>
@@ -630,15 +627,15 @@ export default function CreateTemplatePage() {
               <textarea
                 placeholder="Enter your message in here..."
                 {...register('format')}
-                className="w-full min-h-[160px] px-4 py-3 border border-slate-200 rounded-xl bg-slate-50/50 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm resize-none"
+                className="w-full min-h-[160px] px-4 py-3 border border-slate-200 dark:border-slate-700/30 rounded-xl bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm resize-none"
                 maxLength={1024}
               />
               {errors.format && (
                 <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.format.message}</p>
               )}
-              <div className="mt-3 p-3 bg-blue-50/50 border border-blue-100 rounded-xl flex items-start gap-3">
+              <div className="mt-3 p-3 bg-blue-50/50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-xl flex items-start gap-3">
                 <Info className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
-                <p className="text-[10px] text-blue-600 font-medium leading-relaxed">
+                <p className="text-[12px] text-blue-600 dark:text-blue-400 font-medium leading-relaxed">
                   Use <span className="font-bold">*bold*</span>, <span className="font-bold">_italic_</span>, and <span className="font-bold">{`{{1}}`}</span> for variables.
                 </p>
               </div>
@@ -649,10 +646,10 @@ export default function CreateTemplatePage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+                className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
               >
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                  <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
                     <Type className="h-4 w-4" />
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Header Content</span>
@@ -662,7 +659,7 @@ export default function CreateTemplatePage() {
                   placeholder="Enter header text here"
                   {...register('header')}
                   maxLength={60}
-                  className="h-11 rounded-xl border-slate-200 bg-slate-50/50 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                  className="h-11 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                 />
                 {errors.header && (
                   <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.header.message}</p>
@@ -675,11 +672,11 @@ export default function CreateTemplatePage() {
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+                className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
               >
                 <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                    <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
                       <Paperclip className="h-4 w-4" />
                     </div>
                     <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Media Assets</span>
@@ -687,7 +684,7 @@ export default function CreateTemplatePage() {
                 </div>
 
                 <div className="space-y-4">
-                  <label className="flex items-center gap-3 p-3 bg-slate-50/50 border border-slate-100 rounded-xl cursor-pointer hover:bg-slate-100 transition-all">
+                  <label className="flex items-center gap-3 p-3 bg-slate-50/50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all">
                     <Checkbox
                       checked={useGenericSample}
                       onCheckedChange={(checked) => {
@@ -699,11 +696,11 @@ export default function CreateTemplatePage() {
                       }}
                       className="rounded-md border-slate-300 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
                     />
-                    <span className="text-xs font-bold text-slate-600">Use generic sample handle</span>
+                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Use generic sample handle</span>
                   </label>
 
                   {!useGenericSample && (
-                    <div className="p-4 border-2 border-dashed border-slate-100 rounded-2xl bg-slate-50/30">
+                    <div className="p-4 border-2 border-dashed border-slate-100 dark:border-slate-700/30 rounded-2xl bg-slate-50/30 dark:bg-slate-900/20">
                       <FileUploader
                         onFileSelect={handleFileSelect}
                         onUploadSuccess={handleUploadSuccess}
@@ -721,7 +718,7 @@ export default function CreateTemplatePage() {
                   )}
 
                   {(headerHandle || useGenericSample) && (
-                    <div className="flex items-center gap-2 p-3 bg-green-50 border border-green-100 rounded-xl text-[10px] font-bold text-green-700 uppercase tracking-widest">
+                    <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-500/10 border border-green-100 dark:border-green-500/20 rounded-xl text-[10px] font-bold text-green-700 dark:text-green-400 uppercase tracking-widest">
                       <CheckCircle className="h-3.5 w-3.5" />
                       Sample file is ready
                     </div>
@@ -735,10 +732,10 @@ export default function CreateTemplatePage() {
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+                className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
               >
                 <div className="flex items-center gap-3 mb-6">
-                  <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                  <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
                     <LayoutGrid className="h-4 w-4" />
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Variable Samples</span>
@@ -755,7 +752,7 @@ export default function CreateTemplatePage() {
                         value={value}
                         onChange={(e) => handleSampleValueChange(index, e.target.value)}
                         required
-                        className="h-10 rounded-xl border-slate-200 bg-slate-50/50 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                        className="h-10 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                       />
                     </div>
                   ))}
@@ -767,10 +764,10 @@ export default function CreateTemplatePage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+              className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
             >
               <div className="flex items-center gap-3 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
                   <Info className="h-4 w-4" />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Footer Text (Optional)</span>
@@ -780,7 +777,7 @@ export default function CreateTemplatePage() {
                 placeholder="Enter footer text (e.g. reply STOP to unsubscribe)"
                 {...register('footer')}
                 maxLength={60}
-                className="h-11 rounded-xl border-slate-200 bg-slate-50/50 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                className="h-11 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
               />
               {errors.footer && (
                 <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.footer.message}</p>
@@ -791,10 +788,10 @@ export default function CreateTemplatePage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+              className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
                   <LayoutGrid className="h-4 w-4" />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Interactive Actions</span>
@@ -802,7 +799,7 @@ export default function CreateTemplatePage() {
 
               <div className="space-y-6">
                 {/* Radio Selection Pill */}
-                <div className="flex flex-wrap gap-2 p-1.5 bg-slate-100/50 border border-slate-200 rounded-2xl w-full">
+                <div className="flex flex-wrap gap-2 p-1.5 bg-slate-100/50 dark:bg-slate-950/40 border border-slate-200 dark:border-slate-700/30 rounded-2xl w-full">
                   {['none', 'call_to_actions', 'quick_replies', 'all'].map((option) => {
                     const isActive = watch('interactiveType') === option;
                     return (
@@ -812,7 +809,7 @@ export default function CreateTemplatePage() {
                         onClick={() => setValue('interactiveType', option as any)}
                         className={`
                           flex-1 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all
-                          ${isActive ? 'bg-white text-green-600 shadow-sm border border-slate-200' : 'text-slate-400 hover:text-slate-600'}
+                          ${isActive ? 'bg-white dark:bg-slate-800/80 text-green-600 dark:text-green-400 shadow-sm border border-slate-200 dark:border-slate-700/30' : 'text-slate-400 hover:text-slate-600'}
                         `}
                       >
                         {option.replace('_', ' ')}
@@ -833,11 +830,11 @@ export default function CreateTemplatePage() {
                       key={btn.id}
                       type="button"
                       onClick={() => addInteractiveAction(btn.id as any)}
-                      className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border border-slate-100 bg-slate-50/50 text-slate-400 hover:border-slate-200 hover:bg-slate-100/50 hover:text-slate-600 transition-all"
+                      className="flex flex-col items-center gap-1.5 p-3 rounded-2xl border border-slate-100 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 text-slate-400 hover:border-slate-200 hover:bg-slate-100/50 hover:text-slate-600 transition-all"
                     >
                       <btn.icon className="h-4 w-4" />
                       <span className="text-[9px] font-black uppercase tracking-tight">{btn.label}</span>
-                      <span className="flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-slate-200 text-slate-500 text-[8px] font-black">
+                      <span className="flex items-center justify-center min-w-[16px] h-4 px-1 rounded-full bg-slate-200 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 text-[8px] font-black">
                         {getActionCount(btn.id as any)}
                       </span>
                     </button>
@@ -847,20 +844,20 @@ export default function CreateTemplatePage() {
                 {/* Actions List */}
                 <div className="space-y-4">
                   {watchedInteractiveActions.map((action) => (
-                    <div key={action.id} className="relative group/action bg-slate-50/50 border border-slate-200 rounded-2xl p-4 transition-all hover:bg-white hover:shadow-md">
+                    <div key={action.id} className="relative group/action bg-slate-50/50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 rounded-2xl p-4 transition-all hover:bg-white dark:hover:bg-slate-800/50 hover:shadow-md">
                       <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-2">
-                          <div className="h-7 w-7 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-slate-400">
+                          <div className="h-7 w-7 rounded-lg bg-white dark:bg-slate-800/80 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400">
                             {getActionIcon(action.type)}
                           </div>
-                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500">
+                          <span className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
                             {action.type.replace('_', ' ')}
                           </span>
                         </div>
                         <button
                           type="button"
                           onClick={() => removeInteractiveAction(action.id)}
-                          className="h-7 w-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                          className="h-7 w-7 flex items-center justify-center text-slate-300 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 rounded-lg transition-all"
                         >
                           <X className="h-4 w-4" />
                         </button>
@@ -872,14 +869,14 @@ export default function CreateTemplatePage() {
                           value={action.title}
                           onChange={(e) => updateInteractiveAction(action.id, 'title', e.target.value)}
                           maxLength={25}
-                          className="h-10 rounded-xl border-slate-200 bg-white focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                          className="h-10 rounded-xl border-slate-200 dark:border-slate-700/30 bg-white dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                         />
                         {(action.type === 'URL' || action.type === 'PHONE_NUMBER') && (
                           <Input
                             placeholder={action.type === 'URL' ? 'https://example.com' : '+1 234 567 8900'}
                             value={action.value || ''}
                             onChange={(e) => updateInteractiveAction(action.id, 'value', e.target.value)}
-                            className="h-10 rounded-xl border-slate-200 bg-white focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                            className="h-10 rounded-xl border-slate-200 dark:border-slate-700/30 bg-white dark:bg-slate-800/50 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                           />
                         )}
                         {action.type === 'OTP' && (
@@ -887,7 +884,7 @@ export default function CreateTemplatePage() {
                             <select
                               value={action.otp_type || 'COPY_CODE'}
                               onChange={(e) => updateInteractiveAction(action.id, 'otp_type', e.target.value)}
-                              className="w-full h-10 px-3 py-1 border border-slate-200 rounded-xl bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                              className="w-full h-10 px-3 py-1 border border-slate-200 dark:border-slate-700/30 rounded-xl bg-white dark:bg-slate-800/50 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                             >
                               <option value="COPY_CODE">Copy Code</option>
                               <option value="ZERO_TAP">Zero Tap</option>
@@ -912,7 +909,7 @@ export default function CreateTemplatePage() {
                   className="space-y-4"
                 >
                   {appErrorMessage && (
-                    <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-100 rounded-2xl">
+                    <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-2xl">
                       <AlertCircle className="h-5 w-5 text-red-500 shrink-0 mt-0.5" />
                       <div>
                         <p className="text-xs font-black uppercase tracking-widest text-red-900 mb-1">Application Error</p>
@@ -921,8 +918,8 @@ export default function CreateTemplatePage() {
                     </div>
                   )}
                   {metaError && (
-                    <div className="flex items-start gap-3 p-4 bg-yellow-50 border border-yellow-100 rounded-2xl">
-                      <AlertCircle className="h-5 w-5 text-yellow-600 shrink-0 mt-0.5" />
+                    <div className="flex items-start gap-3 p-4 bg-yellow-50 dark:bg-yellow-500/10 border border-yellow-100 dark:border-yellow-500/20 rounded-2xl">
+                      <AlertCircle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
                       <div className="flex-1">
                         <p className="text-xs font-black uppercase tracking-widest text-yellow-900 mb-1">Meta Rejection</p>
                         <p className="text-xs font-medium text-yellow-800 leading-relaxed">{metaError.message}</p>
@@ -946,10 +943,10 @@ export default function CreateTemplatePage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+              className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
             >
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-8 w-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
                   <Eye className="h-4 w-4" />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Live Preview</span>
@@ -1033,8 +1030,8 @@ export default function CreateTemplatePage() {
                 <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]" />
               </div>
 
-              <div className="mt-6 flex items-start gap-3 p-4 bg-yellow-50/50 border border-yellow-100 rounded-2xl">
-                <Info className="h-4 w-4 text-yellow-600 shrink-0 mt-0.5" />
+              <div className="mt-6 flex items-start gap-3 p-4 bg-yellow-50/50 dark:bg-yellow-500/10 border border-yellow-100 dark:border-yellow-500/20 rounded-2xl">
+                <Info className="h-4 w-4 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
                 <p className="text-[10px] text-yellow-800 font-medium leading-relaxed">
                   <strong>Preview Notice:</strong> This mockup is a graphical approximation. The final message appearance depends on the user&apos;s device and WhatsApp version.
                 </p>

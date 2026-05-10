@@ -16,7 +16,7 @@ export function TemplateSearch({ searchTerm, onSearchChange }: TemplateSearchPro
         placeholder="Search templates..."
         value={searchTerm}
         onChange={(e) => onSearchChange(e.target.value)}
-        className="h-11 pl-11 pr-4 rounded-xl border-slate-200 bg-white focus:ring-green-500/20 focus:border-green-500 transition-all text-sm font-medium"
+        className="h-11 pl-11 pr-4 rounded-xl border-slate-200 dark:border-slate-700/30 bg-white dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all text-sm font-medium"
       />
     </div>
   );

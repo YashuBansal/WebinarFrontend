@@ -102,13 +102,13 @@ export default function AutoMessageConfigsList() {
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="flex flex-col items-center justify-center py-20 text-slate-400 bg-white border border-slate-100 rounded-[32px] shadow-sm"
+        className="flex flex-col items-center justify-center py-20 text-slate-400 bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-2xl shadow-sm"
       >
         <div className="h-20 w-20 bg-slate-50 rounded-3xl flex items-center justify-center mb-6">
           <MessageSquare className="h-10 w-10 opacity-20" />
         </div>
-        <h3 className="text-xl font-bold text-slate-900 mb-2">No Configurations Found</h3>
-        <p className="text-slate-500 font-medium max-w-xs text-center mb-8">
+        <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No Configurations Found</h3>
+        <p className="text-slate-500 dark:text-slate-400 font-medium max-w-xs text-center mb-8">
           You haven't set up any auto message configurations yet.
         </p>
         <Link to={`/whatsapp/dashboard/${selectedProject?._id}/auto-message/create`}>
@@ -137,7 +137,7 @@ export default function AutoMessageConfigsList() {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
                 transition={{ delay: index * 0.05 }}
-                className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-5 sm:p-6 transition-all duration-300 overflow-hidden"
+                className="group relative bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-2xl p-5 sm:p-6 transition-all duration-300 overflow-hidden"
               >
                 {/* Decorative Background Element */}
                 <div className="absolute top-0 right-0 -mr-16 -mt-16 h-32 w-32 rounded-full bg-green-500/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -146,17 +146,17 @@ export default function AutoMessageConfigsList() {
                   {/* Left: Main Info */}
                   <div className="flex-1 space-y-4">
                     <div className="flex items-start gap-4">
-                      <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${cfg.enabled ? 'bg-green-50 text-green-600' : 'bg-slate-50 text-slate-400'}`}>
+                      <div className={`h-10 w-10 rounded-xl flex items-center justify-center shrink-0 ${cfg.enabled ? 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-slate-50 dark:bg-slate-900/50 text-slate-400'}`}>
                         <MessageSquare className="h-5 w-5" />
                       </div>
                       
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h3 className="text-lg font-black text-slate-900">
+                          <h3 className="text-lg font-black text-slate-900 dark:text-white">
                             {cfg.webinarName || cfg.webinarId}
                           </h3>
                           {!!cfg.headerMediaAssetId && (
-                            <Badge variant="secondary" className="bg-blue-50 text-blue-600 border-blue-100 text-[10px] font-bold px-2 py-0">
+                            <Badge variant="secondary" className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-500/20 text-[10px] font-bold px-2 py-0">
                               <ImageIcon className="h-3 w-3 mr-1" />
                               MEDIA
                             </Badge>
@@ -164,7 +164,7 @@ export default function AutoMessageConfigsList() {
                         </div>
                         <div className="flex items-center gap-2 text-xs font-bold text-slate-400 uppercase tracking-widest">
                           <MessageSquare className="h-3 w-3" />
-                          Template: <span className="text-slate-600">{cfg.templateName}</span>
+                          Template: <span className="text-slate-600 dark:text-slate-400">{cfg.templateName}</span>
                         </div>
                       </div>
                     </div>
@@ -173,15 +173,15 @@ export default function AutoMessageConfigsList() {
                     <div className="flex items-center gap-6 pl-16">
                       <div className="flex flex-col">
                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Messages Sent</span>
-                        <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                        <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white">
                           <CheckCircle2 className="h-4 w-4 text-green-500" />
                           <span>{sent}</span>
                         </div>
                       </div>
-                      <div className="h-8 w-px bg-slate-100" />
+                      <div className="h-8 w-px bg-slate-100 dark:bg-slate-900/60" />
                       <div className="flex flex-col">
                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Failed</span>
-                        <div className="flex items-center gap-1.5 font-bold text-slate-900">
+                        <div className="flex items-center gap-1.5 font-bold text-slate-900 dark:text-white">
                           <XCircle className="h-4 w-4 text-red-500" />
                           <span>{failed}</span>
                         </div>
@@ -191,15 +191,15 @@ export default function AutoMessageConfigsList() {
 
                   {/* Right: Actions */}
                   <div className="flex items-center gap-2 shrink-0 self-end md:self-center">
-                    <div className="flex items-center bg-slate-50 border border-slate-100 rounded-xl p-1 gap-1">
+                    <div className="flex items-center bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50 rounded-xl p-1 gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleToggleClick(cfg)}
                         disabled={toggling}
                         className={`h-9 px-3 rounded-lg flex items-center gap-2 font-bold text-xs transition-all ${cfg.enabled
-                          ? "bg-white text-green-600 shadow-sm border border-slate-100"
-                          : "text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                          ? "bg-white dark:bg-slate-800/50 text-green-600 dark:text-green-400 shadow-sm border border-slate-100 dark:border-slate-700/50"
+                          : "text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-900/60"
                           }`}
                       >
                         {cfg.enabled ? <Power className="h-3.5 w-3.5" /> : <PowerOff className="h-3.5 w-3.5" />}
@@ -211,7 +211,7 @@ export default function AutoMessageConfigsList() {
                         size="sm"
                         onClick={() => handleDeleteClick(cfg)}
                         disabled={deleting}
-                        className="h-9 w-9 p-0 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-all"
+                        className="h-9 w-9 p-0 rounded-lg text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -254,13 +254,13 @@ export default function AutoMessageConfigsList() {
           onPointerDownOutside={(e) => e.preventDefault()}
           showCloseButton={false}
         >
-          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white border border-slate-200">
+          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50">
             <div className="flex items-center justify-between mb-5">
               <div className="flex items-center gap-3">
-                <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${selectedConfig?.enabled ? 'bg-orange-50 text-orange-500' : 'bg-green-50 text-green-500'}`}>
+                <div className={`h-10 w-10 rounded-xl flex items-center justify-center ${selectedConfig?.enabled ? 'bg-orange-50 text-orange-500' : 'bg-green-50 dark:bg-green-500/10 text-green-500'}`}>
                   {selectedConfig?.enabled ? <Pause className="h-5 w-5" /> : <Play className="h-5 w-5" />}
                 </div>
-                <h3 className="text-lg font-bold text-slate-900">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                   {selectedConfig?.enabled ? 'Pause' : 'Activate'} Automation
                 </h3>
               </div>
@@ -272,13 +272,13 @@ export default function AutoMessageConfigsList() {
                 }}
                 className="p-1.5 rounded-lg hover:bg-black/5 transition-colors"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
               </button>
             </div>
 
             <div className="mb-8">
-              <p className="text-sm font-medium text-slate-500 leading-relaxed">
-                Are you sure you want to <span className={`font-bold ${selectedConfig?.enabled ? 'text-orange-600' : 'text-green-600'}`}>{selectedConfig?.enabled ? 'pause' : 'activate'}</span> the auto message configuration for <span className="text-slate-900 font-bold">"{selectedConfig?.webinarName || selectedConfig?.webinarId}"</span>?
+              <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+                Are you sure you want to <span className={`font-bold ${selectedConfig?.enabled ? 'text-orange-600' : 'text-green-600 dark:text-green-400'}`}>{selectedConfig?.enabled ? 'pause' : 'activate'}</span> the auto message configuration for <span className="text-slate-900 dark:text-white font-bold">"{selectedConfig?.webinarName || selectedConfig?.webinarId}"</span>?
               </p>
               {selectedConfig?.enabled && (
                 <div className="mt-4 p-3 rounded-xl bg-orange-50 border border-orange-100 flex items-start gap-3">
@@ -299,7 +299,7 @@ export default function AutoMessageConfigsList() {
                   setSelectedConfig(null);
                 }}
                 disabled={toggling}
-                className="rounded-xl px-4 py-2.5 font-medium border-slate-200 text-slate-600 hover:bg-slate-50 flex-1"
+                className="rounded-xl px-4 py-2.5 font-medium border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50 flex-1"
               >
                 Cancel
               </Button>

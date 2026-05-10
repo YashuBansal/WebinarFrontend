@@ -109,7 +109,7 @@ export default function ContactForm({
   };
 
   const labelStyles = "block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 flex items-center gap-1.5";
-  const inputStyles = "rounded-xl border-slate-200 focus:ring-green-500/20 py-5 text-sm font-medium shadow-sm bg-white transition-all";
+  const inputStyles = "rounded-xl border-slate-200 dark:border-slate-800 focus:ring-green-500/20 py-5 text-sm font-medium shadow-sm bg-white dark:bg-slate-900 transition-all";
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -118,14 +118,14 @@ export default function ContactForm({
         onPointerDownOutside={(e) => e.preventDefault()}
         showCloseButton={false}
       >
-        <div className="relative w-full rounded-2xl p-8 shadow-2xl flex flex-col bg-white border border-slate-200">
+        <div className="relative w-full rounded-2xl p-8 shadow-2xl flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <div className="flex items-center gap-2 text-green-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-1">
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-1">
                 {contact ? <User className="h-3 w-3" /> : <UserPlus className="h-3 w-3" />}
                 {contact ? 'Update Identity' : 'Onboard Subscriber'}
               </div>
-              <DialogTitle className="text-xl font-bold text-slate-900">
+              <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
                 {contact ? 'Edit Contact' : 'Create New Contact'}
               </DialogTitle>
               <DialogDescription className="sr-only">
@@ -135,7 +135,7 @@ export default function ContactForm({
             <button
               type="button"
               onClick={handleClose}
-              className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-50 text-slate-400 transition-colors border border-transparent hover:border-slate-100"
+              className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 text-slate-400 transition-colors border border-transparent hover:border-slate-100"
             >
               <X className="w-5 h-5" />
             </button>
@@ -237,7 +237,7 @@ export default function ContactForm({
                 onChange={(value) => setValue('tags', value)}
                 disabled={isLoading}
                 placeholder="Select audience tags..."
-                className="rounded-xl border-slate-200"
+                className="rounded-xl border-slate-200 dark:border-slate-700/50"
               />
             </div>
 
@@ -246,7 +246,7 @@ export default function ContactForm({
                 type="button"
                 variant="outline"
                 onClick={handleClose}
-                className="h-12 px-6 rounded-xl font-bold text-slate-600 border-slate-200 hover:bg-slate-50 transition-all"
+                className="h-12 px-6 rounded-xl font-bold text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all"
               >
                 Cancel
               </Button>

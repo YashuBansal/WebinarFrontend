@@ -55,17 +55,17 @@ export function TagsTable({
   };
 
   return (
-    <div className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden">
+    <div className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 hover:border-green-400 dark:hover:border-green-500 hover:shadow-xl transition-all duration-300 rounded-[20px] p-6 overflow-hidden">
       <div className="absolute top-0 right-0 -mr-24 -mt-24 h-64 w-64 rounded-full bg-green-500/5 blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity" />
 
       <div className="relative z-10">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div>
-            <h2 className="text-xl font-black text-slate-900 flex items-center gap-2">
-              <Tag className="h-5 w-5 text-green-600" />
+            <h2 className="text-xl font-black text-slate-900 dark:text-white flex items-center gap-2">
+              <Tag className="h-5 w-5 text-green-600 dark:text-green-400" />
               Manage Tags
             </h2>
-            <p className="text-slate-500 text-xs font-medium mt-1">View and organize your custom WABA tags</p>
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-1">View and organize your custom WABA tags</p>
           </div>
 
           <div className="relative w-full sm:w-72">
@@ -74,7 +74,7 @@ export function TagsTable({
               placeholder="Search tags..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="pl-10 h-10 bg-slate-50/50 border-slate-200 rounded-xl text-sm font-medium focus:bg-white transition-all"
+              className="pl-10 h-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl text-sm font-medium focus:bg-white transition-all"
             />
           </div>
         </div>
@@ -86,8 +86,8 @@ export function TagsTable({
             ))}
           </div>
         ) : tags.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-slate-400 bg-slate-50/30 rounded-2xl border border-dashed border-slate-200">
-            <div className="h-16 w-16 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-sm">
+          <div className="flex flex-col items-center justify-center py-16 text-slate-400 bg-slate-50 dark:bg-slate-900 rounded-2xl border border-dashed border-slate-200 dark:border-slate-800">
+            <div className="h-16 w-16 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center mb-4 shadow-sm">
               <Tag className="h-8 w-8 opacity-20" />
             </div>
             <p className="font-bold text-sm uppercase tracking-widest">No tags found</p>
@@ -96,10 +96,10 @@ export function TagsTable({
             )}
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-slate-100 bg-white">
+          <div className="overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900">
             <Table>
-              <TableHeader className="bg-slate-50/50">
-                <TableRow className="hover:bg-transparent border-slate-100">
+              <TableHeader className="bg-slate-50 dark:bg-slate-800">
+                <TableRow className="hover:bg-transparent border-slate-100 dark:border-slate-800">
                   <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-400 pl-6">Tag Name</TableHead>
                   <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-400">Created At</TableHead>
                   <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right pr-6">Actions</TableHead>
@@ -107,17 +107,17 @@ export function TagsTable({
               </TableHeader>
               <TableBody>
                 {tags.map((tag) => (
-                  <TableRow key={tag._id} className="group/row hover:bg-slate-50/50 border-slate-100 transition-colors">
+                  <TableRow key={tag._id} className="group/row hover:bg-slate-50 dark:hover:bg-slate-800 border-slate-100 dark:border-slate-800 transition-colors">
                     <TableCell className="py-4 pl-6">
                       <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-lg bg-green-50 flex items-center justify-center text-green-600 font-bold text-xs">
+                        <div className="h-8 w-8 rounded-lg bg-green-50 dark:bg-green-900 flex items-center justify-center text-green-600 dark:text-green-400 font-bold text-xs">
                           #
                         </div>
-                        <span className="font-bold text-slate-700 text-sm">{tag.name}</span>
+                        <span className="font-bold text-slate-700 dark:text-slate-300 text-sm">{tag.name}</span>
                       </div>
                     </TableCell>
                     <TableCell className="py-4">
-                      <div className="flex items-center gap-2 text-slate-500 font-medium text-xs">
+                      <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 font-medium text-xs">
                         <Calendar className="h-3.5 w-3.5 opacity-60" />
                         {new Date(tag.createdAt).toLocaleDateString(undefined, {
                           year: 'numeric',
@@ -132,7 +132,7 @@ export function TagsTable({
                           variant="outline"
                           size="icon"
                           onClick={() => onEdit(tag)}
-                          className="h-8 w-8 rounded-lg border-slate-200 text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all"
+                          className="h-8 w-8 rounded-lg border-slate-200 dark:border-slate-800 text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900 transition-all"
                           title="Edit tag"
                         >
                           <Edit className="h-3.5 w-3.5" />
@@ -141,7 +141,7 @@ export function TagsTable({
                           variant="outline"
                           size="icon"
                           onClick={() => handleDeleteClick(tag)}
-                          className="h-8 w-8 rounded-lg border-slate-200 text-slate-400 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all"
+                          className="h-8 w-8 rounded-lg border-slate-200 dark:border-slate-800 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-900 transition-all"
                           title="Delete tag"
                         >
                           <Trash2 className="h-3.5 w-3.5" />

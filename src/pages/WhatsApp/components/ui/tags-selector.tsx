@@ -62,11 +62,11 @@ export const TagsSelector: React.FC<TagsSelectorProps> = ({
             variant="outline"
             role="combobox"
             aria-expanded={open}
-            className={cn("w-full justify-between h-12 rounded-xl border-slate-200 bg-white hover:bg-slate-50 transition-all px-4", className)}
+            className={cn("w-full justify-between h-12 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all px-4", className)}
             disabled={disabled}
           >
             {value.length > 0 ? (
-              <span className="text-sm font-bold text-slate-700">{value.length} tag{value.length > 1 ? 's' : ''} selected</span>
+              <span className="text-sm font-bold text-slate-700 dark:text-slate-300">{value.length} tag{value.length > 1 ? 's' : ''} selected</span>
             ) : (
               <span className="text-sm font-medium text-slate-400">{placeholder}</span>
             )}
@@ -91,11 +91,11 @@ export const TagsSelector: React.FC<TagsSelectorProps> = ({
                   >
                     <Check
                       className={cn(
-                        "mr-2 h-4 w-4 text-green-600",
+                        "mr-2 h-4 w-4 text-green-600 dark:text-green-400",
                         value.includes(tagName) ? "opacity-100" : "opacity-0"
                       )}
                     />
-                    <span className="text-xs font-bold text-slate-700">{tagName}</span>
+                    <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{tagName}</span>
                   </CommandItem>
                 );
               })}

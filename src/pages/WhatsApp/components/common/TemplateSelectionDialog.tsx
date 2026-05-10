@@ -135,34 +135,37 @@ export function TemplateSelectionDialog({
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="w-screen sm:w-[80vw] max-w-none sm:max-w-none">
-          <DialogHeader>
-            <DialogTitle>Select WhatsApp template</DialogTitle>
+        <DialogContent className="w-screen sm:w-[80vw] max-w-none sm:max-w-none max-h-[95vh] flex flex-col gap-0 p-0 overflow-hidden bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800">
+          <DialogHeader className="shrink-0 px-6 py-4 bg-white dark:bg-slate-900 border-b border-slate-100 dark:border-slate-800">
+            <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">Select WhatsApp template</DialogTitle>
           </DialogHeader>
 
-          <TemplateSelectionForm
-            selectedTemplate={selectedTemplate}
-            variableMappings={variableMappings}
-            selectedMediaAsset={selectedMediaAsset}
-            uploadedFileName={uploadedFileName}
-            setSelectedTemplate={setSelectedTemplate}
-            setVariableMappings={setVariableMappings}
-            setSelectedMediaAsset={setSelectedMediaAsset}
-            setUploadedFileName={setUploadedFileName}
-            onTemplateSelect={onTemplateSelect}
-            projectId={projectId}
-            contactFieldOptions={contactFieldOptions}
-            showPreview={showPreview}
-            showHeaderMedia={showHeaderMedia}
-            allowDynamicFields={allowDynamicFields}
-            showValidationErrors={effectiveShowValidationErrors}
-          />
+          <div className="flex-1 overflow-y-auto custom-scrollbar">
 
-          <div className="mt-4 flex justify-end gap-2">
+            <TemplateSelectionForm
+              selectedTemplate={selectedTemplate}
+              variableMappings={variableMappings}
+              selectedMediaAsset={selectedMediaAsset}
+              uploadedFileName={uploadedFileName}
+              setSelectedTemplate={setSelectedTemplate}
+              setVariableMappings={setVariableMappings}
+              setSelectedMediaAsset={setSelectedMediaAsset}
+              setUploadedFileName={setUploadedFileName}
+              onTemplateSelect={onTemplateSelect}
+              projectId={projectId}
+              contactFieldOptions={contactFieldOptions}
+              showPreview={showPreview}
+              showHeaderMedia={showHeaderMedia}
+              allowDynamicFields={allowDynamicFields}
+              showValidationErrors={effectiveShowValidationErrors}
+            />
+          </div>
+
+          <div className="shrink-0 px-6 py-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3">
             <Button
               type="button"
               variant="outline"
-              size="sm"
+              className="rounded-xl px-6 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
               onClick={() => {
                 setInternalShowValidationErrors(false);
                 setOpen(false);
@@ -172,7 +175,7 @@ export function TemplateSelectionDialog({
             </Button>
             <Button
               type="button"
-              size="sm"
+              className="rounded-xl px-6 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100 shadow-lg shadow-slate-900/20 dark:shadow-white/10 transition-all"
               onClick={handleConfirm}
             >
               Use this template

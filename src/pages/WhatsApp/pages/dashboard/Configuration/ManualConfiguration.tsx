@@ -112,8 +112,8 @@ export default function ManualConfiguration({ onConfigurationSuccess }: ManualCo
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <Loader2 className="h-10 w-10 animate-spin text-green-600" />
-        <p className="text-slate-500 font-bold text-sm uppercase tracking-widest">Fetching Project State...</p>
+        <Loader2 className="h-10 w-10 animate-spin text-green-600 dark:text-green-400" />
+        <p className="text-slate-500 dark:text-slate-400 font-bold text-sm uppercase tracking-widest">Fetching Project State...</p>
       </div>
     );
   }
@@ -138,10 +138,10 @@ export default function ManualConfiguration({ onConfigurationSuccess }: ManualCo
       <AnimatePresence>
         {showSuccessMessage && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-            <Alert className="bg-green-50 border-green-200 rounded-2xl mb-4">
-              <CheckCircle className="h-4 w-4 text-green-600" />
+            <Alert className="bg-green-50 dark:bg-green-500/10 border-green-200 rounded-2xl mb-4">
+              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
               <AlertTitle className="text-green-800 font-bold">Success</AlertTitle>
-              <AlertDescription className="text-green-700 font-medium">
+              <AlertDescription className="text-green-700 dark:text-green-400 font-medium">
                 Project configuration has been updated successfully.
               </AlertDescription>
             </Alert>
@@ -167,10 +167,10 @@ export default function ManualConfiguration({ onConfigurationSuccess }: ManualCo
             {/* API Credentials Section */}
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-2">
-                <div className="h-8 w-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
+                <div className="h-8 w-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
                   <ShieldCheck className="h-4 w-4" />
                 </div>
-                <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">API Credentials</h4>
+                <h4 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest">API Credentials</h4>
               </div>
 
               <div className="space-y-5">
@@ -179,9 +179,9 @@ export default function ManualConfiguration({ onConfigurationSuccess }: ManualCo
                   name="appId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-bold text-slate-700">App ID</FormLabel>
+                      <FormLabel className="font-bold text-slate-700 dark:text-slate-300">App ID</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="Your Meta App ID" className="rounded-xl border-slate-200 focus:ring-green-500/20 h-12" />
+                        <Input {...field} placeholder="Your Meta App ID" className="rounded-xl border-slate-200 dark:border-slate-700/50 focus:ring-green-500/20 h-12" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -192,9 +192,9 @@ export default function ManualConfiguration({ onConfigurationSuccess }: ManualCo
                   name="appSecret"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-bold text-slate-700">App Secret</FormLabel>
+                      <FormLabel className="font-bold text-slate-700 dark:text-slate-300">App Secret</FormLabel>
                       <FormControl>
-                        <Input type="password" {...field} placeholder="Your Meta App Secret" className="rounded-xl border-slate-200 focus:ring-green-500/20 h-12" />
+                        <Input type="password" {...field} placeholder="Your Meta App Secret" className="rounded-xl border-slate-200 dark:border-slate-700/50 focus:ring-green-500/20 h-12" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -209,7 +209,7 @@ export default function ManualConfiguration({ onConfigurationSuccess }: ManualCo
                 <div className="h-8 w-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
                   <Database className="h-4 w-4" />
                 </div>
-                <h4 className="text-sm font-black text-slate-800 uppercase tracking-widest">Account Details</h4>
+                <h4 className="text-sm font-black text-slate-800 dark:text-slate-200 uppercase tracking-widest">Account Details</h4>
               </div>
 
               <div className="space-y-5">
@@ -218,9 +218,9 @@ export default function ManualConfiguration({ onConfigurationSuccess }: ManualCo
                   name="wabaId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-bold text-slate-700">WABA ID</FormLabel>
+                      <FormLabel className="font-bold text-slate-700 dark:text-slate-300">WABA ID</FormLabel>
                       <FormControl>
-                        <Input {...field} placeholder="WhatsApp Business Account ID" className="rounded-xl border-slate-200 focus:ring-green-500/20 h-12" />
+                        <Input {...field} placeholder="WhatsApp Business Account ID" className="rounded-xl border-slate-200 dark:border-slate-700/50 focus:ring-green-500/20 h-12" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -231,9 +231,9 @@ export default function ManualConfiguration({ onConfigurationSuccess }: ManualCo
                   name="permanentAccessToken"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-bold text-slate-700">Permanent Access Token</FormLabel>
+                      <FormLabel className="font-bold text-slate-700 dark:text-slate-300">Permanent Access Token</FormLabel>
                       <FormControl>
-                        <Input type="password" {...field} placeholder="System User Token" className="rounded-xl border-slate-200 focus:ring-green-500/20 h-12" />
+                        <Input type="password" {...field} placeholder="System User Token" className="rounded-xl border-slate-200 dark:border-slate-700/50 focus:ring-green-500/20 h-12" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -260,14 +260,14 @@ export default function ManualConfiguration({ onConfigurationSuccess }: ManualCo
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="space-y-6 border border-slate-100 rounded-3xl p-8 bg-slate-50/50"
+                className="space-y-6 border border-slate-100 dark:border-slate-700/50 rounded-3xl p-8 bg-slate-50/50 dark:bg-slate-800/50"
               >
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="h-12 w-12 rounded-2xl bg-white shadow-sm flex items-center justify-center text-green-600 border border-slate-100">
+                  <div className="h-12 w-12 rounded-2xl bg-white dark:bg-slate-800/50 shadow-sm flex items-center justify-center text-green-600 dark:text-green-400 border border-slate-100 dark:border-slate-700/50">
                     <Globe className="h-6 w-6" />
                   </div>
                   <div>
-                    <h4 className="text-xl font-black text-slate-900">{wabaDetails.name}</h4>
+                    <h4 className="text-xl font-black text-slate-900 dark:text-white">{wabaDetails.name}</h4>
                     <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Account Verified</p>
                   </div>
                 </div>
@@ -277,7 +277,7 @@ export default function ManualConfiguration({ onConfigurationSuccess }: ManualCo
                   name="phoneNumberId"
                   render={({ field }) => (
                     <FormItem className="space-y-4">
-                      <FormLabel className="text-sm font-black text-slate-700 uppercase tracking-widest">Select Project Phone Number</FormLabel>
+                      <FormLabel className="text-sm font-black text-slate-700 dark:text-slate-300 uppercase tracking-widest">Select Project Phone Number</FormLabel>
                       <PhoneNumberSelector
                         phoneNumbers={wabaDetails.phone_numbers.data}
                         value={field.value}
@@ -301,7 +301,7 @@ export default function ManualConfiguration({ onConfigurationSuccess }: ManualCo
             </Alert>
           )}
 
-          <div className="flex justify-end pt-6 border-t border-slate-100">
+          <div className="flex justify-end pt-6 border-t border-slate-100 dark:border-slate-700/50">
             <Button
               type="submit"
               disabled={isUpdatingProject}

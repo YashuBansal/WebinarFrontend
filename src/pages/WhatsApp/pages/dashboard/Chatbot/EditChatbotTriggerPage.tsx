@@ -75,7 +75,7 @@ export default function EditChatbotTriggerPage() {
   if (isLoading || (!trigger && triggers.length > 0)) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-        <div className="h-12 w-12 rounded-2xl bg-green-50 flex items-center justify-center">
+        <div className="h-12 w-12 rounded-2xl bg-green-50 dark:bg-green-500/10 flex items-center justify-center">
           <div className="h-6 w-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
         </div>
         <p className="text-slate-400 text-sm font-medium animate-pulse">Loading trigger details...</p>
@@ -86,11 +86,11 @@ export default function EditChatbotTriggerPage() {
   if (!trigger && !isLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[400px] p-6 text-center">
-        <div className="h-16 w-16 rounded-2xl bg-red-50 flex items-center justify-center mb-4">
+        <div className="h-16 w-16 rounded-2xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center mb-4">
           <AlertCircle className="h-8 w-8 text-red-500" />
         </div>
-        <h3 className="text-lg font-bold text-slate-900 mb-2">Trigger Not Found</h3>
-        <p className="text-slate-500 text-sm max-w-xs mb-6">
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Trigger Not Found</h3>
+        <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xs mb-6">
           The trigger you are looking for might have been deleted or doesn't exist.
         </p>
         <Link to={`/whatsapp/dashboard/${projectId}/chatbot`}>
@@ -106,13 +106,10 @@ export default function EditChatbotTriggerPage() {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -120,21 +117,21 @@ export default function EditChatbotTriggerPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-10 w-10 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100 transition-all text-slate-500"
+                className="h-10 w-10 rounded-xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all text-slate-500 dark:text-slate-400"
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
             </Link>
             <div className="space-y-1">
-              <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-0.5">
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-xs uppercase tracking-widest mb-0.5">
                 <Bot className="h-3.5 w-3.5" />
                 Edit Automation
               </div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
                 Edit Trigger
               </h1>
-              <p className="text-slate-500 text-xs font-medium">
-                Modify your keyword and <span className="text-slate-900 font-bold">Auto Response</span>
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                Modify your keyword and <span className="text-slate-900 dark:text-white font-bold">Auto Response</span>
               </p>
             </div>
           </div>
@@ -156,7 +153,7 @@ export default function EditChatbotTriggerPage() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 sm:p-8 transition-all duration-300 overflow-hidden"
+          className="group relative bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-2xl p-6 sm:p-8 transition-all duration-300 overflow-hidden"
         >
           <div className="absolute top-0 right-0 -mr-24 -mt-24 h-64 w-64 rounded-full bg-green-500/5 blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity" />
 
@@ -165,10 +162,10 @@ export default function EditChatbotTriggerPage() {
               {/* Keyword Section */}
               <div className="space-y-4">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="h-8 w-8 rounded-lg bg-green-50 flex items-center justify-center text-green-600">
+                  <div className="h-8 w-8 rounded-lg bg-green-50 dark:bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400">
                     <Hash className="h-4 w-4" />
                   </div>
-                  <h2 className="text-lg font-black text-slate-900">Trigger Keyword</h2>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white">Trigger Keyword</h2>
                 </div>
 
                 <div className="space-y-2">
@@ -180,7 +177,7 @@ export default function EditChatbotTriggerPage() {
                     value={keyword}
                     onChange={(e) => setKeyword(e.target.value)}
                     placeholder="e.g. Price, Help, Menu"
-                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-green-500/20 transition-all font-medium"
+                    className="h-12 rounded-xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 focus:bg-white focus:ring-green-500/20 transition-all font-medium"
                     required
                   />
                   <p className="text-[11px] text-slate-400 font-medium ml-1">
@@ -189,15 +186,15 @@ export default function EditChatbotTriggerPage() {
                 </div>
               </div>
 
-              <hr className="border-slate-100" />
+              <hr className="border-slate-100 dark:border-slate-700/50" />
 
               {/* Response Section */}
               <div className="space-y-6">
                 <div className="flex items-center gap-2 mb-4">
-                  <div className="h-8 w-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
+                  <div className="h-8 w-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
                     <MessageSquare className="h-4 w-4" />
                   </div>
-                  <h2 className="text-lg font-black text-slate-900">Response Action</h2>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white">Response Action</h2>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -209,10 +206,10 @@ export default function EditChatbotTriggerPage() {
                       value={responseType}
                       onValueChange={(v) => setResponseType(v as ResponseType)}
                     >
-                      <SelectTrigger className="h-12 rounded-xl border-slate-200 bg-slate-50/50 focus:ring-green-500/20 transition-all font-medium">
+                      <SelectTrigger className="h-12 rounded-xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 focus:ring-green-500/20 transition-all font-medium">
                         <SelectValue />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-slate-200 shadow-xl">
+                      <SelectContent className="rounded-xl border-slate-200 dark:border-slate-700/50 shadow-xl">
                         <SelectItem value="text" className="font-medium">Text Message</SelectItem>
                         <SelectItem value="link" className="font-medium">Web Link / URL</SelectItem>
                       </SelectContent>
@@ -230,13 +227,13 @@ export default function EditChatbotTriggerPage() {
                         value={responseValue}
                         onChange={(e) => setResponseValue(e.target.value)}
                         placeholder="https://yourlink.com"
-                        className="h-12 rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white focus:ring-green-500/20 transition-all font-medium"
+                        className="h-12 rounded-xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 focus:bg-white focus:ring-green-500/20 transition-all font-medium"
                         required
                       />
                     ) : (
                       <textarea
                         id="responseValue"
-                        className="flex min-h-[120px] w-full rounded-xl border border-slate-200 bg-slate-50/50 px-4 py-3 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all custom-scrollbar resize-none"
+                        className="flex min-h-[120px] w-full rounded-xl border border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 px-4 py-3 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all custom-scrollbar resize-none"
                         value={responseValue}
                         onChange={(e) => setResponseValue(e.target.value)}
                         placeholder="Type the message to send automatically..."
@@ -247,7 +244,7 @@ export default function EditChatbotTriggerPage() {
                 </div>
               </div>
 
-              <hr className="border-slate-100" />
+              <hr className="border-slate-100 dark:border-slate-700/50" />
 
               {/* Status Section */}
               <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -256,13 +253,13 @@ export default function EditChatbotTriggerPage() {
                     <Settings2 className="h-4 w-4" />
                   </div>
                   <div>
-                    <h2 className="text-sm font-bold text-slate-900">Automation Status</h2>
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-white">Automation Status</h2>
                     <p className="text-[11px] text-slate-400 font-medium">Control whether this trigger is active</p>
                   </div>
                 </div>
 
                 <div
-                  className={`flex items-center gap-3 px-4 py-2 rounded-xl border transition-all cursor-pointer ${enabled ? 'bg-green-50 border-green-200 text-green-700 shadow-sm' : 'bg-slate-50 border-slate-200 text-slate-400'}`}
+                  className={`flex items-center gap-3 px-4 py-2 rounded-xl border transition-all cursor-pointer ${enabled ? 'bg-green-50 dark:bg-green-500/10 border-green-200 text-green-700 dark:text-green-400 shadow-sm' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/50 text-slate-400'}`}
                   onClick={() => setEnabled(!enabled)}
                 >
                   <Checkbox
@@ -278,8 +275,8 @@ export default function EditChatbotTriggerPage() {
               </div>
 
               {/* Quick Info */}
-              <div className="p-4 rounded-2xl bg-blue-50 border border-blue-100 flex gap-4 items-start">
-                <div className="h-8 w-8 rounded-lg bg-white border border-blue-100 flex items-center justify-center text-blue-600 shrink-0">
+              <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 flex gap-4 items-center">
+                <div className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800/50 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
                   <Info className="h-4 w-4" />
                 </div>
                 <p className="text-[11px] font-medium text-blue-700 leading-relaxed">
@@ -300,7 +297,7 @@ export default function EditChatbotTriggerPage() {
                   <Button
                     type="button"
                     variant="ghost"
-                    className="h-11 px-8 rounded-xl font-bold text-sm text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all"
+                    className="h-11 px-8 rounded-xl font-bold text-sm text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all"
                   >
                     Cancel
                   </Button>

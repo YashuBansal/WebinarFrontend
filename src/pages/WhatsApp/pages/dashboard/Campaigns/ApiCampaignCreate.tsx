@@ -155,11 +155,11 @@ const ApiCampaignCreate = () => {
 
   if (!selectedProject) {
     return (
-      <div className="min-h-full flex items-center justify-center p-8">
-        <Alert className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+      <div className="min-h-full flex items-center justify-center p-8 bg-white dark:bg-slate-800/50 shadow-sm">
+        <Alert className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white dark:bg-slate-800/50">
           <AlertCircle className="h-8 w-8 mb-4 text-[#22B573]" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Project Required</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">Project Required</AlertTitle>
+          <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
             Please select a project from the sidebar to create API campaigns.
           </AlertDescription>
         </Alert>
@@ -171,13 +171,10 @@ const ApiCampaignCreate = () => {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -185,7 +182,7 @@ const ApiCampaignCreate = () => {
               variant="ghost"
               size="icon"
               onClick={() => navigate(`/whatsapp/dashboard/${resolvedProjectId}/api-campaigns`)}
-              className="h-10 w-10 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100 transition-all text-slate-500"
+              className="h-10 w-10 rounded-xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all text-slate-500 dark:text-slate-400"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -194,10 +191,10 @@ const ApiCampaignCreate = () => {
                 <Code className="h-3.5 w-3.5" />
                 API Hub
               </div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
                 Create API Campaign
               </h1>
-              <p className="text-slate-500 text-xs font-medium">
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
                 Establish a webhook-ready messaging endpoint.
               </p>
             </div>
@@ -205,7 +202,7 @@ const ApiCampaignCreate = () => {
 
           <div className="flex items-center gap-2">
             <Link to={`/whatsapp/dashboard/${resolvedProjectId}/campaigns`}>
-              <Button variant="ghost" size="sm" className="h-10 px-4 rounded-xl font-bold text-xs uppercase tracking-widest text-slate-400 hover:text-slate-900 transition-all">
+              <Button variant="ghost" size="sm" className="h-10 px-4 rounded-xl font-bold text-xs uppercase tracking-widest text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
                 WhatsApp Campaigns
               </Button>
             </Link>
@@ -213,16 +210,16 @@ const ApiCampaignCreate = () => {
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-2">
         {/* Help Sidebar */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="xl:col-span-1 space-y-6"
+          className="xl:col-span-1 space-y-4"
         >
-          <Card className="rounded-[24px] border-slate-200 shadow-sm overflow-hidden sticky top-6">
-            <CardHeader className="bg-slate-50/50 border-b border-slate-100 p-6">
-              <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+          <Card className="rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden sticky top-6">
+            <CardHeader className="bg-slate-50/50 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-700/50 p-6">
+              <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
                 <Target className="h-4 w-4 text-[#22B573]" />
                 Endpoint Specs
               </CardTitle>
@@ -235,19 +232,19 @@ const ApiCampaignCreate = () => {
                   { label: "Data Format", value: "JSON Payload", icon: Code },
                 ].map((item, i) => (
                   <div key={i} className="flex items-start gap-4 group">
-                    <div className="h-10 w-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-[#22B573] transition-all">
+                    <div className="h-10 w-10 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-slate-400 group-hover:text-[#22B573] transition-all">
                       <item.icon className="h-5 w-5" />
                     </div>
                     <div className="space-y-0.5">
                       <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.label}</p>
-                      <p className="text-sm font-bold text-slate-900">{item.value}</p>
+                      <p className="text-sm font-bold text-slate-900 dark:text-white">{item.value}</p>
                     </div>
                   </div>
                 ))}
               </div>
 
               <div className="p-4 rounded-2xl bg-[#22B573]/5 border border-[#22B573]/10">
-                <p className="text-[11px] font-medium text-slate-600 leading-relaxed">
+                <p className="text-[11px] font-medium text-slate-600 dark:text-slate-400 leading-relaxed">
                   API campaigns are lightweight templates that can be triggered programmatically from your existing workflows or systems.
                 </p>
               </div>
@@ -258,112 +255,122 @@ const ApiCampaignCreate = () => {
         {/* Main Content */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
+          animate={{ opacity: 1, y: 0 }}
           className="xl:col-span-3"
         >
-          <Card className="rounded-[32px] border-slate-200 shadow-xl shadow-slate-200/50 overflow-hidden bg-white">
-            <CardHeader className="bg-slate-50/30 border-b border-slate-100 px-6 sm:px-10 py-8">
-              <CardTitle className="text-xl font-black text-slate-900 tracking-tight flex items-center gap-3">
-                <Settings2 className="h-6 w-6 text-[#22B573]" />
-                Campaign configuration
-              </CardTitle>
-              <CardDescription className="text-slate-500 font-medium">
-                Map your template and variables for API consumption.
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="px-6 sm:px-10 py-10">
-              <form className="space-y-10" onSubmit={handleSubmit(onSubmit)}>
+          <form className="space-y-6" onSubmit={handleSubmit(onSubmit)}>
+            {/* 1. Campaign Identity Card */}
+            <Card className="rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden bg-white dark:bg-slate-800/50">
+              <CardHeader className="bg-slate-50/30 dark:bg-slate-900/40 border-b border-slate-100 dark:border-slate-700/50 px-6 sm:px-10 py-6">
+                <CardTitle className="text-lg font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-[#22B573]" />
+                  Campaign Identity
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="px-6 sm:px-10 py-6">
                 <div className="space-y-4">
                   <div className="flex items-center gap-2 mb-2">
                     <div className="h-5 w-1 bg-[#22B573] rounded-full" />
-                    <Label htmlFor="name" className="text-sm font-black uppercase tracking-widest text-slate-400">Campaign Identity</Label>
+                    <Label htmlFor="name" className="text-sm font-black uppercase tracking-widest text-slate-400">Name your campaign</Label>
                   </div>
                   <div className="relative group">
                     <Input
                       id="name"
                       placeholder="e.g. Transactional OTP Service"
-                      className={`h-14 rounded-2xl border-slate-200 bg-slate-50/50 pl-12 text-base font-bold transition-all focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] ${errors.name ? 'border-red-300' : ''}`}
+                      className={`h-14 rounded-2xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-900/60 pl-12 text-base font-bold transition-all focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] ${errors.name ? 'border-red-300' : ''}`}
                       {...register("name")}
                     />
-                    <FileText className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#22B573] transition-colors" />
+                    <Target className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#22B573] transition-colors" />
                   </div>
                   {errors.name && (
                     <motion.p
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
-                      className="text-xs font-bold text-red-600 flex items-center gap-1 pl-2"
+                      className="text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1 pl-2"
                     >
                       <AlertCircle className="h-3 w-3" />
                       {errors.name.message}
                     </motion.p>
                   )}
                 </div>
+              </CardContent>
+            </Card>
 
-                <div className="space-y-6">
-                  <div className="flex items-center gap-2">
-                    <div className="h-5 w-1 bg-[#22B573] rounded-full" />
-                    <Label className="text-sm font-black uppercase tracking-widest text-slate-400">Template blueprint</Label>
+            {/* 2. Template Configuration Card (Sticky Preview inside) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="group relative bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:border-green-400/30 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-2xl p-1 transition-all duration-300"
+            >
+              <TemplateSelectionForm
+                selectedTemplate={selectedTemplate}
+                variableMappings={variableMappings}
+                selectedMediaAsset={selectedMediaAsset}
+                uploadedFileName={uploadedFileName}
+                setSelectedTemplate={(template) => {
+                  setSelectedTemplate(template);
+                  setShowValidationErrors(false);
+                }}
+                setVariableMappings={setVariableMappings}
+                setSelectedMediaAsset={setSelectedMediaAsset}
+                setUploadedFileName={setUploadedFileName}
+                onTemplateSelect={(template) => {
+                  setValue("templateName", template.name, {
+                    shouldValidate: true,
+                  });
+                  setFormErrors((prev) => ({ ...prev, template: undefined }));
+                  setShowValidationErrors(false);
+                }}
+                onVariableMappingsChange={() => {
+                  setFormErrors((prev) => ({ ...prev, variables: undefined }));
+                }}
+                projectId={selectedProject?._id}
+                showPreview={true}
+                showHeaderMedia={true}
+                allowDynamicFields={false}
+                showValidationErrors={showValidationErrors}
+              />
+            </motion.div>
+
+            {/* 3. Validation and Deployment Card */}
+            <Card className="rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-lg bg-white dark:bg-slate-800/50 overflow-hidden">
+              <CardContent className="p-4 sm:p-4">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4">
+                  <div className="flex-1">
+                    {(formErrors.template || formErrors.variables || formErrors.media) ? (
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        className="p-4 rounded-2xl bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 space-y-1"
+                      >
+                        {formErrors.template && <p className="text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1.5"><AlertCircle className="h-3 w-3" /> {formErrors.template}</p>}
+                        {formErrors.variables && <p className="text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1.5"><AlertCircle className="h-3 w-3" /> {formErrors.variables}</p>}
+                        {formErrors.media && <p className="text-xs font-bold text-red-600 dark:text-red-400 flex items-center gap-1.5"><AlertCircle className="h-3 w-3" /> {formErrors.media}</p>}
+                      </motion.div>
+                    ) : (
+                      <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
+                        <CheckCircle2 className="h-5 w-5 text-[#22B573]" />
+                        <p className="text-sm font-medium">Ready to deploy your transactional API endpoint.</p>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="rounded-3xl border border-slate-100 bg-slate-50/30 p-1">
-                    <TemplateSelectionForm
-                      selectedTemplate={selectedTemplate}
-                      variableMappings={variableMappings}
-                      selectedMediaAsset={selectedMediaAsset}
-                      uploadedFileName={uploadedFileName}
-                      setSelectedTemplate={(template) => {
-                        setSelectedTemplate(template);
-                        setShowValidationErrors(false);
-                      }}
-                      setVariableMappings={setVariableMappings}
-                      setSelectedMediaAsset={setSelectedMediaAsset}
-                      setUploadedFileName={setUploadedFileName}
-                      onTemplateSelect={(template) => {
-                        setValue("templateName", template.name, {
-                          shouldValidate: true,
-                        });
-                        setFormErrors((prev) => ({ ...prev, template: undefined }));
-                        setShowValidationErrors(false);
-                      }}
-                      onVariableMappingsChange={() => {
-                        setFormErrors((prev) => ({ ...prev, variables: undefined }));
-                      }}
-                      projectId={selectedProject?._id}
-                      showPreview={true}
-                      showHeaderMedia={true}
-                      allowDynamicFields={false}
-                      showValidationErrors={showValidationErrors}
-                    />
-                  </div>
-
-                  {(formErrors.template || formErrors.variables || formErrors.media) && (
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="p-4 rounded-2xl bg-red-50 border border-red-100 space-y-1"
-                    >
-                      {formErrors.template && <p className="text-xs font-bold text-red-600 flex items-center gap-1.5"><AlertCircle className="h-3 w-3" /> {formErrors.template}</p>}
-                      {formErrors.variables && <p className="text-xs font-bold text-red-600 flex items-center gap-1.5"><AlertCircle className="h-3 w-3" /> {formErrors.variables}</p>}
-                      {formErrors.media && <p className="text-xs font-bold text-red-600 flex items-center gap-1.5"><AlertCircle className="h-3 w-3" /> {formErrors.media}</p>}
-                    </motion.div>
-                  )}
+                  <Button
+                    type="submit"
+                    disabled={createApiCampaignMutation.isPending || (showValidationErrors && !watchedValues.templateName)}
+                    className="h-14 px-8 rounded-2xl bg-[#22B573] hover:bg-[#1da467] text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 min-w-[240px]"
+                  >
+                    {createApiCampaignMutation.isPending ? (
+                      <Loader2 className="h-5 w-5 animate-spin mr-3" />
+                    ) : (
+                      <Sparkles className="h-5 w-5 mr-3" />
+                    )}
+                    {createApiCampaignMutation.isPending ? "Initializing..." : "Deploy API Campaign"}
+                  </Button>
                 </div>
-
-                <Button
-                  type="submit"
-                  disabled={createApiCampaignMutation.isPending || (showValidationErrors && !watchedValues.templateName)}
-                  className="w-full h-14 rounded-2xl bg-[#22B573] hover:bg-[#1da467] text-white font-black uppercase tracking-widest text-xs shadow-xl shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50"
-                >
-                  {createApiCampaignMutation.isPending ? (
-                    <Loader2 className="h-5 w-5 animate-spin mr-3" />
-                  ) : (
-                    <Sparkles className="h-5 w-5 mr-3" />
-                  )}
-                  {createApiCampaignMutation.isPending ? "Initializing Engine..." : "Deploy API Campaign"}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
+              </CardContent>
+            </Card>
+          </form>
         </motion.div>
       </div>
     </div>

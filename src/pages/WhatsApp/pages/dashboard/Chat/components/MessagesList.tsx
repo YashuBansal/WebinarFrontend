@@ -168,7 +168,7 @@ export function MessagesList({
       {hasMore && (
         <div className="flex justify-center mb-4">
           <button
-            className="px-4 py-2 text-sm bg-white border rounded-lg hover:bg-gray-50 disabled:opacity-50 shadow-sm transition-colors"
+            className="px-4 py-2 text-sm bg-white dark:bg-slate-800/50 border rounded-lg hover:bg-gray-50 disabled:opacity-50 shadow-sm transition-colors"
             onClick={onLoadMore}
             disabled={loading}
             aria-label="Load older messages"
@@ -180,7 +180,7 @@ export function MessagesList({
 
       {/* Messages */}
       {messages.length === 0 && !loading ? (
-        <div className="flex justify-center items-center h-32 text-gray-500">
+        <div className="flex justify-center items-center h-32 text-gray-500 dark:text-slate-400">
           <div className="text-center">
             <div className="text-lg font-medium mb-2">No messages yet</div>
             <div className="text-sm">Start the conversation by sending a message</div>
@@ -212,7 +212,7 @@ export function MessagesList({
             <div key={message._id || idx} className="space-y-3">
               {showDateSeparator && (
                 <div className="flex justify-center my-4 sticky top-2 z-10">
-                  <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-[11px] font-bold text-gray-500 shadow-sm border border-gray-100 uppercase tracking-wider">
+                  <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-lg text-[11px] font-bold text-gray-500 dark:text-slate-400 shadow-sm border border-gray-100 dark:border-slate-700/50 uppercase tracking-wider">
                     {getDateLabel(message.createdAt)}
                   </div>
                 </div>
@@ -228,7 +228,7 @@ export function MessagesList({
                   className={`max-w-[75%] px-4 py-2.5 shadow-sm animate-in fade-in zoom-in-95 duration-500 fill-mode-both ${
                     message.direction === 'outbound' 
                       ? 'bg-teal-600 text-white rounded-2xl rounded-tr-sm slide-in-from-right-4' 
-                      : 'bg-white border border-slate-100 text-gray-800 rounded-2xl rounded-tl-sm slide-in-from-left-4'
+                      : 'bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 text-gray-800 dark:text-slate-200 rounded-2xl rounded-tl-sm slide-in-from-left-4'
                   }`}
                   style={{ animationDelay: `${(messages.length - 1 - idx) < 10 ? (messages.length - 1 - idx) * 30 : 0}ms` }}
                 >
@@ -315,7 +315,7 @@ export function MessagesList({
 
                 {/* Footer outside: Time + Status (outbound only) */}
                 <div className="flex items-center gap-1.5 mt-1 px-1 opacity-60">
-                  <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider">
+                  <span className="text-[10px] font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider">
                     {formatMessageTime(message.createdAt)}
                   </span>
                   
@@ -349,7 +349,7 @@ export function MessagesList({
       {/* Loading indicator */}
       {loading && messages.length === 0 && (
         <div className="flex justify-center items-center h-32">
-          <div className="text-gray-500">Loading messages...</div>
+          <div className="text-gray-500 dark:text-slate-400">Loading messages...</div>
         </div>
       )}
     </div>

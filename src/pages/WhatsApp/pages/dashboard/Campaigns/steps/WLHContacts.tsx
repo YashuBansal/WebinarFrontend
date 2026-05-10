@@ -193,7 +193,7 @@ export default function WLHContacts({
 
   return (
     <div className="space-y-6">
-      <div className="p-6 rounded-2xl border border-slate-200 bg-white/50 backdrop-blur-sm shadow-sm">
+      <div className="p-6 rounded-2xl border border-slate-200 dark:border-slate-700/50 bg-white/50 backdrop-blur-sm shadow-sm">
         <div className="space-y-8">
           <div className="grid gap-6 md:grid-cols-2">
             <div className="space-y-2">
@@ -214,12 +214,12 @@ export default function WLHContacts({
                 <div className="h-4 w-1 bg-blue-500 rounded-full" />
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Attendance Type</span>
               </div>
-              <div className="flex p-1 bg-slate-100 rounded-xl w-fit">
+              <div className="flex p-1 bg-slate-100 dark:bg-slate-900/60 rounded-xl w-fit">
                 <Button
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className={`h-9 px-6 rounded-lg text-xs font-bold transition-all ${isAttended === true ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                  className={`h-9 px-6 rounded-lg text-xs font-bold transition-all ${isAttended === true ? "bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700"}`}
                   onClick={() => setIsAttended(true)}
                 >
                   Sales
@@ -228,7 +228,7 @@ export default function WLHContacts({
                   type="button"
                   size="sm"
                   variant="ghost"
-                  className={`h-9 px-6 rounded-lg text-xs font-bold transition-all ${isAttended === false ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                  className={`h-9 px-6 rounded-lg text-xs font-bold transition-all ${isAttended === false ? "bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700"}`}
                   onClick={() => setIsAttended(false)}
                 >
                   Reminder
@@ -282,7 +282,7 @@ export default function WLHContacts({
             </div>
           </div>
 
-          <div className="p-6 rounded-2xl bg-slate-50 border border-slate-100">
+          <div className="p-6 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50">
              <FilterResults
                 isLoading={advanceCountIsPending}
                 count={advanceCountData?.count}

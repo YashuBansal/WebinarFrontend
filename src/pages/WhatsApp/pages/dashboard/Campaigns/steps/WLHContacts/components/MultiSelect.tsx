@@ -83,13 +83,13 @@ export function MultiSelect({
           role="combobox"
           aria-expanded={open}
           className={cn(
-            "w-full h-11 px-4 justify-between rounded-xl border-slate-200 bg-slate-50/50 text-xs font-bold transition-all hover:bg-slate-100/50 focus:ring-4 focus:ring-[#22B573]/10",
-            open && "border-[#22B573] ring-4 ring-[#22B573]/10 bg-white"
+            "w-full h-11 px-4 justify-between rounded-xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 text-xs font-bold transition-all hover:bg-slate-100/50 focus:ring-4 focus:ring-[#22B573]/10",
+            open && "border-[#22B573] ring-4 ring-[#22B573]/10 bg-white dark:bg-slate-800/50"
           )}
         >
-          <span className="truncate flex-1 text-left text-slate-700">
+          <span className="truncate flex-1 text-left text-slate-700 dark:text-slate-300">
             {selectedValues.length > 0 ? (
-              <span className="text-slate-900">{displayText}</span>
+              <span className="text-slate-900 dark:text-white">{displayText}</span>
             ) : (
               <span className="text-slate-400">{placeholder}</span>
             )}
@@ -100,13 +100,13 @@ export function MultiSelect({
           )} />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1 rounded-2xl border-slate-200 shadow-xl" align="start">
+      <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-1 rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-xl" align="start">
         <Command className="rounded-xl">
           <CommandInput 
             placeholder={searchPlaceholder} 
             className="h-10 text-xs font-medium border-none focus:ring-0"
           />
-          <CommandEmpty className="py-4 text-xs font-medium text-slate-500 text-center">
+          <CommandEmpty className="py-4 text-xs font-medium text-slate-500 dark:text-slate-400 text-center">
             {emptyMessage}
           </CommandEmpty>
           <CommandGroup className="max-h-64 overflow-auto p-1">
@@ -117,7 +117,7 @@ export function MultiSelect({
                   key={option.id}
                   value={option.label}
                   onSelect={() => handleToggle(option.value)}
-                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-700 data-[selected=true]:bg-[#22B573]/5 data-[selected=true]:text-[#22B573] transition-colors cursor-pointer"
+                  className="flex items-center gap-2 px-3 py-2.5 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-300 data-[selected=true]:bg-[#22B573]/5 data-[selected=true]:text-[#22B573] transition-colors cursor-pointer"
                 >
                   <div className={cn(
                     "flex h-4 w-4 shrink-0 items-center justify-center rounded-md border border-slate-300 transition-all",

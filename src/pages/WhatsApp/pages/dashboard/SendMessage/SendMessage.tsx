@@ -376,11 +376,11 @@ const SendMessage = () => {
 
   if (!selectedProject && !isBulkMode) {
     return (
-      <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+      <div className="min-h-full flex items-center justify-center p-8 bg-white dark:bg-slate-800/50 shadow-sm">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white dark:bg-slate-800/50">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">No Project Selected</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">No Project Selected</AlertTitle>
+          <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
             Please select a project to send messages.
           </AlertDescription>
         </Alert>
@@ -392,24 +392,21 @@ const SendMessage = () => {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-1">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-xs uppercase tracking-widest mb-1">
               {isBulkMode ? <Users className="h-3.5 w-3.5" /> : <MessageSquare className="h-3.5 w-3.5" />}
               {isBulkMode ? 'Bulk Campaign' : 'Direct Message'}
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
               {isBulkMode ? 'Send Bulk Messages' : 'Send Template Message'}
             </h1>
-            <p className="text-slate-500 text-xs font-medium">
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
               {isBulkMode 
                 ? `Sending to ${selectedContacts.length} selected contacts`
                 : 'Send a personalized WhatsApp template message to a single recipient'
@@ -422,7 +419,7 @@ const SendMessage = () => {
               <Button
                 variant="outline"
                 onClick={() => navigate(`/whatsapp/dashboard/${projectId}/message-history/${currentProjectId}`)}
-                className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+                className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 font-bold text-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:scale-[1.02] active:scale-[0.98]"
               >
                 <History className="h-4 w-4" />
                 View History
@@ -437,8 +434,8 @@ const SendMessage = () => {
           <AnimatePresence>
             {(sendMessageMutation.isError || sendBulkMessageMutation.isError) && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-                <Alert variant="destructive" className="bg-red-50 border-red-200 rounded-2xl mb-6">
-                  <AlertCircle className="h-4 w-4 text-red-600" />
+                <Alert variant="destructive" className="bg-red-50 dark:bg-red-500/10 border-red-200 rounded-2xl mb-6">
+                  <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                   <AlertTitle className="text-red-800 font-bold">Failed to Send</AlertTitle>
                   <AlertDescription className="text-red-700 font-medium">
                     {((sendMessageMutation.error || sendBulkMessageMutation.error) as any) || 'An unexpected error occurred.'}
@@ -448,10 +445,10 @@ const SendMessage = () => {
             )}
             {(sendMessageMutation.isSuccess || sendBulkMessageMutation.isSuccess) && (
               <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-                <Alert className="bg-green-50 border-green-200 rounded-2xl mb-6">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                <Alert className="bg-green-50 dark:bg-green-500/10 border-green-200 rounded-2xl mb-6">
+                  <CheckCircle2 className="h-4 w-4 text-green-600 dark:text-green-400" />
                   <AlertTitle className="text-green-800 font-bold">Sent Successfully</AlertTitle>
-                  <AlertDescription className="text-green-700 font-medium">
+                  <AlertDescription className="text-green-700 dark:text-green-400 font-medium">
                     {isBulkMode ? 'Bulk messages have been queued for sending.' : 'Your message has been sent successfully.'}
                   </AlertDescription>
                 </Alert>
@@ -464,7 +461,7 @@ const SendMessage = () => {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="group relative bg-white border border-slate-200 hover:border-green-400/30 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-1 transition-all duration-300"
+              className="group relative bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:border-green-400/30 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-1 transition-all duration-300"
             >
               <TemplateSelectionForm
                 selectedTemplate={selectedTemplate}
@@ -491,17 +488,17 @@ const SendMessage = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="bg-white border border-slate-200 rounded-[20px] p-6 sm:p-8"
+              className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-[20px] p-6 sm:p-8"
             >
               <div className="flex flex-col md:flex-row gap-8 items-end">
                 {/* Phone Number - Only show in single mode */}
                 {!isBulkMode ? (
                   <div className="flex-1 space-y-3 w-full">
                     <div className="flex items-center gap-2 mb-1">
-                      <div className="h-7 w-7 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                      <div className="h-7 w-7 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-slate-400">
                         <Phone className="h-3.5 w-3.5" />
                       </div>
-                      <Label htmlFor="recipientPhoneNumber" className="text-sm font-bold text-slate-700 uppercase tracking-wider">
+                      <Label htmlFor="recipientPhoneNumber" className="text-sm font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider">
                         Recipient Phone Number
                       </Label>
                     </div>
@@ -510,7 +507,7 @@ const SendMessage = () => {
                         id="recipientPhoneNumber"
                         placeholder="+91 12345 67890"
                         {...register('recipientPhoneNumber')}
-                        className="h-12 bg-slate-50/50 border-slate-200 rounded-xl px-4 text-slate-900 font-medium focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
+                        className="h-12 bg-slate-50/50 dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/50 rounded-xl px-4 text-slate-900 dark:text-white font-medium focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all"
                       />
                       {errors.recipientPhoneNumber && (
                         <p className="absolute -bottom-5 left-0 text-[10px] font-bold text-red-500 uppercase tracking-tight">
@@ -521,19 +518,19 @@ const SendMessage = () => {
                     <div className="flex flex-wrap gap-2 pt-1">
                       <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Examples:</span>
                       {phoneNumberExamples.slice(0, 2).map((ex, i) => (
-                        <span key={i} className="text-[10px] text-slate-500 font-medium bg-slate-100 px-2 py-0.5 rounded-md">{ex}</span>
+                        <span key={i} className="text-[10px] text-slate-500 dark:text-slate-400 font-medium bg-slate-100 dark:bg-slate-900/60 px-2 py-0.5 rounded-md">{ex}</span>
                       ))}
                     </div>
                   </div>
                 ) : (
                   <div className="flex-1 space-y-2">
                     <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center">
+                      <div className="h-8 w-8 rounded-lg bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 flex items-center justify-center">
                         <Users className="h-4 w-4" />
                       </div>
                       <div>
-                        <h3 className="text-sm font-bold text-slate-900">Bulk Mode Active</h3>
-                        <p className="text-xs text-slate-500 font-medium">{selectedContacts.length} contacts will receive this message</p>
+                        <h3 className="text-sm font-bold text-slate-900 dark:text-white">Bulk Mode Active</h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">{selectedContacts.length} contacts will receive this message</p>
                       </div>
                     </div>
                   </div>
@@ -570,7 +567,7 @@ const SendMessage = () => {
               </div>
 
               {errors.templateName && (
-                <div className="mt-4 p-3 bg-red-50 border border-red-100 rounded-xl flex items-center gap-2 text-red-600 text-xs font-bold uppercase tracking-tight">
+                <div className="mt-4 p-3 bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 rounded-xl flex items-center gap-2 text-red-600 dark:text-red-400 text-xs font-bold uppercase tracking-tight">
                   <AlertCircle className="h-4 w-4" />
                   {errors.templateName.message}
                 </div>

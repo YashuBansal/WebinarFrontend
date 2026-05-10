@@ -51,29 +51,26 @@ export function TemplateHeader({ projectName, projectId, isLoading, isSyncing, i
 
   return (
     <motion.div
-      className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+      className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-900/60 shadow-sm"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
-      style={{
-        backgroundColor: "#ffffff",
-        boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-      }}
+      
     >
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="space-y-1.5">
-          <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-1">
+          <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-xs uppercase tracking-widest mb-1">
             <LayoutGrid className="h-3.5 w-3.5" />
             Message Templates
           </div>
-          <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
             Template Library
           </h1>
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-            <p className="text-slate-500 text-xs font-medium">
-              Manage your identity and message flow for <span className="text-slate-900 font-bold">{projectName}</span>
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+              Manage your identity and message flow for <span className="text-slate-900 dark:text-white font-bold">{projectName}</span>
             </p>
             {lastSyncedAt && (
-              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-50 border border-slate-100 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-tight">
                 <Clock className="w-3 h-3" />
                 <span>Synced: {formatLastSynced(lastSyncedAt)}</span>
               </div>
@@ -86,7 +83,7 @@ export function TemplateHeader({ projectName, projectId, isLoading, isSyncing, i
             variant="outline"
             onClick={onRefresh}
             disabled={isLoading || isRefreshing}
-            className="h-10 px-4 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-xs transition-all hover:bg-slate-50"
+            className="h-10 px-4 rounded-xl flex items-center gap-2 border-slate-200 dark:border-slate-700/30 text-slate-600 dark:text-slate-400 font-bold text-xs transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${(isLoading || isRefreshing) ? 'animate-spin' : ''}`} />
             Refresh
@@ -97,7 +94,7 @@ export function TemplateHeader({ projectName, projectId, isLoading, isSyncing, i
               variant="outline"
               onClick={onSync}
               disabled={isSyncing || isLoading}
-              className="h-10 px-4 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-xs transition-all hover:bg-slate-50"
+              className="h-10 px-4 rounded-xl flex items-center gap-2 border-slate-200 dark:border-slate-700/30 text-slate-600 dark:text-slate-400 font-bold text-xs transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50"
             >
               <ArrowDownUp className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
               Meta Sync

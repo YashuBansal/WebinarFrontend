@@ -84,20 +84,20 @@ const PreviewDialog: React.FC<Props> = ({ file, open, onOpenChange }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent 
-        className="max-w-4xl border-0 bg-transparent p-0 shadow-none outline-none"
+        className="max-w-4xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-0 overflow-hidden rounded-[24px] shadow-2xl"
         showCloseButton={false}
       >
-        <div className="relative w-full rounded-[24px] overflow-hidden shadow-2xl flex flex-col bg-white border border-slate-200">
+        <div className="relative w-full overflow-hidden flex flex-col">
           {/* Premium Header */}
-          <div className="bg-slate-50/80 backdrop-blur-md px-8 py-6 border-b border-slate-100 flex items-center justify-between">
+          <div className="bg-slate-50 dark:bg-slate-950 px-8 py-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="h-12 w-12 rounded-2xl bg-white border border-slate-100 flex items-center justify-center text-slate-400 shadow-sm">
+              <div className="h-12 w-12 rounded-2xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-400 shadow-sm">
                 {isImage && <ImageIcon className="h-6 w-6 text-blue-500" />}
                 {isVideo && <VideoIcon className="h-6 w-6 text-purple-500" />}
                 {!isImage && !isVideo && <FileText className="h-6 w-6 text-orange-500" />}
               </div>
               <div>
-                <h3 className="text-lg font-black text-slate-900 line-clamp-1 max-w-md">
+                <h3 className="text-lg font-black text-slate-900 dark:text-white line-clamp-1 max-w-md">
                   {file.fileName}
                 </h3>
                 <div className="flex items-center gap-3 mt-1">
@@ -127,8 +127,8 @@ const PreviewDialog: React.FC<Props> = ({ file, open, onOpenChange }) => {
           </div>
 
           {/* Preview Area */}
-          <div className="p-8 flex-1 overflow-auto bg-[#fafafa]">
-            <div className="min-h-[400px] flex items-center justify-center bg-white rounded-[24px] border border-slate-100 shadow-inner overflow-hidden relative group">
+          <div className="p-8 flex-1 overflow-auto bg-[#fafafa] dark:bg-slate-950">
+            <div className="min-h-[400px] flex items-center justify-center bg-white dark:bg-slate-900 rounded-[24px] border border-slate-100 dark:border-slate-800 shadow-inner overflow-hidden relative group">
               {isImage && (
                 <motion.img
                   initial={{ opacity: 0, scale: 0.95 }}
@@ -154,12 +154,12 @@ const PreviewDialog: React.FC<Props> = ({ file, open, onOpenChange }) => {
               )}
               {!isImage && !isVideo && (
                 <div className="flex flex-col items-center justify-center text-center p-12 space-y-6">
-                  <div className="h-24 w-24 rounded-[32px] bg-slate-50 border border-slate-100 flex items-center justify-center shadow-sm">
+                  <div className="h-24 w-24 rounded-[32px] bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center shadow-sm">
                     <FileText className="h-12 w-12 text-slate-200" />
                   </div>
                   <div className="space-y-2">
-                    <h4 className="text-xl font-black text-slate-900">Preview not available</h4>
-                    <p className="text-slate-500 text-sm font-medium max-w-sm mx-auto">
+                    <h4 className="text-xl font-black text-slate-900 dark:text-white">Preview not available</h4>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium max-w-sm mx-auto">
                       This file type cannot be previewed in the browser. You can download it or copy the URL to access it.
                     </p>
                   </div>
@@ -167,7 +167,7 @@ const PreviewDialog: React.FC<Props> = ({ file, open, onOpenChange }) => {
               )}
               
               <div className="absolute top-4 right-4 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                <Badge variant="outline" className="bg-white/80 backdrop-blur-md border-slate-200 text-slate-600 font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-widest shadow-sm">
+                <Badge variant="outline" className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-widest shadow-sm">
                   {file.mimeType}
                 </Badge>
               </div>
@@ -175,9 +175,9 @@ const PreviewDialog: React.FC<Props> = ({ file, open, onOpenChange }) => {
           </div>
 
           {/* Premium Footer */}
-          <div className="px-8 py-6 bg-white border-t border-slate-100 flex items-center justify-between">
+          <div className="px-8 py-6 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
             <div className="flex items-center gap-2">
-               <Badge variant="secondary" className="bg-slate-100 text-slate-600 border-none font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-widest">
+                <Badge variant="secondary" className="bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-none font-bold px-3 py-1.5 rounded-lg text-[10px] uppercase tracking-widest">
                 ID: {file._id.slice(-8)}
               </Badge>
             </div>
@@ -186,7 +186,7 @@ const PreviewDialog: React.FC<Props> = ({ file, open, onOpenChange }) => {
               <Button
                 variant="outline"
                 onClick={handleCopyUrl}
-                className="h-11 px-5 rounded-xl border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-all flex items-center gap-2"
+                className="h-11 px-5 rounded-xl border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 font-bold text-sm hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all flex items-center gap-2"
               >
                 <Copy className="h-4 w-4" />
                 Copy URL

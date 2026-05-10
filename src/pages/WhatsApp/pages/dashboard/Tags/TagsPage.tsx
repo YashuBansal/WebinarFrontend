@@ -99,11 +99,11 @@ export default function TagsPage() {
 
   if (!selectedProject) {
     return (
-      <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+      <div className="min-h-full flex items-center justify-center p-8 bg-white dark:bg-slate-900 shadow-sm">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border border-red-100 dark:border-red-900/50 shadow-2xl bg-white dark:bg-slate-900">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">No Project Selected</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">No Project Selected</AlertTitle>
+          <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
             Please select a project to manage its WABA tags.
           </AlertDescription>
         </Alert>
@@ -114,10 +114,10 @@ export default function TagsPage() {
   if (error) {
     return (
       <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border border-red-100 dark:border-red-900/50 shadow-2xl bg-white dark:bg-slate-900">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Error Loading Tags</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">Error Loading Tags</AlertTitle>
+          <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
             {error.message || 'Something went wrong while fetching your tags.'}
           </AlertDescription>
         </Alert>
@@ -129,25 +129,22 @@ export default function TagsPage() {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200 p-4 sm:p-5 bg-white dark:bg-slate-900 shadow-sm dark:border-slate-800"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-1">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-xs uppercase tracking-widest mb-1">
               <TagIcon className="h-3.5 w-3.5" />
               Tags Management
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
               WABA Tags
             </h1>
-            <p className="text-slate-500 text-xs font-medium">
-              Organize and categorize your contacts with custom <span className="text-slate-900 font-bold">WABA Tags</span>
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+              Organize and categorize your contacts with custom <span className="text-slate-900 dark:text-white font-bold">WABA Tags</span>
             </p>
           </div>
 
@@ -167,10 +164,10 @@ export default function TagsPage() {
         <AnimatePresence>
           {showSuccessMessage && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-              <Alert className="bg-green-50 border-green-200 rounded-2xl mb-6">
-                <CheckCircle className="h-4 w-4 text-green-600" />
+              <Alert className="bg-green-50 dark:bg-green-500/10 border-green-200 rounded-2xl mb-6">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                 <AlertTitle className="text-green-800 font-bold">Success</AlertTitle>
-                <AlertDescription className="text-green-700 font-medium">{successMessage}</AlertDescription>
+                <AlertDescription className="text-green-700 dark:text-green-400 font-medium">{successMessage}</AlertDescription>
               </Alert>
             </motion.div>
           )}

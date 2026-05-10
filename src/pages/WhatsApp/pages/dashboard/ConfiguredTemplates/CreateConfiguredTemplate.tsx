@@ -137,13 +137,10 @@ export default function CreateConfiguredTemplate() {
         <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
             {/* Premium Header */}
             <motion.div
-                className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+                className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-                style={{
-                    backgroundColor: "#ffffff",
-                    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-                }}
+                
             >
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="flex items-center gap-4">
@@ -151,20 +148,20 @@ export default function CreateConfiguredTemplate() {
                             variant="ghost"
                             size="icon"
                             onClick={() => navigate(`/whatsapp/dashboard/${projectId}/configured-templates`)}
-                            className="h-10 w-10 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100 transition-all text-slate-500"
+                            className="h-10 w-10 rounded-xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all text-slate-500 dark:text-slate-400"
                         >
                             <ArrowLeft className="h-5 w-5" />
                         </Button>
                         <div className="space-y-1">
-                            <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-0.5">
+                            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-xs uppercase tracking-widest mb-0.5">
                                 <Video className="h-3.5 w-3.5" />
                                 Zoom Templates
                             </div>
-                            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+                            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
                                 Create Zoom Template
                             </h1>
-                            <p className="text-slate-500 text-xs font-medium">
-                                Configure mappings for <span className="text-slate-900 font-bold">Automated Messaging</span>
+                            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                                Configure mappings for <span className="text-slate-900 dark:text-white font-bold">Automated Messaging</span>
                             </p>
                         </div>
                     </div>
@@ -187,14 +184,14 @@ export default function CreateConfiguredTemplate() {
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 sm:p-8 transition-all duration-300 overflow-hidden"
+                    className="group relative bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-2xl p-6 sm:p-8 transition-all duration-300 overflow-hidden"
                 >
                     <div className="absolute top-0 right-0 -mr-24 -mt-24 h-64 w-64 rounded-full bg-green-500/5 blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity" />
 
                     <div className="relative z-10">
                         <div className="mb-8">
-                            <h2 className="text-xl font-black text-slate-900">Template Identity</h2>
-                            <p className="text-slate-500 text-xs font-medium mt-1">Give your configured template a recognizable name</p>
+                            <h2 className="text-xl font-black text-slate-900 dark:text-white">Template Identity</h2>
+                            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-1">Give your configured template a recognizable name</p>
                         </div>
 
                         <div className="space-y-4 max-w-xl">
@@ -208,7 +205,7 @@ export default function CreateConfiguredTemplate() {
                                     placeholder="e.g., Webinar Welcome Message..."
                                     value={configuredTemplateName}
                                     onChange={(e) => setConfiguredTemplateName(e.target.value)}
-                                    className="h-12 rounded-xl border-slate-200 bg-slate-50/50 focus:bg-white transition-all font-medium placeholder:text-slate-400"
+                                    className="h-12 rounded-xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 focus:bg-white transition-all font-medium placeholder:text-slate-400"
                                 />
                                 <p className="text-[10px] text-slate-400 font-medium">
                                     This name is used internally to identify this template in your lists.
@@ -223,18 +220,18 @@ export default function CreateConfiguredTemplate() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 sm:p-8 transition-all duration-300 overflow-hidden"
+                    className="group relative bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-2xl p-1 transition-all duration-300"
                 >
                     <div className="absolute top-0 right-0 -mr-24 -mt-24 h-64 w-64 rounded-full bg-blue-500/5 blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity" />
 
                     <div className="relative z-10">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 px-6 pt-6">
                             <div>
-                                <h2 className="text-xl font-black text-slate-900">Message & Variable Mapping</h2>
-                                <p className="text-slate-500 text-xs font-medium mt-1">Select a base template and map variables to contact fields</p>
+                                <h2 className="text-xl font-black text-slate-900 dark:text-white">Message & Variable Mapping</h2>
+                                <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-1">Select a base template and map variables to contact fields</p>
                             </div>
-                            <div className="p-3 rounded-xl bg-blue-50 border border-blue-100 flex items-center gap-3">
-                                <p className="text-[11px] font-medium text-blue-700">
+                            <div className="p-3 rounded-xl bg-blue-500/5 dark:bg-blue-500/10 border border-blue-200 dark:border-blue-500/20 flex items-center gap-3">
+                                <p className="text-[11px] font-bold text-blue-600 dark:text-blue-400">
                                     Dynamic variables will be automatically replaced with contact data.
                                 </p>
                             </div>

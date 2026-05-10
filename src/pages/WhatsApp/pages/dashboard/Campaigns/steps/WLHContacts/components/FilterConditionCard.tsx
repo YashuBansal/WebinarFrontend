@@ -62,21 +62,21 @@ export function FilterConditionCard({
   }, [condition.field]);
 
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 space-y-5 shadow-sm hover:border-slate-300 transition-colors">
+    <div className="rounded-2xl border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/50 p-5 space-y-5 shadow-sm hover:border-slate-300 transition-colors">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
           <div className="h-7 w-7 rounded-lg bg-slate-900 flex items-center justify-center">
             <span className="text-[10px] font-black text-white">{index + 1}</span>
           </div>
           
-          <div className="flex p-0.5 bg-slate-100 rounded-lg">
+          <div className="flex p-0.5 bg-slate-100 dark:bg-slate-900/60 rounded-lg">
             {(["include", "exclude"] as const).map((modeOption) => (
               <Button
                 key={modeOption}
                 type="button"
                 size="sm"
                 variant="ghost"
-                className={`h-7 px-4 rounded-md text-[10px] font-black uppercase tracking-wider transition-all ${condition.mode === modeOption ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                className={`h-7 px-4 rounded-md text-[10px] font-black uppercase tracking-wider transition-all ${condition.mode === modeOption ? "bg-white dark:bg-slate-800/50 text-slate-900 dark:text-white shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700"}`}
                 onClick={() => onUpdate({ mode: modeOption })}
               >
                 {modeOption}
@@ -85,16 +85,16 @@ export function FilterConditionCard({
           </div>
 
           {index > 0 && (
-            <div className="flex items-center gap-2 border-l pl-3 ml-1 border-slate-200">
+            <div className="flex items-center gap-2 border-l pl-3 ml-1 border-slate-200 dark:border-slate-700/50">
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Logic</span>
-              <div className="flex p-0.5 bg-slate-100 rounded-lg">
+              <div className="flex p-0.5 bg-slate-100 dark:bg-slate-900/60 rounded-lg">
                 {LOGIC_OPTIONS.map((logic) => (
                   <Button
                     key={logic}
                     type="button"
                     size="sm"
                     variant="ghost"
-                    className={`h-7 px-4 rounded-md text-[10px] font-black uppercase tracking-wider transition-all ${condition.logicOperator === logic ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 hover:text-slate-700"}`}
+                    className={`h-7 px-4 rounded-md text-[10px] font-black uppercase tracking-wider transition-all ${condition.logicOperator === logic ? "bg-slate-900 text-white shadow-sm" : "text-slate-500 dark:text-slate-400 hover:text-slate-700"}`}
                     onClick={() => onUpdate({ logicOperator: logic })}
                   >
                     {logic}
@@ -110,7 +110,7 @@ export function FilterConditionCard({
           variant="ghost"
           size="icon"
           onClick={onRemove}
-          className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors rounded-lg"
+          className="h-8 w-8 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors rounded-lg"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
@@ -126,10 +126,10 @@ export function FilterConditionCard({
             value={condition.field}
             onValueChange={(value: ConditionField) => handleFieldChange(value)}
           >
-            <SelectTrigger className="h-10 rounded-xl border-slate-200 bg-slate-50/50 text-xs font-bold focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all">
+            <SelectTrigger className="h-10 rounded-xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 text-xs font-bold focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all">
               <SelectValue placeholder="Select field" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-slate-200 shadow-xl">
+            <SelectContent className="rounded-xl border-slate-200 dark:border-slate-700/50 shadow-xl">
               {(Object.keys(FIELD_CONFIG) as ConditionField[]).map(
                 (fieldKey) => (
                   <SelectItem key={fieldKey} value={fieldKey} className="text-xs font-medium py-2.5 rounded-lg">
@@ -152,10 +152,10 @@ export function FilterConditionCard({
               onUpdate({ operator: value })
             }
           >
-            <SelectTrigger className="h-10 rounded-xl border-slate-200 bg-slate-50/50 text-xs font-bold focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all">
+            <SelectTrigger className="h-10 rounded-xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 text-xs font-bold focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all">
               <SelectValue placeholder="Select operator" />
             </SelectTrigger>
-            <SelectContent className="rounded-xl border-slate-200 shadow-xl">
+            <SelectContent className="rounded-xl border-slate-200 dark:border-slate-700/50 shadow-xl">
               {operatorOptionsForField.map((option) => (
                 <SelectItem key={option.value} value={option.value} className="text-xs font-medium py-2.5 rounded-lg">
                   {option.label}

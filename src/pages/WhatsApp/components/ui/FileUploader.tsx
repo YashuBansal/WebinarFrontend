@@ -145,7 +145,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
             </div>
             
             {uploadStatus === 'success' && (
-              <div className="flex items-center gap-1 text-green-600">
+              <div className="flex items-center gap-1 text-green-600 dark:text-green-400">
                 <CheckCircle className="w-4 h-4" />
                 <span className="text-xs">Uploaded</span>
               </div>
@@ -164,7 +164,7 @@ export const FileUploader: React.FC<FileUploaderProps> = ({
           </div>
 
           {isUploading && (
-            <div className="flex items-center gap-2 text-blue-600">
+            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400">
               <Loader2 className="w-4 h-4 animate-spin" />
               <span className="text-sm">Uploading...</span>
             </div>

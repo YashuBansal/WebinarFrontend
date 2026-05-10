@@ -186,7 +186,7 @@ const TemplateSelection = ({
 
   return (
     <div className="space-y-6">
-      <div className="rounded-3xl border border-slate-100 bg-slate-50/30 p-1">
+      <div className="rounded-3xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/30 dark:bg-slate-800/30 p-1">
         <TemplateSelectionForm
           selectedTemplate={selectedTemplate}
           variableMappings={autoMessageMappings}
@@ -211,11 +211,11 @@ const TemplateSelection = ({
       </div>
 
       {/* Navigation buttons */}
-      <div className="flex items-center justify-between pt-8 border-t border-slate-100">
+      <div className="flex items-center justify-between pt-8 border-t border-slate-100 dark:border-slate-700/50">
         <Button 
           variant="outline" 
           onClick={onPrevious} 
-          className="h-12 px-6 rounded-xl border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+          className="h-12 px-6 rounded-xl border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 font-bold text-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:scale-[1.02] active:scale-[0.98]"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Previous

@@ -158,33 +158,33 @@ const CampaignPreview = ({
             <Layout className="h-5 w-5 text-[#22B573]" />
           </div>
           <div>
-            <h3 className="text-base font-black text-slate-900 uppercase tracking-tight">Campaign Manifest</h3>
+            <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">Campaign Manifest</h3>
             <p className="text-xs font-medium text-slate-400">Review your configuration before deployment</p>
           </div>
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all group">
+          <div className="p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-900/50 hover:shadow-md transition-all group">
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <FileText className="h-4 w-4 text-blue-500" />
-                <Badge variant="secondary" className="bg-blue-50 text-blue-600 border-none text-[9px] font-black px-1.5 py-0">NAME</Badge>
+                <Badge variant="secondary" className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-none text-[9px] font-black px-1.5 py-0">NAME</Badge>
               </div>
               <div className="space-y-0.5">
-                <p className="text-sm font-bold text-slate-800 truncate">{campaignData.name}</p>
+                <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{campaignData.name}</p>
                 <p className="text-[10px] font-medium text-slate-400">Target Identifier</p>
               </div>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all group">
+          <div className="p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-900/50 hover:shadow-md transition-all group">
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <Users className="h-4 w-4 text-[#22B573]" />
                 <Badge variant="secondary" className="bg-[#22B573]/10 text-[#22B573] border-none text-[9px] font-black px-1.5 py-0">AUDIENCE</Badge>
               </div>
               <div className="space-y-0.5">
-                <p className="text-sm font-bold text-slate-800">
+                <p className="text-sm font-bold text-slate-800 dark:text-slate-200">
                   {contactType === 'whatsapp' ? selectedContacts.length : wlhAttendeeFilters.contactCount} Contacts
                 </p>
                 <p className="text-[10px] font-medium text-slate-400">Total Recipients</p>
@@ -192,27 +192,27 @@ const CampaignPreview = ({
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all group">
+          <div className="p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-900/50 hover:shadow-md transition-all group">
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <MessageSquare className="h-4 w-4 text-purple-500" />
                 <Badge variant="secondary" className="bg-purple-50 text-purple-600 border-none text-[9px] font-black px-1.5 py-0">TEMPLATE</Badge>
               </div>
               <div className="space-y-0.5">
-                <p className="text-sm font-bold text-slate-800 truncate">{selectedTemplate?.name}</p>
+                <p className="text-sm font-bold text-slate-800 dark:text-slate-200 truncate">{selectedTemplate?.name}</p>
                 <p className="text-[10px] font-medium text-slate-400">WhatsApp Approved</p>
               </div>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all group">
+          <div className="p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-white dark:hover:bg-slate-900/50 hover:shadow-md transition-all group">
             <div className="flex flex-col gap-3">
               <div className="flex items-center justify-between">
                 <CheckCircle2 className="h-4 w-4 text-orange-500" />
                 <Badge variant="secondary" className="bg-orange-50 text-orange-600 border-none text-[9px] font-black px-1.5 py-0">STATUS</Badge>
               </div>
               <div className="space-y-0.5">
-                <p className="text-sm font-bold text-slate-800">Validated</p>
+                <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Validated</p>
                 <p className="text-[10px] font-medium text-slate-400">System Ready</p>
               </div>
             </div>
@@ -224,16 +224,16 @@ const CampaignPreview = ({
         {/* Left Column: Preview */}
         <motion.div variants={itemVariants} className="lg:col-span-7 space-y-6">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-2xl bg-blue-50 flex items-center justify-center">
+            <div className="h-10 w-10 rounded-2xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
               <Zap className="h-5 w-5 text-blue-500" />
             </div>
             <div>
-              <h3 className="text-base font-black text-slate-900 uppercase tracking-tight">Transmission Preview</h3>
+              <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">Transmission Preview</h3>
               <p className="text-xs font-medium text-slate-400">Simulated mobile experience</p>
             </div>
           </div>
           
-          <div className="bg-slate-50/50 rounded-3xl border border-slate-200 p-8 flex justify-center">
+          <div className="bg-slate-50/50 dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-slate-700/50 p-8 flex justify-center">
             <div className="w-full max-w-sm">
               <WhatsAppTemplatePreviewCard
                 template={selectedTemplate}
@@ -254,7 +254,7 @@ const CampaignPreview = ({
               <Send className="h-5 w-5 text-orange-500" />
             </div>
             <div>
-              <h3 className="text-base font-black text-slate-900 uppercase tracking-tight">Launch Control</h3>
+              <h3 className="text-base font-black text-slate-900 dark:text-white uppercase tracking-tight">Launch Control</h3>
               <p className="text-xs font-medium text-slate-400">Configure deployment timeline</p>
             </div>
           </div>
@@ -270,15 +270,15 @@ const CampaignPreview = ({
                 className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all cursor-pointer ${
                   sendType === 'now' 
                   ? 'border-[#22B573] bg-[#22B573]/5 shadow-sm' 
-                  : 'border-slate-100 bg-slate-50/50 hover:bg-slate-100'
+                  : 'border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-900/60'
                 }`}
               >
                 <RadioGroupItem value="now" id="now" className="sr-only" />
-                <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors ${sendType === 'now' ? 'bg-[#22B573] text-white' : 'bg-slate-100 text-slate-400'}`}>
+                <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors ${sendType === 'now' ? 'bg-[#22B573] text-white' : 'bg-slate-100 dark:bg-slate-900/60 text-slate-400'}`}>
                   <Zap className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-800">Instant Broadcast</p>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Instant Broadcast</p>
                   <p className="text-xs font-medium text-slate-400">Deliver all messages immediately</p>
                 </div>
                 {sendType === 'now' && <CheckCircle2 className="h-5 w-5 text-[#22B573]" />}
@@ -289,15 +289,15 @@ const CampaignPreview = ({
                 className={`flex items-center gap-4 p-5 rounded-2xl border-2 transition-all cursor-pointer ${
                   sendType === 'scheduled' 
                   ? 'border-[#22B573] bg-[#22B573]/5 shadow-sm' 
-                  : 'border-slate-100 bg-slate-50/50 hover:bg-slate-100'
+                  : 'border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-900/60'
                 }`}
               >
                 <RadioGroupItem value="scheduled" id="scheduled" className="sr-only" />
-                <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors ${sendType === 'scheduled' ? 'bg-[#22B573] text-white' : 'bg-slate-100 text-slate-400'}`}>
+                <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-colors ${sendType === 'scheduled' ? 'bg-[#22B573] text-white' : 'bg-slate-100 dark:bg-slate-900/60 text-slate-400'}`}>
                   <Calendar className="h-5 w-5" />
                 </div>
                 <div className="flex-1">
-                  <p className="text-sm font-bold text-slate-800">Scheduled Release</p>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-200">Scheduled Release</p>
                   <p className="text-xs font-medium text-slate-400">Plan for a specific future moment</p>
                 </div>
                 {sendType === 'scheduled' && <CheckCircle2 className="h-5 w-5 text-[#22B573]" />}
@@ -310,7 +310,7 @@ const CampaignPreview = ({
                   initial={{ opacity: 0, height: 0, y: -10 }}
                   animate={{ opacity: 1, height: 'auto', y: 0 }}
                   exit={{ opacity: 0, height: 0, y: -10 }}
-                  className="space-y-4 p-5 rounded-2xl bg-white border border-slate-200 shadow-sm"
+                  className="space-y-4 p-5 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 shadow-sm"
                 >
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
@@ -323,7 +323,7 @@ const CampaignPreview = ({
                           value={scheduledDate}
                           onChange={(e) => handleDateChange(e.target.value)}
                           min={new Date().toISOString().split('T')[0]}
-                          className="h-12 pl-12 rounded-xl border-slate-200 bg-slate-50/50 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all"
+                          className="h-12 pl-12 rounded-xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all"
                         />
                       </div>
                     </div>
@@ -337,16 +337,16 @@ const CampaignPreview = ({
                           type="time"
                           value={scheduledTime}
                           onChange={(e) => handleTimeChange(e.target.value)}
-                          className="h-12 pl-12 rounded-xl border-slate-200 bg-slate-50/50 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all"
+                          className="h-12 pl-12 rounded-xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 text-sm font-bold focus:bg-white focus:ring-4 focus:ring-[#22B573]/10 focus:border-[#22B573] transition-all"
                         />
                       </div>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                  <div className="flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50">
                     <Clock className="h-4 w-4 text-slate-400" />
-                    <p className="text-[10px] font-medium text-slate-500">
-                      Current Node: <span className="text-slate-900 font-bold">{Intl.DateTimeFormat().resolvedOptions().timeZone}</span>
+                    <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                      Current Node: <span className="text-slate-900 dark:text-white font-bold">{Intl.DateTimeFormat().resolvedOptions().timeZone}</span>
                     </p>
                   </div>
 
@@ -354,7 +354,7 @@ const CampaignPreview = ({
                     <motion.div 
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
-                      className="flex items-center gap-2 p-3 rounded-xl bg-red-50 border border-red-100 text-red-600"
+                      className="flex items-center gap-2 p-3 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 text-red-600 dark:text-red-400"
                     >
                       <AlertCircle className="h-4 w-4 shrink-0" />
                       <p className="text-xs font-bold">{scheduledError}</p>
@@ -368,11 +368,11 @@ const CampaignPreview = ({
       </div>
 
       {/* Navigation Controls */}
-      <motion.div variants={itemVariants} className="flex items-center justify-between pt-8 border-t border-slate-100">
+      <motion.div variants={itemVariants} className="flex items-center justify-between pt-8 border-t border-slate-100 dark:border-slate-700/50">
         <Button 
           variant="ghost" 
           onClick={onPrevious} 
-          className="h-12 px-6 rounded-xl text-slate-500 font-bold text-sm hover:bg-slate-100 transition-all"
+          className="h-12 px-6 rounded-xl text-slate-500 dark:text-slate-400 font-bold text-sm hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
           Previous Step

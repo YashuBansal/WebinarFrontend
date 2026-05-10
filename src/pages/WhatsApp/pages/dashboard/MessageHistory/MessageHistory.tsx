@@ -94,7 +94,7 @@ const MessageHistory = () => {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'sent':
-        return <CheckCircle className="h-4 w-4" />;
+        return <CheckCircle className="h-4 w-4 bg-white dark:bg-slate-800/50 shadow-sm" />;
       case 'delivered':
         return <CheckCircle2 className="h-4 w-4" />;
       case 'read':
@@ -111,17 +111,17 @@ const MessageHistory = () => {
   const getStatusStyles = (status: string) => {
     switch (status) {
       case 'sent':
-        return 'bg-blue-50 text-blue-600 border-blue-100';
+        return 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-500/20';
       case 'delivered':
-        return 'bg-emerald-50 text-emerald-600 border-emerald-100';
+        return 'bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-100 dark:border-emerald-500/20';
       case 'read':
-        return 'bg-green-50 text-green-600 border-green-100';
+        return 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-100 dark:border-green-500/20';
       case 'failed':
-        return 'bg-red-50 text-red-600 border-red-100';
+        return 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-100 dark:border-red-500/20';
       case 'clicked':
         return 'bg-purple-50 text-purple-600 border-purple-100';
       default:
-        return 'bg-amber-50 text-amber-600 border-amber-100';
+        return 'bg-amber-50 dark:bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-100 dark:border-amber-500/20';
     }
   };
 
@@ -177,7 +177,7 @@ const MessageHistory = () => {
                   e.preventDefault();
                   if (hasPrevPage) handlePageChange(page - 1);
                 }}
-                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasPrevPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+                className={`rounded-xl border-slate-200 dark:border-slate-700/50 h-10 px-4 font-bold text-slate-600 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 ${!hasPrevPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
               />
             </PaginationItem>
 
@@ -189,7 +189,7 @@ const MessageHistory = () => {
                       e.preventDefault();
                       handlePageChange(1);
                     }}
-                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 dark:border-slate-700/50 font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50"
                   >
                     1
                   </PaginationLink>
@@ -214,7 +214,7 @@ const MessageHistory = () => {
                     className={`cursor-pointer h-10 w-10 rounded-xl font-bold transition-all ${
                       pageNum === page 
                         ? 'bg-[#22B573] text-white border-[#22B573] shadow-lg shadow-green-600/20' 
-                        : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                        : 'border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50'
                     }`}
                   >
                     {pageNum}
@@ -232,7 +232,7 @@ const MessageHistory = () => {
                       e.preventDefault();
                       handlePageChange(totalPages);
                     }}
-                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 font-bold text-slate-600 hover:bg-slate-50"
+                    className="cursor-pointer h-10 w-10 rounded-xl border-slate-200 dark:border-slate-700/50 font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50"
                   >
                     {totalPages}
                   </PaginationLink>
@@ -246,7 +246,7 @@ const MessageHistory = () => {
                   e.preventDefault();
                   if (hasNextPage) handlePageChange(page + 1);
                 }}
-                className={`rounded-xl border-slate-200 h-10 px-4 font-bold text-slate-600 transition-all hover:bg-slate-50 ${!hasNextPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
+                className={`rounded-xl border-slate-200 dark:border-slate-700/50 h-10 px-4 font-bold text-slate-600 dark:text-slate-400 transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 ${!hasNextPage ? 'pointer-events-none opacity-40' : 'cursor-pointer hover:scale-[1.02] active:scale-[0.98]'}`}
               />
             </PaginationItem>
           </PaginationContent>
@@ -258,10 +258,10 @@ const MessageHistory = () => {
   if (!projectId) {
     return (
       <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white dark:bg-slate-800/50">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">Project ID Required</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">Project ID Required</AlertTitle>
+          <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
             Please provide a valid project ID to view message history.
           </AlertDescription>
         </Alert>
@@ -273,13 +273,10 @@ const MessageHistory = () => {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -287,7 +284,7 @@ const MessageHistory = () => {
               variant="ghost"
               size="icon"
               onClick={() => navigate(`/whatsapp/dashboard/${projectId}/send-message`)}
-              className="h-10 w-10 rounded-xl border border-slate-100 bg-slate-50/50 hover:bg-slate-100 transition-all text-slate-500"
+              className="h-10 w-10 rounded-xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all text-slate-500 dark:text-slate-400"
             >
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -296,11 +293,11 @@ const MessageHistory = () => {
                 <History className="h-3.5 w-3.5" />
                 Audit Logs
               </div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
                 Message History
               </h1>
-              <p className="text-slate-500 text-xs font-medium">
-                Tracking all outbound messages for <span className="text-slate-900 font-bold">{selectedProject?.projectName || 'Project'}</span>
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                Tracking all outbound messages for <span className="text-slate-900 dark:text-white font-bold">{selectedProject?.projectName || 'Project'}</span>
               </p>
             </div>
           </div>
@@ -315,7 +312,7 @@ const MessageHistory = () => {
               {autoRefreshEnabled && (
                 <div className="flex items-center gap-1.5 mt-1">
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                  <span className="text-[10px] font-bold text-green-600 uppercase tracking-widest">Live Sync Active</span>
+                  <span className="text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-widest">Live Sync Active</span>
                 </div>
               )}
             </div>
@@ -324,7 +321,7 @@ const MessageHistory = () => {
               onClick={handleRefresh}
               variant="outline"
               disabled={isRefreshing}
-              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 text-slate-600 font-bold text-sm transition-all hover:bg-slate-50 hover:scale-[1.02] active:scale-[0.98]"
+              className="h-11 px-6 rounded-xl flex items-center gap-2 border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 font-bold text-sm transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 hover:scale-[1.02] active:scale-[0.98]"
             >
               <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
               {isRefreshing ? 'Syncing...' : 'Sync Now'}
@@ -335,7 +332,7 @@ const MessageHistory = () => {
               className={`h-11 px-6 rounded-xl flex items-center gap-2 font-bold text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] ${
                 autoRefreshEnabled 
                   ? 'bg-slate-900 hover:bg-slate-800 text-white shadow-slate-900/10' 
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  : 'bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50'
               }`}
             >
               <motion.div
@@ -360,18 +357,18 @@ const MessageHistory = () => {
               className="grid grid-cols-2 lg:grid-cols-4 gap-4"
             >
               {[
-                { label: "Total Messages", value: messagesData.total, icon: MessageSquare, color: "text-blue-600", bg: "bg-blue-50", border: "border-blue-100" },
-                { label: "Delivered/Read", value: messagesData.wabaMessages.filter(m => m.status === 'delivered' || m.status === 'read').length, icon: CheckCircle2, color: "text-emerald-600", bg: "bg-emerald-50", border: "border-emerald-100" },
-                { label: "Pending/Sent", value: messagesData.wabaMessages.filter(m => m.status === 'sent' || m.status === 'pending').length, icon: Clock, color: "text-amber-600", bg: "bg-amber-50", border: "border-amber-100" },
-                { label: "Failed", value: messagesData.wabaMessages.filter(m => m.status === 'failed').length, icon: XCircle, color: "text-red-600", bg: "bg-red-50", border: "border-red-100" },
+                { label: "Total Messages", value: messagesData.total, icon: MessageSquare, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-500/10", border: "border-blue-100 dark:border-blue-500/20" },
+                { label: "Delivered/Read", value: messagesData.wabaMessages.filter(m => m.status === 'delivered' || m.status === 'read').length, icon: CheckCircle2, color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10", border: "border-emerald-100 dark:border-emerald-500/20" },
+                { label: "Pending/Sent", value: messagesData.wabaMessages.filter(m => m.status === 'sent' || m.status === 'pending').length, icon: Clock, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-500/10", border: "border-amber-100 dark:border-amber-500/20" },
+                { label: "Failed", value: messagesData.wabaMessages.filter(m => m.status === 'failed').length, icon: XCircle, color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-500/10", border: "border-red-100 dark:border-red-500/20" },
               ].map((stat, i) => (
                 <Card key={i} className={`rounded-2xl border ${stat.border} ${stat.bg} shadow-sm group hover:shadow-md transition-all duration-300`}>
                   <CardContent className="p-5 flex items-center gap-4">
-                    <div className={`h-12 w-12 rounded-xl bg-white border ${stat.border} flex items-center justify-center ${stat.color} shadow-sm group-hover:scale-110 transition-transform`}>
+                    <div className={`h-12 w-12 rounded-xl bg-white dark:bg-slate-800/50 border ${stat.border} flex items-center justify-center ${stat.color} shadow-sm group-hover:scale-110 transition-transform`}>
                       <stat.icon className="h-6 w-6" />
                     </div>
                     <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-0.5">{stat.label}</p>
+                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-0.5">{stat.label}</p>
                       <h4 className={`text-2xl font-black ${stat.color}`}>{stat.value}</h4>
                     </div>
                   </CardContent>
@@ -386,37 +383,37 @@ const MessageHistory = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="bg-white border border-slate-200 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500"
+          className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-[24px] overflow-hidden shadow-sm hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-500"
         >
-          <div className="p-6 sm:p-8 border-b border-slate-100 bg-slate-50/30">
+          <div className="p-6 sm:p-8 border-b border-slate-100 dark:border-slate-700/50 bg-slate-50/30 dark:bg-slate-800/30">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div>
-                <h2 className="text-xl font-black text-slate-900">Message Logs</h2>
-                <p className="text-slate-500 text-xs font-medium mt-1">Filter and audit your message delivery status</p>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white">Message Logs</h2>
+                <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-1">Filter and audit your message delivery status</p>
               </div>
 
               <div className="flex flex-wrap items-center gap-3">
                 {/* Date Filter */}
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400">
+                  <div className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 flex items-center justify-center text-slate-400">
                     <Calendar className="h-4 w-4" />
                   </div>
                   <Select value={datePreset || ''} onValueChange={(value) => setDatePreset(value as DatePreset)}>
-                    <SelectTrigger className="w-40 h-10 rounded-xl border-slate-200 font-bold text-slate-700 bg-white focus:ring-[#22B573]/20">
+                    <SelectTrigger className="w-40 h-10 rounded-xl border-slate-200 dark:border-slate-700/50 font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/50 focus:ring-[#22B573]/20">
                       <SelectValue placeholder="Period" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-slate-200 shadow-2xl">
+                    <SelectContent className="rounded-xl border-slate-200 dark:border-slate-700/50 shadow-2xl">
                       <SelectItem value="today" className="font-bold">Today</SelectItem>
                       <SelectItem value="yesterday" className="font-bold">Yesterday</SelectItem>
                       <SelectItem value="lastWeek" className="font-bold">Last Week</SelectItem>
-                      <SelectItem value="custom" className="font-bold text-blue-600">Custom Range</SelectItem>
+                      <SelectItem value="custom" className="font-bold text-blue-600 dark:text-blue-400">Custom Range</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 {/* Message Type Filter */}
                 <div className="flex items-center gap-2">
-                  <div className="h-8 w-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-slate-400">
+                  <div className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 flex items-center justify-center text-slate-400">
                     <Filter className="h-4 w-4" />
                   </div>
                   <Select
@@ -425,10 +422,10 @@ const MessageHistory = () => {
                       setSelectedMessageType(value === 'all' ? null : (value as MessageType));
                     }}
                   >
-                    <SelectTrigger className="w-48 h-10 rounded-xl border-slate-200 font-bold text-slate-700 bg-white focus:ring-[#22B573]/20">
+                    <SelectTrigger className="w-48 h-10 rounded-xl border-slate-200 dark:border-slate-700/50 font-bold text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800/50 focus:ring-[#22B573]/20">
                       <SelectValue placeholder="All Types" />
                     </SelectTrigger>
-                    <SelectContent className="rounded-xl border-slate-200 shadow-2xl">
+                    <SelectContent className="rounded-xl border-slate-200 dark:border-slate-700/50 shadow-2xl">
                       <SelectItem value="all" className="font-bold">All Messages</SelectItem>
                       <SelectItem value="campaign" className="font-bold">Campaigns</SelectItem>
                       <SelectItem value="individual" className="font-bold">Individual</SelectItem>
@@ -459,7 +456,7 @@ const MessageHistory = () => {
                       type="date"
                       value={customStart}
                       onChange={(e) => setCustomStart(e.target.value)}
-                      className="h-10 w-44 rounded-xl border-slate-200 bg-white font-bold text-slate-700 focus:ring-[#22B573]/20"
+                      className="h-10 w-44 rounded-xl border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/50 font-bold text-slate-700 dark:text-slate-300 focus:ring-[#22B573]/20"
                     />
                   </div>
                   <div className="flex items-center gap-3">
@@ -468,7 +465,7 @@ const MessageHistory = () => {
                       type="date"
                       value={customEnd}
                       onChange={(e) => setCustomEnd(e.target.value)}
-                      className="h-10 w-44 rounded-xl border-slate-200 bg-white font-bold text-slate-700 focus:ring-[#22B573]/20"
+                      className="h-10 w-44 rounded-xl border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/50 font-bold text-slate-700 dark:text-slate-300 focus:ring-[#22B573]/20"
                     />
                   </div>
                   <Button 
@@ -486,20 +483,20 @@ const MessageHistory = () => {
           <div className="p-4 sm:p-8">
             {isLoading ? (
               <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-                <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                <div className="h-16 w-16 bg-slate-50 dark:bg-slate-900/50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-700/50">
                   <Loader2 className="h-8 w-8 animate-spin text-[#22B573]" />
                 </div>
                 <p className="font-bold text-sm uppercase tracking-widest">Loading Messages...</p>
               </div>
             ) : error ? (
-              <Alert variant="destructive" className="bg-red-50 border-red-200 rounded-2xl">
-                <AlertCircle className="h-4 w-4 text-red-600" />
+              <Alert variant="destructive" className="bg-red-50 dark:bg-red-500/10 border-red-200 rounded-2xl">
+                <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
                 <AlertTitle className="text-red-800 font-bold">Failed to load</AlertTitle>
                 <AlertDescription className="text-red-700 font-medium">Please check your connection and try again.</AlertDescription>
               </Alert>
             ) : !messagesData || messagesData.wabaMessages.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-24 text-slate-400">
-                <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100">
+                <div className="h-16 w-16 bg-slate-50 dark:bg-slate-900/50 rounded-2xl flex items-center justify-center mb-4 border border-slate-100 dark:border-slate-700/50">
                   <Search className="h-8 w-8 opacity-20" />
                 </div>
                 <p className="font-bold text-sm uppercase tracking-widest">No messages found</p>
@@ -513,7 +510,7 @@ const MessageHistory = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.05 }}
-                    className="group flex flex-col xl:flex-row xl:items-center gap-6 p-6 rounded-2xl border border-slate-100 bg-white hover:bg-slate-50/50 hover:border-[#22B573]/20 hover:shadow-lg hover:shadow-slate-200/40 transition-all duration-300"
+                    className="group flex flex-col xl:flex-row xl:items-center gap-6 p-6 rounded-2xl border border-slate-100 dark:border-slate-700/50 bg-white dark:bg-slate-800/50 hover:bg-slate-50/50 hover:border-[#22B573]/20 hover:shadow-lg hover:shadow-slate-200/40 transition-all duration-300"
                   >
                     {/* Status Icon */}
                     <div className={`h-14 w-14 rounded-2xl border flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-105 transition-transform ${getStatusStyles(message.status)}`}>
@@ -524,14 +521,14 @@ const MessageHistory = () => {
                     <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       <div className="space-y-1">
                         <div className="flex items-center gap-2 mb-1">
-                          <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-tighter px-2 py-0.5 border-slate-200 bg-slate-50 text-slate-500`}>
+                          <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-tighter px-2 py-0.5 border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400`}>
                             {getMessageTypeLabel(message.messageType)}
                           </Badge>
                           <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-widest px-2 py-0.5 border-none shadow-sm ${getStatusStyles(message.status)}`}>
                             {message.status}
                           </Badge>
                         </div>
-                        <h3 className="font-black text-slate-900 text-lg line-clamp-1 group-hover:text-[#22B573] transition-colors">
+                        <h3 className="font-black text-slate-900 dark:text-white text-lg line-clamp-1 group-hover:text-[#22B573] transition-colors">
                           {message.templateName || 'Direct Message'}
                         </h3>
                         <div className="flex items-center gap-2 text-slate-400">
@@ -549,24 +546,24 @@ const MessageHistory = () => {
                           <div className="grid grid-cols-2 gap-x-4 gap-y-1">
                             <div className="flex flex-col">
                               <span className="text-[10px] font-bold text-slate-400 uppercase">Created</span>
-                              <span className="text-[11px] font-medium text-slate-600">{formatDate(message.createdAt)}</span>
+                              <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">{formatDate(message.createdAt)}</span>
                             </div>
                             {message.sentAt && (
                               <div className="flex flex-col">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase">Sent</span>
-                                <span className="text-[11px] font-medium text-slate-600">{formatDate(message.sentAt)}</span>
+                                <span className="text-[11px] font-medium text-slate-600 dark:text-slate-400">{formatDate(message.sentAt)}</span>
                               </div>
                             )}
                             {message.deliveredAt && (
                               <div className="flex flex-col">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase">Delivered</span>
-                                <span className="text-[11px] font-medium text-emerald-600">{formatDate(message.deliveredAt)}</span>
+                                <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400">{formatDate(message.deliveredAt)}</span>
                               </div>
                             )}
                             {message.readAt && (
                               <div className="flex flex-col">
                                 <span className="text-[10px] font-bold text-slate-400 uppercase">Read</span>
-                                <span className="text-[11px] font-medium text-green-600">{formatDate(message.readAt)}</span>
+                                <span className="text-[11px] font-medium text-green-600 dark:text-green-400">{formatDate(message.readAt)}</span>
                               </div>
                             )}
                           </div>
@@ -574,16 +571,16 @@ const MessageHistory = () => {
                       </div>
 
                       <div className="flex flex-col justify-center gap-3">
-                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 flex flex-col gap-1">
+                        <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-700/50 flex flex-col gap-1">
                           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">WABA Message ID</span>
-                          <span className="text-xs font-mono font-medium text-slate-600 break-all">{message.wabaMessageId}</span>
+                          <span className="text-xs font-mono font-medium text-slate-600 dark:text-slate-400 break-all">{message.wabaMessageId}</span>
                         </div>
                         
                         {message.failureReason && (
-                          <div className="p-2.5 rounded-xl bg-red-50 border border-red-100 flex items-start gap-2.5">
+                          <div className="p-2.5 rounded-xl bg-red-50 dark:bg-red-500/10 border border-red-100 dark:border-red-500/20 flex items-start gap-2.5">
                             <AlertCircle className="h-3.5 w-3.5 text-red-500 mt-0.5 flex-shrink-0" />
                             <div className="min-w-0">
-                              <p className="text-[10px] font-black text-red-600 uppercase tracking-widest leading-none mb-1">Error Trace</p>
+                              <p className="text-[10px] font-black text-red-600 dark:text-red-400 uppercase tracking-widest leading-none mb-1">Error Trace</p>
                               <p className="text-[11px] font-medium text-red-700 leading-tight line-clamp-2">{message.failureReason}</p>
                             </div>
                           </div>

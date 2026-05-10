@@ -69,17 +69,17 @@ export function TagForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[480px] rounded-2xl p-0 overflow-hidden border-none shadow-2xl bg-white" showCloseButton={true}>
+      <DialogContent className="sm:max-w-[480px] rounded-2xl p-0 overflow-hidden border border-slate-200 dark:border-slate-800 shadow-2xl bg-white dark:bg-slate-900" showCloseButton={true}>
         <div className="p-8">
           <DialogHeader className="mb-8">
-            <div className="flex items-center gap-2 text-green-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-2">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-2">
               <Tag className="h-3.5 w-3.5" />
               {editingTag ? 'Edit Tag' : 'New Tag'}
             </div>
-            <DialogTitle className="text-2xl font-black text-slate-900 tracking-tight">
+            <DialogTitle className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">
               {editingTag ? 'Update WABA Tag' : 'Create WABA Tag'}
             </DialogTitle>
-            <p className="text-slate-500 text-sm font-medium mt-1">
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">
               {editingTag 
                 ? 'Update the name of your tag for better organization.' 
                 : 'Define a new tag to categorize your WhatsApp contacts.'}
@@ -103,7 +103,7 @@ export function TagForm({
                           placeholder="e.g. Premium Customer, Lead..."
                           {...field}
                           disabled={isLoading}
-                          className="pl-11 h-12 bg-slate-50/50 border-slate-200 rounded-xl font-bold text-slate-700 focus:bg-white focus:ring-2 focus:ring-green-500/10 transition-all"
+                          className="pl-11 h-12 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl font-bold text-slate-700 dark:text-slate-300 focus:bg-white focus:ring-2 focus:ring-green-500 transition-all"
                         />
                       </div>
                     </FormControl>
@@ -118,7 +118,7 @@ export function TagForm({
                   variant="outline"
                   onClick={handleClose}
                   disabled={isLoading}
-                  className="h-12 px-6 rounded-xl font-bold text-slate-600 border-slate-200 hover:bg-slate-50 transition-all"
+                  className="h-12 px-6 rounded-xl font-bold text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
                 >
                   Cancel
                 </Button>

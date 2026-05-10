@@ -43,15 +43,15 @@ export function ChatHeader({
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden h-9 w-9 rounded-full -ml-2 text-gray-500"
+              className="md:hidden h-9 w-9 rounded-full -ml-2 text-gray-500 dark:text-slate-400"
               onClick={onBack}
             >
               <ChevronLeft className="h-6 w-6" />
             </Button>
           )}
-          <Avatar className="h-9 w-9 md:h-10 md:w-10 border border-gray-100 shadow-sm relative">
+          <Avatar className="h-9 w-9 md:h-10 md:w-10 border border-gray-100 dark:border-slate-700/50 shadow-sm relative">
             <AvatarFallback 
-              className={`${hasName ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 text-gray-500'} text-[13px] font-bold rounded-full flex items-center justify-center`}
+              className={`${hasName ? 'bg-teal-100 text-teal-700' : 'bg-gray-100 dark:bg-slate-900/50 text-gray-500 dark:text-slate-400'} text-[13px] font-bold rounded-full flex items-center justify-center`}
             >
               {hasName ? (
                 initials
@@ -62,10 +62,10 @@ export function ChatHeader({
           </Avatar>
           
           <div className="flex flex-col">
-            <h2 className="text-[15px] font-medium text-gray-900 leading-tight tracking-tight">
+            <h2 className="text-[15px] font-medium text-gray-900 dark:text-white leading-tight tracking-tight">
               {contactName || contactPhone}
             </h2>
-            <p className="text-[13px] text-gray-500 font-normal">
+            <p className="text-[13px] text-gray-500 dark:text-slate-400 font-normal">
               {contactPhone}
             </p>
           </div>
@@ -78,12 +78,12 @@ export function ChatHeader({
 
       {/* 24-hour window warning - Modern banner */}
       {canSendDirect && !canSendDirect.canSend && (
-        <div className="px-6 py-2 bg-amber-50/60 backdrop-blur-sm border-b border-amber-100/50 text-[11px] text-amber-700 flex items-center gap-2.5 animate-in fade-in slide-in-from-top-1 duration-300">
-          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 text-amber-600">
+        <div className="px-6 py-2 bg-amber-50/60 backdrop-blur-sm border-b border-amber-100/50 text-[11px] text-amber-700 dark:text-amber-400 flex items-center gap-2.5 animate-in fade-in slide-in-from-top-1 duration-300">
+          <div className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 text-amber-600 dark:text-amber-400">
             <Info className="w-3 h-3" />
           </div>
           <span className="font-medium">{canSendDirect.reason}</span>
-          <button className="ml-auto text-[10px] font-bold uppercase tracking-widest text-amber-600 hover:text-amber-700 underline-offset-2 hover:underline">
+          <button className="ml-auto text-[10px] font-bold uppercase tracking-widest text-amber-600 dark:text-amber-400 hover:text-amber-700 underline-offset-2 hover:underline">
             Learn More
           </button>
         </div>

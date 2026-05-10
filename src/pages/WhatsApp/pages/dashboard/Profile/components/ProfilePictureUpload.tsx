@@ -59,7 +59,7 @@ export const ProfilePictureUpload = ({
     <div className="space-y-6">
       <div 
         className={`relative group h-64 rounded-[32px] border-2 border-dashed transition-all duration-300 flex flex-col items-center justify-center overflow-hidden ${
-          dragActive ? 'border-green-500 bg-green-50/30' : 'border-slate-200 bg-slate-50/50 hover:bg-slate-50'
+          dragActive ? 'border-green-500 bg-green-50/30' : 'border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-900/50'
         }`}
         onDragEnter={handleDrag}
         onDragLeave={handleDrag}
@@ -88,12 +88,12 @@ export const ProfilePictureUpload = ({
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4">
-            <div className="h-20 w-20 rounded-[28px] bg-white shadow-lg flex items-center justify-center text-slate-300">
+            <div className="h-20 w-20 rounded-[28px] bg-white dark:bg-slate-800/50 shadow-lg flex items-center justify-center text-slate-300">
               <Camera className="h-10 w-10" />
             </div>
             <div className="text-center">
-              <p className="text-sm font-bold text-slate-900">Upload Identity</p>
-              <p className="text-[10px] font-medium text-slate-500 mt-1 uppercase tracking-widest">Drag & Drop or click below</p>
+              <p className="text-sm font-bold text-slate-900 dark:text-white">Upload Identity</p>
+              <p className="text-[10px] font-medium text-slate-500 dark:text-slate-400 mt-1 uppercase tracking-widest">Drag & Drop or click below</p>
             </div>
           </div>
         )}
@@ -136,7 +136,7 @@ export const ProfilePictureUpload = ({
       />
 
       {error && (
-        <Alert variant="destructive" className="rounded-2xl border-none bg-red-50 text-red-600">
+        <Alert variant="destructive" className="rounded-2xl border-none bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400">
           <AlertCircle className="h-4 w-4" />
           <AlertDescription className="text-xs font-bold">{error}</AlertDescription>
         </Alert>

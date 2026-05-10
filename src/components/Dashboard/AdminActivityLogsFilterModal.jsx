@@ -110,7 +110,7 @@ export default function AdminActivityLogsFilterModal({
                 className="flex items-center gap-2 text-lg font-bold"
                 style={{ color: isDark ? "#f8fafc" : "#0f172a", fontFamily: "Inter, sans-serif" }}
               >
-                <Filter className="h-5 w-5 text-gray-500" />
+                <Filter className="h-5 w-5 text-gray-500 dark:text-slate-400" />
                 User Activity Logs Filters
               </h3>
               <button
@@ -119,7 +119,7 @@ export default function AdminActivityLogsFilterModal({
                 className="rounded-lg p-1.5 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                 aria-label="Close filters"
               >
-                <X className="h-5 w-5 text-gray-500" />
+                <X className="h-5 w-5 text-gray-500 dark:text-slate-400" />
               </button>
             </div>
 

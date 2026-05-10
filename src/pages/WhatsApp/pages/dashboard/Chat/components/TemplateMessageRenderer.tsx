@@ -13,7 +13,7 @@ export function TemplateMessageRenderer({ message, templates }: TemplateMessageR
   
   if (!template) {
     console.log('No template found, falling back to displayText');
-    return <div className="text-gray-600">{displayText || message.textBody || 'Template message'}</div>;
+    return <div className="text-gray-600 dark:text-slate-400">{displayText || message.textBody || 'Template message'}</div>;
   }
 
   // Create a preview by merging template structure with actual data
@@ -100,8 +100,8 @@ export function TemplateMessageRenderer({ message, templates }: TemplateMessageR
   const preview = createTemplatePreview();
 
   return (
-    <div className="template-message bg-white rounded-lg p-4 border border-gray-200 shadow-sm max-w-sm">
-      <div className="text-xs text-gray-500 mb-3 font-medium">Template: {templateName}</div>
+    <div className="template-message bg-white dark:bg-slate-800/50 rounded-lg p-4 border border-gray-200 dark:border-slate-700/50 shadow-sm max-w-sm">
+      <div className="text-xs text-gray-500 dark:text-slate-400 mb-3 font-medium">Template: {templateName}</div>
       
       {/* Header */}
       {preview.header && (
@@ -120,7 +120,7 @@ export function TemplateMessageRenderer({ message, templates }: TemplateMessageR
             </div>
           )}
           {preview.header.type === 'IMAGE' && !preview.header.imageUrl && (
-            <div className="bg-gray-100 rounded-lg p-4 text-center text-gray-500">
+            <div className="bg-gray-100 dark:bg-slate-900/50 rounded-lg p-4 text-center text-gray-500 dark:text-slate-400">
               📷 Image
             </div>
           )}
@@ -135,21 +135,21 @@ export function TemplateMessageRenderer({ message, templates }: TemplateMessageR
             </div>
           )}
           {preview.header.type === 'VIDEO' && !preview.header.videoUrl && (
-            <div className="bg-gray-100 rounded-lg p-4 text-center text-gray-500">
+            <div className="bg-gray-100 dark:bg-slate-900/50 rounded-lg p-4 text-center text-gray-500 dark:text-slate-400">
               🎥 Video
             </div>
           )}
           {preview.header.type === 'DOCUMENT' && preview.header.documentUrl && (
-            <div className="mb-2 p-3 bg-gray-50 rounded-lg border">
+            <div className="mb-2 p-3 bg-gray-50 dark:bg-slate-800/50 rounded-lg border">
               <div className="flex items-center">
                 <span className="text-2xl mr-3">📄</span>
                 <div className="flex-1">
-                  <div className="font-medium text-gray-900">{preview.header.documentFilename || 'Document'}</div>
+                  <div className="font-medium text-gray-900 dark:text-white">{preview.header.documentFilename || 'Document'}</div>
                   <a 
                     href={preview.header.documentUrl} 
                     target="_blank" 
                     rel="noopener noreferrer" 
-                    className="text-blue-600 text-sm hover:underline"
+                    className="text-blue-600 dark:text-blue-400 text-sm hover:underline"
                   >
                     Download
                   </a>
@@ -158,12 +158,12 @@ export function TemplateMessageRenderer({ message, templates }: TemplateMessageR
             </div>
           )}
           {preview.header.type === 'DOCUMENT' && !preview.header.documentUrl && (
-            <div className="bg-gray-100 rounded-lg p-4 text-center text-gray-500">
+            <div className="bg-gray-100 dark:bg-slate-900/50 rounded-lg p-4 text-center text-gray-500 dark:text-slate-400">
               📄 Document
             </div>
           )}
           {preview.header.type === 'TEXT' && preview.header.resolvedText && (
-            <div className="font-semibold text-lg mb-2 text-gray-900">
+            <div className="font-semibold text-lg mb-2 text-gray-900 dark:text-white">
               {preview.header.resolvedText}
             </div>
           )}
@@ -172,14 +172,14 @@ export function TemplateMessageRenderer({ message, templates }: TemplateMessageR
 
       {/* Body */}
       {preview.body && (
-        <div className="mb-3 text-gray-800 leading-relaxed">
+        <div className="mb-3 text-gray-800 dark:text-slate-200 leading-relaxed">
           {preview.body.resolvedText || preview.body.text}
         </div>
       )}
 
       {/* Footer */}
       {preview.footer && (
-        <div className="text-sm text-gray-500 mt-3 italic">
+        <div className="text-sm text-gray-500 dark:text-slate-400 mt-3 italic">
           {preview.footer.text}
         </div>
       )}
@@ -219,7 +219,7 @@ export function TemplateMessageRenderer({ message, templates }: TemplateMessageR
 
       {/* Fallback if no preview content */}
       {!preview.header && !preview.body && !preview.footer && preview.buttons.length === 0 && (
-        <div className="text-gray-600">{displayText || 'Template message'}</div>
+        <div className="text-gray-600 dark:text-slate-400">{displayText || 'Template message'}</div>
       )}
     </div>
   );

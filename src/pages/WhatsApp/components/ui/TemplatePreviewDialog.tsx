@@ -34,7 +34,7 @@ export function TemplatePreviewDialog({
       case 'PAUSED':
         return <AlertCircle className="w-5 h-5 text-orange-500" />;
       default:
-        return <Clock className="w-5 h-5 text-gray-500" />;
+        return <Clock className="w-5 h-5 text-gray-500 dark:text-slate-400" />;
     }
   };
 
@@ -47,21 +47,21 @@ export function TemplatePreviewDialog({
       case 'REJECTED':
         return 'bg-red-100 text-red-800';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 dark:bg-slate-800 text-gray-800 dark:text-slate-200';
     }
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-xl max-h-[95vh] overflow-y-auto bg-slate-50/50 backdrop-blur-xl border-white/20">
+      <DialogContent className="sm:max-w-xl max-h-[95vh] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800">
         <DialogHeader className="mb-4">
           <div className="flex items-center gap-4">
-            <div className="p-2 bg-white rounded-xl shadow-sm">
+            <div className="p-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
               {getStatusIcon(template.status)}
             </div>
             <div className="flex-1 text-left">
-              <DialogTitle className="text-xl font-bold text-slate-900">{template.name}</DialogTitle>
-              <DialogDescription className="text-slate-500 font-medium">
+              <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">{template.name}</DialogTitle>
+              <DialogDescription className="text-slate-500 dark:text-slate-400 font-medium">
                 {template.language} • {template.category}
               </DialogDescription>
             </div>
@@ -73,7 +73,7 @@ export function TemplatePreviewDialog({
 
         <div className="py-2">
           {/* WhatsApp Preview using iPhone 16 Mockup */}
-          <div className="bg-white/40 rounded-3xl p-6 border border-white shadow-inner">
+          <div className="bg-slate-50 dark:bg-slate-950 rounded-3xl p-6 border border-slate-100 dark:border-slate-800 shadow-inner">
             <WhatsAppTemplatePreviewCard
               template={template}
               variableMappings={[]} // No mappings in simple preview
@@ -85,12 +85,12 @@ export function TemplatePreviewDialog({
 
           {/* Rejected Reason */}
           {template.status === 'REJECTED' && template.rejected_reason && (
-            <div className="mt-6 p-4 bg-red-50/50 border border-red-100 rounded-2xl">
+            <div className="mt-6 p-4 bg-red-50 dark:bg-red-950/20 border border-red-100 dark:border-red-500/20 rounded-2xl">
               <h3 className="text-sm font-bold text-red-800 mb-1 flex items-center gap-2">
                 <AlertCircle size={16} />
                 Rejection Reason
               </h3>
-              <p className="text-sm text-red-600 font-medium">{template.rejected_reason}</p>
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium">{template.rejected_reason}</p>
             </div>
           )}
         </div>

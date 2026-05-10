@@ -307,33 +307,33 @@ export default function CSVImport({
         onPointerDownOutside={(e) => e.preventDefault()}
         showCloseButton={false}
       >
-        <div className="relative w-full rounded-2xl shadow-2xl flex flex-col bg-white border border-slate-200 overflow-hidden max-h-[95vh]">
+        <div className="relative w-full rounded-2xl shadow-2xl flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 overflow-hidden max-h-[95vh]">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-slate-100 bg-white sticky top-0 z-20">
+          <div className="flex items-center justify-between p-6 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-20">
             <div>
-              <div className="flex items-center gap-2 text-green-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-1">
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-1">
                 <Upload className="h-3 w-3" />
                 Ingestion Engine
               </div>
-              <DialogTitle className="text-xl font-bold text-slate-900">
+              <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
                 Import Audience
               </DialogTitle>
               <DialogDescription className="sr-only">
                 Multi-step workflow for uploading and mapping contact datasets.
               </DialogDescription>
               <div className="flex items-center gap-4 mt-1">
-                <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${stage === 'uploadFile' ? 'text-green-600' : 'text-slate-300'}`}>
-                  <span className={`h-4 w-4 rounded-full flex items-center justify-center border ${stage === 'uploadFile' ? 'border-green-600 bg-green-50' : 'border-slate-200 bg-white'}`}>1</span>
+                <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${stage === 'uploadFile' ? 'text-green-600 dark:text-green-400' : 'text-slate-300'}`}>
+                  <span className={`h-4 w-4 rounded-full flex items-center justify-center border ${stage === 'uploadFile' ? 'border-green-600 bg-green-50 dark:bg-green-500/10' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'}`}>1</span>
                   Upload
                 </div>
-                <div className="w-4 h-px bg-slate-100" />
-                <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${stage === 'previewData' ? 'text-green-600' : 'text-slate-300'}`}>
-                  <span className={`h-4 w-4 rounded-full flex items-center justify-center border ${stage === 'previewData' ? 'border-green-600 bg-green-50' : 'border-slate-200 bg-white'}`}>2</span>
+                <div className="w-4 h-px bg-slate-100 dark:bg-slate-900/60" />
+                <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${stage === 'previewData' ? 'text-green-600 dark:text-green-400' : 'text-slate-300'}`}>
+                  <span className={`h-4 w-4 rounded-full flex items-center justify-center border ${stage === 'previewData' ? 'border-green-600 bg-green-50 dark:bg-green-500/10' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'}`}>2</span>
                   Headers
                 </div>
-                <div className="w-4 h-px bg-slate-100" />
-                <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${stage === 'mapFields' ? 'text-green-600' : 'text-slate-300'}`}>
-                  <span className={`h-4 w-4 rounded-full flex items-center justify-center border ${stage === 'mapFields' ? 'border-green-600 bg-green-50' : 'border-slate-200 bg-white'}`}>3</span>
+                <div className="w-4 h-px bg-slate-100 dark:bg-slate-900/60" />
+                <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest ${stage === 'mapFields' ? 'text-green-600 dark:text-green-400' : 'text-slate-300'}`}>
+                  <span className={`h-4 w-4 rounded-full flex items-center justify-center border ${stage === 'mapFields' ? 'border-green-600 bg-green-50 dark:bg-green-500/10' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'}`}>3</span>
                   Mapping
                 </div>
               </div>
@@ -341,7 +341,7 @@ export default function CSVImport({
             <button
               type="button"
               onClick={handleCloseModal}
-              className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-50 text-slate-400 transition-colors border border-transparent hover:border-slate-100"
+              className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/50 text-slate-400 transition-colors border border-transparent hover:border-slate-100"
             >
               <X className="w-5 h-5" />
             </button>
@@ -353,56 +353,56 @@ export default function CSVImport({
                 <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-300">
                   <div
                     onClick={() => fileInputRef.current?.click()}
-                    className="group relative border-2 border-dashed border-slate-200 hover:border-green-400 rounded-2xl p-8 text-center transition-all cursor-pointer bg-slate-50/30 hover:bg-green-50/10"
+                    className="group relative border-2 border-dashed border-slate-200 dark:border-slate-800 hover:border-green-400 rounded-2xl p-8 text-center transition-all cursor-pointer bg-slate-50/30 dark:bg-slate-900/40 hover:bg-green-50/10"
                   >
                     <input ref={fileInputRef} type="file" accept=".csv,.xlsx" onChange={handleFileUpload} className="hidden" />
                     {isParsingFile ? (
                       <div className="flex flex-col items-center py-4">
-                        <Loader2 className="h-12 w-12 animate-spin text-green-600 mb-4 opacity-40" />
+                        <Loader2 className="h-12 w-12 animate-spin text-green-600 dark:text-green-400 mb-4 opacity-40" />
                         <p className="text-sm font-black uppercase tracking-widest text-slate-400">Parsing File...</p>
                       </div>
                     ) : (
                       <div className="flex flex-col items-center">
-                        <div className="h-20 w-20 bg-white rounded-2xl shadow-sm border border-slate-100 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                          <FileSpreadsheet className="h-10 w-10 text-green-600" />
+                        <div className="h-20 w-20 bg-white dark:bg-slate-900 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                          <FileSpreadsheet className="h-10 w-10 text-green-600 dark:text-green-400" />
                         </div>
-                        <h4 className="text-lg font-bold text-slate-900 mb-2">Drop your dataset here</h4>
-                        <p className="text-sm font-medium text-slate-500 max-w-xs mx-auto">
-                          Choose a <span className="text-green-600 font-bold">CSV</span> or <span className="text-green-600 font-bold">Excel</span> file to begin the audience ingestion.
+                        <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Drop your dataset here</h4>
+                        <p className="text-sm font-medium text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+                          Choose a <span className="text-green-600 dark:text-green-400 font-bold">CSV</span> or <span className="text-green-600 dark:text-green-400 font-bold">Excel</span> file to begin the audience ingestion.
                         </p>
                       </div>
                     )}
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
-                      <div className="flex items-center gap-2 text-slate-900 font-bold text-[10px] uppercase tracking-widest mb-4">
-                        <CheckCircle className="h-3.5 w-3.5 text-green-600" />
+                    <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                      <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-[10px] uppercase tracking-widest mb-4">
+                        <CheckCircle className="h-3.5 w-3.5 text-green-600 dark:text-green-400" />
                         Requirements
                       </div>
                       <div className="space-y-3">
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-500 font-medium">Phone Column</span>
-                          <span className="text-slate-900 font-bold uppercase tracking-tighter bg-white px-2 py-0.5 rounded border border-slate-100">Mandatory</span>
+                          <span className="text-slate-500 dark:text-slate-400 font-medium">Phone Column</span>
+                          <span className="text-slate-900 dark:text-white font-bold uppercase tracking-tighter bg-white dark:bg-slate-800/50 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700/50">Mandatory</span>
                         </div>
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-500 font-medium">File Formats</span>
-                          <span className="text-slate-900 font-bold uppercase tracking-tighter bg-white px-2 py-0.5 rounded border border-slate-100">.csv / .xlsx</span>
+                          <span className="text-slate-500 dark:text-slate-400 font-medium">File Formats</span>
+                          <span className="text-slate-900 dark:text-white font-bold uppercase tracking-tighter bg-white dark:bg-slate-800/50 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700/50">.csv / .xlsx</span>
                         </div>
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-slate-500 font-medium">Batch Limit</span>
-                          <span className="text-slate-900 font-bold uppercase tracking-tighter bg-white px-2 py-0.5 rounded border border-slate-100">Unlimited</span>
+                          <span className="text-slate-500 dark:text-slate-400 font-medium">Batch Limit</span>
+                          <span className="text-slate-900 dark:text-white font-bold uppercase tracking-tighter bg-white dark:bg-slate-800/50 px-2 py-0.5 rounded border border-slate-100 dark:border-slate-700/50">Unlimited</span>
                         </div>
                       </div>
                     </div>
-                    <div className="p-4 rounded-2xl bg-slate-50/50 border border-slate-100">
-                      <div className="flex items-center gap-2 text-slate-900 font-bold text-[10px] uppercase tracking-widest mb-4">
-                        <Settings2 className="h-3.5 w-3.5 text-blue-600" />
+                    <div className="p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
+                      <div className="flex items-center gap-2 text-slate-900 dark:text-white font-bold text-[10px] uppercase tracking-widest mb-4">
+                        <Settings2 className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400" />
                         Optional Columns
                       </div>
                       <div className="flex flex-wrap gap-2">
                         {['First Name', 'Last Name', 'Email', 'Tags'].map(tag => (
-                          <span key={tag} className="px-3 py-1 bg-white border border-slate-100 rounded-lg text-[10px] font-bold text-slate-600 shadow-sm">{tag}</span>
+                          <span key={tag} className="px-3 py-1 bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-lg text-[10px] font-bold text-slate-600 dark:text-slate-400 shadow-sm">{tag}</span>
                         ))}
                       </div>
                     </div>
@@ -414,26 +414,26 @@ export default function CSVImport({
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
                   <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                     <div>
-                      <h4 className="text-lg font-bold text-slate-900">Define Header Row</h4>
-                      <p className="text-xs font-medium text-slate-500 mt-1">Select the row containing column labels for mapping.</p>
+                      <h4 className="text-lg font-bold text-slate-900 dark:text-white">Define Header Row</h4>
+                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400 mt-1">Select the row containing column labels for mapping.</p>
                     </div>
-                    <div className="flex items-center gap-3 p-1 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="flex items-center gap-3 p-1 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-700/50">
                       <span className="pl-3 text-[10px] font-black uppercase tracking-widest text-slate-400">Row Number</span>
                       <Input
                         type="number"
                         min={1}
                         value={headerRowNumber}
                         onChange={(e) => setHeaderRowNumber(e.target.value)}
-                        className="w-20 h-9 rounded-lg border-slate-200 focus:ring-green-500/20 text-xs font-bold"
+                        className="w-20 h-9 rounded-lg border-slate-200 dark:border-slate-700/50 focus:ring-green-500/20 text-xs font-bold"
                       />
                     </div>
                   </div>
 
-                  <div className="rounded-2xl border border-slate-200 overflow-hidden shadow-sm bg-white">
+                  <div className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-sm bg-white dark:bg-slate-900">
                     <div className="overflow-x-auto">
                       <Table>
                         <TableHeader>
-                          <TableRow className="bg-slate-50/50 hover:bg-slate-50/50">
+                          <TableRow className="bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-50/50">
                             <TableHead className="w-24 px-6 py-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Pick</TableHead>
                             {Array.from({ length: actualColumns }).map((_, i) => (
                               <TableHead key={i} className="px-4 py-4 font-black text-[10px] uppercase tracking-widest text-slate-400">Col {i + 1}</TableHead>
@@ -445,18 +445,18 @@ export default function CSVImport({
                             <TableRow
                               key={rowIndex}
                               onClick={() => setHeaderRowNumber(String(rowIndex + 1))}
-                              className={`group cursor-pointer transition-colors ${parseInt(headerRowNumber, 10) === rowIndex + 1 ? 'bg-green-50/30' : 'hover:bg-slate-50/50'
+                              className={`group cursor-pointer transition-colors ${parseInt(headerRowNumber, 10) === rowIndex + 1 ? 'bg-green-600' : 'hover:bg-slate-50/50'
                                 }`}
                             >
                               <TableCell className="px-6 py-4">
-                                <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all ${parseInt(headerRowNumber, 10) === rowIndex + 1 ? 'border-green-600 bg-green-600 shadow-[0_0_8px_rgba(34,181,115,0.4)]' : 'border-slate-200 bg-white'
-                                  }`}>
-                                  {parseInt(headerRowNumber, 10) === rowIndex + 1 && <div className="h-1.5 w-1.5 rounded-full bg-white" />}
+                                <div className={`h-5 w-5 rounded-full border-2 flex items-center justify-center transition-all ${parseInt(headerRowNumber, 10) === rowIndex + 1 ? 'border-white bg-white' : 'border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900'
+                                   }`}>
+                                  {parseInt(headerRowNumber, 10) === rowIndex + 1 && <div className="h-1.5 w-1.5 rounded-full bg-green-600" />}
                                 </div>
                               </TableCell>
                               {row.map((cell, cellIndex) => (
                                 <TableCell key={cellIndex} className="px-4 py-4">
-                                  <span className={`text-xs font-medium truncate max-w-[120px] block ${cell ? 'text-slate-700' : 'text-slate-300 italic'}`}>
+                                  <span className={`text-xs font-medium truncate max-w-[120px] block ${cell ? 'text-slate-700 dark:text-slate-300' : 'text-slate-300 italic'}`}>
                                     {cell || 'empty'}
                                   </span>
                                 </TableCell>
@@ -472,26 +472,26 @@ export default function CSVImport({
 
               {stage === MODAL_STAGES.MAP_FIELDS && (
                 <div className="space-y-8 animate-in fade-in slide-in-from-right-4 duration-300">
-                  <div className="flex items-center gap-4 p-6 rounded-2xl bg-green-50/30 border border-green-100/50">
-                    <div className="h-12 w-12 rounded-2xl bg-white flex items-center justify-center text-green-600 shadow-sm border border-green-50">
+                  <div className="flex items-center gap-4 p-6 rounded-2xl bg-green-50/30 dark:bg-green-500/10 border border-green-100/50 dark:border-green-500/20">
+                    <div className="h-12 w-12 rounded-2xl bg-white dark:bg-slate-900 flex items-center justify-center text-green-600 dark:text-green-400 shadow-sm border border-green-50 dark:border-green-500/20">
                       <FileSpreadsheet className="h-6 w-6" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-slate-900">{fileName}</h4>
+                      <h4 className="text-sm font-bold text-slate-900 dark:text-white">{fileName}</h4>
                       <p className="text-[10px] font-black uppercase tracking-[0.15em] text-slate-400 mt-0.5">{parsedData.length} Records Detected • Ready to map</p>
                     </div>
                   </div>
 
                   <div className="space-y-4">
                     {FIELDS_TO_MAP.map((field) => (
-                      <div key={field.name} className="group relative flex flex-col md:flex-row md:items-center gap-6 p-4 rounded-2xl border border-slate-100 bg-slate-50/20 hover:bg-white hover:shadow-xl hover:shadow-slate-200/20 transition-all">
+                      <div key={field.name} className="group relative flex flex-col md:flex-row md:items-center gap-6 p-4 rounded-2xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/20 dark:bg-slate-900/20 hover:bg-white dark:hover:bg-slate-800 transition-all">
                         <div className="w-full md:w-56">
                           <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1 flex items-center gap-2">
                             {field.icon}
                             {field.label}
                             {field.required && <span className="text-rose-500 font-black">•</span>}
                           </Label>
-                          <div className="text-[11px] font-bold text-slate-900 group-hover:text-blue-600 transition-colors">Target CRM Field</div>
+                          <div className="text-[11px] font-bold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">Target CRM Field</div>
                         </div>
 
                         <div className="flex-1">
@@ -499,10 +499,10 @@ export default function CSVImport({
                             value={fieldMapping[field.name] || undefined}
                             onValueChange={(val) => setFieldMapping(prev => ({ ...prev, [field.name]: val === 'unmapped' ? '' : val }))}
                           >
-                            <SelectTrigger className="h-12 rounded-xl border-slate-200 focus:ring-blue-500/10 focus:border-blue-500/50 transition-all font-bold text-xs">
+                            <SelectTrigger className="h-12 rounded-xl border-slate-200 dark:border-slate-700/50 focus:ring-blue-500/10 focus:border-blue-500/50 transition-all font-bold text-xs">
                               <SelectValue placeholder={field.required ? "Select mandatory column..." : "Optional: Skip field"} />
                             </SelectTrigger>
-                            <SelectContent className="rounded-2xl border-slate-100 shadow-2xl p-2 max-h-64">
+                            <SelectContent className="rounded-2xl border-slate-100 dark:border-slate-700/50 shadow-2xl p-2 max-h-64">
                               <SelectItem value="unmapped" className="text-xs font-bold text-slate-400">Skip Field</SelectItem>
                               {parsedHeaders.map(h => (
                                 <SelectItem key={h} value={h} className="rounded-xl m-1">
@@ -518,7 +518,7 @@ export default function CSVImport({
 
                         <div className="w-12 flex justify-center">
                           {fieldMapping[field.name] ? (
-                            <div className="h-8 w-8 rounded-full bg-green-50 flex items-center justify-center text-green-600 border border-green-100">
+                            <div className="h-8 w-8 rounded-full bg-green-50 dark:bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400 border border-green-100 dark:border-green-500/20">
                               <CheckCircle className="h-4 w-4" />
                             </div>
                           ) : field.required ? (
@@ -531,16 +531,16 @@ export default function CSVImport({
                     ))}
                   </div>
 
-                  <div className="p-6 rounded-2xl bg-blue-50/30 border border-blue-100/50">
+                  <div className="p-6 rounded-2xl bg-blue-50/30 dark:bg-blue-500/5 border border-blue-100/50 dark:border-blue-500/20">
                     <Label className={labelStyles}>
                       <Globe className="h-3 w-3" />
                       Normalization Context
                     </Label>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
                       <div className="space-y-2">
-                        <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Default Country Code</p>
+                        <p className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest ml-1">Default Country Code</p>
                         <Select value={defaultCountryCode} onValueChange={setDefaultCountryCode}>
-                          <SelectTrigger className="h-11 rounded-xl border-slate-200 bg-white font-bold text-xs">
+                          <SelectTrigger className="h-11 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 font-bold text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent className="rounded-2xl shadow-xl max-h-64">
@@ -553,9 +553,9 @@ export default function CSVImport({
                         </Select>
                       </div>
                       <div className="flex flex-col justify-end">
-                        <div className="flex items-center gap-3 p-3 rounded-xl bg-white border border-slate-100 h-11">
+                        <div className="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 h-11">
                           <Checkbox id="replaceTags" checked={replaceTags} onCheckedChange={(v) => setReplaceTags(!!v)} />
-                          <Label htmlFor="replaceTags" className="text-xs font-bold text-slate-600 cursor-pointer">Wipe existing tags</Label>
+                          <Label htmlFor="replaceTags" className="text-xs font-bold text-slate-600 dark:text-slate-400 cursor-pointer">Wipe existing tags</Label>
                         </div>
                       </div>
                     </div>
@@ -566,12 +566,12 @@ export default function CSVImport({
           </div>
 
           {/* Footer */}
-          <div className="py-4 px-6 border-t border-slate-100 bg-white flex items-center justify-between sticky bottom-0 z-20">
+          <div className="py-4 px-6 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center justify-between sticky bottom-0 z-20">
             {stage !== MODAL_STAGES.UPLOAD_FILE ? (
               <Button
                 variant="outline"
                 onClick={() => setStage(stage === MODAL_STAGES.MAP_FIELDS ? MODAL_STAGES.PREVIEW_DATA : MODAL_STAGES.UPLOAD_FILE)}
-                className="h-12 px-6 rounded-xl font-bold text-slate-600 border-slate-200 hover:bg-slate-50 transition-all flex items-center gap-2"
+                className="h-12 px-6 rounded-xl font-bold text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all flex items-center gap-2"
               >
                 <ArrowLeft className="h-4 w-4" />
                 Back
@@ -582,7 +582,7 @@ export default function CSVImport({
               <Button
                 variant="outline"
                 onClick={handleCloseModal}
-                className="h-12 px-6 rounded-xl font-bold text-slate-600 border-slate-200 hover:bg-slate-50 transition-all"
+                className="h-12 px-6 rounded-xl font-bold text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all"
               >
                 Cancel
               </Button>

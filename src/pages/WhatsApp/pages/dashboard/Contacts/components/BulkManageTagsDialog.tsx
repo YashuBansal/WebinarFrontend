@@ -48,18 +48,18 @@ export default function BulkManageTagsDialog({
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent 
-        className="sm:max-w-[450px] border-0 bg-transparent p-0 shadow-none outline-none"
+        className="sm:max-w-[450px] border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-0 overflow-hidden rounded-2xl shadow-2xl"
         onPointerDownOutside={(e) => e.preventDefault()}
         showCloseButton={false}
       >
-        <div className="relative w-full rounded-2xl p-8 shadow-2xl flex flex-col bg-white border border-slate-200">
+        <div className="relative w-full p-8 flex flex-col">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <div className="flex items-center gap-2 text-green-600 font-bold text-[10px] uppercase tracking-[0.2em] mb-1">
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-[10px] uppercase tracking-[0.2em] mb-1">
                 <Settings2 className="h-3 w-3" />
                 Bulk Operation
               </div>
-              <DialogTitle className="text-xl font-bold text-slate-900">
+              <DialogTitle className="text-xl font-bold text-slate-900 dark:text-white">
                 Manage Tags
               </DialogTitle>
               <DialogDescription className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">
@@ -69,7 +69,7 @@ export default function BulkManageTagsDialog({
             <button
               type="button"
               onClick={onClose}
-              className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-50 text-slate-400 transition-colors border border-transparent hover:border-slate-100"
+              className="h-10 w-10 flex items-center justify-center rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-400 transition-colors border border-transparent hover:border-slate-100"
             >
               <X className="w-5 h-5" />
             </button>
@@ -81,13 +81,13 @@ export default function BulkManageTagsDialog({
                 <Settings2 className="h-3 w-3" />
                 Select Action
               </Label>
-              <div className="flex gap-2 p-1 bg-slate-50 rounded-2xl border border-slate-100">
+              <div className="flex gap-2 p-1 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700">
                 <button
                   type="button"
                   onClick={() => setOperation('add')}
                   className={`flex-1 h-10 rounded-xl text-xs font-bold transition-all ${
                     operation === 'add' 
-                      ? 'bg-white text-green-600 shadow-sm border border-slate-100' 
+                      ? 'bg-white dark:bg-slate-800 text-green-600 dark:text-green-400 shadow-sm border border-slate-100 dark:border-slate-700' 
                       : 'text-slate-400 hover:text-slate-600'
                   }`}
                 >
@@ -98,7 +98,7 @@ export default function BulkManageTagsDialog({
                   onClick={() => setOperation('remove')}
                   className={`flex-1 h-10 rounded-xl text-xs font-bold transition-all ${
                     operation === 'remove' 
-                      ? 'bg-white text-red-600 shadow-sm border border-slate-100' 
+                      ? 'bg-white dark:bg-slate-800 text-red-600 dark:text-red-400 shadow-sm border border-slate-100 dark:border-slate-700' 
                       : 'text-slate-400 hover:text-slate-600'
                   }`}
                 >
@@ -118,7 +118,7 @@ export default function BulkManageTagsDialog({
                 onChange={setSelectedTags}
                 disabled={isLoading}
                 placeholder="Search and select tags..."
-                className="rounded-xl border-slate-200"
+                className="rounded-xl border-slate-200 dark:border-slate-800"
               />
             </div>
 
@@ -128,7 +128,7 @@ export default function BulkManageTagsDialog({
                 variant="outline" 
                 onClick={onClose} 
                 disabled={isLoading}
-                className="h-12 px-6 rounded-xl font-bold text-slate-600 border-slate-200 hover:bg-slate-50 transition-all"
+                className="h-12 px-6 rounded-xl font-bold text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
               >
                 Cancel
               </Button>

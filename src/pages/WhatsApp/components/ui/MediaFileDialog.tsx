@@ -239,9 +239,9 @@ export const MediaFileDialog: React.FC<MediaFileDialogProps> = ({
           {selectedFileForUpload && (
             <div className={`border rounded-lg p-3 ${
               uploadMediaAssetMutation.isPending 
-                ? 'border-primary bg-primary/5' 
+                ? 'border-primary bg-primary/10' 
                 : uploadMediaAssetMutation.isSuccess
-                ? 'border-green-500 bg-green-50 dark:bg-green-950'
+                ? 'border-green-500 bg-green-50 dark:bg-green-900'
                 : 'border-muted'
             }`}>
               <div className="flex items-center justify-between">
@@ -278,7 +278,7 @@ export const MediaFileDialog: React.FC<MediaFileDialogProps> = ({
           {/* File Grid */}
           <div 
             className={`min-h-[300px] transition-colors ${
-              isDragging ? 'border-2 border-dashed border-primary bg-primary/5 rounded-lg' : ''
+              isDragging ? 'border-2 border-dashed border-primary bg-primary/10 rounded-lg' : ''
             }`}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -321,8 +321,8 @@ export const MediaFileDialog: React.FC<MediaFileDialogProps> = ({
                         key={file._id}
                         className={`group relative p-3 border rounded-lg cursor-pointer transition-all hover:shadow-md ${
                           selectedFile?._id === file._id 
-                            ? 'border-primary bg-primary/5' 
-                            : 'hover:border-primary/50'
+                            ? 'border-primary bg-primary/10' 
+                            : 'hover:border-primary'
                         }`}
                         onClick={() => handleFileSelect(file)}
                       >

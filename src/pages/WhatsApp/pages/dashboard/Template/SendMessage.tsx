@@ -147,11 +147,11 @@ export default function SendMessage() {
 
   if (!selectedProject) {
     return (
-      <div className="min-h-screen bg-gray-50 p-6">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900/60 p-6">
         <div className="max-w-4xl mx-auto">
           <div className="text-center py-12">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">No Project Selected</h2>
-            <p className="text-gray-600 mb-6">Please select a project to send messages.</p>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">No Project Selected</h2>
+            <p className="text-gray-600 dark:text-slate-400 mb-6">Please select a project to send messages.</p>
           </div>
         </div>
       </div>
@@ -161,12 +161,12 @@ export default function SendMessage() {
   const templatePreview = getTemplatePreview();
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900/60 p-6">
       <div className="max-w-4xl mx-auto">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Send Template Message</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Send Template Message</h1>
+          <p className="text-gray-600 dark:text-slate-400 mt-2">
             Send WhatsApp messages using approved templates for {selectedProject.projectName}
           </p>
         </div>
@@ -210,12 +210,12 @@ export default function SendMessage() {
                 <CardContent>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                         Template Name
                       </label>
                       <select
                         {...register('templateName')}
-                        className="w-full h-9 px-3 py-1 border border-gray-300 rounded-md bg-white appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full h-9 px-3 py-1 border border-gray-300 rounded-md bg-white dark:bg-slate-900/60 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
                         <option value="">Select a template</option>
                         {approvedTemplates.map(template => (
@@ -230,7 +230,7 @@ export default function SendMessage() {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                      <label className="block text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">
                         Language
                       </label>
                       <Input
@@ -260,7 +260,7 @@ export default function SendMessage() {
                       {/* Body Variables */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <label className="text-sm font-medium text-gray-700">
+                          <label className="text-sm font-medium text-gray-700 dark:text-slate-300">
                             Body Variables
                           </label>
                           <Button
@@ -295,7 +295,7 @@ export default function SendMessage() {
                       {/* Header Variables */}
                       <div>
                         <div className="flex items-center justify-between mb-2">
-                          <label className="text-sm font-medium text-gray-700">
+                          <label className="text-sm font-medium text-gray-700 dark:text-slate-300">
                             Header Variables
                           </label>
                           <Button
@@ -363,7 +363,7 @@ export default function SendMessage() {
               </CardHeader>
               <CardContent>
                 {templatePreview ? (
-                  <div className="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+                  <div className="bg-white dark:bg-slate-900/60 border border-gray-200 dark:border-slate-700/30 rounded-lg p-4 space-y-3">
                     {/* WhatsApp Logo */}
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center">
@@ -373,29 +373,29 @@ export default function SendMessage() {
                     </div>
 
                     {/* Message Preview */}
-                    <div className="bg-gray-50 p-3 rounded-md space-y-2">
+                    <div className="bg-gray-50 dark:bg-slate-900/60 p-3 rounded-md space-y-2">
                       {templatePreview.header && (
-                        <div className="text-sm font-medium text-gray-800">
+                        <div className="text-sm font-medium text-gray-800 dark:text-slate-200">
                           {templatePreview.header}
                         </div>
                       )}
-                      <div className="text-sm text-gray-700 whitespace-pre-wrap">
+                      <div className="text-sm text-gray-700 dark:text-slate-300 whitespace-pre-wrap">
                         {templatePreview.body}
                       </div>
                       {templatePreview.footer && (
-                        <div className="text-xs text-gray-500 mt-2">
+                        <div className="text-xs text-gray-500 dark:text-slate-400 mt-2">
                           {templatePreview.footer}
                         </div>
                       )}
                     </div>
 
                     {/* Recipient Info */}
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs text-gray-500 dark:text-slate-400">
                       To: {watch('recipientPhoneNumber') || 'Recipient phone number'}
                     </div>
                   </div>
                 ) : (
-                  <div className="text-center py-8 text-gray-500">
+                  <div className="text-center py-8 text-gray-500 dark:text-slate-400">
                     <MessageSquare className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     <p>Select a template to see preview</p>
                   </div>

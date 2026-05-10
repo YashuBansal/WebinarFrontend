@@ -94,8 +94,8 @@ export default function ChatPage() {
   if (!selectedProject) {
     return (
       <div className="flex h-full overflow-hidden w-full">
-        <div className="flex-1 flex items-center justify-center bg-gray-50">
-          <div className="text-center text-gray-500">
+        <div className="flex-1 flex items-center justify-center bg-gray-50 dark:bg-slate-800/50">
+          <div className="text-center text-gray-500 dark:text-slate-400">
             <div className="text-lg font-medium mb-2">No project selected</div>
             <div className="text-sm">Please select a project to start chatting</div>
           </div>

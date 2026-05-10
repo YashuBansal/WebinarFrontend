@@ -106,7 +106,7 @@ const WhatsAppConnect = ({ onConnectionSuccess, onConnectionFailure, projectId, 
       className={`w-full h-12 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 ${
         isActive 
           ? 'text-white shadow-xl shadow-green-600/20' 
-          : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 shadow-sm'
+          : 'bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm'
       }`}
       style={isActive ? { backgroundColor: "#22B573", fontWeight: 700 } : { fontWeight: 700 }}
     >

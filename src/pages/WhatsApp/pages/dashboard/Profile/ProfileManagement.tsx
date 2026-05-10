@@ -128,8 +128,8 @@ const ProfileManagement = () => {
   const ProfileInfoDisplay = () => {
     if (!profile) {
       return (
-        <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-          <div className="h-16 w-16 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
+        <div className="flex flex-col items-center justify-center py-12 text-slate-400 bg-white dark:bg-slate-800/50 shadow-sm">
+          <div className="h-16 w-16 bg-slate-50 dark:bg-slate-900/50 rounded-2xl flex items-center justify-center mb-4">
             <User className="h-8 w-8 opacity-20" />
           </div>
           <p className="font-bold text-sm uppercase tracking-widest">No Profile Data</p>
@@ -149,28 +149,28 @@ const ProfileManagement = () => {
       <div className="space-y-6">
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item, i) => item.value && (
-            <div key={i} className="group p-5 rounded-2xl bg-slate-50/50 border border-slate-100 hover:bg-white hover:shadow-md transition-all">
+            <div key={i} className="group p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 hover:bg-white dark:hover:bg-slate-900/50 hover:shadow-md transition-all">
               <div className="flex items-center gap-3 mb-3">
-                <div className="h-8 w-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                <div className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
                   <item.icon className="h-4 w-4" />
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.label}</span>
               </div>
               {item.badge ? (
-                <Badge variant="secondary" className="bg-white border-slate-200 text-slate-900 font-bold px-3 py-1 rounded-lg">
+                <Badge variant="secondary" className="bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/50 text-slate-900 dark:text-white font-bold px-3 py-1 rounded-lg">
                   {item.value}
                 </Badge>
               ) : (
-                <p className="text-sm font-medium text-slate-700 leading-relaxed">{item.value}</p>
+                <p className="text-sm font-medium text-slate-700 dark:text-slate-300 leading-relaxed">{item.value}</p>
               )}
             </div>
           ))}
         </div>
 
         {profile.websites && profile.websites.length > 0 && (
-          <div className="p-5 rounded-2xl bg-slate-50/50 border border-slate-100">
+          <div className="p-5 rounded-2xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50">
             <div className="flex items-center gap-3 mb-3">
-              <div className="h-8 w-8 rounded-lg bg-white border border-slate-100 flex items-center justify-center text-slate-400">
+              <div className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-slate-400">
                 <Globe className="h-4 w-4" />
               </div>
               <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Websites</span>
@@ -182,7 +182,7 @@ const ProfileManagement = () => {
                   href={website}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-3 py-1.5 bg-white border border-slate-100 rounded-xl text-xs font-bold text-blue-600 hover:border-blue-200 hover:shadow-sm transition-all"
+                  className="px-3 py-1.5 bg-white dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 rounded-xl text-xs font-bold text-blue-600 dark:text-blue-400 hover:border-blue-200 hover:shadow-sm transition-all"
                 >
                   {website}
                 </a>
@@ -197,10 +197,10 @@ const ProfileManagement = () => {
   if (!selectedProject) {
     return (
       <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white dark:bg-slate-800/50">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">No Project Selected</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">No Project Selected</AlertTitle>
+          <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
             Please select a project to manage its WhatsApp Business profile.
           </AlertDescription>
         </Alert>
@@ -212,25 +212,22 @@ const ProfileManagement = () => {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-green-600 font-bold text-xs uppercase tracking-widest mb-1">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-xs uppercase tracking-widest mb-1">
               <User className="h-3.5 w-3.5" />
               Business Profile
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
               Profile Management
             </h1>
-            <p className="text-slate-500 text-xs font-medium">
-              Manage your identity and configuration on <span className="text-slate-900 font-bold">WhatsApp Business</span>
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+              Manage your identity and configuration on <span className="text-slate-900 dark:text-white font-bold">WhatsApp Business</span>
             </p>
           </div>
 
@@ -251,10 +248,10 @@ const ProfileManagement = () => {
         <AnimatePresence>
           {showSuccessMessage && (
             <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }}>
-              <Alert className="bg-green-50 border-green-200 rounded-2xl mb-6">
-                <CheckCircle className="h-4 w-4 text-green-600" />
+              <Alert className="bg-green-50 dark:bg-green-500/10 border-green-200 rounded-2xl mb-6">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                 <AlertTitle className="text-green-800 font-bold">Updated Successfully</AlertTitle>
-                <AlertDescription className="text-green-700 font-medium">Your business profile has been synchronized with Meta.</AlertDescription>
+                <AlertDescription className="text-green-700 dark:text-green-400 font-medium">Your business profile has been synchronized with Meta.</AlertDescription>
               </Alert>
             </motion.div>
           )}
@@ -266,13 +263,13 @@ const ProfileManagement = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 transition-all duration-300 overflow-hidden flex flex-col items-center justify-center text-center"
+            className="group relative bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden flex flex-col items-center justify-center text-center"
           >
             <div className="absolute top-0 right-0 -mr-16 -mt-16 h-32 w-32 rounded-full bg-green-500/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
             
             <div className="relative z-10">
               <div className="relative inline-block mb-4">
-                <div className="h-24 w-24 rounded-[28px] overflow-hidden bg-slate-50 border-4 border-white shadow-xl relative group/img">
+                <div className="h-24 w-24 rounded-[28px] overflow-hidden bg-slate-50 dark:bg-slate-900/50 border-4 border-white shadow-xl relative group/img">
                   {isLoadingProfile ? (
                     <Skeleton className="h-full w-full" />
                   ) : profile?.profile_picture_url ? (
@@ -293,13 +290,13 @@ const ProfileManagement = () => {
                   <CheckCircle className="h-4 w-4" />
                 </div>
               </div>
-              <h3 className="text-lg font-black text-slate-900 line-clamp-1">{selectedProject?.projectName}</h3>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white line-clamp-1">{selectedProject?.projectName}</h3>
               <p className="font-bold text-slate-400 uppercase tracking-widest text-[8px] mt-1">Verified Account</p>
               
               <Button 
                 onClick={() => setIsEditingPicture(true)}
                 variant="outline"
-                className="mt-5 h-9 rounded-xl border-slate-200 text-slate-600 font-bold text-xs transition-all hover:bg-slate-50 px-5"
+                className="mt-5 h-9 rounded-xl border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 font-bold text-xs transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50 px-5"
               >
                 Change Photo
               </Button>
@@ -333,15 +330,15 @@ const ProfileManagement = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
-          className="group relative bg-white border border-slate-200 hover:border-green-400/50 hover:shadow-xl hover:shadow-green-900/5 rounded-[20px] p-6 sm:p-8 transition-all duration-300 overflow-hidden"
+          className="group relative bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 sm:p-8 transition-all duration-300 overflow-hidden"
         >
           <div className="absolute top-0 right-0 -mr-24 -mt-24 h-64 w-64 rounded-full bg-green-500/5 blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity" />
 
           <div className="relative z-10">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
               <div>
-                <h2 className="text-xl font-black text-slate-900">Business Information</h2>
-                <p className="text-slate-500 text-xs font-medium mt-1">Configure your brand identity on WhatsApp</p>
+                <h2 className="text-xl font-black text-slate-900 dark:text-white">Business Information</h2>
+                <p className="text-slate-500 dark:text-slate-400 text-xs font-medium mt-1">Configure your brand identity on WhatsApp</p>
               </div>
               {!isEditingProfile && (
                 <Button
@@ -372,10 +369,10 @@ const ProfileManagement = () => {
 
       {/* Change Photo Dialog */}
       <Dialog open={isEditingPicture} onOpenChange={setIsEditingPicture}>
-        <DialogContent className="sm:max-w-[480px] rounded-2xl p-8 overflow-hidden border-none shadow-2xl bg-white" showCloseButton={true}>
+        <DialogContent className="sm:max-w-[480px] rounded-2xl p-8 overflow-hidden border-none shadow-2xl bg-white dark:bg-slate-800/50" showCloseButton={true}>
           <DialogHeader className="mb-8">
             <DialogTitle className="text-[20px] font-bold text-[#071028] tracking-tight">Change Profile Photo</DialogTitle>
-            <p className="text-slate-500 text-sm font-medium mt-1">Update your business profile picture on WhatsApp.</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm font-medium mt-1">Update your business profile picture on WhatsApp.</p>
           </DialogHeader>
           
           <div className="mb-8">
@@ -390,7 +387,7 @@ const ProfileManagement = () => {
             <Button 
               variant="outline" 
               onClick={() => setIsEditingPicture(false)}
-              className="rounded-xl h-10 px-6 font-bold text-slate-600 border-slate-200 hover:bg-slate-50 transition-all"
+              className="rounded-xl h-10 px-6 font-bold text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all"
             >
               Cancel
             </Button>

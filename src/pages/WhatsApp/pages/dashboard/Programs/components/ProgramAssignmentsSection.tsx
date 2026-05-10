@@ -60,11 +60,11 @@ import {
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 
 const ASSIGNMENT_STATUS_COLORS: Record<string, string> = {
-  scheduled: 'bg-blue-50 text-blue-600 border-blue-100',
-  running: 'bg-green-50 text-green-600 border-green-100',
-  paused: 'bg-yellow-50 text-yellow-600 border-yellow-100',
-  completed: 'bg-slate-50 text-slate-600 border-slate-100',
-  cancelled: 'bg-red-50 text-red-600 border-red-100',
+  scheduled: 'bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900',
+  running: 'bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 border-green-100 dark:border-green-900',
+  paused: 'bg-yellow-50 dark:bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border-yellow-100 dark:border-yellow-900',
+  completed: 'bg-slate-50 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-100 dark:border-slate-800',
+  cancelled: 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900',
 };
 
 interface ProgramAssignmentsSectionProps {
@@ -294,19 +294,19 @@ export function ProgramAssignmentsSection({
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-2">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <h2 className="text-xl font-black text-slate-900 tracking-tight">Active Reach</h2>
+              <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Active Reach</h2>
               {autoRefreshEnabled && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.8 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-50 text-[10px] font-bold text-green-600 uppercase tracking-wider border border-green-100"
+                  className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-50 dark:bg-green-500/10 text-[10px] font-bold text-green-600 dark:text-green-400 uppercase tracking-wider border border-green-100 dark:border-green-500/20"
                 >
                   <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
                   Live
                 </motion.div>
               )}
             </div>
-            <p className="text-slate-600 text-xs font-medium">
+            <p className="text-slate-600 dark:text-slate-400 text-xs font-medium">
               {lastRefreshTime ? `Synced at ${formatProgramTime(lastRefreshTime)}` : 'Real-time assignment tracking'}
             </p>
           </div>
@@ -316,7 +316,7 @@ export function ProgramAssignmentsSection({
               onClick={handleRefresh}
               variant="outline"
               disabled={isRefreshing}
-              className="h-10 px-4 rounded-xl border-slate-200 text-slate-600 font-bold text-xs gap-2 hover:bg-slate-50 transition-all"
+              className="h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 font-bold text-xs gap-2 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
             >
               <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
               Refresh
@@ -325,7 +325,7 @@ export function ProgramAssignmentsSection({
             <Button
               onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
               variant="outline"
-              className={`h-10 px-4 rounded-xl border-slate-200 font-bold text-xs gap-2 transition-all ${autoRefreshEnabled ? 'bg-green-50 text-green-700 border-green-200' : 'text-slate-600 hover:bg-slate-50'}`}
+              className={`h-10 px-4 rounded-xl border-slate-200 dark:border-slate-800 font-bold text-xs gap-2 transition-all ${autoRefreshEnabled ? 'bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-400 border-green-200 dark:border-green-900' : 'text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800'}`}
             >
               <Clock className="h-3.5 w-3.5" />
               {autoRefreshEnabled ? 'Auto-Sync On' : 'Auto-Sync Off'}
@@ -344,18 +344,18 @@ export function ProgramAssignmentsSection({
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="group relative bg-white border border-slate-200 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden"
+          className="group relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm hover:shadow-md transition-all overflow-hidden"
         >
           <div className="overflow-x-auto">
             <Table>
-              <TableHeader className="bg-slate-50/50">
-                <TableRow className="hover:bg-transparent border-slate-100">
-                  <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-600 pl-6">Contact / Phone</TableHead>
-                  <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-600">Status</TableHead>
-                  <th className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-600 text-left px-4">Start At</th>
-                  <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-600">Progress</TableHead>
-                  <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-600">Next Slot</TableHead>
-                  <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-600 text-right pr-6">Actions</TableHead>
+              <TableHeader className="bg-slate-50 dark:bg-slate-950">
+                <TableRow className="hover:bg-transparent border-slate-100 dark:border-slate-800">
+                  <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 pl-6">Contact / Phone</TableHead>
+                  <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Status</TableHead>
+                  <th className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 text-left px-4">Start At</th>
+                  <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Progress</TableHead>
+                  <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Next Slot</TableHead>
+                  <TableHead className="h-12 text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 text-right pr-6">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -363,8 +363,8 @@ export function ProgramAssignmentsSection({
                   <TableRow>
                     <TableCell colSpan={6} className="h-40 text-center">
                       <div className="flex flex-col items-center justify-center gap-3">
-                        <Loader2 className="h-6 w-6 animate-spin text-slate-600" />
-                        <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">Fetching assignments...</p>
+                        <Loader2 className="h-6 w-6 animate-spin text-slate-600 dark:text-slate-400" />
+                        <p className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Fetching assignments...</p>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -372,46 +372,46 @@ export function ProgramAssignmentsSection({
                   <TableRow>
                     <TableCell colSpan={6} className="h-40 text-center">
                       <div className="flex flex-col items-center justify-center gap-3">
-                        <UserCheck className="h-8 w-8 text-slate-600" />
-                        <p className="text-xs font-bold text-slate-600 uppercase tracking-widest">No active assignments found</p>
-                        <Button variant="ghost" size="sm" onClick={() => setAddAssignmentOpen(true)} className="text-blue-600 hover:text-blue-700 hover:bg-blue-50 font-bold text-[10px] uppercase">Assign Now</Button>
+                        <UserCheck className="h-8 w-8 text-slate-600 dark:text-slate-400" />
+                        <p className="text-xs font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">No active assignments found</p>
+                        <Button variant="ghost" size="sm" onClick={() => setAddAssignmentOpen(true)} className="text-blue-600 dark:text-blue-400 hover:text-blue-700 hover:bg-blue-50 dark:hover:bg-blue-500/10 font-bold text-[10px] uppercase">Assign Now</Button>
                       </div>
                     </TableCell>
                   </TableRow>
                 ) : (
                   assignments.map((a) => (
-                    <TableRow key={a._id} className="group/row hover:bg-slate-50/50 border-slate-100 transition-colors">
+                    <TableRow key={a._id} className="group/row hover:bg-slate-50 dark:hover:bg-slate-800/40 border-slate-100 dark:border-slate-800 transition-colors">
                       <TableCell className="py-4 pl-6">
                         <div className="flex items-center gap-3">
-                          <div className={`h-8 w-8 rounded-full flex items-center justify-center border font-bold text-[10px] ${a.source === 'auto' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-slate-50 text-slate-600 border-slate-200'}`}>
+                          <div className={`h-8 w-8 rounded-full flex items-center justify-center border font-bold text-[10px] ${a.source === 'auto' ? 'bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-800' : 'bg-slate-50 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800'}`}>
                             {a.source === 'auto' ? 'A' : 'M'}
                           </div>
                           <div className="space-y-0.5">
-                            <div className="font-bold text-slate-900 text-sm">{a.phone}</div>
-                            <div className="text-[10px] font-bold text-slate-600 uppercase tracking-tighter">
+                            <div className="font-bold text-slate-900 dark:text-white text-sm">{a.phone}</div>
+                            <div className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-tighter">
                               {a.source === 'auto' ? 'Auto-assigned' : 'Manually added'}
                             </div>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell className="py-4">
-                        <Badge className={`rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider border shadow-none ${ASSIGNMENT_STATUS_COLORS[a.status] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                        <Badge className={`rounded-full px-3 py-0.5 text-[10px] font-bold uppercase tracking-wider border shadow-none ${ASSIGNMENT_STATUS_COLORS[a.status] || 'bg-slate-100 dark:bg-slate-950 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800'}`}>
                           {a.status}
                         </Badge>
                       </TableCell>
-                      <TableCell className="py-4 text-xs font-medium text-slate-600">
+                      <TableCell className="py-4 text-xs font-medium text-slate-600 dark:text-slate-400">
                         <div className="flex flex-col">
                           <span>{formatProgramDateTime(a.startAt).split(',')[0]}</span>
-                          <span className="text-[10px] text-slate-600">{formatProgramDateTime(a.startAt).split(',')[1]}</span>
+                          <span className="text-[10px] text-slate-600 dark:text-slate-400">{formatProgramDateTime(a.startAt).split(',')[1]}</span>
                         </div>
                       </TableCell>
                       <TableCell className="py-4">
                         <div className="space-y-1.5 max-w-[120px]">
-                          <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-600">
+                          <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">
                             <span>{Math.round(((a.stats?.completedSlots || 0) / (a.stats?.totalSlots || 1)) * 100)}%</span>
                             <span>{a.stats?.completedSlots || 0}/{a.stats?.totalSlots || 0}</span>
                           </div>
-                          <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                          <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-950 rounded-full overflow-hidden border border-slate-200 dark:border-slate-800">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${((a.stats?.completedSlots || 0) / (a.stats?.totalSlots || 1)) * 100}%` }}
@@ -428,12 +428,12 @@ export function ProgramAssignmentsSection({
                       </TableCell>
                       <TableCell className="py-4">
                         {a.stats?.nextSlotDate ? (
-                          <div className="flex items-center gap-2 text-slate-600 font-bold text-xs">
-                            <Clock className="h-3.5 w-3.5 text-slate-600" />
+                          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 font-bold text-xs">
+                            <Clock className="h-3.5 w-3.5 text-slate-600 dark:text-slate-400" />
                             {formatProgramTime(a.stats.nextSlotDate)}
                           </div>
                         ) : (
-                          <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest">Queue Finished</span>
+                          <span className="text-[10px] font-bold text-slate-600 dark:text-slate-400 uppercase tracking-widest">Queue Finished</span>
                         )}
                       </TableCell>
                       <TableCell className="py-4 text-right pr-6">
@@ -445,7 +445,7 @@ export function ProgramAssignmentsSection({
                               setSelectedAssignmentId(a._id);
                               setViewSlotsOpen(true);
                             }}
-                            className="h-8 w-8 rounded-lg border-slate-200 text-slate-600 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all"
+                            className="h-8 w-8 rounded-lg border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 hover:border-blue-200 hover:bg-blue-50 dark:hover:bg-blue-900/40 dark:hover:border-blue-800 transition-all"
                             title="View timeline"
                           >
                             <Eye className="h-3.5 w-3.5" />
@@ -456,7 +456,7 @@ export function ProgramAssignmentsSection({
                               size="icon"
                               onClick={() => pauseMutation.mutate(a._id)}
                               disabled={pauseMutation.isPending}
-                              className="h-8 w-8 rounded-lg border-slate-200 text-slate-600 hover:text-yellow-600 hover:border-yellow-200 hover:bg-yellow-50 transition-all"
+                              className="h-8 w-8 rounded-lg border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-yellow-600 hover:border-yellow-200 hover:bg-yellow-50 dark:hover:bg-yellow-900/40 dark:hover:text-yellow-400 dark:hover:border-yellow-800 transition-all"
                               title="Pause"
                             >
                               <Pause className="h-3.5 w-3.5" />
@@ -468,7 +468,7 @@ export function ProgramAssignmentsSection({
                               size="icon"
                               onClick={() => resumeMutation.mutate(a._id)}
                               disabled={resumeMutation.isPending}
-                              className="h-8 w-8 rounded-lg border-slate-200 text-slate-600 hover:text-green-600 hover:border-green-200 hover:bg-green-50 transition-all"
+                              className="h-8 w-8 rounded-lg border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-green-600 dark:hover:text-green-400 hover:border-green-200 hover:bg-green-50 dark:hover:bg-green-900/40 dark:hover:border-green-800 transition-all"
                               title="Resume"
                             >
                               <Play className="h-3.5 w-3.5" />
@@ -480,7 +480,7 @@ export function ProgramAssignmentsSection({
                               size="icon"
                               onClick={() => cancelMutation.mutate(a._id)}
                               disabled={cancelMutation.isPending}
-                              className="h-8 w-8 rounded-lg border-slate-200 text-slate-600 hover:text-red-600 hover:border-red-200 hover:bg-red-50 transition-all"
+                              className="h-8 w-8 rounded-lg border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:border-red-200 hover:bg-red-50 dark:hover:bg-red-900/40 dark:hover:border-red-800 transition-all"
                               title="Cancel"
                             >
                               <XCircle className="h-3.5 w-3.5" />
@@ -503,66 +503,66 @@ export function ProgramAssignmentsSection({
           className="max-w-sm border-0 bg-transparent p-0 shadow-none outline-none"
           showCloseButton={false}
         >
-          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white border border-slate-200">
+          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-bold text-slate-900">Add Manual Assignment</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Add Manual Assignment</h3>
               <button
                 type="button"
                 onClick={() => setAddAssignmentOpen(false)}
                 className="p-1.5 rounded-lg hover:bg-black/5 transition-colors"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
               </button>
             </div>
 
             <div className="space-y-6 mb-8 overflow-y-auto max-h-[60vh] pr-1">
               <div className="space-y-2">
-                <Label htmlFor="phone" className="text-[10px] font-black uppercase tracking-widest text-slate-600">Phone Number</Label>
+                <Label htmlFor="phone" className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Phone Number</Label>
                 <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600 pointer-events-none" />
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-600 dark:text-slate-400 pointer-events-none" />
                   <Input
                     id="phone"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="919876543210"
-                    className="pl-9 h-11 rounded-xl border-slate-200 focus:ring-green-500/20 bg-white"
+                    className="pl-9 h-11 rounded-xl border-slate-200 dark:border-slate-800 focus:ring-green-500/20 bg-white dark:bg-slate-950"
                   />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="startAtDate" className="text-[10px] font-black uppercase tracking-widest text-slate-600">Date</Label>
+                  <Label htmlFor="startAtDate" className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Date</Label>
                   <Input
                     id="startAtDate"
                     type="date"
                     value={startAtDate}
                     onChange={(e) => setStartAtDate(e.target.value)}
-                    className="h-11 rounded-xl border-slate-200"
+                    className="h-11 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="startAtTime" className="text-[10px] font-black uppercase tracking-widest text-slate-600">Time</Label>
+                  <Label htmlFor="startAtTime" className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Time</Label>
                   <Input
                     id="startAtTime"
                     type="time"
                     value={startAtTime}
                     onChange={(e) => setStartAtTime(e.target.value)}
-                    className="h-11 rounded-xl border-slate-200"
+                    className="h-11 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950"
                   />
                 </div>
               </div>
 
               {/* Dynamic Variables */}
               {requiredVariables.length > 0 && (
-                <div className="pt-4 border-t border-slate-100 space-y-4">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-600 flex items-center gap-2">
+                <div className="pt-4 border-t border-slate-100 dark:border-slate-700/50 space-y-4">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 flex items-center gap-2">
                     <Variable className="h-3 w-3" />
                     Required Variables
                   </Label>
                   <div className="space-y-3">
                     {requiredVariables.map((key) => (
                       <div key={key} className="space-y-1.5">
-                        <Label htmlFor={`dynamic-${key}`} className="text-[9px] font-bold text-slate-600 uppercase ml-1">
+                        <Label htmlFor={`dynamic-${key}`} className="text-[9px] font-bold text-slate-600 dark:text-slate-400 uppercase ml-1">
                           {key}
                         </Label>
                         <Input
@@ -575,7 +575,7 @@ export function ProgramAssignmentsSection({
                             }))
                           }
                           placeholder={`Value for ${key}`}
-                          className="h-10 bg-slate-50/50 border-slate-200 rounded-xl font-medium focus:bg-white transition-all"
+                          className="h-10 bg-slate-50 dark:bg-slate-950 border-slate-200 dark:border-slate-800 rounded-xl font-medium focus:bg-white dark:focus:bg-slate-900 transition-all"
                         />
                       </div>
                     ))}
@@ -584,11 +584,11 @@ export function ProgramAssignmentsSection({
               )}
             </div>
 
-            <div className="flex justify-end gap-3 mt-auto border-t border-slate-100 pt-4">
+            <div className="flex justify-end gap-3 mt-auto border-t border-slate-100 dark:border-slate-700/50 pt-4">
               <Button
                 variant="outline"
                 onClick={() => setAddAssignmentOpen(false)}
-                className="rounded-xl px-4 py-2.5 font-medium border-slate-200 text-slate-600 hover:bg-slate-50"
+                className="rounded-xl px-4 py-2.5 font-medium border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 Cancel
               </Button>
@@ -610,10 +610,10 @@ export function ProgramAssignmentsSection({
           className="max-w-xl border-0 bg-transparent p-0 shadow-none outline-none"
           showCloseButton={false}
         >
-          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white border border-slate-200">
+          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800">
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                <History className="w-5 h-5 text-gray-500" />
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <History className="w-5 h-5 text-gray-500 dark:text-slate-400" />
                 Execution Timeline
               </h3>
               <button
@@ -621,7 +621,7 @@ export function ProgramAssignmentsSection({
                 onClick={() => setViewSlotsOpen(false)}
                 className="p-1.5 rounded-lg hover:bg-black/5 transition-colors"
               >
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-5 h-5 text-gray-500 dark:text-slate-400" />
               </button>
             </div>
 
@@ -629,41 +629,41 @@ export function ProgramAssignmentsSection({
               {slotsLoading ? (
                 <div className="py-20 flex flex-col items-center justify-center space-y-4">
                   <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-600">Loading timeline...</p>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Loading timeline...</p>
                 </div>
               ) : (!slotsData || slotsData.length === 0) ? (
-                <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-600">
+                <div className="flex flex-col items-center justify-center py-20 gap-3 text-slate-600 dark:text-slate-400">
                   <Info className="h-12 w-12 opacity-10" />
                   <p className="text-sm font-bold uppercase tracking-widest">No slots generated yet</p>
                 </div>
               ) : (
-                <div className="rounded-2xl border border-slate-100 overflow-hidden shadow-sm bg-white">
+                <div className="rounded-2xl border border-slate-100 dark:border-slate-800 overflow-hidden shadow-sm bg-white dark:bg-slate-950">
                   <Table>
-                    <TableHeader className="bg-slate-50/50">
-                      <TableRow className="hover:bg-transparent">
-                        <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-600">Occ / Slot</TableHead>
-                        <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-600">Scheduled At</TableHead>
-                        <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-600">Status</TableHead>
-                        <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-600">Execution Details / Error</TableHead>
+                    <TableHeader className="bg-slate-50 dark:bg-slate-900">
+                      <TableRow className="hover:bg-transparent border-slate-100 dark:border-slate-800">
+                        <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Occ / Slot</TableHead>
+                        <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Scheduled At</TableHead>
+                        <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Status</TableHead>
+                        <TableHead className="text-[9px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Execution Details / Error</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {slotsData.map((slot) => (
-                        <TableRow key={slot._id} className="hover:bg-slate-50/30 border-slate-50 transition-colors">
-                          <TableCell className="py-3 font-bold text-xs text-slate-900">
-                            Day {slot.occurrenceIndex + 1} · <span className="text-slate-600">Slot {slot.timeSlotIndex + 1}</span>
+                        <TableRow key={slot._id} className="hover:bg-slate-50 dark:hover:bg-slate-900/50 border-slate-100 dark:border-slate-800 transition-colors">
+                          <TableCell className="py-3 font-bold text-xs text-slate-900 dark:text-white">
+                            Day {slot.occurrenceIndex + 1} · <span className="text-slate-600 dark:text-slate-400">Slot {slot.timeSlotIndex + 1}</span>
                           </TableCell>
-                          <TableCell className="py-3 text-[10px] font-bold text-slate-600">
+                          <TableCell className="py-3 text-[10px] font-bold text-slate-600 dark:text-slate-400">
                             {formatProgramDateTime(slot.scheduledAt)}
                           </TableCell>
                           <TableCell className="py-3">
                             {(() => {
                               const displayStatus = slot.wabaMessage?.status || slot.status;
-                              let badgeStyle = 'bg-slate-100 text-slate-600 border-slate-200';
-                              if (displayStatus === 'pending') badgeStyle = 'bg-yellow-50 text-yellow-600 border-yellow-100';
-                              if (['sent', 'enqueued', 'delivered'].includes(displayStatus)) badgeStyle = 'bg-green-50 text-green-600 border-green-100';
-                              if (displayStatus === 'read') badgeStyle = 'bg-blue-50 text-blue-600 border-blue-100 shadow-sm';
-                              if (displayStatus === 'failed') badgeStyle = 'bg-red-50 text-red-600 border-red-100';
+                              let badgeStyle = 'bg-slate-100 dark:bg-slate-900 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-800';
+                              if (displayStatus === 'pending') badgeStyle = 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400 border-yellow-100 dark:border-yellow-900';
+                              if (['sent', 'enqueued', 'delivered'].includes(displayStatus)) badgeStyle = 'bg-green-50 dark:bg-green-900/30 text-green-600 dark:text-green-400 border-green-100 dark:border-green-900';
+                              if (displayStatus === 'read') badgeStyle = 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900 shadow-sm';
+                              if (displayStatus === 'failed') badgeStyle = 'bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 border-red-100 dark:border-red-900';
 
                               return (
                                 <div className="flex flex-col gap-1">
@@ -683,9 +683,9 @@ export function ProgramAssignmentsSection({
                               );
                             })()}
                           </TableCell>
-                          <TableCell className="py-3 text-[10px] font-medium text-slate-600 max-w-[200px]">
+                          <TableCell className="py-3 text-[10px] font-medium text-slate-600 dark:text-slate-400 max-w-[200px]">
                             {slot.wabaMessage?.failureReason || slot.lastError ? (
-                              <div className="flex items-start gap-1.5 text-red-500 bg-red-50/50 p-2 rounded-lg border border-red-100">
+                              <div className="flex items-start gap-1.5 text-red-500 bg-red-50 dark:bg-red-950 p-2 rounded-lg border border-red-100 dark:border-red-900">
                                 <AlertCircle className="h-3 w-3 shrink-0" />
                                 <span className="line-clamp-2 leading-tight">{slot.wabaMessage?.failureReason || slot.lastError}</span>
                               </div>
@@ -704,11 +704,11 @@ export function ProgramAssignmentsSection({
               )}
             </div>
 
-            <div className="flex justify-end pt-4 border-t border-slate-100">
+            <div className="flex justify-end pt-4 border-t border-slate-100 dark:border-slate-700/50">
               <Button
                 variant="outline"
                 onClick={() => setViewSlotsOpen(false)}
-                className="rounded-xl px-6 py-2.5 font-medium border-slate-200 text-slate-600 hover:bg-slate-50"
+                className="rounded-xl px-6 py-2.5 font-medium border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
               >
                 Close History
               </Button>

@@ -114,10 +114,10 @@ export default function Templates() {
   if (!selectedProject) {
     return (
       <div className="min-h-full flex items-center justify-center p-8">
-        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white">
+        <Alert variant="destructive" className="max-w-md rounded-[32px] p-8 border-none shadow-2xl bg-white dark:bg-slate-900/60">
           <AlertCircle className="h-8 w-8 mb-4 text-red-500" />
-          <AlertTitle className="text-xl font-black text-slate-900 mb-2">No Project Selected</AlertTitle>
-          <AlertDescription className="text-slate-500 font-medium">
+          <AlertTitle className="text-xl font-black text-slate-900 dark:text-white mb-2">No Project Selected</AlertTitle>
+          <AlertDescription className="text-slate-500 dark:text-slate-400 font-medium">
             Please select a project to view templates.
           </AlertDescription>
         </Alert>
@@ -138,6 +138,16 @@ export default function Templates() {
         onRefresh={() => refetch()}
         onSync={handleSyncTemplates}
       />
+
+      <div className="container mx-auto mb-6 px-4 sm:px-0">
+        <TemplateStats
+          totalTemplates={allTemplates.length}
+          approvedTemplates={allTemplates.filter(t => t.status === 'APPROVED').length}
+          pendingTemplates={allTemplates.filter(t => t.status === 'PENDING').length}
+          rejectedTemplates={allTemplates.filter(t => t.status === 'REJECTED').length}
+        />
+      </div>
+
       <main className="container mx-auto space-y-6 pb-12">
         {/* Search & Tabs Row */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -189,14 +199,6 @@ export default function Templates() {
             )}
           </motion.div>
         </AnimatePresence>
-
-        {/* Stats */}
-        <TemplateStats
-          totalTemplates={allTemplates.length}
-          approvedTemplates={allTemplates.filter(t => t.status === 'APPROVED').length}
-          pendingTemplates={allTemplates.filter(t => t.status === 'PENDING').length}
-          rejectedTemplates={allTemplates.filter(t => t.status === 'REJECTED').length}
-        />
       </main>
 
       <ConfirmationDialog

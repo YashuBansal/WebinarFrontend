@@ -131,8 +131,8 @@ export function AutoAssignRuleBuilder({
   };
 
   return (
-    <Card className="rounded-2xl border border-slate-200 overflow-hidden bg-white shadow-xl shadow-slate-200/40">
-      <CardHeader className="bg-slate-50/50 p-6 sm:p-8 border-b border-slate-100">
+    <Card className="rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden bg-white dark:bg-slate-900 shadow-xl shadow-slate-200/40">
+      <CardHeader className="bg-slate-50 dark:bg-slate-950 p-6 sm:p-8 border-b border-slate-100 dark:border-slate-800">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-start gap-4">
             <div className="h-12 w-12 rounded-2xl bg-orange-50 flex items-center justify-center text-orange-600 border border-orange-100 shrink-0 shadow-sm">
@@ -142,16 +142,16 @@ export function AutoAssignRuleBuilder({
               <div className="flex items-center gap-2 text-orange-600 font-bold text-[10px] uppercase tracking-widest mb-1">
                 Automation Logic
               </div>
-              <CardTitle className="text-xl font-black text-slate-900 tracking-tight">Auto-Assign Rules</CardTitle>
-              <CardDescription className="text-slate-600 text-xs font-medium max-w-md">
+              <CardTitle className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Auto-Assign Rules</CardTitle>
+              <CardDescription className="text-slate-600 dark:text-slate-400 text-xs font-medium max-w-md">
                 Configure rules for automatically assigning attendees directly to this sequence based on webinar and attendance data.
               </CardDescription>
             </div>
           </div>
-          <div className="flex items-center gap-3 bg-white px-4 py-2.5 rounded-2xl border border-slate-200 shadow-sm self-start sm:self-center">
+          <div className="flex items-center gap-3 bg-white dark:bg-slate-900 px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm self-start sm:self-center">
             <div className="flex items-center gap-2 mr-2">
               <div className={`h-2 w-2 rounded-full ${isAutoAssignable ? 'bg-green-500 animate-pulse' : 'bg-slate-300'}`} />
-              <Label htmlFor="auto-assign-rt" className="text-[10px] font-black uppercase tracking-widest text-slate-600 cursor-pointer">
+              <Label htmlFor="auto-assign-rt" className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 cursor-pointer">
                 {isAutoAssignable ? 'Running' : 'Disabled'}
               </Label>
             </div>
@@ -178,32 +178,32 @@ export function AutoAssignRuleBuilder({
               {/* Primary Filters */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-3">
-                  <Label className="text-xs font-black uppercase tracking-widest text-slate-600">Target Webinars</Label>
+                  <Label className="text-xs font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Target Webinars</Label>
                   <WebinarSelector
                     webinars={(webinarsData as any) ?? []}
                     selectedWebinarIds={selectedWebinarIds}
                     onSelectionChange={setSelectedWebinarIds}
                     placeholder="Select webinars..."
                   />
-                  <div className="flex items-center gap-1.5 text-[12px] text-slate-600 font-medium italic">
+                  <div className="flex items-center gap-1.5 text-[12px] text-slate-600 dark:text-slate-400 font-medium italic">
                     <HelpCircle className="h-3 w-3" />
                     Select one or more webinars to pull attendees from
                   </div>
                 </div>
 
                 <div className="space-y-3">
-                  <Label className="text-xs font-black uppercase tracking-widest text-slate-600">Attendance Status</Label>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-1.5 bg-slate-50 rounded-2xl border border-slate-100">
+                  <Label className="text-xs font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Attendance Status</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-1.5 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-100 dark:border-slate-800">
                     <Button
                       type="button"
                       variant={isAttended === true ? 'default' : 'ghost'}
                       onClick={() => setIsAttended(true)}
                       className={`h-8 rounded-xl text-xs font-bold transition-all px-4 ${isAttended === true
-                        ? 'bg-white text-slate-900 shadow-md border-slate-200'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-md border-slate-200 dark:border-slate-800'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                     >
-                      <ShieldCheck className={`h-4 w-4 mr-2 shrink-0 ${isAttended === true ? 'text-green-500' : 'text-slate-600'}`} />
+                      <ShieldCheck className={`h-4 w-4 mr-2 shrink-0 ${isAttended === true ? 'text-green-500' : 'text-slate-600 dark:text-slate-400'}`} />
                       <span className="truncate">Attended (Sales)</span>
                     </Button>
                     <Button
@@ -211,15 +211,15 @@ export function AutoAssignRuleBuilder({
                       variant={isAttended === false ? 'default' : 'ghost'}
                       onClick={() => setIsAttended(false)}
                       className={`h-8 rounded-xl text-xs font-bold transition-all px-4 ${isAttended === false
-                        ? 'bg-white text-slate-900 shadow-md border-slate-200'
-                        : 'text-slate-600 hover:text-slate-900'
+                        ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-white shadow-md border-slate-200 dark:border-slate-800'
+                        : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
                         }`}
                     >
-                      <AlertCircle className={`h-4 w-4 mr-2 shrink-0 ${isAttended === false ? 'text-blue-500' : 'text-slate-600'}`} />
+                      <AlertCircle className={`h-4 w-4 mr-2 shrink-0 ${isAttended === false ? 'text-blue-500' : 'text-slate-600 dark:text-slate-400'}`} />
                       <span className="truncate">Missed (Reminder)</span>
                     </Button>
                   </div>
-                  <div className="flex items-center gap-1.5 text-[12px] text-slate-600 font-medium italic">
+                  <div className="flex items-center gap-1.5 text-[12px] text-slate-600 dark:text-slate-400 font-medium italic">
                     <HelpCircle className="h-3 w-3" />
                     Determine which segment of leads to target
                   </div>
@@ -227,10 +227,10 @@ export function AutoAssignRuleBuilder({
               </div>
 
               {/* Advanced Conditions */}
-              <div className="space-y-4 pt-4 border-t border-slate-100">
+              <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-600">Advanced Filter Conditions</h3>
-                  <Badge variant="outline" className="text-[12px] bg-blue-50 text-blue-600 border-blue-100">{conditions.length} Active</Badge>
+                  <h3 className="text-xs font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Advanced Filter Conditions</h3>
+                  <Badge variant="outline" className="text-[12px] bg-blue-50 dark:bg-blue-900 text-blue-600 dark:text-blue-400 border-blue-100 dark:border-blue-900">{conditions.length} Active</Badge>
                 </div>
 
                 <div className="space-y-4">
@@ -259,7 +259,7 @@ export function AutoAssignRuleBuilder({
                   variant="outline"
                   onClick={handleAddCondition}
                   disabled={disabled}
-                  className="h-10 px-5 rounded-xl border-dashed border-slate-200 text-slate-600 font-bold text-xs gap-2 hover:bg-slate-50 transition-all active:scale-[0.98] w-full sm:w-auto"
+                  className="h-10 px-5 rounded-xl border-dashed border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 font-bold text-xs gap-2 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all active:scale-[0.98] w-full sm:w-auto"
                 >
                   <Plus className="h-4 w-4" />
                   Add Additional Condition
@@ -267,14 +267,14 @@ export function AutoAssignRuleBuilder({
               </div>
 
               {/* Action Bar */}
-              <div className="pt-8 border-t border-slate-100 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-6">
+              <div className="pt-8 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-6">
                 <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={testCount}
                     disabled={disabled || isPending || selectedWebinarIds.length === 0 || isAttended === null}
-                    className="h-11 px-6 rounded-xl border-slate-200 text-slate-700 font-bold text-xs gap-2 bg-white shadow-sm hover:bg-slate-50 transition-all active:scale-[0.95]"
+                    className="h-11 px-6 rounded-xl border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 font-bold text-xs gap-2 bg-white dark:bg-slate-900 shadow-sm hover:bg-slate-50 dark:hover:bg-slate-800 transition-all active:scale-[0.95]"
                   >
                     {isPending ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -288,7 +288,7 @@ export function AutoAssignRuleBuilder({
                     <motion.div
                       initial={{ opacity: 0, scale: 0.9 }}
                       animate={{ opacity: 1, scale: 1 }}
-                      className="px-4 py-2.5 rounded-xl bg-blue-50 border border-blue-100 text-blue-700 font-bold text-xs flex items-center gap-2 shadow-sm"
+                      className="px-4 py-2.5 rounded-xl bg-blue-50 dark:bg-blue-900 border border-blue-100 dark:border-blue-900 text-blue-700 font-bold text-xs flex items-center gap-2 shadow-sm"
                     >
                       <span className="text-sm font-black underline decoration-2 underline-offset-4">{advanceCountData.count}</span>
                       <span>Attendees match these rules</span>

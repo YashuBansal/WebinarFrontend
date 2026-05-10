@@ -57,20 +57,20 @@ const Configuration = () => {
 
   if (isConfigured) {
     return (
-      <div className="min-h-full w-full flex items-center justify-center p-6">
+      <div className="min-h-full w-full flex items-center justify-center p-6 bg-white dark:bg-slate-800/50 shadow-sm">
         <motion.div 
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full bg-white rounded-[32px] p-10 border border-slate-200 shadow-2xl text-center"
+          className="max-w-md w-full bg-white dark:bg-slate-800/50 rounded-[32px] p-10 border border-slate-200 dark:border-slate-700/50 shadow-2xl text-center"
         >
-          <div className="h-20 w-20 bg-green-50 rounded-3xl flex items-center justify-center mx-auto mb-6">
-            <CheckCircle className="h-10 w-10 text-green-600" />
+          <div className="h-20 w-20 bg-green-50 dark:bg-green-500/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
+            <CheckCircle className="h-10 w-10 text-green-600 dark:text-green-400" />
           </div>
-          <h1 className="text-2xl font-black text-slate-900 mb-3">Configuration Complete!</h1>
-          <p className="text-slate-500 font-medium mb-8">
+          <h1 className="text-2xl font-black text-slate-900 dark:text-white mb-3">Configuration Complete!</h1>
+          <p className="text-slate-500 dark:text-slate-400 font-medium mb-8">
             Your WhatsApp Business Account is ready to go. We're getting your workspace ready.
           </p>
-          <div className="flex items-center gap-3 justify-center text-green-600 font-bold text-sm">
+          <div className="flex items-center gap-3 justify-center text-green-600 dark:text-green-400 font-bold text-sm">
             <div className="h-2 w-2 rounded-full bg-green-600 animate-ping" />
             Updating interface...
           </div>
@@ -83,26 +83,23 @@ const Configuration = () => {
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 lg:p-4 xl:p-6 2xl:p-8">
       {/* Premium Header */}
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        style={{
-          backgroundColor: "#ffffff",
-          boxShadow: "0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06)",
-        }}
+        
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="flex items-center gap-2 text-green-600 font-bold text-[10px] uppercase tracking-widest">
+            <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-[10px] uppercase tracking-widest">
               <Settings className="h-3 w-3" />
               Project Settings
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
               WhatsApp Configuration
             </h1>
-            <p className="text-slate-500 text-xs font-medium">
-              Project: <span className="text-slate-900 font-bold">{selectedProject?.projectName || 'No Project Selected'}</span>
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+              Project: <span className="text-slate-900 dark:text-white font-bold">{selectedProject?.projectName || 'No Project Selected'}</span>
             </p>
           </div>
         </div>
@@ -117,10 +114,10 @@ const Configuration = () => {
               exit={{ opacity: 0, height: 0 }}
               className="mb-6"
             >
-              <Alert className="bg-green-50 border-green-200 rounded-2xl">
-                <CheckCircle className="h-4 w-4 text-green-600" />
+              <Alert className="bg-green-50 dark:bg-green-500/10 border-green-200 rounded-2xl">
+                <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                 <AlertTitle className="text-green-800 font-bold">Success</AlertTitle>
-                <AlertDescription className="text-green-700 font-medium">
+                <AlertDescription className="text-green-700 dark:text-green-400 font-medium">
                   WhatsApp Business Account configured successfully! Refreshing to update interface...
                 </AlertDescription>
               </Alert>
@@ -153,29 +150,29 @@ const Configuration = () => {
             transition={{ delay: 0.1 }}
           >
             <div 
-              className={`group relative flex flex-col bg-white border h-full transition-all duration-300 rounded-[24px] p-6 sm:p-8 cursor-pointer ${
+              className={`group relative flex flex-col bg-white dark:bg-slate-800/50 border h-full transition-all duration-300 rounded-[24px] p-6 sm:p-8 cursor-pointer ${
                 activeTab === 'embedded' 
                   ? 'border-green-400 shadow-xl shadow-green-900/5 ring-1 ring-green-400/20' 
-                  : 'border-slate-200 hover:border-slate-300 hover:shadow-lg'
+                  : 'border-slate-200 dark:border-slate-700/50 hover:border-slate-300 hover:shadow-lg'
               }`}
               onClick={() => setActiveTab('embedded')}
             >
               <div className="flex items-start justify-between mb-6">
                 <div className={`flex h-14 w-14 items-center justify-center rounded-2xl transition-all duration-300 ${
-                  activeTab === 'embedded' ? 'bg-green-600 text-white shadow-lg shadow-green-600/30' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100'
+                  activeTab === 'embedded' ? 'bg-green-600 text-white shadow-lg shadow-green-600/30' : 'bg-slate-50 dark:bg-slate-900/50 text-slate-400 group-hover:bg-slate-100'
                 }`}>
                   <Smartphone className="h-7 w-7" />
                 </div>
                 <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                  activeTab === 'embedded' ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500'
+                  activeTab === 'embedded' ? 'bg-green-100 text-green-700 dark:text-green-400' : 'bg-slate-100 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400'
                 }`}>
                   Recommended
                 </div>
               </div>
 
               <div className="mb-8">
-                <h3 className="text-xl font-black text-slate-900 mb-2">Embedded Signup</h3>
-                <p className="text-slate-500 text-sm font-medium leading-relaxed">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">Embedded Signup</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-relaxed">
                   Fastest way to connect. Use Meta's secure popup flow to automatically link your account and fetch credentials.
                 </p>
               </div>
@@ -198,29 +195,29 @@ const Configuration = () => {
             transition={{ delay: 0.2 }}
           >
             <div 
-              className={`group relative flex flex-col bg-white border h-full transition-all duration-300 rounded-[24px] p-6 sm:p-8 cursor-pointer ${
+              className={`group relative flex flex-col bg-white dark:bg-slate-800/50 border h-full transition-all duration-300 rounded-[24px] p-6 sm:p-8 cursor-pointer ${
                 activeTab === 'manual' 
                   ? 'border-blue-400 shadow-xl shadow-blue-900/5 ring-1 ring-blue-400/20' 
-                  : 'border-slate-200 hover:border-slate-300 hover:shadow-lg'
+                  : 'border-slate-200 dark:border-slate-700/50 hover:border-slate-300 hover:shadow-lg'
               }`}
               onClick={() => setActiveTab('manual')}
             >
               <div className="flex items-start justify-between mb-6">
                 <div className={`flex h-14 w-14 items-center justify-center rounded-2xl transition-all duration-300 ${
-                  activeTab === 'manual' ? 'bg-slate-900 text-white shadow-lg' : 'bg-slate-50 text-slate-400 group-hover:bg-slate-100'
+                  activeTab === 'manual' ? 'bg-slate-900 text-white shadow-lg' : 'bg-slate-50 dark:bg-slate-900/50 text-slate-400 group-hover:bg-slate-100'
                 }`}>
                   <Terminal className="h-7 w-7" />
                 </div>
                 <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${
-                  activeTab === 'manual' ? 'bg-slate-100 text-slate-900 border border-slate-200' : 'bg-slate-100 text-slate-500'
+                  activeTab === 'manual' ? 'bg-slate-100 dark:bg-slate-900/60 text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700/50' : 'bg-slate-100 dark:bg-slate-900/60 text-slate-500 dark:text-slate-400'
                 }`}>
                   Developer
                 </div>
               </div>
 
               <div className="mb-8">
-                <h3 className="text-xl font-black text-slate-900 mb-2">Manual Setup</h3>
-                <p className="text-slate-500 text-sm font-medium leading-relaxed">
+                <h3 className="text-xl font-black text-slate-900 dark:text-white mb-2">Manual Setup</h3>
+                <p className="text-slate-500 dark:text-slate-400 text-sm font-medium leading-relaxed">
                   For advanced users. Manually enter your App ID, App Secret, WABA ID, and Permanent Access Tokens from Meta.
                 </p>
               </div>
@@ -231,7 +228,7 @@ const Configuration = () => {
                   className={`w-full h-12 px-6 rounded-2xl flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-[0.98] ${
                     activeTab === 'manual' 
                       ? 'text-white shadow-xl shadow-slate-900/20' 
-                      : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                      : 'bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900/50'
                   }`}
                   style={activeTab === 'manual' ? { backgroundColor: "#0f172a", fontWeight: 700 } : { fontWeight: 700 }}
                 >
@@ -252,14 +249,14 @@ const Configuration = () => {
               exit={{ opacity: 0, y: 30 }}
               className="mt-8"
             >
-              <div className="bg-white border border-slate-200 rounded-[32px] p-8 sm:p-10 shadow-2xl shadow-slate-200/40">
+              <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-[32px] p-8 sm:p-10 shadow-2xl shadow-slate-200/40">
                 <div className="mb-8 flex items-center gap-4">
                   <div className="h-10 w-10 bg-slate-900 rounded-xl flex items-center justify-center text-white">
                     <Terminal className="h-5 w-5" />
                   </div>
                   <div>
-                    <h2 className="text-2xl font-black text-slate-900">Manual Configuration</h2>
-                    <p className="text-slate-500 text-sm font-medium">Please enter your Meta Business details below</p>
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-white">Manual Configuration</h2>
+                    <p className="text-slate-500 dark:text-slate-400 text-sm font-medium">Please enter your Meta Business details below</p>
                   </div>
                 </div>
                 <ManualConfiguration onConfigurationSuccess={handleConnectionSuccess} />

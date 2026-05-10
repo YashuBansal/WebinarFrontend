@@ -22,11 +22,11 @@ const getFileIcon = (mimeType?: string) => {
 const FileThumbnail: React.FC<Props> = ({ file, size = 'small', rounded = true }) => {
   const baseClass = size === 'large' ? 'w-full h-40' : 'w-12 h-12';
   const radiusClass = rounded ? 'rounded-lg' : '';
-  const containerClass = `${baseClass} ${radiusClass} overflow-hidden bg-gray-100 dark:bg-gray-800 flex-shrink-0`;
+  const containerClass = `${baseClass} ${radiusClass} overflow-hidden bg-gray-100 dark:bg-slate-900/50 dark:bg-slate-900/50 flex-shrink-0`;
 
   if (!file || !file.mimeType) {
     return (
-      <div className={`${baseClass} ${radiusClass} bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0`}>
+      <div className={`${baseClass} ${radiusClass} bg-gray-100 dark:bg-slate-900/50 dark:bg-slate-900/50 flex items-center justify-center flex-shrink-0`}>
         <FileText className="h-5 w-5 text-slate-300" />
       </div>
     );
@@ -111,7 +111,7 @@ const FileThumbnail: React.FC<Props> = ({ file, size = 'small', rounded = true }
   }
 
   return (
-    <div className={`${baseClass} ${radiusClass} bg-gray-100 dark:bg-gray-800 flex items-center justify-center flex-shrink-0`}>
+    <div className={`${baseClass} ${radiusClass} bg-gray-100 dark:bg-slate-900/50 dark:bg-slate-900/50 flex items-center justify-center flex-shrink-0`}>
       {getFileIcon(file.mimeType)}
     </div>
   );

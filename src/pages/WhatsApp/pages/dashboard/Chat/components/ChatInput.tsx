@@ -80,7 +80,7 @@ export function ChatInput({
     <div className={`flex-shrink-0 mt-auto p-4 bg-white/80 backdrop-blur-md border-t border-gray-100/50 ${className}`}>
       {/* Error message */}
       {error && (
-        <div className="mb-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-100 rounded-xl flex items-center gap-2.5 text-[12px] text-red-700 animate-in slide-in-from-bottom-2 duration-300">
+        <div className="mb-4 p-3 bg-red-50/80 backdrop-blur-sm border border-red-100 dark:border-red-500/20 rounded-xl flex items-center gap-2.5 text-[12px] text-red-700 animate-in slide-in-from-bottom-2 duration-300">
           <AlertCircle className="h-4 w-4 flex-shrink-0" />
           <span className="font-medium">{error}</span>
         </div>
@@ -88,7 +88,7 @@ export function ChatInput({
 
       <div className="max-w-[1400px] mx-auto">
         <TooltipProvider>
-          <div className="flex items-center gap-3 bg-white border border-gray-200 rounded-2xl p-2 shadow-sm focus-within:ring-4 focus-within:ring-teal-500/5 focus-within:border-teal-500/50 transition-all duration-300">
+          <div className="flex items-center gap-3 bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 rounded-2xl p-2 shadow-sm focus-within:ring-4 focus-within:ring-teal-500/5 focus-within:border-teal-500/50 transition-all duration-300">
             {/* Action Buttons Left */}
             <div className="flex items-center gap-0.5">
               <Popover>
