@@ -18,7 +18,7 @@ export function TemplateEmptyState({ activeTab, hasTemplatesInTab, projectId }: 
   return (
     <Card>
       <CardContent className="p-6 text-center">
-        <div className="w-16 h-16 bg-gray-100 dark:bg-slate-900/60 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="w-16 h-16 bg-gray-100 dark:bg-slate-800/50 rounded-full flex items-center justify-center mx-auto mb-4">
           {activeTab === 'approved' && <CheckCircle className="w-8 h-8 text-green-400" />}
           {activeTab === 'pending' && <Clock className="w-8 h-8 text-yellow-400" />}
           {activeTab === 'rejected' && <XCircle className="w-8 h-8 text-red-400" />}

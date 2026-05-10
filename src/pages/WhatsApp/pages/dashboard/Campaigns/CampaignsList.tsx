@@ -23,6 +23,7 @@ import {
   Eye,
   Calendar,
   X,
+  XCircle,
   RefreshCw,
   Loader2,
   Search,
@@ -333,33 +334,37 @@ const CampaignsList = () => {
       label: "Total Campaigns", 
       value: campaignsData?.pagination?.totalCount || 0, 
       icon: MessageSquare, 
-      color: "text-blue-600 dark:text-blue-400", 
-      bg: "bg-blue-50 dark:bg-blue-500/10", 
-      border: "border-blue-100 dark:border-blue-500/20" 
+      color: "text-slate-600 dark:text-slate-400", 
+      bg: "bg-slate-50 dark:bg-slate-800/50", 
+      border: "border-slate-100 dark:border-slate-700/50",
+      anim: "animate-float"
     },
     { 
       label: "Completed", 
       value: globalCampaigns.filter(c => c.status === 'completed').length, 
       icon: CheckCircle, 
-      color: "text-emerald-600 dark:text-emerald-400", 
-      bg: "bg-emerald-50 dark:bg-emerald-500/10", 
-      border: "border-emerald-100 dark:border-emerald-500/20" 
+      color: "text-green-600 dark:text-green-400", 
+      bg: "bg-green-50 dark:bg-green-900", 
+      border: "border-green-100 dark:border-green-800",
+      anim: "animate-bounce-subtle"
     },
     { 
       label: "In Progress", 
       value: globalCampaigns.filter(c => c.status === 'in-progress').length, 
       icon: TrendingUp, 
-      color: "text-blue-600 dark:text-blue-400", 
-      bg: "bg-blue-50 dark:bg-blue-500/10", 
-      border: "border-blue-100 dark:border-blue-500/20" 
+      color: "text-yellow-600 dark:text-yellow-400", 
+      bg: "bg-yellow-50 dark:bg-yellow-900", 
+      border: "border-yellow-100 dark:border-yellow-800",
+      anim: "animate-pulse-subtle"
     },
     { 
       label: "Failed/Cancelled", 
       value: globalCampaigns.filter(c => c.status === 'failed' || c.isDeleted).length, 
-      icon: X, 
+      icon: XCircle, 
       color: "text-red-600 dark:text-red-400", 
-      bg: "bg-red-50 dark:bg-red-500/10", 
-      border: "border-red-100 dark:border-red-500/20" 
+      bg: "bg-red-50 dark:bg-red-900", 
+      border: "border-red-100 dark:border-red-800",
+      anim: "animate-wiggle"
     },
   ];
 
@@ -453,17 +458,15 @@ const CampaignsList = () => {
               className="grid grid-cols-2 lg:grid-cols-4 gap-4"
             >
               {stats.map((stat, i) => (
-                <Card key={i} className={`rounded-2xl border ${stat.border} ${stat.bg} shadow-sm group hover:shadow-md transition-all duration-300`}>
-                  <CardContent className="p-5 flex items-center gap-4">
-                    <div className={`h-12 w-12 rounded-xl bg-white dark:bg-slate-800/50 border ${stat.border} flex items-center justify-center ${stat.color} shadow-sm group-hover:scale-110 transition-transform`}>
-                      <stat.icon className="h-6 w-6" />
+                <div key={i} className="group p-5 rounded-2xl bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:shadow-md transition-all duration-300">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className={`h-8 w-8 rounded-lg ${stat.bg} border ${stat.border} flex items-center justify-center ${stat.color} ${stat.anim}`}>
+                      <stat.icon className="h-4 w-4" />
                     </div>
-                    <div>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400 mb-0.5">{stat.label}</p>
-                      <h4 className={`text-2xl font-black ${stat.color}`}>{stat.value}</h4>
-                    </div>
-                  </CardContent>
-                </Card>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{stat.label}</span>
+                  </div>
+                  <p className={`text-2xl font-black ${stat.color} leading-none`}>{stat.value}</p>
+                </div>
               ))}
             </motion.div>
           )}

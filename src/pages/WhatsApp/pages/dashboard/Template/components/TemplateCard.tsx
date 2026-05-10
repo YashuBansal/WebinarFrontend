@@ -33,7 +33,7 @@ export function TemplateCard({ template, onCopy, onDelete }: TemplateCardProps) 
       case 'REJECTED':
         return { icon: XCircle, color: 'text-red-600 dark:text-red-400', bg: 'bg-red-50 dark:bg-red-500/10', border: 'border-red-100 dark:border-red-500/20', label: 'Rejected' };
       default:
-        return { icon: Clock, color: 'text-slate-400 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-900/60', border: 'border-slate-100 dark:border-slate-700/30', label: status };
+        return { icon: Clock, color: 'text-slate-400 dark:text-slate-400', bg: 'bg-slate-50 dark:bg-slate-800/50', border: 'border-slate-100 dark:border-slate-700/50', label: status };
     }
   };
 
@@ -46,13 +46,13 @@ export function TemplateCard({ template, onCopy, onDelete }: TemplateCardProps) 
       transition={{ type: "spring", stiffness: 300, damping: 20 }}
       className="h-full"
     >
-      <div className="group relative h-full bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-5 transition-all duration-300 overflow-hidden flex flex-col">
+      <div className="group relative h-full bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-5 transition-all duration-300 overflow-hidden flex flex-col">
         <div className="absolute top-0 right-0 -mr-16 -mt-16 h-32 w-32 rounded-full bg-green-500/5 blur-3xl opacity-0 group-hover:opacity-100 transition-opacity" />
         
         <div className="relative z-10 flex flex-col h-full">
           {/* Header */}
           <div className="flex items-start justify-between mb-4">
-            <div className="h-10 w-10 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 dark:text-slate-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
+            <div className="h-10 w-10 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-slate-400 dark:text-slate-400 group-hover:text-green-600 dark:group-hover:text-green-400 transition-colors">
               <MessageSquare className="h-5 w-5" />
             </div>
             <div className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg border ${status.bg} ${status.border} ${status.color}`}>

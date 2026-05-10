@@ -51,7 +51,7 @@ export function TemplateHeader({ projectName, projectId, isLoading, isSyncing, i
 
   return (
     <motion.div
-      className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-900/60 shadow-sm"
+      className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
       
