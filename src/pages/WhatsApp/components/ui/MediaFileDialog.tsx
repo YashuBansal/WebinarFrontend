@@ -125,13 +125,17 @@ export const MediaFileDialog: React.FC<MediaFileDialogProps> = ({
     }
 
     try {
-      await uploadMediaAssetMutation.mutateAsync({
+      const res = await uploadMediaAssetMutation.mutateAsync({
         file,
         projectId: selectedProject._id,
       });
       toastUtils.success(`"${file.name}" uploaded successfully`);
       setSelectedFileForUpload(null);
-      // The query cache invalidation will automatically refresh the list
+      
+      // Auto-select the newly uploaded file
+      if (res.data) {
+        onFileSelect(res.data);
+      }
     } catch (error: any) {
       const errorMsg = error?.response?.data?.message || error?.message || 'Upload failed';
       toastUtils.error(errorMsg);

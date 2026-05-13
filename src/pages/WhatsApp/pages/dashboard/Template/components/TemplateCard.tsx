@@ -9,7 +9,8 @@ import {
   Eye,
   Trash2,
   MoreVertical,
-  MessageSquare
+  MessageSquare,
+  Zap
 } from 'lucide-react';
 import { TemplatePreviewDialog } from '@/components/ui/TemplatePreviewDialog';
 import { Badge } from '@/components/ui/badge';
@@ -19,9 +20,10 @@ interface TemplateCardProps {
   template: any;
   onCopy: (name: string) => void;
   onDelete: (id: string, name: string) => void;
+  onCloneToSession?: (template: any) => void;
 }
 
-export function TemplateCard({ template, onCopy, onDelete }: TemplateCardProps) {
+export function TemplateCard({ template, onCopy, onDelete, onCloneToSession }: TemplateCardProps) {
   const [showPreview, setShowPreview] = useState(false);
 
   const getStatusConfig = (status: string) => {
@@ -98,6 +100,15 @@ export function TemplateCard({ template, onCopy, onDelete }: TemplateCardProps) 
                 title="Preview"
               >
                 <Eye className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => onCloneToSession?.(template)}
+                className="h-8 w-8 p-0 rounded-lg text-slate-400 dark:text-slate-400 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-500/10 transition-all"
+                title="Clone as Session Copy (No Approval Needed)"
+              >
+                <Zap className="h-4 w-4" />
               </Button>
             </div>
             

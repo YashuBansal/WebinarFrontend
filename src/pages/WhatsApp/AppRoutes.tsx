@@ -6,6 +6,7 @@ const ProjectsPage = lazy(() => import("@/pages/ProjectsPage"));
 const DashboardLayout = lazy(() => import("@/pages/dashboard/DashboardLayout").then(m => ({ default: m.default })));
 const Templates = lazy(() => import("@/pages/dashboard/Template/Templates").then(m => ({ default: m.default })));
 const CreateTemplatePage = lazy(() => import("@/pages/dashboard/Template/CreateTemplatePage").then(m => ({ default: m.default })));
+const CreateSessionTemplatePage = lazy(() => import("@/pages/dashboard/Template/CreateSessionTemplatePage").then(m => ({ default: m.default })));
 const ConfiguredTemplatesList = lazy(() => import("@/pages/dashboard/ConfiguredTemplates/ConfiguredTemplatesList").then(m => ({ default: m.default })));
 const CreateConfiguredTemplate = lazy(() => import("@/pages/dashboard/ConfiguredTemplates/CreateConfiguredTemplate").then(m => ({ default: m.default })));
 const SendMessage = lazy(() => import("@/pages/dashboard/SendMessage/SendMessage").then(m => ({ default: m.default })));
@@ -48,6 +49,7 @@ const routes = [
     children: [
       { path: "templates", element: <ConfigurationGuard><Templates /></ConfigurationGuard> },
       { path: "templates/create", element: <ConfigurationGuard><CreateTemplatePage /></ConfigurationGuard> },
+      { path: "templates/create-session", element: <ConfigurationGuard><CreateSessionTemplatePage /></ConfigurationGuard> },
       { path: "configured-templates", element: <ConfigurationGuard><ConfiguredTemplatesList /></ConfigurationGuard> },
       { path: "configured-templates/create", element: <ConfigurationGuard><CreateConfiguredTemplate /></ConfigurationGuard> },
       { path: "send-message", element: <ConfigurationGuard><SendMessage /></ConfigurationGuard> },

@@ -304,7 +304,15 @@ input.dateTime-picker[type="datetime-local"]::-webkit-calendar-picker-indicator 
   border-radius: 10px;
 }
 
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+.dark .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
 
@@ -321,7 +329,15 @@ input.dateTime-picker[type="datetime-local"]::-webkit-calendar-picker-indicator 
   border-radius: 10px;
 }
 
+.dark .dashboard-scrollbar::-webkit-scrollbar-thumb {
+  background: #334155;
+}
+
 .dashboard-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
+
+.dark .dashboard-scrollbar::-webkit-scrollbar-thumb:hover {
   background: #475569;
 }
 
@@ -330,6 +346,393 @@ input.dateTime-picker[type="datetime-local"]::-webkit-calendar-picker-indicator 
 .dashboard-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: #64748b transparent;
+}
+
+.dark .custom-scrollbar,
+.dark .dashboard-scrollbar {
+  scrollbar-color: #334155 transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   WhatsApp-Style Chat UI  —  Authentic WA design system
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Chat scrollbar */
+.wa-messages-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.wa-messages-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.wa-messages-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 10px;
+}
+
+.dark .wa-messages-scroll::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.wa-messages-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.15) transparent;
+}
+
+.dark .wa-messages-scroll {
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* Date separator chip */
+.wa-date-chip {
+  background: #fff;
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #54656f;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  user-select: none;
+}
+
+.dark .wa-date-chip {
+  background: #182229;
+  color: #8696a0;
+}
+
+/* Bubble base */
+.wa-bubble {
+  position: relative;
+  border-radius: 8px;
+  padding: 6px 7px 4px 9px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.12);
+  word-break: break-word;
+  overflow: visible;
+  /* Show the tails */
+}
+
+/* Inbound (received) bubble — white */
+.wa-bubble-in {
+  background: #ffffff;
+  border-top-left-radius: 0;
+  color: #111b21;
+}
+
+.dark .wa-bubble-in { background: #202c33; color: #e9edef; }
+
+/* Inbound tail */
+.wa-bubble-in::before {
+  content: '';
+  position: absolute;
+  top: 0; left: -8px;
+  border-style: solid;
+  border-width: 0 9px 9px 0;
+  border-color: transparent #ffffff transparent transparent;
+  filter: drop-shadow(-1px 1px 0px rgba(0,0,0,0.15));
+}
+.dark .wa-bubble-in::before { border-color: transparent #202c33 transparent transparent; }
+
+/* Outbound (sent) bubble — green */
+.wa-bubble-out {
+  background: #d9fdd3;
+  border-top-right-radius: 0;
+  color: #111b21;
+}
+
+/* Outbound tail */
+.wa-bubble-out::after {
+  content: '';
+  position: absolute;
+  top: 0; right: -8px;
+  border-style: solid;
+  border-width: 9px 9px 0 0;
+  border-color: #d9fdd3 transparent transparent transparent;
+  filter: drop-shadow(1px 1px 0px rgba(0,0,0,0.15));
+}
+.dark .wa-bubble-out { background: #005c4b; color: #e9edef; }
+.dark .wa-bubble-out::after { border-color: #005c4b transparent transparent transparent; }
+
+/* Sender name (inbound, for group/template) */
+.wa-sender-name {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #7b6d57;
+  margin-bottom: 2px;
+  letter-spacing: 0.01em;
+}
+
+.dark .wa-sender-name {
+  color: #e6a817;
+}
+
+/* Plain text — padding-bottom reserves space for time row */
+.wa-plain-text {
+  font-size: 14.2px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  padding-bottom: 18px;
+}
+
+/* Time + status row — flex, NO float */
+.wa-time-row {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 3px;
+  margin-top: 2px;
+}
+
+.wa-time-row-in {
+  color: #667781;
+}
+
+.wa-time-row-out {
+  color: #667781;
+}
+
+.dark .wa-time-row-in,
+.dark .wa-time-row-out {
+  color: #8696a0;
+}
+
+.wa-time-text {
+  font-size: 11px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ─── Template card (inside bubble) ─── */
+.wa-tmpl-wrap {
+  width: 100%;
+}
+
+/* Media header flush to bubble edges */
+.wa-tmpl-media-wrap {
+  margin: -6px -7px 8px -9px;
+  border-radius: 8px 8px 0 0;
+  overflow: hidden;
+}
+
+.wa-tmpl-media {
+  width: 100%;
+  max-height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.wa-tmpl-media-placeholder {
+  margin: -6px -7px 8px -9px;
+  border-radius: 8px 8px 0 0;
+  background: rgba(0, 0, 0, 0.07);
+  padding: 28px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  color: #8696a0;
+}
+
+/* Document */
+.wa-tmpl-doc {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin-bottom: 6px;
+}
+
+.wa-tmpl-doc-in {
+  background: rgba(0, 0, 0, 0.05);
+  color: #54656f;
+}
+
+.wa-tmpl-doc-out {
+  background: rgba(0, 0, 0, 0.08);
+  color: #54656f;
+}
+
+.dark .wa-tmpl-doc-in {
+  background: rgba(255, 255, 255, 0.06);
+  color: #8696a0;
+}
+
+.dark .wa-tmpl-doc-out {
+  background: rgba(255, 255, 255, 0.08);
+  color: #8696a0;
+}
+
+/* Bold text header */
+.wa-tmpl-text-header {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.2;
+  margin-bottom: 4px;
+  /* Tight gap after header */
+}
+
+.wa-tmpl-text-header-in,
+.wa-tmpl-text-header-out {
+  color: #111b21;
+}
+
+.dark .wa-tmpl-text-header-in,
+.dark .wa-tmpl-text-header-out {
+  color: #e9edef;
+}
+
+/* Body — very tight gap if footer exists */
+.wa-tmpl-body-text {
+  font-size: 14.2px;
+  line-height: 1.45;
+  padding-bottom: 2px;
+  white-space: pre-wrap;
+}
+
+/* If body is the last element (no footer/buttons), add room for time */
+/* If body is the last element (no footer/buttons), add room for time */
+.wa-tmpl-body-text:last-child {
+  padding-bottom: 14px;
+}
+
+.wa-tmpl-body-in,
+.wa-tmpl-body-out {
+  color: #111b21;
+}
+
+.dark .wa-tmpl-body-in,
+.dark .wa-tmpl-body-out {
+  color: #e9edef;
+}
+
+/* Footer — tighter room for time row */
+.wa-tmpl-footer {
+  font-size: 12px;
+  margin-top: 0px;
+  line-height: 1.3;
+  padding-bottom: 14px;
+  /* Reduced from 20px */
+}
+
+.wa-tmpl-footer-in,
+.wa-tmpl-footer-out {
+  color: #8696a0;
+}
+
+.dark .wa-tmpl-footer-in,
+.dark .wa-tmpl-footer-out {
+  color: #667781;
+}
+
+/* Action buttons (URL/Phone) — inside bubble, separated by thin line */
+.wa-tmpl-action-list {
+  margin-top: 6px;
+}
+
+.wa-tmpl-action-row {
+  border-top-width: 1px;
+  border-top-style: solid;
+  padding-top: 7px;
+  margin-top: 4px;
+}
+
+.wa-tmpl-divider-in {
+  border-top-color: #e9edef;
+}
+
+.wa-tmpl-divider-out {
+  border-top-color: rgba(0, 0, 0, 0.12);
+}
+
+.dark .wa-tmpl-divider-in {
+  border-top-color: #2a3942;
+}
+
+.dark .wa-tmpl-divider-out {
+  border-top-color: rgba(255, 255, 255, 0.12);
+}
+
+.wa-tmpl-action-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 500;
+  text-decoration: none;
+  transition: opacity 0.15s;
+}
+
+.wa-tmpl-action-btn-in,
+.wa-tmpl-action-btn-out {
+  color: #00a884;
+}
+
+.dark .wa-tmpl-action-btn-in,
+.dark .wa-tmpl-action-btn-out {
+  color: #00cf9d;
+}
+
+.wa-tmpl-action-btn:hover {
+  opacity: 0.75;
+}
+
+/* Quick reply pills — BELOW bubble (white card each) */
+.wa-qr-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-top: 3px;
+  width: 100%;
+}
+
+.wa-qr-pill {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 100%;
+  padding: 9px 12px;
+  background: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #00a884;
+  cursor: default;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  line-height: 1;
+}
+
+.dark .wa-qr-pill {
+  background: #202c33;
+  color: #00cf9d;
+}
+
+/* Media inside plain message bubble */
+.wa-media-img {
+  width: 100%;
+  max-height: 260px;
+  object-fit: cover;
+  border-radius: 6px;
+  display: block;
+  margin-bottom: 2px;
+}
+
+.wa-doc-block {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  color: #54656f;
+}
+
+.dark .wa-doc-block {
+  background: rgba(255, 255, 255, 0.06);
+  color: #8696a0;
 }
 
 @layer base {

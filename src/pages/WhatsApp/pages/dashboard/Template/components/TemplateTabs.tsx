@@ -2,16 +2,18 @@ import {
   CheckCircle, 
   XCircle, 
   Clock,
-  LayoutGrid
+  LayoutGrid,
+  Zap
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 interface TemplateTabsProps {
-  activeTab: 'approved' | 'pending' | 'rejected';
-  onTabChange: (tab: 'approved' | 'pending' | 'rejected') => void;
+  activeTab: 'approved' | 'pending' | 'rejected' | 'session';
+  onTabChange: (tab: 'approved' | 'pending' | 'rejected' | 'session') => void;
   approvedCount: number;
   pendingCount: number;
   rejectedCount: number;
+  sessionCount: number;
 }
 
 export function TemplateTabs({ 
@@ -19,12 +21,14 @@ export function TemplateTabs({
   onTabChange, 
   approvedCount, 
   pendingCount, 
-  rejectedCount 
+  rejectedCount,
+  sessionCount
 }: TemplateTabsProps) {
   const tabs = [
     { id: 'approved', label: 'Approved', count: approvedCount, icon: CheckCircle, activeColor: 'text-green-600 dark:text-green-400', activeBg: 'bg-green-50 dark:bg-green-500/10', activeBorder: 'border-green-200' },
     { id: 'pending', label: 'Pending', count: pendingCount, icon: Clock, activeColor: 'text-yellow-600 dark:text-yellow-400', activeBg: 'bg-yellow-50 dark:bg-yellow-500/10', activeBorder: 'border-yellow-200' },
     { id: 'rejected', label: 'Rejected', count: rejectedCount, icon: XCircle, activeColor: 'text-red-600 dark:text-red-400', activeBg: 'bg-red-50 dark:bg-red-500/10', activeBorder: 'border-red-200' },
+    { id: 'session', label: 'Session Only', count: sessionCount, icon: Zap, activeColor: 'text-amber-600 dark:text-amber-400', activeBg: 'bg-amber-50 dark:bg-amber-500/10', activeBorder: 'border-amber-200' },
   ] as const;
 
   return (

@@ -36,8 +36,8 @@ export function ChatHeader({
   const hasName = !!initials;
 
   return (
-    <div className="flex flex-col flex-shrink-0 z-10">
-      <div className="flex items-center justify-between p-3 px-4 md:px-6 border-b border-gray-100/80 bg-white/80 backdrop-blur-md sticky top-0">
+    <div className="flex flex-col flex-shrink-0 z-10 sticky top-0">
+      <div className="flex items-center justify-between p-3 px-4 md:px-6 border-b border-gray-100/80 dark:border-slate-800/50 bg-white dark:bg-slate-950 shadow-sm">
         <div className="flex items-center gap-2 md:gap-4">
           {onBack && (
             <Button
@@ -78,7 +78,7 @@ export function ChatHeader({
 
       {/* 24-hour window warning - Modern banner */}
       {canSendDirect && !canSendDirect.canSend && (
-        <div className="px-6 py-2 bg-amber-50/60 backdrop-blur-sm border-b border-amber-100/50 text-[11px] text-amber-700 dark:text-amber-400 flex items-center gap-2.5 animate-in fade-in slide-in-from-top-1 duration-300">
+        <div className="px-6 py-2 bg-amber-50/60 dark:bg-[#25323a] backdrop-blur-sm border-b border-amber-100/50 dark:border-amber-900/20 text-[11px] text-amber-700 dark:text-amber-400 flex items-center gap-2.5 animate-in fade-in slide-in-from-top-1 duration-300">
           <div className="flex items-center justify-center w-5 h-5 rounded-full bg-amber-100 text-amber-600 dark:text-amber-400">
             <Info className="w-3 h-3" />
           </div>

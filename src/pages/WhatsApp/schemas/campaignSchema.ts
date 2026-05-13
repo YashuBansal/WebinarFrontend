@@ -115,6 +115,7 @@ export const campaignContactSchema = z.object({
   phone: z.string(),
   email: z.string().optional(),
   tags: z.array(z.string()).optional(),
+  avatar: z.string().optional(),
 });
 
 const wlhConditionSchema = z.object({

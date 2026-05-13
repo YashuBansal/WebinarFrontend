@@ -5,6 +5,7 @@ import { useTemplates, useSendTemplateMessage } from './useTemplates';
 import { toastUtils } from '@/lib/utils';
 import type { SendTemplateMessagePayload } from '@/schemas/templateSchema';
 import { socketManager } from '@/lib/socket';
+import { useQuickReplies } from './useQuickReplies';
 
 // Query key constant for invalidating waba message queries
 const WABA_MESSAGE_QUERY_KEY = 'wabaMessage';
@@ -30,6 +31,9 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
 
   // Template sending mutation
   const sendTemplateMutation = useSendTemplateMessage();
+
+  // Fetch quick replies (session templates)
+  const { quickReplies, isLoading: isQuickRepliesLoading } = useQuickReplies(projectId || '');
   
   // Helper function to invalidate contact queries
   const invalidateContactQueries = useCallback(() => {
@@ -59,7 +63,7 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
     }
   }, [projectId, phoneNumber]);
 
-  const sendText = useCallback(async (text: string, contactId?: string) => {
+  const sendText = useCallback(async (text: string, components?: any[], contactId?: string) => {
     if (!projectId || !phoneNumber || !text?.trim()) return;
 
     const optimisticCreatedAt = new Date().toISOString();
@@ -69,6 +73,8 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
       direction: 'outbound',
       createdAt: optimisticCreatedAt,
       status: 'pending',
+      messageFormat: components && components.length > 0 ? 'template' : 'text',
+      templateComponents: components,
     };
 
     // 1. Immediately show the message in the UI
@@ -77,7 +83,7 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
 
     try {
       // 2. Perform the actual API call
-      const { id } = await chatApi.sendText({ projectId, phoneNumber, text, contactId });
+      const { id } = await chatApi.sendText({ projectId, phoneNumber, text, components, contactId });
       const sentAt = new Date().toISOString();
 
       // 3. Update the optimistic message with the real ID and 'sent' status
@@ -231,27 +237,49 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
           
           // Check if this message (by ID) is already in the list
           if (incoming._id && prev.some(m => String(m._id) === String(incoming._id))) {
-            return prev;
+            // Still update the message to get latest status/data
+            return prev.map(m => String(m._id) === String(incoming._id) ? { ...m, ...incoming } : m);
           }
 
-          // If it's an outbound message, try to find and replace an optimistic placeholder
+          // If it's an outbound message, try to find and replace a placeholder
           if (incoming.direction === 'outbound') {
             const MATCH_WINDOW_MS = 60000; // 1 minute window for socket echoes
-            const optimisticIdx = prev.findIndex(m => 
-              !m._id && 
-              m.direction === 'outbound' && 
-              m.textBody === incoming.textBody &&
-              Math.abs(new Date(m.createdAt).getTime() - new Date(incoming.createdAt).getTime()) < MATCH_WINDOW_MS
-            );
+
+            // Case 1: placeholder still has no _id (API hasn't resolved yet)
+            // Case 2: placeholder already has an _id (API resolved before socket echo)
+            //   — in this case !m._id fails, so we must also check by ID on the incoming
+            const optimisticIdx = prev.findIndex(m => {
+              if (m.direction !== 'outbound') return false;
+              const withinWindow = Math.abs(
+                new Date(m.createdAt).getTime() - new Date(incoming.createdAt).getTime()
+              ) < MATCH_WINDOW_MS;
+              if (!withinWindow) return false;
+
+              // Match no-id placeholder by textBody
+              if (!m._id && m.textBody === incoming.textBody) return true;
+
+              // Match already-id'd placeholder — this happens when API resolves before
+              // the WebSocket echo and the optimistic already got stamped with the server ID
+              if (m._id && incoming._id && String(m._id) === String(incoming._id)) return true;
+
+              // For template messages (session templates): also match by templateComponents body text
+              if (!m._id && m.messageFormat === 'template' && incoming.messageFormat === 'template') {
+                const mBody = m.templateComponents?.find((c: any) => c.type === 'BODY')?.text;
+                const iBody = incoming.templateComponents?.find((c: any) => c.type === 'BODY')?.text;
+                if (mBody && iBody && mBody === iBody) return true;
+              }
+
+              return false;
+            });
 
             if (optimisticIdx !== -1) {
               const next = [...prev];
-              next[optimisticIdx] = incoming;
+              next[optimisticIdx] = { ...prev[optimisticIdx], ...incoming };
               return next;
             }
           }
 
-          // Prevent duplicate append for identical messages without IDs (very quick echoes)
+          // Prevent duplicate append for identical messages (very quick echoes)
           const last = prev[prev.length - 1];
           if (
             last &&
@@ -417,6 +445,8 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
     sendText, 
     sendTemplate,
     templates,
+    quickReplies,
+    isQuickRepliesLoading,
     canSendDirect,
     checkCanSendDirect,
     sendTemplateMutation

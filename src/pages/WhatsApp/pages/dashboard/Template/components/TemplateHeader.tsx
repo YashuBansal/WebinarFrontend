@@ -5,7 +5,8 @@ import {
   Plus,
   ArrowDownUp,
   Clock,
-  LayoutGrid
+  LayoutGrid,
+  Zap
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -18,9 +19,20 @@ interface TemplateHeaderProps {
   lastSyncedAt?: string | null;
   onRefresh: () => void;
   onSync?: () => void;
+  activeTab?: string;
 }
 
-export function TemplateHeader({ projectName, projectId, isLoading, isSyncing, isRefreshing, lastSyncedAt, onRefresh, onSync }: TemplateHeaderProps) {
+export function TemplateHeader({ 
+  projectName, 
+  projectId, 
+  isLoading, 
+  isSyncing, 
+  isRefreshing, 
+  lastSyncedAt, 
+  onRefresh, 
+  onSync,
+  activeTab
+}: TemplateHeaderProps) {
   const formatLastSynced = (dateString: string | null | undefined) => {
     if (!dateString) return null;
     try {
@@ -108,6 +120,15 @@ export function TemplateHeader({ projectName, projectId, isLoading, isSyncing, i
             >
               <Plus className="w-4 h-4" />
               Create Template
+            </Button>
+          </Link>
+
+          <Link to={`/whatsapp/dashboard/${projectId}/templates/create-session`}>
+            <Button 
+              className="h-10 px-6 rounded-xl flex items-center gap-2 text-white font-bold text-xs shadow-xl shadow-amber-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] bg-amber-500 hover:bg-amber-600 border-none"
+            >
+              <Zap className="h-4 w-4" />
+              Create Session Template
             </Button>
           </Link>
         </div>

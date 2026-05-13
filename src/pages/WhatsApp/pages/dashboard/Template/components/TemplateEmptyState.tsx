@@ -4,12 +4,13 @@ import {
   CheckCircle, 
   XCircle, 
   Clock, 
-  Plus
+  Plus,
+  Zap
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface TemplateEmptyStateProps {
-  activeTab: 'approved' | 'pending' | 'rejected';
+  activeTab: 'approved' | 'pending' | 'rejected' | 'session';
   hasTemplatesInTab: boolean;
   projectId: string;
 }
@@ -22,9 +23,10 @@ export function TemplateEmptyState({ activeTab, hasTemplatesInTab, projectId }: 
           {activeTab === 'approved' && <CheckCircle className="w-8 h-8 text-green-400" />}
           {activeTab === 'pending' && <Clock className="w-8 h-8 text-yellow-400" />}
           {activeTab === 'rejected' && <XCircle className="w-8 h-8 text-red-400" />}
+          {(activeTab as string) === 'session' && <Zap className="w-8 h-8 text-amber-400" />}
         </div>
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-          No {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)} Templates Found
+          No {(activeTab === 'session' ? 'Session' : activeTab.charAt(0).toUpperCase() + activeTab.slice(1))} Templates Found
         </h3>
         <p className="text-gray-600 dark:text-slate-400 mb-4">
           {!hasTemplatesInTab 
@@ -37,6 +39,14 @@ export function TemplateEmptyState({ activeTab, hasTemplatesInTab, projectId }: 
             <Button className="bg-teal-600 hover:bg-teal-700">
               <Plus className="w-4 h-4 mr-2" />
               Create Your First Template
+            </Button>
+          </Link>
+        )}
+        {(activeTab as string) === 'session' && !hasTemplatesInTab && (
+          <Link to={`/whatsapp/dashboard/${projectId}/templates/create-session`}>
+            <Button className="bg-amber-600 hover:bg-amber-700">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Your First Session Template
             </Button>
           </Link>
         )}

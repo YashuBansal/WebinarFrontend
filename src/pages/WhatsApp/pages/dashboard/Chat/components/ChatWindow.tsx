@@ -12,6 +12,7 @@ import { MessageSquare } from 'lucide-react';
 import { ChatHeader } from './ChatHeader';
 import { MessagesList } from './MessagesList';
 import { TemplateForm } from './TemplateForm';
+import { SessionTemplateForm } from './SessionTemplateForm';
 import { ChatInput } from './ChatInput';
 import { EmptyState } from './EmptyState';
 
@@ -68,6 +69,7 @@ export function ChatWindow({
   onBack
 }: ChatWindowProps) {
   const [showTemplateForm, setShowTemplateForm] = useState(false);
+  const [showSessionForm, setShowSessionForm] = useState(false);
 
   const {
     messages,
@@ -77,6 +79,7 @@ export function ChatWindow({
     hasMore,
     loading,
     templates,
+    quickReplies,
     canSendDirect,
     sendTemplateMutation
   } = useChat(projectId, activeContact);
@@ -115,11 +118,11 @@ export function ChatWindow({
   }, [projectId, activeContact, sendTemplate, onTemplateSent]);
 
   // Handle text message sending
-  const handleSendText = useCallback(async (text: string) => {
+  const handleSendText = useCallback(async (text: string, components?: any[]) => {
     if (!activeContact || !projectId) return;
 
     try {
-      await sendText(text);
+      await sendText(text, components as any);
       // Create a message object for the callback
       const message: ChatMessageDTO = {
         phoneNumber: activeContact,
@@ -134,9 +137,10 @@ export function ChatWindow({
     }
   }, [activeContact, projectId, sendText, onMessageSent]);
 
-  // Reset template form when switching contacts
+  // Reset forms when switching contacts
   useEffect(() => {
     setShowTemplateForm(false);
+    setShowSessionForm(false);
   }, [activeContact]);
 
   // Mark messages as read when chat is opened
@@ -209,10 +213,9 @@ export function ChatWindow({
         />
       </div>
 
-      {/* Messages List - Scrollable area with custom background pattern */}
-      <div className="flex-1 min-h-0 overflow-hidden relative bg-[#f8fafc]">
+      <div className="flex-1 min-h-0 overflow-hidden relative bg-[#efeae2] dark:bg-[#0b141a]">
         <div
-          className="absolute inset-0 opacity-[0.06] pointer-events-none bg-repeat bg-[url('/whatsapp-bg.png')] z-0"
+          className="absolute inset-0 opacity-[0.08] dark:opacity-[0.04] pointer-events-none bg-repeat bg-[url('/whatsapp-bg.png')] z-0"
           style={{ backgroundSize: '400px' }}
         ></div>
         <div className="relative z-10 h-full">
@@ -223,13 +226,14 @@ export function ChatWindow({
             loading={loading}
             onLoadMore={loadMore}
             contact={activeContact}
+            contactName={getContactDisplayName()}
             projectId={projectId}
           />
         </div>
 
-        {/* Template Form - Bottom-anchored overlay (grows up to header, then scrolls) */}
+        {/* Template Form - Bottom-anchored overlay */}
         {showTemplateForm && (
-          <div className="absolute bottom-0 left-0 right-0 max-h-full bg-white dark:bg-slate-800/50 z-50 overflow-y-auto animate-in slide-in-from-bottom-4 duration-300 shadow-[0_-12px_40px_rgba(0,0,0,0.15)] border-t border-gray-100 dark:border-slate-700/50">
+          <div className="absolute bottom-0 left-0 right-0 max-h-full bg-white dark:bg-[#111b21] z-50 overflow-y-auto animate-in slide-in-from-bottom-4 duration-300 shadow-[0_-12px_40px_rgba(0,0,0,0.3)] border-t border-gray-100 dark:border-slate-800">
             <TemplateForm
               templates={templates}
               mediaAssetsData={mediaAssetsData}
@@ -241,6 +245,24 @@ export function ChatWindow({
             />
           </div>
         )}
+
+        {/* Session Template Form - Bottom-anchored overlay */}
+        {showSessionForm && (
+          <div className="absolute bottom-0 left-0 right-0 max-h-full bg-white dark:bg-[#111b21] z-50 overflow-y-auto animate-in slide-in-from-bottom-4 duration-300 shadow-[0_-12px_40px_rgba(0,0,0,0.3)] border-t border-gray-100 dark:border-slate-800">
+            <SessionTemplateForm
+              quickReplies={quickReplies}
+              mediaAssetsData={mediaAssetsData}
+              mediaAssetsLoading={mediaAssetsLoading}
+              mediaAssetsError={mediaAssetsError}
+              onSend={async (text, components) => {
+                await handleSendText(text, components);
+                setShowSessionForm(false);
+              }}
+              onCancel={() => setShowSessionForm(false)}
+              isSubmitting={false}
+            />
+          </div>
+        )}
       </div>
 
       {/* Chat Footer - Contains Chat Input */}
@@ -249,7 +271,15 @@ export function ChatWindow({
           disabled={disabled || !activeContact}
           canSendDirect={canSendDirect?.canSend ?? false}
           onSend={handleSendText}
-          onShowTemplate={() => setShowTemplateForm(!showTemplateForm)}
+          onShowTemplate={() => {
+            setShowTemplateForm(!showTemplateForm);
+            setShowSessionForm(false);
+          }}
+          onShowSessionTemplate={() => {
+            setShowSessionForm(!showSessionForm);
+            setShowTemplateForm(false);
+          }}
+          quickReplies={quickReplies}
         />
       </div>
     </div>

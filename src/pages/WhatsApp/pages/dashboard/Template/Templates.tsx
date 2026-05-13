@@ -7,7 +7,8 @@ import { Link, useParams } from 'react-router-dom';
 import { toastUtils } from '@/lib/utils';
 import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { AlertCircle, LayoutGrid } from 'lucide-react';
+import { AlertCircle, LayoutGrid, Zap } from 'lucide-react';
+import { useQuickReplies } from '@/hooks/useQuickReplies';
 
 // Import modular components
 import {
@@ -25,8 +26,9 @@ export default function Templates() {
   const { selectedProject } = useProjectContext();
   const { projectId } = useParams<{ projectId: string }>();
   const [searchTerm, setSearchTerm] = useState('');
-  const [activeTab, setActiveTab] = useState<'approved' | 'pending' | 'rejected'>('approved');
-  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string } | null>(null);
+  const [activeTab, setActiveTab] = useState<'approved' | 'pending' | 'rejected' | 'session'>('approved');
+  const [pendingDelete, setPendingDelete] = useState<{ id: string; name: string; isQuickReply?: boolean } | null>(null);
+  const [pendingClone, setPendingClone] = useState<any | null>(null);
 
   const {
     data: templatesResponse,
@@ -38,6 +40,12 @@ export default function Templates() {
 
   const deleteTemplateMutation = useDeleteTemplate();
   const syncTemplatesMutation = useSyncTemplates();
+  const { 
+    quickReplies, 
+    isLoading: isQuickRepliesLoading, 
+    createQuickReply, 
+    deleteQuickReply 
+  } = useQuickReplies(selectedProject?._id || '');
 
   const allTemplates = templatesResponse?.data || [];
 
@@ -47,32 +55,72 @@ export default function Templates() {
   }, [allTemplates]);
 
   // Simple filtering
-  const filteredTemplates = allTemplates.filter(template => {
-    const matchesTab = template.status === activeTab.toUpperCase();
-    const matchesSearch = !searchTerm ||
-      template.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      template.category.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesTab && matchesSearch;
-  });
+  const filteredTemplates = useMemo(() => {
+    if (activeTab === 'session') {
+      return quickReplies.filter(qr => 
+        !searchTerm || 
+        qr.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        qr.content.toLowerCase().includes(searchTerm.toLowerCase())
+      ).map(qr => ({
+        id: qr._id,
+        name: qr.name,
+        status: 'SESSION',
+        category: 'SESSION',
+        language: qr.language || 'en_US',
+        components: qr.components && qr.components.length > 0 
+          ? qr.components 
+          : [{ type: 'BODY', text: qr.content }],
+        isQuickReply: true
+      }));
+    }
 
-  const handleDeleteTemplate = (templateId: string, templateName: string) => {
+    return allTemplates.filter(template => {
+      const matchesTab = template.status === activeTab.toUpperCase();
+      const matchesSearch = !searchTerm ||
+        template.name.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesTab && matchesSearch;
+    });
+  }, [allTemplates, activeTab, searchTerm, quickReplies]);
+
+  const handleDeleteTemplate = (templateId: string, templateName: string, isQuickReply?: boolean) => {
     if (!selectedProject?._id) return;
-    setPendingDelete({ id: templateId, name: templateName });
+    setPendingDelete({ id: templateId, name: templateName, isQuickReply });
   };
 
   const confirmDelete = async () => {
     if (!selectedProject?._id || !pendingDelete) return;
     try {
-      await deleteTemplateMutation.mutateAsync({
-        projectId: selectedProject._id,
-        deletePayload: { hsm_id: pendingDelete.id, name: pendingDelete.name },
-      });
-      toastUtils.success('Template deleted successfully');
+      if (pendingDelete.isQuickReply) {
+        await deleteQuickReply(pendingDelete.id);
+      } else {
+        await deleteTemplateMutation.mutateAsync({
+          projectId: selectedProject._id,
+          deletePayload: { hsm_id: pendingDelete.id, name: pendingDelete.name },
+        });
+      }
+      toastUtils.success(`${pendingDelete.isQuickReply ? 'Quick reply' : 'Template'} deleted successfully`);
     } catch (error) {
-      console.error('Failed to delete template:', error);
-      toastUtils.error('Failed to delete template. Please try again.');
+      console.error('Failed to delete:', error);
+      toastUtils.error('Failed to delete. Please try again.');
     } finally {
       setPendingDelete(null);
+    }
+  };
+
+  const handleCloneToSession = async (template: any) => {
+    if (!selectedProject?._id) return;
+    
+    const bodyContent = template.components?.find((c: any) => c.type === 'BODY')?.text || '';
+    
+    try {
+      await createQuickReply({
+        projectId: selectedProject._id,
+        name: `${template.name}_session`,
+        content: bodyContent,
+      });
+      setActiveTab('session');
+    } catch (error) {
+      console.error('Failed to clone template:', error);
     }
   };
 
@@ -137,6 +185,7 @@ export default function Templates() {
         lastSyncedAt={lastSyncedAt}
         onRefresh={() => refetch()}
         onSync={handleSyncTemplates}
+        activeTab={activeTab}
       />
 
       <div className="container mx-auto mb-6 px-4 sm:px-0">
@@ -157,6 +206,7 @@ export default function Templates() {
             approvedCount={allTemplates.filter(t => t.status === 'APPROVED').length}
             pendingCount={allTemplates.filter(t => t.status === 'PENDING').length}
             rejectedCount={allTemplates.filter(t => t.status === 'REJECTED').length}
+            sessionCount={quickReplies.length}
           />
           <div className="w-full lg:w-72">
             <TemplateSearch
@@ -182,7 +232,7 @@ export default function Templates() {
             ) : filteredTemplates.length === 0 ? (
               <TemplateEmptyState
                 activeTab={activeTab}
-                hasTemplatesInTab={allTemplates.filter(t => t.status === activeTab.toUpperCase()).length > 0}
+                hasTemplatesInTab={allTemplates.filter(t => t.status === (activeTab === 'session' ? 'SESSION' : activeTab.toUpperCase())).length > 0}
                 projectId={projectId || ''}
               />
             ) : (
@@ -192,7 +242,8 @@ export default function Templates() {
                     key={template.id}
                     template={template}
                     onCopy={copyTemplateName}
-                    onDelete={handleDeleteTemplate}
+                    onDelete={(id, name) => handleDeleteTemplate(id, name, (template as any).isQuickReply)}
+                    onCloneToSession={handleCloneToSession}
                   />
                 ))}
               </div>

@@ -24,7 +24,8 @@ import {
   Paperclip,
   CheckCircle,
   Info,
-  Eye
+  Eye,
+  ImageIcon
 } from 'lucide-react';
 import { useCreateTemplate } from '@/hooks/useTemplates';
 import { useForm } from 'react-hook-form';
@@ -36,6 +37,7 @@ import { toastUtils } from '@/lib/utils';
 import { FileUploader } from '@/components/ui/FileUploader';
 import { Badge } from '@/components/ui/badge';
 import type { AxiosError } from 'axios';
+import { WhatsAppTemplatePreviewCard } from '../../../components/ui/whatsapp-template-preview-card';
 
 interface InteractiveAction {
   id: string;
@@ -456,8 +458,8 @@ export default function CreateTemplatePage() {
             <Button
               form="template-form"
               type="submit"
-              disabled={isSubmitting || createTemplateMutation.isPending}
-              className="h-11 px-8 rounded-xl flex items-center gap-2 text-white font-bold text-sm shadow-xl shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              disabled={isSubmitting || createTemplateMutation.isPending || !watch('name')?.trim() || !watch('language') || !watch('format')?.trim()}
+              className="h-11 px-8 rounded-xl flex items-center gap-2 text-white font-bold text-sm shadow-xl shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:scale-100"
               style={{ backgroundColor: "#22B573" }}
             >
               {isSubmitting || createTemplateMutation.isPending ? (
@@ -480,92 +482,84 @@ export default function CreateTemplatePage() {
         <form id="template-form" onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
           {/* Left Column - Form */}
           <div className="lg:col-span-7 space-y-6">
-            <div className="grid gap-6 md:grid-cols-2">
-              {/* Template Category */}
+            <div className="grid gap-6">
+              {/* Template Name - Full Width */}
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+                className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300"
               >
                 <div className="flex items-center gap-3 mb-4">
                   <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
-                    <LayoutGrid className="h-4 w-4" />
+                    <Info className="h-4 w-4" />
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Category</span>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Template Name</span>
+                    <p className="text-[9px] text-slate-400 mt-0.5">Use lowercase, numbers, and underscores only</p>
+                  </div>
                 </div>
-                <div className="relative">
-                  <select
-                    {...register('category')}
-                    className="w-full h-11 px-4 py-2 border border-slate-200 dark:border-slate-700/30 rounded-xl bg-slate-50/50 dark:bg-slate-900/60 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
-                  >
-                    {categories.map(category => (
-                      <option key={category} value={category}>{category}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                </div>
-                {errors.category && (
-                  <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.category.message}</p>
-                )}
+                <Input
+                  type="text"
+                  placeholder="e.g. order_confirmation_v1"
+                  {...register('name')}
+                  className="h-12 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-semibold text-base"
+                />
               </motion.div>
 
-              {/* Template Language */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.05 }}
-                className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
-                    <Type className="h-4 w-4" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Template Category */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                      <LayoutGrid className="h-4 w-4" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Category</span>
                   </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Language</span>
-                </div>
-                <div className="relative">
-                  <select
-                    {...register('language')}
-                    className="w-full h-11 px-4 py-2 border border-slate-200 dark:border-slate-700/30 rounded-xl bg-slate-50/50 dark:bg-slate-900/60 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
-                  >
-                    <option value="">Select language</option>
-                    {languages.map(language => (
-                      <option key={language.value} value={language.value}>{language.label}</option>
-                    ))}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                </div>
-                {errors.language && (
-                  <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.language.message}</p>
-                )}
-              </motion.div>
-            </div>
+                  <div className="relative">
+                    <select
+                      {...register('category')}
+                      className="w-full h-11 px-4 py-2 border border-slate-200 dark:border-slate-700/30 rounded-xl bg-slate-50/50 dark:bg-slate-900/60 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                    >
+                      {categories.map(category => (
+                        <option key={category} value={category}>{category}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </motion.div>
 
-            {/* Template Name */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
-            >
-              <div className="flex items-center gap-3 mb-4">
-                <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
-                  <Info className="h-4 w-4" />
-                </div>
-                <div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Template Name</span>
-                  <p className="text-[9px] text-slate-400 mt-0.5">Use lowercase, numbers, and underscores only</p>
-                </div>
+                {/* Template Language */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.05 }}
+                  className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+                >
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
+                      <Type className="h-4 w-4" />
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Language</span>
+                  </div>
+                  <div className="relative">
+                    <select
+                      {...register('language')}
+                      className="w-full h-11 px-4 py-2 border border-slate-200 dark:border-slate-700/30 rounded-xl bg-slate-50/50 dark:bg-slate-900/60 appearance-none focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                    >
+                      <option value="">Select language</option>
+                      {languages.map(language => (
+                        <option key={language.value} value={language.value}>{language.label}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </motion.div>
               </div>
-              <Input
-                type="text"
-                placeholder="e.g. order_confirmation_v1"
-                {...register('name')}
-                className="h-11 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
-              />
-              {errors.name && (
-                <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.name.message}</p>
-              )}
-            </motion.div>
+            </div>
 
             {/* Template Header/Type Selection */}
             <motion.div
@@ -580,24 +574,29 @@ export default function CreateTemplatePage() {
                 </div>
                 <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Header Type</span>
               </div>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                {['NONE', ...headerFormats].map((format) => {
-                  const isSelected = (watch('headerFormat') || 'NONE') === format;
-                  const Icon = format === 'IMAGE' ? Image : format === 'VIDEO' ? Video : format === 'DOCUMENT' ? FileText : format === 'TEXT' ? Type : X;
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                {[
+                  { id: 'NONE', icon: X, label: 'NONE' },
+                  { id: 'TEXT', icon: Type, label: 'TEXT' },
+                  { id: 'IMAGE', icon: ImageIcon, label: 'IMAGE' },
+                  { id: 'VIDEO', icon: Video, label: 'VIDEO' },
+                  { id: 'DOCUMENT', icon: FileText, label: 'DOC' },
+                ].map((format) => {
+                  const isSelected = (watch('headerFormat') || 'NONE') === format.id;
                   return (
                     <button
-                      key={format}
+                      key={format.id}
                       type="button"
-                      onClick={() => setValue('headerFormat', format === 'NONE' ? undefined : format as any)}
+                      onClick={() => setValue('headerFormat', format.id === 'NONE' ? undefined : format.id as any)}
                       className={`
-                        flex flex-col items-center justify-center gap-2 p-4 rounded-2xl border transition-all
+                        flex flex-col items-center justify-center gap-2 p-3 rounded-2xl border transition-all
                         ${isSelected
                           ? 'border-green-500 bg-green-50 dark:bg-green-500/10 text-green-700 dark:text-green-400 shadow-sm'
                           : 'border-slate-100 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 text-slate-400 hover:border-slate-200 hover:bg-slate-100/50'}
                       `}
                     >
-                      <Icon className="h-5 w-5" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">{format}</span>
+                      <format.icon className="h-4 w-4" />
+                      <span className="text-[9px] font-black uppercase tracking-widest">{format.label}</span>
                     </button>
                   );
                 })}
@@ -620,8 +619,25 @@ export default function CreateTemplatePage() {
                   </div>
                   <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Template Body</span>
                 </div>
-                <div className="text-[10px] font-black text-slate-400 tabular-nums">
-                  {characterCount} / 1024
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      const currentFormat = watch('format') || '';
+                      const markers = currentFormat.match(/\{\{\d+\}\}/g) || [];
+                      const nextIndex = markers.length + 1;
+                      setValue('format', currentFormat + `{{${nextIndex}}}`);
+                    }}
+                    className="h-7 px-3 text-[10px] font-bold border-slate-200 dark:border-slate-700/30 hover:bg-green-50 hover:text-green-600 hover:border-green-200 rounded-lg transition-all"
+                  >
+                    <Plus className="w-3 h-3 mr-1" />
+                    ADD VARIABLE
+                  </Button>
+                  <div className="text-[10px] font-black text-slate-400 tabular-nums">
+                    {characterCount} / 1024
+                  </div>
                 </div>
               </div>
               <textarea
@@ -630,9 +646,6 @@ export default function CreateTemplatePage() {
                 className="w-full min-h-[160px] px-4 py-3 border border-slate-200 dark:border-slate-700/30 rounded-xl bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm resize-none"
                 maxLength={1024}
               />
-              {errors.format && (
-                <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.format.message}</p>
-              )}
               <div className="mt-3 p-3 bg-blue-50/50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-xl flex items-start gap-3">
                 <Info className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
                 <p className="text-[12px] text-blue-600 dark:text-blue-400 font-medium leading-relaxed">
@@ -661,9 +674,6 @@ export default function CreateTemplatePage() {
                   maxLength={60}
                   className="h-11 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                 />
-                {errors.header && (
-                  <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.header.message}</p>
-                )}
               </motion.div>
             )}
 
@@ -779,9 +789,6 @@ export default function CreateTemplatePage() {
                 maxLength={60}
                 className="h-11 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
               />
-              {errors.footer && (
-                <p className="text-red-500 text-[10px] font-bold uppercase tracking-wider mt-2 ml-1">{errors.footer.message}</p>
-              )}
             </motion.div>
 
             {/* Interactive Actions */}
@@ -943,97 +950,72 @@ export default function CreateTemplatePage() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.3 }}
-              className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
+              className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[32px] p-8 transition-all duration-300"
             >
-              <div className="flex items-center gap-3 mb-6">
-                <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
-                  <Eye className="h-4 w-4" />
+              <div className="flex items-center gap-3 mb-8">
+                <div className="h-10 w-10 rounded-xl bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors shadow-inner">
+                  <Eye className="h-5 w-5" />
                 </div>
-                <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Live Preview</span>
+                <div>
+                  <span className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Live Appearance</span>
+                  <h2 className="text-sm font-black text-slate-900 dark:text-white uppercase tracking-widest mt-0.5">Real-time Preview</h2>
+                </div>
               </div>
 
-              {/* WhatsApp Mockup */}
-              <div className="relative mx-auto max-w-[320px] bg-[#E5DDD5] rounded-[32px] border-8 border-slate-900 p-4 min-h-[480px] shadow-2xl overflow-hidden">
-                <div className="absolute top-0 inset-x-0 h-12 bg-[#075E54] flex items-center px-4 gap-3 z-10">
-                  <div className="h-8 w-8 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden">
-                    <Phone className="h-4 w-4 text-slate-500" />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-white text-[10px] font-bold">WhatsApp Business</p>
-                    <p className="text-white/60 text-[8px]">Online</p>
-                  </div>
-                </div>
+              {/* Constructing Mock Template for Preview */}
+              {(() => {
+                const mockTemplate = {
+                  name: watch('name'),
+                  category: watch('category'),
+                  language: watch('language'),
+                  components: [
+                    ...(watchedHeaderFormat ? [{
+                      type: 'HEADER' as const,
+                      format: watchedHeaderFormat,
+                      text: watch('header') || ''
+                    }] : []),
+                    {
+                      type: 'BODY' as const,
+                      text: watchedFormat || 'Your message content will appear here...'
+                    },
+                    ...(watch('footer') ? [{
+                      type: 'FOOTER' as const,
+                      text: watch('footer') || ''
+                    }] : []),
+                    ...(watchedInteractiveActions.length > 0 ? [{
+                      type: 'BUTTONS' as const,
+                      buttons: watchedInteractiveActions.map(a => ({
+                        type: a.type,
+                        text: a.title || `${a.type.replace('_', ' ')} Button`,
+                        url: a.value,
+                        phone_number: a.value,
+                        otp_type: a.otp_type
+                      }))
+                    }] : [])
+                  ]
+                };
 
-                <div className="mt-14 space-y-3 relative z-10">
-                  <div className="max-w-[85%] bg-white rounded-2xl rounded-tl-none p-3 shadow-sm border border-slate-100 animate-in fade-in slide-in-from-left-2">
-                    {/* Header Preview */}
-                    {watchedHeaderFormat && (
-                      <div className="mb-2 rounded-lg overflow-hidden">
-                        {watchedHeaderFormat === 'TEXT' && watch('header') && (
-                          <p className="text-[11px] font-bold text-slate-900 mb-1 leading-tight">
-                            {watch('header')}
-                          </p>
-                        )}
-                        {watchedHeaderFormat === 'IMAGE' && (
-                          <div className="aspect-video bg-slate-100 flex flex-col items-center justify-center gap-1 border border-slate-200 rounded-lg">
-                            <Image className="h-6 w-6 text-slate-300" />
-                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Image Header</span>
-                          </div>
-                        )}
-                        {watchedHeaderFormat === 'VIDEO' && (
-                          <div className="aspect-video bg-slate-100 flex flex-col items-center justify-center gap-1 border border-slate-200 rounded-lg">
-                            <Video className="h-6 w-6 text-slate-300" />
-                            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Video Header</span>
-                          </div>
-                        )}
-                        {watchedHeaderFormat === 'DOCUMENT' && (
-                          <div className="p-3 bg-slate-50 flex items-center gap-3 border border-slate-200 rounded-lg">
-                            <FileText className="h-6 w-6 text-slate-400" />
-                            <span className="text-[8px] font-bold text-slate-500 uppercase tracking-widest">Document</span>
-                          </div>
-                        )}
-                      </div>
-                    )}
+                const previewMappings = extractVariablesFromText(watchedFormat || '').map((v, i) => ({
+                  variable: `{{${v}}}`,
+                  staticValue: sampleValues[i] || '',
+                  isDynamic: false
+                }));
 
-                    {/* Body Preview */}
-                    <p className="text-[11px] text-slate-700 whitespace-pre-wrap leading-relaxed">
-                      {watchedFormat
-                        ? (sampleValues.length > 0 ? replaceVariablesWithSamples(watchedFormat, sampleValues) : watchedFormat)
-                        : "Your message content will appear here..."
-                      }
-                    </p>
+                return (
+                  <WhatsAppTemplatePreviewCard
+                    template={mockTemplate as any}
+                    variableMappings={previewMappings}
+                    showSampleContact={true}
+                    showVariableMappings={false}
+                    className="w-full"
+                  />
+                );
+              })()}
 
-                    {/* Footer Preview */}
-                    {watch('footer') && (
-                      <p className="text-[9px] text-slate-400 mt-1.5 border-t border-slate-50 pt-1.5">
-                        {watch('footer')}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Action Buttons Preview */}
-                  {watchedInteractiveActions.length > 0 && (
-                    <div className="flex flex-col gap-1.5 px-2">
-                      {watchedInteractiveActions.map((action) => (
-                        <div
-                          key={action.id}
-                          className="w-full bg-white/90 backdrop-blur-sm border border-slate-100 py-2 rounded-xl text-[10px] font-bold text-blue-600 text-center shadow-sm"
-                        >
-                          {action.title || `${action.type.replace('_', ' ')} button`}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* WhatsApp Background Pattern (Simulated) */}
-                <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#000_1px,transparent_1px)] [background-size:16px_16px]" />
-              </div>
-
-              <div className="mt-6 flex items-start gap-3 p-4 bg-yellow-50/50 dark:bg-yellow-500/10 border border-yellow-100 dark:border-yellow-500/20 rounded-2xl">
-                <Info className="h-4 w-4 text-yellow-600 dark:text-yellow-400 shrink-0 mt-0.5" />
-                <p className="text-[10px] text-yellow-800 font-medium leading-relaxed">
-                  <strong>Preview Notice:</strong> This mockup is a graphical approximation. The final message appearance depends on the user&apos;s device and WhatsApp version.
+              <div className="mt-8 flex items-start gap-4 p-5 bg-amber-50/50 dark:bg-amber-500/10 border border-amber-100 dark:border-amber-500/20 rounded-[24px]">
+                <Info className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                <p className="text-[11px] text-amber-800 dark:text-amber-300 font-medium leading-relaxed">
+                  <strong>Preview Notice:</strong> This mockup is a high-fidelity graphical approximation. The final message appearance depends on the user&apos;s device and WhatsApp version.
                 </p>
               </div>
             </motion.div>

@@ -145,7 +145,7 @@ export function WhatsAppTemplatePreviewCard({
             <div className="flex-1 flex items-center gap-2 ml-0.5">
               <div className="w-8 h-8 bg-gray-200 rounded-full overflow-hidden flex-shrink-0">
                 <img
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${sampleContact?.firstName || 'Business'}`}
+                  src={sampleContact?.avatar || '/wlh-pfp-logo.png'}
                   alt="Avatar"
                   className="w-full h-full object-cover"
                 />

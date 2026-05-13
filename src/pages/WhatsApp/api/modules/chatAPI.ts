@@ -45,7 +45,7 @@ export const chatApi = {
     return data.data as ChatHistoryResponse;
   },
 
-  async sendText(payload: { projectId: string; phoneNumber: string; text: string; contactId?: string }) {
+  async sendText(payload: { projectId: string; phoneNumber: string; text: string; components?: any[]; contactId?: string }) {
     const formattedPayload = {
       ...payload,
       phoneNumber: payload.phoneNumber.startsWith('+') ? payload.phoneNumber : `+${payload.phoneNumber}`,
