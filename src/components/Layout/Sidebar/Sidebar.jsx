@@ -14,6 +14,7 @@ import useRoles from "../../../hooks/useRoles";
 import useAddUserActivity from "../../../hooks/useAddUserActivity";
 import { clearNotifications } from "../../../features/slices/notification";
 import { clearWebinarData } from "../../../features/slices/webinarContact";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   getGSTValue,
   logOutAndClearCookies,
@@ -47,6 +48,7 @@ const Sidebar = ({
   const logUserActivity = useAddUserActivity();
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { isUpdated } = useSelector((state) => state.noticeBoard);
   const { sidebarLinkData } = useSelector((state) => state.sidebarLink);
@@ -139,6 +141,10 @@ const Sidebar = ({
       action: "logout",
       details: "User logged out successfully",
     });
+    
+    // Clear the global TanStack Query cache to prevent data leakage
+    queryClient.clear();
+    
     dispatch(clearWebinarData());
     dispatch(clearNotifications());
     dispatch(logout());

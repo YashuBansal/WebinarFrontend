@@ -9,18 +9,9 @@ import "./index.css";
 export default function ZoomLiveWrapper() {
   const location = useLocation();
 
-  // Auto-reload on first entry to ensure fresh state
+  // Clear cache on entry to ensure fresh state without hard reload
   useEffect(() => {
-    const zoomReloaded = sessionStorage.getItem("zoom_module_reloaded");
-    if (!zoomReloaded) {
-      sessionStorage.setItem("zoom_module_reloaded", "true");
-      window.location.reload();
-    }
-
-    // Clear the flag when leaving the module so it reloads on next entry
-    return () => {
-      sessionStorage.removeItem("zoom_module_reloaded");
-    };
+    queryClient.clear();
   }, []);
 
   // Scroll to top on route change
