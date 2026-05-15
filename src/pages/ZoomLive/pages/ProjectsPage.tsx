@@ -314,13 +314,13 @@ export default function ProjectsPage() {
                             <MoreVertical className="h-5 w-5" />
                           </Button>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-2xl p-2 min-w-[160px]">
+                        <DropdownMenuContent align="end" className="rounded-2xl border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-900 shadow-2xl p-2 min-w-[160px]">
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
                               openRenameDialog(project);
                             }}
-                            className="gap-3 px-4 py-3 rounded-xl cursor-pointer font-medium"
+                            className="gap-3 px-4 py-3 rounded-xl cursor-pointer font-medium text-slate-700 dark:text-slate-200 focus:bg-slate-100 dark:focus:bg-slate-800 focus:text-blue-600 dark:focus:text-blue-400"
                           >
                             <Edit3 className="h-4 w-4 text-blue-500" />
                             <span>Rename</span>
@@ -330,7 +330,7 @@ export default function ProjectsPage() {
                               e.stopPropagation();
                               handleDeleteProject(project);
                             }}
-                            className="gap-3 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 cursor-pointer focus:text-red-600 font-medium"
+                            className="gap-3 px-4 py-3 rounded-xl text-red-600 dark:text-red-400 cursor-pointer focus:bg-red-50 dark:focus:bg-red-500/10 focus:text-red-600 font-medium"
                           >
                             <Trash2 className="h-4 w-4" />
                             <span>Delete Project</span>
@@ -412,7 +412,7 @@ export default function ProjectsPage() {
           onPointerDownOutside={(e) => e.preventDefault()}
           showCloseButton={false}
         >
-          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50">
+          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700/50">
             <div className="flex items-center justify-between mb-5">
               <DialogTitle className="text-lg font-bold text-slate-900 dark:text-white">
                 Rename Project
@@ -438,7 +438,7 @@ export default function ProjectsPage() {
                   value={renameProjectName}
                   onChange={(e) => setRenameProjectName(e.target.value)}
                   placeholder="Enter new project name"
-                  className="pl-9 rounded-xl border-slate-200 dark:border-slate-700/50 focus:ring-blue-500/20 py-6 text-base font-medium shadow-sm bg-white dark:bg-slate-800/50"
+                  className="pl-9 rounded-xl border-slate-200 dark:border-slate-700/50 focus:ring-blue-500/20 py-6 text-base font-medium shadow-sm bg-white dark:bg-slate-950/50"
                 />
               </div>
             </div>

@@ -32,16 +32,16 @@ export default function DashboardLayout() {
 
   // Fetch project data if we have projectId but no project
   const { data: projectData, isLoading: isProjectLoading } = useZoomProject(projectId)
-  
+
   // Initialize socket connection when component mounts
   useEffect(() => {
     // Establish socket connection - backend will authenticate via cookies
     const socket = socketManager.getSocket()
-    
+
     if (socket) {
       console.log('Socket connection initialized in DashboardLayout')
     }
-    
+
     // Cleanup: disconnect socket when component unmounts
     // Note: Since socketManager is a singleton, you might want to keep connection alive
     // Uncomment the return statement below if you want to disconnect on unmount
@@ -49,7 +49,7 @@ export default function DashboardLayout() {
     //   socketManager.disconnect()
     // }
   }, [])
-  
+
   useEffect(() => {
     if (!projectId) {
       navigate("/projects", { replace: true })
@@ -69,7 +69,7 @@ export default function DashboardLayout() {
     if (currentProject && projectId) {
       const isConfigured = isProjectConfigured(currentProject)
       const currentPath = window.location.pathname
-      
+
       // Check for post-configuration redirect
       const postConfigRedirect = sessionStorage.getItem('postConfigRedirect')
       if (postConfigRedirect) {
@@ -77,7 +77,7 @@ export default function DashboardLayout() {
         navigate(postConfigRedirect, { replace: true })
         return
       }
-      
+
       // If not configured and not already on configuration page, redirect to configuration
       if (!isConfigured && !currentPath.includes('/configuration')) {
         navigate(`/zoom/dashboard/${projectId}/configuration`, { replace: true })

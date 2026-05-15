@@ -7,7 +7,7 @@ type TabsContextValue = {
 
 const TabsContext = React.createContext<TabsContextValue | undefined>(undefined)
 
-export function Tabs({ value, defaultValue, onValueChange, children }: { value?: string; defaultValue?: string; onValueChange?: (v: string) => void; children: React.ReactNode }) {
+export function Tabs({ value, defaultValue, onValueChange, children, className = '' }: { value?: string; defaultValue?: string; onValueChange?: (v: string) => void; children: React.ReactNode; className?: string }) {
   const [internal, setInternal] = React.useState<string>(defaultValue || '')
   const isControlled = value !== undefined
   const current = isControlled ? (value as string) : internal
@@ -18,7 +18,7 @@ export function Tabs({ value, defaultValue, onValueChange, children }: { value?:
 
   return (
     <TabsContext.Provider value={{ value: current, setValue }}>
-      <div>{children}</div>
+      <div className={className}>{children}</div>
     </TabsContext.Provider>
   )
 }
@@ -27,7 +27,7 @@ export function TabsList({ children, className = '' }: { children: React.ReactNo
   return <div className={`inline-flex h-9 items-center justify-center rounded-lg bg-gray-100 p-1 text-gray-600 ${className}`}>{children}</div>
 }
 
-export function TabsTrigger({ value, children }: { value: string; children: React.ReactNode }) {
+export function TabsTrigger({ value, children, className = '' }: { value: string; children: React.ReactNode; className?: string }) {
   const ctx = React.useContext(TabsContext)
   if (!ctx) throw new Error('TabsTrigger must be used within Tabs')
   const isActive = ctx.value === value
@@ -35,7 +35,8 @@ export function TabsTrigger({ value, children }: { value: string; children: Reac
     <button
       type="button"
       onClick={() => ctx.setValue(value)}
-      className={`px-3 py-1.5 text-sm rounded-md transition-colors ${isActive ? 'bg-white text-gray-900 shadow' : 'hover:text-gray-900'}`}
+      data-state={isActive ? 'active' : 'inactive'}
+      className={className || `px-3 py-1.5 text-sm rounded-md transition-colors ${isActive ? 'bg-white text-gray-900 shadow' : 'hover:text-gray-900'}`}
     >
       {children}
     </button>

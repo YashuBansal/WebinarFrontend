@@ -48,15 +48,9 @@ export default function LiveDataTab({ meetingId, zoomProjectId, occurrenceId, is
     const secs = seconds % 60
 
     const parts: string[] = []
-    if (hours > 0) {
-      parts.push(`${hours}h`)
-    }
-    if (minutes > 0) {
-      parts.push(`${minutes}m`)
-    }
-    if (secs > 0 && hours === 0) {
-      parts.push(`${secs}s`)
-    }
+    if (hours > 0) parts.push(`${hours}h`)
+    if (minutes > 0) parts.push(`${minutes}m`)
+    if (secs > 0 && hours === 0) parts.push(`${secs}s`)
 
     return parts.length > 0 ? parts.join(' ') : '0s'
   }
@@ -65,11 +59,8 @@ export default function LiveDataTab({ meetingId, zoomProjectId, occurrenceId, is
     if (!lastJoinAt) return undefined
     try {
       const joinTime = new Date(lastJoinAt).getTime()
-      const now = Date.now()
-      const durationMs = now - joinTime
-      if (durationMs > 0) {
-        return Math.floor(durationMs / 1000)
-      }
+      const durationMs = Date.now() - joinTime
+      if (durationMs > 0) return Math.floor(durationMs / 1000)
     } catch {
       return undefined
     }
@@ -103,14 +94,11 @@ export default function LiveDataTab({ meetingId, zoomProjectId, occurrenceId, is
         return
     }
 
-    if (participantsToExport.length === 0) {
-      return
-    }
+    if (participantsToExport.length === 0) return
 
-    // Find the maximum number of phone numbers across all participants
     const maxPhoneCount = Math.max(
       ...participantsToExport.map((p) => p.attendeeData?.phones?.length || 0),
-      1 // At least 1 column even if no phones
+      1
     )
 
     const exportData = participantsToExport.map((participant) => {
@@ -118,19 +106,15 @@ export default function LiveDataTab({ meetingId, zoomProjectId, occurrenceId, is
       const email = participant.participantEmail || ''
       const attendeeData = participant.attendeeData
 
-      // Determine duration based on participant status
       let duration: number | undefined
       if (selectedTab === 'online' && participant.lastJoinAt) {
         duration = calculateOnlineDuration(participant.lastJoinAt)
       } else if (selectedTab === 'left') {
         duration = participant.onlineDuration
-      } else if (selectedTab === 'not-joined') {
-        duration = undefined
       } else {
         duration = participant.onlineDuration
       }
 
-      // Build base row data
       const rowData: Record<string, any> = {
         'Name': name,
         'Email': email,
@@ -145,7 +129,6 @@ export default function LiveDataTab({ meetingId, zoomProjectId, occurrenceId, is
         'Registered Count': attendeeData?.registeredWebinarCount ?? '—',
       }
 
-      // Add phone numbers as separate columns
       const phones = attendeeData?.phones || []
       for (let i = 0; i < maxPhoneCount; i++) {
         rowData[`Phone ${i + 1}`] = phones[i] || '—'
@@ -157,90 +140,124 @@ export default function LiveDataTab({ meetingId, zoomProjectId, occurrenceId, is
     const worksheet = XLSX.utils.json_to_sheet(exportData)
     const workbook = XLSX.utils.book_new()
     XLSX.utils.book_append_sheet(workbook, worksheet, sheetName)
-
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5)
-    const filename = `participants-${tabLabel}-${timestamp}.xlsx`
-
-    XLSX.writeFile(workbook, filename)
+    XLSX.writeFile(workbook, `participants-${tabLabel}-${timestamp}.xlsx`)
   }
 
-
-
   if (isLoading) {
-    return <div className="animate-pulse h-24 bg-gray-100 rounded" />
+    return (
+      <div className="p-8 space-y-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map(i => (
+            <div key={i} className="h-20 bg-slate-100 dark:bg-slate-800/50 rounded-2xl animate-pulse" />
+          ))}
+        </div>
+        <div className="h-64 bg-slate-100 dark:bg-slate-800/50 rounded-[32px] animate-pulse" />
+      </div>
+    )
   }
 
   if (error) {
     return (
-      <Alert>
-        <AlertDescription>Failed to load live data.</AlertDescription>
+      <Alert className="bg-red-50 dark:bg-red-900/20 border-red-100 dark:border-red-900/30 rounded-2xl">
+        <AlertDescription className="text-red-600 dark:text-red-400 font-bold">
+          Failed to load live status data. Please try again.
+        </AlertDescription>
       </Alert>
     )
   }
 
-  if (!data) {
-    return <div className="text-sm text-muted-foreground">No status available.</div>
-  }
+  if (!data) return null
 
   return (
-    <div className="space-y-4">
-      {/* Summary Stats */}
-      <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-        <div>Online: <span className="font-medium text-gray-900">{data.counts.online}</span></div>
-        <div>Joined but left: <span className="font-medium text-gray-900">{data.counts.joinedButLeft}</span></div>
-        <div>Total unique: <span className="font-medium text-gray-900">{data.counts.totalUniqueParticipants}</span></div>
-        <div>Not joined yet: <span className="font-medium text-gray-900">{data.counts.totalNotJoined}</span></div>
-        <div>Total registrations: <span className="font-medium text-gray-900">{data.counts.totalRegistrations}</span></div>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleExportToExcel}
-          className="ml-auto flex items-center gap-2"
-          disabled={!data || (
-            selectedTab === 'online' && data.participants.online.length === 0 ||
-            selectedTab === 'left' && data.participants.left.length === 0 ||
-            selectedTab === 'not-joined' && data.participants.notJoined.length === 0
-          )}
-        >
-          <FileSpreadsheet className="h-4 w-4" />
-          Export Excel
-        </Button>
+    <div className="space-y-8">
+      {/* Premium Summary Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+        {[
+          { label: 'Online Now', value: data.counts.online, color: 'emerald' },
+          { label: 'Left Session', value: data.counts.joinedButLeft, color: 'blue' },
+          { label: 'Unique Joined', value: data.counts.totalUniqueParticipants, color: 'indigo' },
+          { label: 'Not Joined', value: data.counts.totalNotJoined, color: 'amber' },
+          { label: 'Registrations', value: data.counts.totalRegistrations, color: 'slate' },
+        ].map((stat, i) => (
+          <div key={i} className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-4 shadow-sm group hover:scale-[1.02] transition-all">
+            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{stat.label}</p>
+            <p className={`text-2xl font-black text-${stat.color}-600 dark:text-${stat.color}-400`}>
+              {stat.value}
+            </p>
+          </div>
+        ))}
       </div>
 
-      {/* Sub-tabs for different participant categories */}
-      <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-        <TabsList>
-          <TabsTrigger value="online">Online ({data.counts.online})</TabsTrigger>
-          <TabsTrigger value="left">Joined but Left ({data.counts.joinedButLeft})</TabsTrigger>
-          <TabsTrigger value="not-joined">Not Joined ({data.counts.totalNotJoined})</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="online" className="mt-4">
-          <ParticipantTable 
-            participants={data.participants.online}
-            showJoinTime={true}
-            showOnlineDuration={true}
-            emptyMessage="No one online."
-          />
-        </TabsContent>
-        
-        <TabsContent value="left" className="mt-4">
-          <ParticipantTable 
-            participants={data.participants.left}
-            showJoinTime={true} 
-            showLeaveTime={true}
-            showOnlineDuration={true}
-            emptyMessage="No participants have left yet."
-          />
-        </TabsContent>
-        
-        <TabsContent value="not-joined" className="mt-4">
-          <ParticipantTable 
-            participants={data.participants.notJoined}
-            emptyMessage="Everyone has joined."
-          />
-        </TabsContent>
-      </Tabs>
+      <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-[32px] p-2 overflow-hidden shadow-sm">
+        <Tabs value={selectedTab} onValueChange={setSelectedTab} className="w-full">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-4 pt-4 mb-6">
+            <TabsList className="bg-slate-100/50 dark:bg-slate-900/50 p-1.5 rounded-2xl border border-slate-200/50 dark:border-slate-800/50 h-auto gap-1">
+              <TabsTrigger 
+                value="online" 
+                className="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:shadow-sm transition-all"
+              >
+                Online ({data.counts.online})
+              </TabsTrigger>
+              <TabsTrigger 
+                value="left" 
+                className="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:shadow-sm transition-all"
+              >
+                Left ({data.counts.joinedButLeft})
+              </TabsTrigger>
+              <TabsTrigger 
+                value="not-joined" 
+                className="px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest data-[state=active]:bg-white dark:data-[state=active]:bg-slate-800 data-[state=active]:text-blue-600 dark:data-[state=active]:text-blue-400 data-[state=active]:shadow-sm transition-all"
+              >
+                Not Joined ({data.counts.totalNotJoined})
+              </TabsTrigger>
+            </TabsList>
+
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExportToExcel}
+              className="rounded-xl h-11 px-6 font-bold text-xs gap-2 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 shadow-sm"
+              disabled={
+                (selectedTab === 'online' && data.participants.online.length === 0) ||
+                (selectedTab === 'left' && data.participants.left.length === 0) ||
+                (selectedTab === 'not-joined' && data.participants.notJoined.length === 0)
+              }
+            >
+              <FileSpreadsheet className="h-4 w-4 text-emerald-500" />
+              Export Report
+            </Button>
+          </div>
+          
+          <div className="min-h-[400px]">
+            <TabsContent value="online" className="m-0 focus-visible:outline-none">
+              <ParticipantTable 
+                participants={data.participants.online}
+                showJoinTime={true}
+                showOnlineDuration={true}
+                emptyMessage="No participants are currently online."
+              />
+            </TabsContent>
+            
+            <TabsContent value="left" className="m-0 focus-visible:outline-none">
+              <ParticipantTable 
+                participants={data.participants.left}
+                showJoinTime={true} 
+                showLeaveTime={true}
+                showOnlineDuration={true}
+                emptyMessage="No participants have left the session yet."
+              />
+            </TabsContent>
+            
+            <TabsContent value="not-joined" className="m-0 focus-visible:outline-none">
+              <ParticipantTable 
+                participants={data.participants.notJoined}
+                emptyMessage="All registered participants have joined."
+              />
+            </TabsContent>
+          </div>
+        </Tabs>
+      </div>
     </div>
   )
 }

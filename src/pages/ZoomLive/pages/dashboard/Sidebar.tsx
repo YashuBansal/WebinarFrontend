@@ -13,24 +13,24 @@ function Sidebar() {
   // Prefer fresh API data so sidebar updates right after OAuth (context/localStorage can be stale)
   const effectiveProject = projectData ?? project
   const isConfigured = isProjectConfigured(effectiveProject)
-  
+
   // Show configuration only when not configured
   const configurationItems = [
     { name: "Configuration", path: `/zoom/dashboard/${projectId}/configuration`, icon: Settings },
   ]
-  
+
   // Show these items only if project is configured
   const configuredOnlyItems = [
     { name: "Profile", path: `/zoom/dashboard/${projectId}/profile`, icon: User },
     { name: "Meetings", path: `/zoom/dashboard/${projectId}/meetings`, icon: Video },
     { name: "Webinars", path: `/zoom/dashboard/${projectId}/webinars`, icon: Video },
   ]
-  
+
   // Combine items based on configuration status
-  const navItems = isConfigured 
+  const navItems = isConfigured
     ? configuredOnlyItems
     : configurationItems
-  
+
   return (
     <aside className="w-56 md:w-64 bg-white/90 dark:bg-gray-800/90 border-r min-h-screen p-4 flex flex-col gap-6 shadow-sm">
       <div className="flex items-center gap-2 mb-2 px-2">
@@ -60,14 +60,13 @@ function Sidebar() {
           </NavLink>
         ))}
       </nav>
-      
+
       {/* Configuration Status Indicator */}
       <div className="mt-auto">
-        <div className={`px-3 py-2 rounded-md text-xs font-medium ${
-          isConfigured 
-            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200" 
+        <div className={`px-3 py-2 rounded-md text-xs font-medium ${isConfigured
+            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
             : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200"
-        }`}>
+          }`}>
           {isConfigured ? "✅ Configured" : "⚠️ Setup Required"}
         </div>
       </div>

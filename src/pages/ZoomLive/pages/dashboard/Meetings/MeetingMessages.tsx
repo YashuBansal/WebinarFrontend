@@ -12,8 +12,10 @@ import {
   TableHeader,
   TableRow,
 } from "@zoom/components/ui/table";
-import { Loader2, RefreshCw } from "lucide-react";
+import { Loader2, RefreshCw, History, MessageSquare } from "lucide-react";
 import { useMeetingMessages } from "@zoom/hooks/useZoom";
+import { motion } from "framer-motion";
+import { cn } from "@zoom/lib/utils";
 
 export default function MeetingMessages() {
   const { meetingId, webinarId } = useParams<{
@@ -97,181 +99,200 @@ export default function MeetingMessages() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <div className="mb-2">
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-widest mb-1">
+              <History className="h-3.5 w-3.5" />
+              Communication Logs
+            </div>
+            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
+              Message History
+            </h1>
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+              Tracking all WhatsApp notifications for {isWebinar ? "Webinar" : "Meeting"} <span className="text-slate-900 dark:text-white font-bold">{zoomId}</span>
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
             <Button
               variant="outline"
-              size="sm"
-              onClick={() => {
-                navigate(-1);
-              }}
-              className="flex items-center gap-2"
+              onClick={() => navigate(-1)}
+              className="h-11 px-6 rounded-xl border-slate-200 dark:border-slate-700 font-bold text-xs"
             >
-              Back
+              Go Back
             </Button>
-          </div>
-          <h1 className="text-2xl font-bold">Message History</h1>
-          <p className="text-muted-foreground">
-            {isWebinar ? "Webinar" : "Meeting"}: {zoomId}
-          </p>
-          {lastRefreshTime && (
-            <p className="text-xs text-muted-foreground mt-1">
-              Last updated: {lastRefreshTime.toLocaleTimeString()}
-            </p>
-          )}
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={handleRefresh}
-            variant="outline"
-            size="sm"
-            disabled={isRefreshing || isFetching}
-            className="flex items-center gap-2"
-          >
-            <RefreshCw
-              className={`h-4 w-4 ${
-                isRefreshing || isFetching ? "animate-spin" : ""
-              }`}
-            />
-            <span className="hidden sm:inline">
-              {isRefreshing || isFetching ? "Refreshing..." : "Refresh"}
-            </span>
-          </Button>
-          <Button
-            onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
-            variant={autoRefreshEnabled ? "default" : "outline"}
-            size="sm"
-            className="flex items-center gap-2 w-32"
-          >
-            <RefreshCw className="h-4 w-4" />
-            <span className="hidden sm:inline">
-              {autoRefreshEnabled ? "Disable Auto" : "Enable Auto"}
-            </span>
-          </Button>
-          {/* <Button onClick={handleDownloadReport} variant="outline" size="sm" className="flex items-center gap-2">
-            <FileText className="h-4 w-4" /> Download CSV
-          </Button> */}
-        </div>
-      </div>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Messages</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {!reportData || reportData.messages.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No messages found.
+            
+            <div className="h-11 p-1 bg-slate-100 dark:bg-slate-900/50 rounded-xl flex items-center gap-1 border border-slate-200 dark:border-slate-800">
+              <Button
+                onClick={handleRefresh}
+                variant="ghost"
+                className="h-9 px-4 rounded-lg font-bold text-xs hover:bg-white dark:hover:bg-slate-800 shadow-none transition-all"
+                disabled={isRefreshing || isFetching}
+              >
+                <RefreshCw className={cn("h-3.5 w-3.5 mr-2", (isRefreshing || isFetching) && "animate-spin")} />
+                Refresh
+              </Button>
+              <div className="w-[1px] h-4 bg-slate-200 dark:bg-slate-700 mx-1" />
+              <Button
+                onClick={() => setAutoRefreshEnabled(!autoRefreshEnabled)}
+                variant="ghost"
+                className={cn(
+                  "h-9 px-4 rounded-lg font-bold text-xs transition-all",
+                  autoRefreshEnabled ? "text-blue-600 bg-blue-50 dark:bg-blue-500/10" : "hover:bg-white dark:hover:bg-slate-800"
+                )}
+              >
+                Auto {autoRefreshEnabled ? "ON" : "OFF"}
+              </Button>
             </div>
-          ) : (
-            <div className="rounded-md border">
+          </div>
+        </div>
+      </motion.div>
+
+      <main className="container mx-auto space-y-6 pb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-[32px] overflow-hidden shadow-sm"
+        >
+          <div className="p-6 border-b border-slate-100 dark:border-slate-800/50 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="h-10 w-10 rounded-xl bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                <MessageSquare className="h-5 w-5" />
+              </div>
+              <h3 className="text-lg font-black text-slate-900 dark:text-white tracking-tight">Delivery Status</h3>
+            </div>
+            {lastRefreshTime && (
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                Sync: {lastRefreshTime.toLocaleTimeString()}
+              </span>
+            )}
+          </div>
+
+          <div className="overflow-x-auto">
+            {!reportData || reportData.messages.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 text-center">
+                <div className="h-16 w-16 rounded-3xl bg-slate-50 dark:bg-slate-900/50 flex items-center justify-center text-slate-300 mb-4">
+                  <MessageSquare className="h-8 w-8" />
+                </div>
+                <h4 className="text-lg font-bold text-slate-900 dark:text-white">No messages sent yet</h4>
+                <p className="text-slate-500 text-sm max-w-xs mt-1">
+                  Messages will appear here once triggers are activated and notifications are delivered.
+                </p>
+              </div>
+            ) : (
               <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Phone Number</TableHead>
-                    <TableHead>Template Name</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Message Type</TableHead>
-                    <TableHead>Created At</TableHead>
-                    <TableHead>Sent At</TableHead>
-                    <TableHead>Delivered At</TableHead>
-                    <TableHead>Read At</TableHead>
-                    <TableHead>Error</TableHead>
+                <TableHeader className="bg-slate-50/50 dark:bg-slate-900/50">
+                  <TableRow className="border-slate-100 dark:border-slate-800 hover:bg-transparent">
+                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 py-4">Recipient</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 py-4">Template</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 py-4 text-center">Status</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 py-4">Timeline</TableHead>
+                    <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 py-4 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {reportData.messages.map((m: any) => (
-                    <TableRow key={m._id}>
-                      <TableCell className="font-medium">
-                        {m.phoneNumber}
+                  {reportData.messages.map((m: any, index: number) => (
+                    <motion.tr
+                      key={m._id}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.03 }}
+                      className="border-slate-100 dark:border-slate-800 hover:bg-slate-50/30 dark:hover:bg-slate-900/30 transition-colors"
+                    >
+                      <TableCell className="py-4">
+                        <div className="flex flex-col">
+                          <span className="font-bold text-sm text-slate-900 dark:text-white">{m.phoneNumber}</span>
+                          <span className="text-[10px] font-medium text-slate-500">{m.messageType}</span>
+                        </div>
                       </TableCell>
-                      <TableCell className="font-medium">
-                        {m.templateName}
+                      <TableCell className="py-4">
+                        <span className="font-bold text-xs text-slate-700 dark:text-slate-300">{m.templateName}</span>
                       </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            m.status === "delivered" || m.status === "read"
-                              ? "default"
-                              : m.status === "sent"
-                              ? "secondary"
-                              : m.status === "failed"
-                              ? "destructive"
-                              : "outline"
-                          }
-                          className={
-                            m.status === "delivered"
-                              ? "bg-green-500"
-                              : m.status === "read"
-                              ? "bg-blue-500"
-                              : m.status === "sent"
-                              ? "bg-yellow-500"
-                              : ""
-                          }
-                        >
-                          {String(m.status || "").toUpperCase()}
-                        </Badge>
+                      <TableCell className="py-4">
+                        <div className="flex justify-center">
+                          <Badge
+                            className={cn(
+                              "px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tight shadow-sm",
+                              m.status === "delivered" || m.status === "read"
+                                ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 border border-emerald-200/50 dark:border-emerald-500/20"
+                                : m.status === "sent"
+                                ? "bg-amber-50 text-amber-600 dark:bg-amber-500/10 border border-amber-200/50 dark:border-amber-500/20"
+                                : m.status === "failed"
+                                ? "bg-rose-50 text-rose-600 dark:bg-rose-500/10 border border-rose-200/50 dark:border-rose-500/20"
+                                : "bg-slate-50 text-slate-600 dark:bg-slate-700/50 border border-slate-200/50 dark:border-slate-700/20"
+                            )}
+                          >
+                            {m.status || "pending"}
+                          </Badge>
+                        </div>
                       </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{m.messageType}</Badge>
+                      <TableCell className="py-4">
+                        <div className="flex flex-col gap-1">
+                          <div className="flex items-center gap-2">
+                            <div className="h-1 w-1 rounded-full bg-blue-500" />
+                            <span className="text-[10px] font-medium text-slate-500">Created: {new Date(m.createdAt).toLocaleString()}</span>
+                          </div>
+                          {m.sentAt && (
+                            <div className="flex items-center gap-2">
+                              <div className="h-1 w-1 rounded-full bg-emerald-500" />
+                              <span className="text-[10px] font-medium text-slate-500">Sent: {new Date(m.sentAt).toLocaleString()}</span>
+                            </div>
+                          )}
+                        </div>
                       </TableCell>
-                      <TableCell>
-                        {m.createdAt
-                          ? new Date(m.createdAt).toLocaleString()
-                          : "-"}
+                      <TableCell className="py-4 text-right">
+                        {m.failureReason && (
+                          <span className="text-[10px] font-bold text-rose-500 bg-rose-50 dark:bg-rose-500/10 px-2 py-1 rounded-md border border-rose-100 dark:border-rose-500/20">
+                            Error: {m.failureReason}
+                          </span>
+                        )}
+                        {!m.failureReason && <span className="text-slate-300 dark:text-slate-700">—</span>}
                       </TableCell>
-                      <TableCell>
-                        {m.sentAt ? new Date(m.sentAt).toLocaleString() : "-"}
-                      </TableCell>
-                      <TableCell>
-                        {m.deliveredAt
-                          ? new Date(m.deliveredAt).toLocaleString()
-                          : "-"}
-                      </TableCell>
-                      <TableCell>
-                        {m.readAt ? new Date(m.readAt).toLocaleString() : "-"}
-                      </TableCell>
-                      <TableCell className="text-red-600">
-                        {m.failureReason || "-"}
-                      </TableCell>
-                    </TableRow>
+                    </motion.tr>
                   ))}
                 </TableBody>
               </Table>
-            </div>
-          )}
+            )}
+          </div>
 
           {reportData && reportData.pagination.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2 pt-4">
+            <div className="p-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-4 bg-slate-50/20 dark:bg-slate-900/10">
               <Button
                 variant="outline"
                 size="sm"
                 disabled={!reportData.pagination.hasPrevPage}
-                onClick={() =>
-                  reportData.pagination.hasPrevPage && setPage(page - 1)
-                }
+                onClick={() => setPage(page - 1)}
+                className="rounded-xl font-bold text-xs h-9 px-4 border-slate-200 dark:border-slate-700"
               >
                 Previous
               </Button>
-              <span className="text-sm">
-                Page {page} of {reportData.pagination.totalPages}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-black text-slate-900 dark:text-white px-3 py-1 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm">
+                  {page}
+                </span>
+                <span className="text-xs font-bold text-slate-400">of {reportData.pagination.totalPages}</span>
+              </div>
               <Button
                 variant="outline"
                 size="sm"
                 disabled={!reportData.pagination.hasNextPage}
-                onClick={() =>
-                  reportData.pagination.hasNextPage && setPage(page + 1)
-                }
+                onClick={() => setPage(page + 1)}
+                className="rounded-xl font-bold text-xs h-9 px-4 border-slate-200 dark:border-slate-700"
               >
                 Next
               </Button>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </motion.div>
+      </main>
     </div>
   );
 }

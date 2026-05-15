@@ -7,29 +7,51 @@ export default function ScrollControls() {
   console.log("ScrollControls mounted");
 
   useEffect(() => {
-    console.log("ScrollControls mounted");
+    const container = document.querySelector(".custom-scrollbar");
+
     const handleScroll = () => {
-      setShowButtons(window.scrollY > 50); // Show only when user scrolls
+      const scrollPos = container ? container.scrollTop : window.scrollY;
+      setShowButtons(scrollPos > 50);
     };
 
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    if (container) {
+      container.addEventListener("scroll", handleScroll);
+    } else {
+      window.addEventListener("scroll", handleScroll);
+    }
+
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", handleScroll);
+      } else {
+        window.removeEventListener("scroll", handleScroll);
+      }
+    };
   }, []);
 
   const scrollTo = (position) => {
-    window.scrollTo({
-      top: position === "top" ? 0 : document.body.scrollHeight,
-      behavior: "smooth",
-    });
+    const container = document.querySelector(".custom-scrollbar");
+    const target = position === "top" ? 0 : (container ? container.scrollHeight : document.body.scrollHeight);
+
+    if (container) {
+      container.scrollTo({
+        top: target,
+        behavior: "smooth",
+      });
+    } else {
+      window.scrollTo({
+        top: target,
+        behavior: "smooth",
+      });
+    }
   };
 
   if (!showButtons) return null;
 
   return (
     <div
-      className={`fixed right-4 bottom-10 flex flex-col z-50 gap-2 transition-opacity ${
-        showButtons ? "opacity-100" : "opacity-0"
-      }`}
+      className={`fixed right-4 bottom-10 flex flex-col z-50 gap-2 transition-opacity ${showButtons ? "opacity-100" : "opacity-0"
+        }`}
     >
       <button
         onClick={() => scrollTo("top")}
