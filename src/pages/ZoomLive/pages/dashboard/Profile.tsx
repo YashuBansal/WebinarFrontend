@@ -104,7 +104,7 @@ const Profile = () => {
             <Button
               onClick={handleRefreshToken}
               disabled={refreshTokenMutation.isPending || isProfileLoading}
-              className="h-11 px-6 rounded-xl flex items-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
+              className="h-11 px-6 rounded-xl flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98]"
             >
               {refreshTokenMutation.isPending ? <RefreshCw className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
               Refresh Token
@@ -161,7 +161,7 @@ const Profile = () => {
                   ].map((item, i) => (
                     <div key={i} className="group/item p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/50 hover:bg-white dark:hover:bg-slate-800 transition-all">
                       <div className="flex items-center gap-3 mb-2">
-                        <div className="h-7 w-7 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-slate-400 group-hover/item:text-blue-600 transition-colors">
+                        <div className="h-7 w-7 rounded-lg bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700/50 flex items-center justify-center text-slate-400 dark:text-slate-300 group-hover/item:text-blue-600 transition-colors">
                           <item.icon className="h-3.5 w-3.5" />
                         </div>
                         <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">{item.label}</span>

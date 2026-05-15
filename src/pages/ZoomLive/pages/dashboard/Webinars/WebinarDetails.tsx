@@ -288,8 +288,7 @@ export default function WebinarDetails() {
                       console.error("Failed to sync webinar:", error);
                     }
                   }}
-                  variant="outline"
-                  className="w-full h-11 rounded-xl flex items-center justify-start gap-3 border-slate-200 dark:border-slate-700 font-bold text-xs"
+                  className="w-full h-11 rounded-xl flex items-center justify-start gap-3 bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-600/10 font-bold text-xs transition-all hover:scale-[1.02]"
                   disabled={syncWebinarMutation.isPending}
                 >
                   <RefreshCw className={cn("h-4 w-4", syncWebinarMutation.isPending && "animate-spin")} />

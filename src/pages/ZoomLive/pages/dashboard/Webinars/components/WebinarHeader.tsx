@@ -78,7 +78,7 @@ export default function WebinarHeader({ details, statusData, isStatusLoading, st
             { icon: Clock, label: "Duration", value: `${details.duration ?? 0} Minutes` },
           ].map((item, i) => (
             <div key={i} className="flex items-center gap-4 p-4 rounded-2xl bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800/50">
-              <div className="h-10 w-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400">
+              <div className="h-10 w-10 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 flex items-center justify-center text-slate-400 dark:text-slate-300">
                 <item.icon className="h-4 w-4" />
               </div>
               <div>

@@ -192,7 +192,7 @@ const Webinars = () => {
                   setToDate("");
                   setSearchTerm("");
                 }}
-                className="h-10 rounded-xl text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 font-bold px-4"
+                className="h-10 rounded-xl text-slate-500 dark:text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/20 font-bold px-4 transition-colors"
               >
                 Reset
               </Button>

@@ -307,8 +307,7 @@ export default function MeetingDetails() {
                       console.error("Failed to sync meeting:", error);
                     }
                   }}
-                  variant="outline"
-                  className="w-full h-11 rounded-xl flex items-center justify-start gap-3 border-slate-200 dark:border-slate-700 font-bold text-xs"
+                  className="w-full h-11 rounded-xl flex items-center justify-start gap-3 bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-600/10 font-bold text-xs transition-all hover:scale-[1.02]"
                   disabled={syncMeetingMutation.isPending}
                 >
                   <RefreshCw className={cn("h-4 w-4", syncMeetingMutation.isPending && "animate-spin")} />
