@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src/pages/WhatsApp"),
+      "@zoom": path.resolve(__dirname, "./src/pages/ZoomLive"),
     },
   },
   plugins: [react(), viteCompression({ algorithm: "gzip", ext: ".gz" })],

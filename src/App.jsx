@@ -68,7 +68,9 @@ import {
   SupportPage,
   DocumentationPage,
   WhatsAppWrapper,
+  ZoomLiveWrapper,
 } from "./pages";
+
 import RouteGuard from "./components/AccessControl/RouteGuard";
 
 import {
@@ -709,15 +711,14 @@ const App = () => {
           ),
         },
         {
-          path: "/zoom",
+          path: "/zoom/*",
           element: (
             <RouteGuard roleNames={["ADMIN"]}>
-              <RedirectToExternal
-                url={import.meta.env.VITE_REACT_APP_ZOOM_URL}
-              />
+              <ZoomLiveWrapper />
             </RouteGuard>
           ),
         },
+
       ],
     },
     {

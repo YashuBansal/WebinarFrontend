@@ -79,6 +79,8 @@ const TermsPage = lazy(() => import("./Public/TermsPage"));
 const SupportPage = lazy(() => import("./Public/SupportPage"));
 const DocumentationPage = lazy(() => import("./Public/DocumentationPage"));
 const WhatsAppWrapper = lazy(() => import("./WhatsApp/WhatsAppWrapper"));
+const ZoomLiveWrapper = lazy(() => import("./ZoomLive/ZoomLiveWrapper"));
+
 
 export {
   CalendarPage,
@@ -141,4 +143,6 @@ export {
   SupportPage,
   DocumentationPage,
   WhatsAppWrapper,
+  ZoomLiveWrapper,
 };
+

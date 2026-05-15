@@ -71,7 +71,7 @@ const DialogOverlay = React.forwardRef<
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className={cn(
-        "fixed inset-0 z-[100] bg-black/60",
+        "fixed inset-0 z-[200] bg-black/60 backdrop-blur-sm",
         className
       )}
     />
@@ -92,7 +92,7 @@ const DialogContent = React.forwardRef<
       {open && (
         <DialogPortal forceMount>
           <DialogOverlay />
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pointer-events-none">
+          <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 pointer-events-none">
             <DialogPrimitive.Content
               ref={ref}
               asChild
@@ -105,7 +105,7 @@ const DialogContent = React.forwardRef<
                 exit={{ opacity: 0, scale: 0.95, y: 20 }}
                 transition={{ type: "spring", duration: 0.4, bounce: 0 }}
                 className={cn(
-                  "bg-white dark:bg-slate-900 pointer-events-auto relative z-[100] grid w-full max-w-lg gap-4 rounded-lg border p-6 shadow-lg",
+                  "bg-white dark:bg-slate-900 pointer-events-auto relative z-[200] grid w-full max-w-lg gap-4 rounded-lg border p-6 shadow-lg",
                   className
                 )}
               >

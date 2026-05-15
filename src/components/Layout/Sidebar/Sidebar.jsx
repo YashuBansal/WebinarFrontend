@@ -29,6 +29,7 @@ import useMediaQuery from "../../../hooks/useMediaQuery";
 import useUserSubscription from "../../../hooks/useUserSubscription";
 import DashboardSidebar from "./DashboardSidebar";
 import WhatsAppSidebar from "./WhatsAppSidebar";
+import ZoomSidebar from "./ZoomSidebar";
 import { useTheme } from "../../../contexts/ThemeContext";
 
 const PANEL_W = 200;
@@ -67,8 +68,9 @@ const Sidebar = ({
 
   // Theme colors
   const isWhatsApp = activeHeaderSection === "WhatsApp";
-  const themeColor = isWhatsApp ? "#22c55e" : "#f97316"; // green-500 : orange-500
-  const themeBgLight = isWhatsApp ? "rgba(34, 197, 94, 0.1)" : "rgba(249, 115, 22, 0.1)";
+  const isZoom = activeHeaderSection === "Zoom";
+  const themeColor = isWhatsApp ? "#22c55e" : (isZoom ? "#3b82f6" : "#f97316");
+  const themeBgLight = isWhatsApp ? "rgba(34, 197, 94, 0.1)" : (isZoom ? "rgba(59, 130, 246, 0.1)" : "rgba(249, 115, 22, 0.1)");
 
   // Sync scrolling between rail and panel
   useEffect(() => {
@@ -266,6 +268,16 @@ const Sidebar = ({
         />
       );
     }
+
+    if (activeHeaderSection === "Zoom") {
+      return (
+        <ZoomSidebar
+          variant={variant}
+          section={section}
+          handleNavigation={handleNavigation}
+        />
+      );
+    }
     
     if (section && section !== "middle") return null;
 
@@ -325,7 +337,7 @@ const Sidebar = ({
             transition={{ duration: 0.2 }}
             className="flex-1 flex flex-col overflow-hidden"
           >
-            {activeHeaderSection === "WhatsApp" ? (
+            {activeHeaderSection === "WhatsApp" || activeHeaderSection === "Zoom" ? (
                <div className="flex flex-1 flex-col overflow-hidden">
                   {renderContextualSidebar("mobile", "top")}
                   <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
@@ -377,7 +389,7 @@ const Sidebar = ({
             transition={{ duration: 0.2 }}
             className="flex-1 flex flex-col overflow-hidden"
           >
-            {activeHeaderSection === "WhatsApp" ? (
+            {activeHeaderSection === "WhatsApp" || activeHeaderSection === "Zoom" ? (
                <div className="flex flex-1 flex-col overflow-hidden">
                   {renderContextualSidebar("rail", "top")}
                   <div className="flex-1 overflow-y-auto py-2 no-scrollbar" ref={railScrollRef}>
@@ -433,7 +445,7 @@ const Sidebar = ({
             transition={{ duration: 0.2 }}
             className="flex-1 flex flex-col overflow-hidden"
           >
-            {activeHeaderSection === "WhatsApp" ? (
+            {activeHeaderSection === "WhatsApp" || activeHeaderSection === "Zoom" ? (
                <div className="flex flex-1 flex-col overflow-hidden">
                   {renderContextualSidebar("panel", "top")}
                   <div className="flex-1 overflow-y-auto py-2 custom-scrollbar" ref={panelScrollRef}>

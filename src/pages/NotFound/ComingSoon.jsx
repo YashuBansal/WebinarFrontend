@@ -26,7 +26,7 @@ const NotFoundPage = () => {
       </Button>
       <Box className="mt-8">
         <img
-          src="https://via.placeholder.com/400"
+          src="https://placehold.co/400"
           alt="Not Found Illustration"
           className="w-80 h-auto"
         />
