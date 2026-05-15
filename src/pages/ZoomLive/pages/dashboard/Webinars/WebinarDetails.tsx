@@ -3,7 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { Alert, AlertDescription } from "@zoom/components/ui/alert";
 import { Button } from "@zoom/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@zoom/components/ui/tabs";
-import { Settings, History, RefreshCw, Presentation } from "lucide-react";
+import { Settings, History, RefreshCw, Presentation, ArrowLeft } from "lucide-react";
 import {
   useWebinarDetails,
   useWebinarRegistrants,
@@ -210,27 +210,25 @@ export default function WebinarDetails() {
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold text-xs uppercase tracking-widest mb-1">
-              <Presentation className="h-3.5 w-3.5" />
-              Event Analytics
-            </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
-              Webinar Details
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-              Monitor event performance and manage attendee registrations
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
+          <div className="flex items-center gap-4">
+            <button
               onClick={() => navigate(-1)}
-              variant="outline"
-              className="h-11 px-6 rounded-xl font-bold text-xs border-slate-200 dark:border-slate-700"
+              className="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-700/30 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all shadow-sm"
             >
-              Go Back
-            </Button>
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 text-indigo-600 dark:text-indigo-400 font-bold text-xs uppercase tracking-widest mb-1">
+                <Presentation className="h-3.5 w-3.5" />
+                Event Analytics
+              </div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
+                Webinar Details
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                Monitor event performance and manage attendee registrations
+              </p>
+            </div>
           </div>
         </div>
       </motion.div>

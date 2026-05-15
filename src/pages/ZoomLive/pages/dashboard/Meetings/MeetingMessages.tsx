@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@zoom/components/ui/table";
-import { Loader2, RefreshCw, History, MessageSquare } from "lucide-react";
+import { Loader2, RefreshCw, History, MessageSquare, ArrowLeft, Clock } from "lucide-react";
 import { useMeetingMessages } from "@zoom/hooks/useZoom";
 import { motion } from "framer-motion";
 import { cn } from "@zoom/lib/utils";
@@ -107,28 +107,28 @@ export default function MeetingMessages() {
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-widest mb-1">
-              <History className="h-3.5 w-3.5" />
-              Communication Logs
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-700/30 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all shadow-sm"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-widest mb-1">
+                <History className="h-3.5 w-3.5" />
+                Communication Logs
+              </div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
+                Message History
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                Tracking all WhatsApp notifications for {isWebinar ? "Webinar" : "Meeting"} <span className="text-slate-900 dark:text-white font-bold">{zoomId}</span>
+              </p>
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
-              Message History
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-              Tracking all WhatsApp notifications for {isWebinar ? "Webinar" : "Meeting"} <span className="text-slate-900 dark:text-white font-bold">{zoomId}</span>
-            </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => navigate(-1)}
-              className="h-11 px-6 rounded-xl border-slate-200 dark:border-slate-700 font-bold text-xs"
-            >
-              Go Back
-            </Button>
-            
             <div className="h-11 p-1 bg-slate-100 dark:bg-slate-900/50 rounded-xl flex items-center gap-1 border border-slate-200 dark:border-slate-800">
               <Button
                 onClick={handleRefresh}
@@ -148,7 +148,13 @@ export default function MeetingMessages() {
                   autoRefreshEnabled ? "text-blue-600 bg-blue-50 dark:bg-blue-500/10" : "hover:bg-white dark:hover:bg-slate-800"
                 )}
               >
-                Auto {autoRefreshEnabled ? "ON" : "OFF"}
+                <motion.div
+                  animate={autoRefreshEnabled ? { rotate: 360 } : { rotate: 0 }}
+                  transition={autoRefreshEnabled ? { repeat: Infinity, duration: 4, ease: "linear" } : { duration: 0.5 }}
+                >
+                  <Clock className="h-4 w-4" />
+                </motion.div>
+                {autoRefreshEnabled ? "Live" : "Manual"}
               </Button>
             </div>
           </div>
@@ -224,10 +230,10 @@ export default function MeetingMessages() {
                               m.status === "delivered" || m.status === "read"
                                 ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-500/10 border border-emerald-200/50 dark:border-emerald-500/20"
                                 : m.status === "sent"
-                                ? "bg-amber-50 text-amber-600 dark:bg-amber-500/10 border border-amber-200/50 dark:border-amber-500/20"
-                                : m.status === "failed"
-                                ? "bg-rose-50 text-rose-600 dark:bg-rose-500/10 border border-rose-200/50 dark:border-rose-500/20"
-                                : "bg-slate-50 text-slate-600 dark:bg-slate-700/50 border border-slate-200/50 dark:border-slate-700/20"
+                                  ? "bg-amber-50 text-amber-600 dark:bg-amber-500/10 border border-amber-200/50 dark:border-amber-500/20"
+                                  : m.status === "failed"
+                                    ? "bg-rose-50 text-rose-600 dark:bg-rose-500/10 border border-rose-200/50 dark:border-rose-500/20"
+                                    : "bg-slate-50 text-slate-600 dark:bg-slate-700/50 border border-slate-200/50 dark:border-slate-700/20"
                             )}
                           >
                             {m.status || "pending"}

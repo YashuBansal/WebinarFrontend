@@ -256,28 +256,28 @@ export default function MeetingEventConfig() {
         animate={{ opacity: 1, y: 0 }}
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-widest mb-1">
-              <Settings className="h-3.5 w-3.5" />
-              Event Automation
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="h-10 w-10 rounded-xl border border-slate-200 dark:border-slate-700/30 flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-all shadow-sm"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </button>
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2 text-blue-600 dark:text-blue-400 font-bold text-xs uppercase tracking-widest mb-1">
+                <Settings className="h-3.5 w-3.5" />
+                Event Automation
+              </div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
+                {isWebinar ? 'Webinar' : 'Meeting'} Configuration
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                Configure WhatsApp notifications and automation triggers for your {isWebinar ? 'webinar' : 'meeting'}
+              </p>
             </div>
-            <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
-              {isWebinar ? 'Webinar' : 'Meeting'} Configuration
-            </h1>
-            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
-              Configure WhatsApp notifications and automation triggers for your {isWebinar ? 'webinar' : 'meeting'}
-            </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              onClick={() => navigate(-1)}
-              className="h-11 px-6 rounded-xl border-slate-200 dark:border-slate-700 font-bold text-xs"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Go Back
-            </Button>
             <Button
               onClick={handleSave}
               disabled={!canSave || isLoading}
