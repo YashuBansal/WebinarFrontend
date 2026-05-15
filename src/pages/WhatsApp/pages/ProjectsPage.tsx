@@ -188,7 +188,7 @@ export default function ProjectsPage() {
               WhatsApp Module
             </div>
             <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
-              Projectsssss
+              Projects
             </h1>
             <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
               <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,181,115,0.6)]" />
