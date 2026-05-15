@@ -28,7 +28,8 @@ export default function ZoomCallback() {
   useEffect(() => {
     if (code && !hasExchangedRef.current) {
       hasExchangedRef.current = true
-      const redirectUri = `${window.location.origin}/zoom/callback`
+      const redirectUri = import.meta.env.VITE_REACT_APP_ZOOM_REDIRECT_URI?.trim() || 
+        `${window.location.origin}/zoom/callback`
       exchangeMutation.mutate({
         code,
         state: state || '',

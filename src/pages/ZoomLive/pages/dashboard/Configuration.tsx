@@ -45,7 +45,9 @@ const Configuration = () => {
 
   const handleConnectZoom = () => {
     const clientId = import.meta.env.VITE_REACT_APP_ZOOM_CLIENT_ID
-    const redirectUri = encodeURIComponent(`${window.location.origin}/zoom/callback`
+    const redirectUri = encodeURIComponent(
+      import.meta.env.VITE_REACT_APP_ZOOM_REDIRECT_URI?.trim() ||
+      `${window.location.origin}/zoom/callback`
     )
     const state = encodeURIComponent(projectId || 'noproj')
 
