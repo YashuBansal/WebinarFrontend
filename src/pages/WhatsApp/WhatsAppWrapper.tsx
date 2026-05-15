@@ -52,6 +52,20 @@ function WabaTemplatesSyncOnFirstProjectOpen() {
     syncTemplatesMutation.mutateAsync,
   ]);
 
+  // Auto-reload on first entry to ensure fresh state
+  useEffect(() => {
+    const wabaReloaded = sessionStorage.getItem("waba_module_reloaded");
+    if (!wabaReloaded) {
+      sessionStorage.setItem("waba_module_reloaded", "true");
+      window.location.reload();
+    }
+
+    // Clear the flag when leaving the module so it reloads on next entry
+    return () => {
+      sessionStorage.removeItem("zoom_module_reloaded");
+    };
+  }, []);
+
   // Scroll to top on route change
   useEffect(() => {
     const el = document.querySelector(".custom-scrollbar.absolute");

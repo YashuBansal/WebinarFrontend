@@ -256,13 +256,13 @@ const Webinars = () => {
 
                       <div className="space-y-3">
                         <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
-                          <Calendar className="h-4 w-4 text-slate-300" />
+                          <Calendar className="h-4 w-4 text-slate-400 dark:text-slate-200" />
                           <span className="text-xs font-bold uppercase tracking-tight">
                             {webinar.startTime ? formatDate(new Date(webinar.startTime)) : "No date"}
                           </span>
                         </div>
                         <div className="flex items-center gap-3 text-slate-500 dark:text-slate-400">
-                          <Clock className="h-4 w-4 text-slate-300" />
+                          <Clock className="h-4 w-4 text-slate-400 dark:text-slate-200" />
                           <span className="text-xs font-bold uppercase tracking-tight">
                             {webinar.startTime ? formatTime(new Date(webinar.startTime)) : "—"} • {webinar.duration ?? 0} min
                           </span>

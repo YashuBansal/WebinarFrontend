@@ -9,6 +9,20 @@ import "./index.css";
 export default function ZoomLiveWrapper() {
   const location = useLocation();
 
+  // Auto-reload on first entry to ensure fresh state
+  useEffect(() => {
+    const zoomReloaded = sessionStorage.getItem("zoom_module_reloaded");
+    if (!zoomReloaded) {
+      sessionStorage.setItem("zoom_module_reloaded", "true");
+      window.location.reload();
+    }
+
+    // Clear the flag when leaving the module so it reloads on next entry
+    return () => {
+      sessionStorage.removeItem("zoom_module_reloaded");
+    };
+  }, []);
+
   // Scroll to top on route change
   useEffect(() => {
     const el = document.querySelector(".custom-scrollbar.absolute");
