@@ -179,7 +179,7 @@ export default function ProjectsPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        
+
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1.5">
@@ -188,7 +188,7 @@ export default function ProjectsPage() {
               WhatsApp Module
             </div>
             <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
-              Projects
+              Projectsssss
             </h1>
             <div className="flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs font-medium">
               <div className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,181,115,0.6)]" />
