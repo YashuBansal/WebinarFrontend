@@ -78,7 +78,7 @@ const AddonCard = ({
 
   return (
     <div
-      className="group flex h-full gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-xl dark:border-slate-700 dark:bg-slate-800/90 dark:hover:border-slate-600 dark:hover:shadow-blue-950/20 sm:gap-5 sm:rounded-3xl sm:p-6"
+      className="group flex h-full gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-xl dark:border-slate-700 dark:bg-slate-800/90 dark:hover:border-slate-600 dark:hover:shadow-blue-950/20 sm:gap-5 sm:rounded-2xl sm:p-6"
     >
       <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-500/10 transition-transform duration-300 ease-out group-hover:scale-110 dark:bg-blue-500/15">
         <Icon className="h-7 w-7 text-blue-500 dark:text-blue-400" aria-hidden />

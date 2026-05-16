@@ -147,7 +147,7 @@ const PlanCard = (props) => {
         "group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300",
         "hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-xl",
         "dark:border-slate-700 dark:bg-slate-800/90 dark:hover:border-slate-600 dark:hover:shadow-blue-950/20",
-        "sm:rounded-3xl",
+        "sm:rounded-2xl",
       )}
     >
       <div

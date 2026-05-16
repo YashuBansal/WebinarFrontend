@@ -106,7 +106,7 @@ const BuyAddOnsPage = () => {
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-200 bg-white/60 py-16 text-center dark:border-slate-700 dark:bg-slate-800/40"
+          className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white/60 py-16 text-center dark:border-slate-700 dark:bg-slate-800/40"
         >
           <Package className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
           <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">No add-ons are listed yet.</p>

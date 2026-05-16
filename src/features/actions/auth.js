@@ -59,11 +59,7 @@ export const updateUser = createAsyncThunk(
   async (payload, { rejectWithValue }) => {
     try {
       console.log("payload", payload);
-      const { data } = await instance.patch("/users", payload, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const { data } = await instance.patch("/users", payload);
       return data;
     } catch (error) {
       return rejectWithValue(error);

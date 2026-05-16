@@ -86,7 +86,7 @@ const ManageTags = () => {
       </motion.header>
 
       <div
-        className="min-h-[280px] rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-6"
+        className="min-h-[280px] rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-6"
       >
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">

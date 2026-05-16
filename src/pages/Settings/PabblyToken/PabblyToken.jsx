@@ -119,7 +119,7 @@ const apiCampaignJSONBody = `{
 }`;
 
 const sectionShell =
-  "space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-6";
+  "space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-6";
 const sectionTitle =
   "border-b border-slate-200 pb-3 text-xs font-bold uppercase tracking-widest text-slate-400 dark:border-slate-700 dark:text-slate-500";
 
@@ -298,7 +298,7 @@ const PabblyToken = () => {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-slate-600 dark:bg-slate-900/50 sm:rounded-3xl sm:p-5"
+            className="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-slate-600 dark:bg-slate-900/50 sm:rounded-2xl sm:p-5"
           >
             <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
               <BookOpen className="h-4 w-4 text-blue-500" />

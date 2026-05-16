@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, lazy, Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import CloudDownloadIcon from "./download.svg";
+import { CloudDownload, ExternalLink, FileText, Download, Trash2, AlertCircle } from "lucide-react";
+import { useTheme } from "../../contexts/ThemeContext";
 import { useNavigate } from "react-router-dom";
 const LinearProgressWithLabel = lazy(() => import("../Export/LinearProgressWithLabel"));
 import { socket } from "../../socket";
@@ -46,7 +47,7 @@ const ImportExportNotifications = ({ userData, roles }) => {
 
   useEffect(() => {
     dispatch(getUserDocuments({bell: true}));
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     setProgress(0)
@@ -61,7 +62,6 @@ const ImportExportNotifications = ({ userData, roles }) => {
 
   useEffect(() => {
     function onImport(data) {
-      console.log(data);
       if (data.actionType === "import") {
         if (data.value > 0) {
           setProgress(data.value);
@@ -70,7 +70,6 @@ const ImportExportNotifications = ({ userData, roles }) => {
     }
 
     function newDownload(data){
-      console.log(data);
       dispatch(setNewDownload(data));
     }
     socket.on("import-export", onImport);
@@ -79,21 +78,28 @@ const ImportExportNotifications = ({ userData, roles }) => {
       socket.off("import-export", onImport);
       socket.off("new-download", newDownload);
     };
-  }, []);
+  }, [dispatch]);
+
+  const { isDark } = useTheme();
 
   return (
-    <div className="sm:relative">
+    <div className="relative">
       <button
         ref={bellRef}
         onClick={handleBellClick}
-        className="md:p-2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+        title="Downloads & Exports"
+        className="flex h-8 w-8 items-center justify-center rounded-lg transition-all sm:h-9 sm:w-9 md:h-10 md:w-10"
+        style={{
+          backgroundColor: isDark ? "#1e293b" : "#f9fafb",
+          border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
+        }}
       >
         <div className="relative">
-          <img src={CloudDownloadIcon} className="w-4 h-4 min-w-4 min-h-4 sm:w-6 sm:h-6 sm:min-w-6 sm:min-h-6" alt="Download" />
-          {false && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">
-              2
-            </span>
+          <CloudDownload 
+            className={`h-4 w-4 sm:h-5 sm:w-5 ${(isExportLoading || isImporting) ? "text-blue-500 animate-bounce" : "text-blue-400/80"}`} 
+          />
+          {(isExportLoading || isImporting) && (
+            <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 animate-pulse items-center justify-center rounded-full bg-blue-500 ring-2 ring-white dark:ring-slate-900" />
           )}
         </div>
       </button>
@@ -101,169 +107,110 @@ const ImportExportNotifications = ({ userData, roles }) => {
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute right-0 mt-2 w-96 bg-white shadow-lg rounded-lg border border-gray-200 max-h-[400px] overflow-y-auto"
+          className="absolute right-0 z-[100] mt-2 w-[320px] origin-top-right rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800 sm:w-96"
         >
           <div className="p-4">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-bold">Downloads</h3>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className={`h-2 w-2 rounded-full ${(isExportLoading || isImporting) ? 'bg-blue-500 animate-pulse' : 'bg-slate-300'}`} />
+                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">Downloads</h3>
+              </div>
               <button 
-              onClick={() => {
-                setIsOpen(false)
-                navigate("/user-downloads")
-              }}
-              className="text-gray-500 hover:text-gray-900 hover:underline">
-                View All
+                onClick={() => {
+                  setIsOpen(false);
+                  navigate("/user-downloads");
+                }}
+                className="flex items-center gap-1 text-xs font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400"
+              >
+                View History <ExternalLink className="h-3 w-3" />
               </button>
             </div>
-            <hr className="my-2 border-gray-200" />
-            <div className="divide-y">
+
+            <div className="custom-scrollbar max-h-[350px] space-y-3 overflow-y-auto pr-1">
               {(isExportLoading || isImporting) && (
-                <div className="p-3 hover:bg-gray-50 cursor-pointer">
-                  <div className="font-medium">Data Import Progress</div>
-                  <p className="text-gray-600 text-sm">
-                    {isImporting ? "Importing data from the backend" : "Exporting data to the backend"}
-                  </p>
-                  <div className="text-xs text-gray-500 text-right mt-1">
-                    <Suspense fallback={<></>}>
-                      <LinearProgressWithLabel value={progress} />
-                    </Suspense>
+                <div className="rounded-lg bg-blue-50/50 p-3 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-400">
+                      <CloudDownload className="h-3.5 w-3.5" />
+                    </div>
+                    <span className="text-xs font-bold text-blue-700 dark:text-blue-300 uppercase tracking-wider">
+                      {isImporting ? "Importing Data..." : "Exporting Data..."}
+                    </span>
                   </div>
+                  <Suspense fallback={<div className="h-2 w-full bg-slate-100 rounded animate-pulse" />}>
+                    <LinearProgressWithLabel value={progress} />
+                  </Suspense>
                 </div>
               )}
-              {userDocuments.map((notif) => (
-                <div
-                key={notif._id}
-                className="p-4 hover:bg-gray-50 border-b border-gray-100 last:border-0"
-              >
-                <div className="flex items-center justify-between gap-3">
-                  {/* Document Icon */}
-                  {/* <div className="flex-shrink-0 text-blue-500">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                      />
-                    </svg>
-                  </div> */}
-  
-                  {/* Document Details */}
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between">
-                      <div className="font-medium text-gray-900 truncate max-w-56">
-                        {notif?.fileName}
-                      </div>
+
+              {userDocuments.length > 0 ? (
+                userDocuments.map((notif) => (
+                  <div
+                    key={notif._id}
+                    className="group relative flex items-start gap-3 rounded-lg border border-slate-50 p-3 transition-all hover:bg-slate-50 dark:border-transparent dark:hover:bg-slate-700/50"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-500 group-hover:bg-blue-100 group-hover:text-blue-600 dark:group-hover:bg-blue-900/30 dark:group-hover:text-blue-400 transition-colors">
+                      <FileText className="h-5 w-5" />
                     </div>
-  
-                    <div className="mt-1 text-sm text-gray-500">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-800">
+
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        {notif?.fileName}
+                      </p>
+                      <div className="mt-1 flex items-center gap-2 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                        <span className="rounded bg-slate-100 px-1.5 py-0.5 dark:bg-slate-700">
                           {formatFileSize(notif?.fileSize)}
                         </span>
                         <span>•</span>
-                        <span>
-                          {formatDateAsNumber(notif?.createdAt)}
-                        </span>
+                        <span>{formatDateAsNumber(notif?.createdAt)}</span>
                       </div>
+                      
+                      {notif.status === "EXPIRED" && (
+                        <div className="mt-2 flex items-center gap-1 text-[10px] font-bold text-red-500 uppercase tracking-tight">
+                          <AlertCircle className="h-3 w-3" /> Link Expired
+                        </div>
+                      )}
                     </div>
-                  </div>
-  
-                  {/* Action Buttons */}
-                  {userData?.isActive && (
-                  <div className="flex flex-col gap-2">
-                    <button
-                    disabled={isLoading}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        dispatch(
-                          getUserDocument({
-                            id: notif._id,
-                            fileName: notif?.fileName,
-                          })
-                        );
-                      }}
-                      className="p-2 hover:bg-blue-50 rounded-full text-blue-600 hover:text-blue-800 transition-colors"
-                      title="Redownload"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-                        />
-                      </svg>
-                    </button>
-  
-                    <button
-                    disabled={isLoading}
-                    onClick={(e) => {
-                        e.stopPropagation();
-                        // Add delete handler here
-                        dispatch(deleteUserDocument({id:notif?._id}))
-                      }}
-                      className="p-2 hover:bg-red-50 rounded-full text-red-600 hover:text-red-800 transition-colors"
-                      title="Delete"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                  )}
-                </div>
-  
-                {/* Status Indicator */}
-                {notif.status === "EXPIRED" && (
-                  <div className="mt-2 text-xs text-red-500 flex items-center gap-1">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-4 w-4"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                      />
-                    </svg>
-                    Link expired
-                  </div>
-                )}
-              </div>
-              ))}
 
-              {userDocuments.length === 0 && (
-                <div className="p-4 text-center text-gray-700">
-                  No Downloads found
-                </div>
+                    {userData?.isActive && notif.status !== "EXPIRED" && (
+                      <div className="flex shrink-0 items-center gap-1 self-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                          disabled={isLoading}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            dispatch(getUserDocument({ id: notif._id, fileName: notif?.fileName }));
+                          }}
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-50 text-blue-600 hover:bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors"
+                          title="Download"
+                        >
+                          <Download className="h-4 w-4" />
+                        </button>
+                        <button
+                          disabled={isLoading}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            dispatch(deleteUserDocument({ id: notif?._id }));
+                          }}
+                          className="flex h-8 w-8 items-center justify-center rounded-full bg-red-50 text-red-600 hover:bg-red-100 dark:bg-red-900/30 dark:text-red-400 dark:hover:bg-red-900/50 transition-colors"
+                          title="Delete"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                !isExportLoading && !isImporting && (
+                  <div className="flex flex-col items-center justify-center py-8 text-center">
+                    <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-700/30">
+                      <CloudDownload className="h-6 w-6 text-slate-300 dark:text-slate-600" />
+                    </div>
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                      No downloads available
+                    </p>
+                  </div>
+                )
               )}
             </div>
           </div>

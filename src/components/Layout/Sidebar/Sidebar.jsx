@@ -474,7 +474,8 @@ const Sidebar = ({
     <>
       {mobileShell}
       <div
-        className="fixed bottom-0 left-0 top-16 z-40 hidden md:flex"
+        className="fixed bottom-0 left-0 z-40 hidden md:flex"
+        style={{ top: "var(--header-height, 64px)" }}
         ref={desktopShellRef}
       >
         {railAside}
