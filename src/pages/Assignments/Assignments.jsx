@@ -4,20 +4,16 @@ import React, {
   useLayoutEffect,
   useMemo,
   useRef,
+  Suspense,
+  lazy,
 } from "react";
 import { useSearchParams, useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   Tabs,
   Tab,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
 } from "@mui/material";
-import CancelIcon from "@mui/icons-material/Cancel";
 import { attendeeTableColumns } from "../../utils/columnData";
-import DataTable from "../../components/Table/DataTable";
 import {
   cancelRequestReAssignment,
   getAssignments,
@@ -25,7 +21,8 @@ import {
   getLeadType,
   requestReAssignment,
 } from "../../features/actions/assign";
-import AttendeesFilterModal from "../../components/Attendees/AttendeesFilterModal";
+import { getEmployee } from "../../features/actions/employee";
+const AttendeesFilterModal = lazy(() => import("../../components/Attendees/AttendeesFilterModal"));
 import { getEmployeeWebinars } from "../../features/actions/webinarContact";
 import {
   resetAssignedData,
@@ -43,12 +40,18 @@ import RequestReassignmentModal from "./ReAssigmentModal";
 import { createPortal } from "react-dom";
 import useRoles from "../../hooks/useRoles";
 import { setWebinarAttendeesFilters } from "../../features/slices/filters.slice";
-import { VisibilityIcon, RedCrossIcon } from "../../components/SVGs";
 import { clearWebinarData } from "../../features/slices/webinarContact";
-import { globalButton } from "../../utils/style";
 import ApplyTagsModal from "../../components/Webinar/ApplyTagsModal";
 import { useApplyTagsToEmployeeAssignments } from "../../hooks/useTags";
 import useUserSubscription from "../../hooks/useUserSubscription";
+import { useTheme } from "../../contexts/ThemeContext";
+const FilterPresetModal = lazy(() => import("../../components/Filter/FilterPresetModal"));
+import { motion, AnimatePresence } from "framer-motion";
+import WebinarAttendeesTableShell from "../../components/Attendees/WebinarAttendeesTableShell";
+import { DynamicLeadsTable } from "../../components/Webinar/DynamicLeadsTable";
+import ModalFallback from "../../components/Fallback/ModalFallback";
+import { ChevronDown, Calendar, UserCheck, Activity, Tag as TagIcon, LayoutGrid } from "lucide-react";
+import { cn } from "../../lib/utils";
 
 const Assignments = () => {
   const employeeId = useParams()?.id;
@@ -68,11 +71,14 @@ const Assignments = () => {
   const { userData } = useSelector((state) => state.auth);
   const { data: subscription } = useUserSubscription();
 
-  const semething =
-    roles.getRoleNameById(userData?.role) === "EMPLOYEE SALES"
+  const { singleEmployeeData } = useSelector((state) => state.employee);
+
+  const semething = useMemo(() => {
+    const targetRole = singleEmployeeData?.role || userData?.role;
+    return roles.getRoleNameById(targetRole) === "EMPLOYEE SALES"
       ? "postWebinar"
       : "preWebinar";
-  console.log("sdfsdf", semething);
+  }, [singleEmployeeData, userData, roles]);
 
   const assignmentMetrics = subscription?.plan?.assignmentMetrics || false;
   const { assignData, isLoading, isSuccess, pagination, leadTypeData } =
@@ -111,6 +117,10 @@ const Assignments = () => {
     "isAssigned",
   ]);
   const [applyTagsModalOpen, setApplyTagsModalOpen] = useState(false);
+  const [presetModalOpen, setPresetModalOpen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const { isDark } = useTheme();
+  const theme = isDark ? "dark" : "light";
 
   useEffect(() => {
     const currentParams = Object.fromEntries([...searchParams.entries()]);
@@ -194,6 +204,9 @@ const Assignments = () => {
   useLayoutEffect(() => {
     dispatch(getEmployeeWebinars({ employeeId }));
     dispatch(getLeadType());
+    if (employeeId) {
+      dispatch(getEmployee(employeeId));
+    }
     return () => {
       dispatch(resetAssignedData());
       console.log("resetting data", resetFilterRef.current);
@@ -302,18 +315,74 @@ const Assignments = () => {
     );
   };
 
+  const ALL_COLUMNS = useMemo(() => {
+    const baseColumns = attendeeTableColumns
+      .filter((column) => !notAllowedColumns.includes(column.key))
+      .map((col) => {
+        // Map keys to what DynamicLeadsTable expects for special formatting
+        let key = col.key;
+        if (col.key === "isAssigned") key = "assignedTo";
+        if (col.key === "createdAt") key = "dateTime";
+        if (col.key === "registeredCount") key = "registeredWebinars";
+        if (col.key === "attendedCount") key = "attendedWebinars";
+        if (col.key === "timeInSession") key = "pastWebinarDuration";
+
+        return {
+          key: key,
+          label: col.header,
+          dataKey: col.key,
+          widthKey: col.key,
+          sortable: true,
+          locked: col.key === "email" || col.key === "serialNo",
+        };
+      });
+
+    return [
+      {
+        key: "serialNo",
+        label: "S.No",
+        dataKey: "serialNo",
+        widthKey: "serialNo",
+        sortable: false,
+        locked: true,
+      },
+      ...baseColumns,
+      {
+        key: "actions",
+        label: "Actions",
+        dataKey: "actions",
+        widthKey: "actions",
+        sortable: false,
+        locked: true,
+        variant: tabValue === AssignmentStatus.REASSIGN_REQUESTED ? "cancel" : "delete",
+      },
+    ];
+  }, [notAllowedColumns, tabValue]);
+
   const tableData = useMemo(() => {
     return {
-      columns: attendeeTableColumns.filter(
-        (column) => !notAllowedColumns.includes(column.key)
-      ),
       totalRecords: total,
       rows: assignData.map((row) => ({
         ...row,
         leadType: leadTypeData.find((lead) => lead._id === row?.leadType),
       })),
     };
-  }, [assignData, leadTypeData, notAllowedColumns]);
+  }, [assignData, leadTypeData]);
+
+  const columnWidths = useMemo(() => {
+    const widths = {
+      serialNo: 60,
+      actions: 120,
+    };
+    attendeeTableColumns.forEach((col) => {
+      widths[col.key] = col.width * 5 || 150;
+    });
+    return widths;
+  }, []);
+
+  const columnVisibility = useMemo(() => {
+    return ALL_COLUMNS.reduce((acc, col) => ({ ...acc, [col.key]: true }), {});
+  }, [ALL_COLUMNS]);
 
   const targetEmployeeId = employeeId || userData?._id;
 
@@ -382,77 +451,93 @@ const Assignments = () => {
     return icons;
   }, [tabValue]);
 
-  const AttendeeDropdown = () => {
-    const handleChange = (event) => {
-      const label = event.target.value;
-      setSelected(label);
-      setPage(1);
-      setSelectedRows([]);
-    };
-    if (tabValue !== AssignmentStatus.ACTIVE) return null;
-    return (
-      <FormControl className="w-40 " variant="outlined">
-        <InputLabel id="attendee-label">Activity</InputLabel>
-        <Select
-          labelId="attendee-label"
-          className="h-10"
-          value={selected}
-          onChange={handleChange}
-          label="Activity"
-        >
-          <MenuItem value="All">All</MenuItem>
-          <MenuItem value="Worked">Worked</MenuItem>
-          <MenuItem value="Pending">Pending</MenuItem>
-        </Select>
-      </FormControl>
+  const handleSort = (column) => {
+    const currentSortBy = sortByOption?.sortBy;
+    const currentSortOrder = sortByOption?.sortOrder;
+
+    let newSortBy = column;
+    let newSortOrder = "desc";
+
+    if (currentSortBy === column) {
+      if (currentSortOrder === "desc") {
+        newSortOrder = "asc";
+      } else {
+        newSortBy = "";
+        newSortOrder = "";
+      }
+    }
+
+    dispatch(
+      setWebinarAttendeesFilters({
+        recordType: semething,
+        sortBy: {
+          sortBy: newSortBy,
+          sortOrder: newSortOrder,
+        },
+      })
     );
   };
   return (
-    <div className=" md:px-10 pt-10 ">
-      <Tabs
-        value={tabValue}
-        onChange={(e, newValue) => {
-          setSelectedRows([]);
-          setTabValue(newValue);
-        }}
-        centered
-        className="border-b border-gray-200"
-        textColor="primary"
-        indicatorColor="primary"
-      >
-        <Tab
-          label="Assignments"
-          value={AssignmentStatus.ACTIVE}
-          className="text-gray-600"
-        />
-        <Tab
-          label="ReAssignments"
-          value={AssignmentStatus.REASSIGN_REQUESTED}
-          className="text-gray-600"
-        />
-      </Tabs>
+    <div className="md:px-10 pt-10 min-h-screen">
+      <div className="flex justify-center mb-8">
+        <Tabs
+          value={tabValue}
+          onChange={(e, newValue) => {
+            setSelectedRows([]);
+            setTabValue(newValue);
+          }}
+          centered
+          className="bg-white/50 dark:bg-slate-900/50 backdrop-blur-md p-1 rounded-2xl border border-slate-200 dark:border-slate-800"
+          textColor="primary"
+          indicatorColor="primary"
+          sx={{
+            "& .MuiTabs-indicator": {
+              height: "100%",
+              borderRadius: "12px",
+              zIndex: 0,
+              backgroundColor: "rgba(59, 130, 246, 0.1)",
+            },
+            "& .MuiTab-root": {
+              zIndex: 1,
+              minHeight: "44px",
+              borderRadius: "12px",
+              margin: "0 4px",
+              fontWeight: 600,
+              textTransform: "none",
+              color: isDark ? "#94a3b8" : "#64748b",
+              "&.Mui-selected": {
+                color: "#3b82f6",
+              },
+            },
+          }}
+        >
+          <Tab label="Assignments" value={AssignmentStatus.ACTIVE} />
+          <Tab label="ReAssignments" value={AssignmentStatus.REASSIGN_REQUESTED} />
+        </Tabs>
+      </div>
 
-      <div
-        className={`flex items-center my-6 gap-4 flex-wrap px-2 justify-between`}
-      >
-        <div className="flex items-center gap-4">
+      <div className="flex items-center mb-8 gap-4 flex-wrap justify-between">
+        <div className="flex items-center gap-3">
           {userData?.isActive && assignmentMetrics && (
             <button
               onClick={() => {
                 resetFilterRef.current = true;
                 navigate(`/assignment-metrics`);
               }}
-              className={globalButton}
+              className="group relative px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-500/20 flex items-center gap-2 overflow-hidden"
             >
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
+              <Activity className="w-4 h-4" />
               Assign Metrics
             </button>
           )}
 
           {userData?.isActive && tabValue === AssignmentStatus.ACTIVE && (
             <button
-              className={globalButton}
               onClick={() => setApplyTagsModalOpen(true)}
+              className="px-6 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 text-sm font-semibold rounded-xl hover:bg-slate-50 dark:hover:bg-slate-750 transition-all shadow-sm flex items-center gap-2"
             >
+              <TagIcon className="w-4 h-4 text-slate-400" />
               Apply Tags
             </button>
           )}
@@ -460,7 +545,9 @@ const Assignments = () => {
           {selectedRows.length > 0 &&
             userData?.isActive &&
             tabValue === AssignmentStatus.ACTIVE && (
-              <button
+              <motion.button
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
                 onClick={() => {
                   if (currentWebinar === "all") {
                     errorToast("Please Select a Webinar First");
@@ -468,79 +555,115 @@ const Assignments = () => {
                   }
                   setOpenReassignModal(true);
                 }}
-                className={globalButton}
+                className="px-6 py-2.5 bg-rose-500 hover:bg-rose-600 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-rose-500/20 flex items-center gap-2"
               >
-                Request ReAssignment
-              </button>
+                <LayoutGrid className="w-4 h-4" />
+                Request ReAssignment ({selectedRows.length})
+              </motion.button>
             )}
         </div>
-        <FormControl className="md:w-60 w-full">
-          <InputLabel id="webinar-label">Webinar</InputLabel>
-          <Select
-            labelId="webinar-label"
-            label="Webinar"
-            value={currentWebinar}
-            onChange={(e) => {
-              setCurrentWebinar(e.target.value);
-              setPage(1);
-              setSelectedRows([]);
 
-              dispatch(setWebinarAttendeesFilters());
-            }}
-          >
-            <MenuItem value="all">All</MenuItem>
-            {webinarData.map((webinar, index) => (
-              <MenuItem key={index} value={webinar._id}>
-                {webinar?.webinarName} -{" "}
-                {formatDateAsNumber(webinar?.webinarDate)}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <div className="flex flex-col gap-1.5 min-w-[280px]">
+          <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Select Webinar</label>
+          <div className="relative group">
+            <select
+              value={currentWebinar}
+              onChange={(e) => {
+                setCurrentWebinar(e.target.value);
+                setPage(1);
+                setSelectedRows([]);
+                dispatch(setWebinarAttendeesFilters());
+              }}
+              className="w-full h-11 pl-4 pr-10 rounded-xl text-sm font-semibold bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 outline-none appearance-none cursor-pointer transition-all shadow-sm"
+            >
+              <option value="all">All Webinars</option>
+              {webinarData.map((webinar, index) => (
+                <option key={index} value={webinar._id}>
+                  {webinar?.webinarName} - {formatDateAsNumber(webinar?.webinarDate)}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none group-hover:text-blue-500 transition-colors" />
+          </div>
+        </div>
       </div>
 
-      <DataTable
-        tableHeader={tableHeader}
-        tableUniqueKey="viewAssignmentsTable"
-        buttonGroupContent={<AttendeeDropdown />}
-        isSelectVisible={
-          (employeeId || !userData?.isActive ? false : true) &&
-          tabValue === AssignmentStatus.ACTIVE
-        }
+      <WebinarAttendeesTableShell
+        theme={theme}
+        isDark={isDark}
+        tabValue={semething}
+        total={total}
+        selectedActivity={selected}
+        setSelectedActivity={setSelected}
+        showAssignmentType={false}
+        showActivityStatus={tabValue === AssignmentStatus.ACTIVE}
+        showExport={false}
+        isFullScreen={isFullScreen}
+        setIsFullScreen={setIsFullScreen}
+        onOpenFilters={() => dispatch({ type: "modals/openModal", payload: filterModalName })}
+        onOpenExport={() => dispatch({ type: "modals/openModal", payload: exportExcelModalName })}
+        onOpenPresets={() => setPresetModalOpen(true)}
         filters={webinarAttendeesFilters}
-        setFilters={(filters) => {
-          dispatch(
-            setWebinarAttendeesFilters({
-              filters: filters,
-            })
-          );
-        }}
-        tableData={tableData}
-        actions={actionIcons}
-        totalPages={totalPages}
+        setApplyTagsModalOpen={setApplyTagsModalOpen}
         page={page}
         setPage={setPage}
-        selectedRows={selectedRows}
-        setSelectedRows={setSelectedRows}
+        totalPages={totalPages}
         limit={LIMIT}
-        filterModalName={filterModalName}
-        exportModalName={exportExcelModalName}
-        isLoading={isLoading}
-        isLeadType={true}
-      />
+        tableHeader={tableHeader}
+      >
+        <DynamicLeadsTable
+          columns={ALL_COLUMNS.map((col) => ({
+            ...col,
+            onViewClick: handleViewFullDetails,
+            onDeleteClick: (item) => {
+              if (tabValue === AssignmentStatus.REASSIGN_REQUESTED) {
+                dispatch(
+                  cancelRequestReAssignment({
+                    assignments: [item._id],
+                    attendeeEmails: [item?.email],
+                    webinarId: item?.webinar,
+                    requestReason: "cancelled",
+                  })
+                );
+              }
+            },
+          }))}
+          selectedRows={selectedRows}
+          onToggleSelect={(id) => {
+            setSelectedRows((prev) => {
+              if (prev.includes(id)) return prev.filter((rowId) => rowId !== id);
+              return [...prev, id];
+            });
+          }}
+          onToggleSelectAll={(checked, allIds) => {
+            if (checked) setSelectedRows(allIds);
+            else setSelectedRows([]);
+          }}
+          attendees={tableData.rows}
+          columnWidths={columnWidths}
+          columnVisibility={columnVisibility}
+          sortColumn={sortByOption?.sortBy}
+          sortDirection={sortByOption?.sortOrder}
+          resizingColumn={null}
+          theme={theme}
+          indexOfFirstItem={(page - 1) * LIMIT}
+          sortedAttendees={tableData.rows}
+          onSort={handleSort}
+          isLoading={isLoading}
+        />
+      </WebinarAttendeesTableShell>
 
       {filterModalOpen && (
-        <AttendeesFilterModal
-          notAllowed={notAllowedColumns}
-          modalName={filterModalName}
-          setPage={setPage}
-          label="Assignments Filter"
-          tabValue={semething}
-          onTrigger={() => {
-            console.log("trigger is triggering -------  > ");
-            setSelected("All");
-          }}
-        />
+        <Suspense fallback={<ModalFallback />}>
+          <AttendeesFilterModal
+            notAllowed={notAllowedColumns}
+            modalName={filterModalName}
+            setPage={setPage}
+            label="Assignments Filter"
+            tabValue={semething}
+            onTrigger={() => setSelected("All")}
+          />
+        </Suspense>
       )}
       {openReassignModal &&
         createPortal(
@@ -575,6 +698,25 @@ const Assignments = () => {
           />,
           document.body
         )}
+      {presetModalOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <FilterPresetModal
+            open={presetModalOpen}
+            setIsPresetModalOpen={setPresetModalOpen}
+            tableName={tableHeader}
+            filters={webinarAttendeesFilters}
+            setFilters={(next) => {
+              dispatch(
+                setWebinarAttendeesFilters({
+                  recordType: semething,
+                  filters: next || {},
+                })
+              );
+              setPage(1);
+            }}
+          />
+        </Suspense>
+      )}
     </div>
   );
 };

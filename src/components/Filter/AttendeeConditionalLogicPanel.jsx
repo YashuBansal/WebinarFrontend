@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
-import { Filter, Plus, Trash2 } from "lucide-react";
+import { Filter, Plus, Trash2, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import Select from "react-select";
@@ -414,28 +420,75 @@ export default function AttendeeConditionalLogicPanel({
               </div>
               {renderIncludeExclude(row)}
               {renderAndOrToggle(row, index)}
-              <select
-                value={row.fieldKey}
-                onChange={(e) => handleFieldChange(row.id, e.target.value)}
-                className="min-w-[140px] flex-1 max-w-[200px] p-2 rounded-lg text-sm border focus:ring-2"
-                style={inputStyle}
-              >
-                <option value="">Choose field…</option>
-                {enabledFieldEntries.map(([key, label]) => (
-                  <option key={key} value={key} disabled={row.fieldKey !== key && usedKeys.has(key)}>{label}</option>
-                ))}
-              </select>
-              <select
-                value={row.operator}
-                onChange={(e) => updateRow(row.id, { operator: e.target.value })}
-                disabled={!row.fieldKey}
-                className="min-w-[120px] max-w-[150px] p-2 rounded-lg text-sm border focus:ring-2 disabled:opacity-50"
-                style={inputStyle}
-              >
-                {operatorOptionsForField(row.fieldKey).map((op) => (
-                  <option key={op.value} value={op.value}>{op.label}</option>
-                ))}
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="min-w-[140px] flex-1 max-w-[200px] flex h-10 items-center justify-between rounded-lg border px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                    style={inputStyle}
+                  >
+                    <span className="truncate">
+                      {row.fieldKey ? FIELD_LABELS[row.fieldKey] : "Choose field…"}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                >
+                  <DropdownMenuItem
+                    onClick={() => handleFieldChange(row.id, "")}
+                    className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  >
+                    Choose field…
+                  </DropdownMenuItem>
+                  {enabledFieldEntries.map(([key, label]) => (
+                    <DropdownMenuItem
+                      key={key}
+                      disabled={row.fieldKey !== key && usedKeys.has(key)}
+                      onClick={() => handleFieldChange(row.id, key)}
+                      className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                    >
+                      {label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild disabled={!row.fieldKey}>
+                  <Button
+                    variant="outline"
+                    disabled={!row.fieldKey}
+                    className="min-w-[120px] max-w-[150px] flex h-10 items-center justify-between rounded-lg border px-3 py-2 text-sm outline-none transition-all duration-200 disabled:opacity-50 hover:bg-black/5 dark:hover:bg-white/10"
+                    style={inputStyle}
+                  >
+                    <span className="truncate">
+                      {row.fieldKey
+                        ? operatorOptionsForField(row.fieldKey).find(
+                            (op) => op.value === row.operator
+                          )?.label || "Operator"
+                        : "Operator"}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                >
+                  {operatorOptionsForField(row.fieldKey).map((op) => (
+                    <DropdownMenuItem
+                      key={op.value}
+                      onClick={() => updateRow(row.id, { operator: op.value })}
+                      className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                    >
+                      {op.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
               {renderValueEditor(row)}
               <Button type="button" variant="ghost" onClick={() => removeRow(row.id)} className="h-9 w-9 p-0 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20">
                 <Trash2 className="w-4 h-4" />

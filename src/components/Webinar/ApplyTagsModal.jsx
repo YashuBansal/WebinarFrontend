@@ -1,6 +1,11 @@
 import React, { useState, useEffect } from "react";
-import Select from "react-select";
-import { X, Tag, Plus } from "lucide-react";
+import { X, Tag, Plus, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import tagsService from "../../services/tagsService";
 import AppLoader from "../AppLoader";
@@ -35,7 +40,7 @@ const ApplyTagsModal = ({ onClose, onSubmit, isLoading }) => {
 
   const handleApply = () => {
     if (selectedTag) {
-      onSubmit(selectedTag.value);
+      onSubmit(selectedTag);
     }
   };
 
@@ -43,26 +48,7 @@ const ApplyTagsModal = ({ onClose, onSubmit, isLoading }) => {
   const titleColor = isDark ? "#f8fafc" : "#0f172a";
   const footerBg = isDark ? "rgba(15,23,42,0.85)" : "#F9FAFB";
 
-  const rsStyles = {
-    control: (base) => ({
-      ...base,
-      minHeight: 45,
-      borderRadius: 12,
-      fontSize: 14,
-      backgroundColor: isDark ? "#0f172a" : "#ffffff",
-      borderColor: isDark ? "#334155" : "#e2e8f0",
-      boxShadow: "none",
-    }),
-    menuPortal: (base) => ({ ...base, zIndex: 10000 }),
-    singleValue: (base) => ({
-      ...base,
-      color: isDark ? "#f8fafc" : "#0f172a",
-    }),
-    placeholder: (base) => ({
-      ...base,
-      color: isDark ? "#64748b" : "#94a3b8",
-    }),
-  };
+
 
   const cancelBtn = {
     backgroundColor: "transparent",
@@ -111,15 +97,41 @@ const ApplyTagsModal = ({ onClose, onSubmit, isLoading }) => {
               </div>
             ) : (
               <div className="space-y-4">
-                <Select
-                  options={tags}
-                  value={selectedTag}
-                  onChange={setSelectedTag}
-                  styles={rsStyles}
-                  placeholder="Type to search tags..."
-                  isClearable
-                  menuPortalTarget={document.body}
-                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="flex h-12 w-full items-center justify-between rounded-xl border-gray-200 bg-white px-4 py-2 text-sm dark:border-slate-800 dark:bg-slate-900 text-slate-700 dark:text-slate-200 outline-none hover:bg-gray-50 dark:hover:bg-white/10 transition-all duration-200"
+                    >
+                      <span className="truncate">
+                        {selectedTag
+                          ? selectedTag
+                          : "Select a Tag to Apply..."}
+                      </span>
+                      <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[250px] z-[300] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                  >
+                    {tags.length === 0 ? (
+                      <div className="px-3 py-2 text-sm text-slate-500 text-center">
+                        No tags found
+                      </div>
+                    ) : (
+                      tags.map((t) => (
+                        <DropdownMenuItem
+                          key={t.value}
+                          onClick={() => setSelectedTag(t.value)}
+                          className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200"
+                        >
+                          {t.label}
+                        </DropdownMenuItem>
+                      ))
+                    )}
+                  </DropdownMenuContent>
+                </DropdownMenu>
                 <p className="text-xs text-gray-500 italic">
                   Note: This tag will be applied to all attendees matching the current filters.
                 </p>

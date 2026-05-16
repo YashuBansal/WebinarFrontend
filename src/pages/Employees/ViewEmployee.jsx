@@ -65,6 +65,12 @@ import FilterPresetModal from "../../components/Filter/FilterPresetModal";
 import { Button } from "../../components/ui/button";
 import { Eye } from "lucide-react";
 import AppLoader from "../../components/AppLoader";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../components/ui/dropdown-menu";
 
 const ExportEmployeeAssignments = lazy(
   () => import("../../components/Export/ExportEmployeeAssignments"),
@@ -450,50 +456,99 @@ const ViewEmployee = () => {
   const WebinarDropdown = () => {
     return (
       <div className="flex flex-wrap items-center gap-3">
-        <div className="relative">
-          <select
-            className="pl-4 pr-10 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 appearance-none cursor-pointer font-medium transition-all hover:border-blue-400"
-            style={inputStyle}
-            value={currentWebinar}
-            onChange={(e) => {
-              setCurrentWebinar(e.target.value);
-              setPage(1);
-            }}
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              className="flex h-10 min-w-[200px] items-center justify-between rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+            >
+              <span className="truncate">
+                {currentWebinar === "all"
+                  ? "All Webinars"
+                  : (webinarData || []).find((w) => w._id === currentWebinar)
+                      ?.webinarName || "Select Webinar"}
+              </span>
+              <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="start"
+            className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
           >
-            <option value="all">All Webinars</option>
-            {Array.isArray(webinarData) && webinarData.map((webinar, index) => (
-              <option key={index} value={webinar._id}>
-                {webinar?.webinarName} -{" "}
-                {formatDateAsNumber(webinar?.webinarDate)}
-              </option>
-            ))}
-          </select>
-          <ChevronDown
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-            style={{ color: mutedText }}
-          />
-        </div>
-
-        {tabValue === "history" && (
-          <div className="relative">
-            <select
-              className="pl-4 pr-10 py-2 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/30 appearance-none cursor-pointer font-medium transition-all hover:border-blue-400"
-              style={inputStyle}
-              value={validCallFlag}
-              onChange={(e) => {
-                setValidCallFlag(e.target.value);
+            <DropdownMenuItem
+              onClick={() => {
+                setCurrentWebinar("all");
                 setPage(1);
               }}
+              className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
             >
-              <option value="all">All Status</option>
-              <option value="valid">Valid Calls</option>
-              <option value="invalid">Invalid Calls</option>
-            </select>
-            <ChevronDown
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none"
-              style={{ color: mutedText }}
-            />
-          </div>
+              All Webinars
+            </DropdownMenuItem>
+            {(webinarData || []).map((webinar) => (
+              <DropdownMenuItem
+                key={webinar._id}
+                onClick={() => {
+                  setCurrentWebinar(webinar._id);
+                  setPage(1);
+                }}
+                className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+              >
+                {webinar?.webinarName} - {formatDateAsNumber(webinar?.webinarDate)}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {tabValue === "history" && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="flex h-10 min-w-[140px] items-center justify-between rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+              >
+                <span className="truncate">
+                  {validCallFlag === "all"
+                    ? "All Status"
+                    : validCallFlag === "valid"
+                    ? "Valid Calls"
+                    : "Invalid Calls"}
+                </span>
+                <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="start"
+              className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+            >
+              <DropdownMenuItem
+                onClick={() => {
+                  setValidCallFlag("all");
+                  setPage(1);
+                }}
+                className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+              >
+                All Status
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setValidCallFlag("valid");
+                  setPage(1);
+                }}
+                className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+              >
+                Valid Calls
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => {
+                  setValidCallFlag("invalid");
+                  setPage(1);
+                }}
+                className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+              >
+                Invalid Calls
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         )}
       </div>
     );

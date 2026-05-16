@@ -1,9 +1,15 @@
 /* eslint-disable react/prop-types */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
-import { Filter, Plus, Trash2 } from "lucide-react";
+import { Filter, Plus, Trash2, ChevronDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
 
 const makeRowId = () =>
   `${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
@@ -600,16 +606,40 @@ export default function EmployeeConditionalLogicPanel({
               name="isActive"
               control={control}
               render={({ field }) => (
-                <select
-                  {...field}
-                  value={field.value || ""}
-                  className="w-full p-2 rounded-lg text-sm focus:outline-none focus:ring-2 cursor-pointer"
-                  style={inputStyle}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="flex h-10 w-full items-center justify-between rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
                 >
-                  <option value="">Select…</option>
-                  <option value="active">Active</option>
-                  <option value="inactive">Inactive</option>
-                </select>
+                  <span className="truncate">
+                    {field.value === "active"
+                      ? "Active"
+                      : field.value === "inactive"
+                      ? "Inactive"
+                      : "Select…"}
+                  </span>
+                  <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+              >
+                <DropdownMenuItem
+                  onClick={() => field.onChange("active")}
+                  className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                >
+                  Active
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() => field.onChange("inactive")}
+                  className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                >
+                  Inactive
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
               )}
             />
           </div>
@@ -621,19 +651,35 @@ export default function EmployeeConditionalLogicPanel({
               name="role"
               control={control}
               render={({ field }) => (
-                <select
-                  {...field}
-                  value={field.value || ""}
-                  className="w-full p-2 rounded-lg text-sm focus:outline-none focus:ring-2 cursor-pointer"
-                  style={inputStyle}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="flex h-10 w-full items-center justify-between rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
                 >
-                  <option value="">Select role…</option>
-                  {(roleOptionValues || []).map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                  <span className="truncate">
+                    {field.value
+                      ? (roleOptionValues || []).find((o) => o.value === field.value)?.label
+                      : "Select role…"}
+                  </span>
+                  <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+              >
+                {(roleOptionValues || []).map((opt) => (
+                  <DropdownMenuItem
+                    key={opt.value}
+                    onClick={() => field.onChange(opt.value)}
+                    className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  >
+                    {opt.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
               )}
             />
           </div>
@@ -744,41 +790,66 @@ export default function EmployeeConditionalLogicPanel({
 
               {renderAndOrToggle(row, index)}
 
-              <select
-                value={row.fieldKey}
-                onChange={(e) => handleFieldChange(row.id, e.target.value)}
-                className="min-w-[140px] flex-1 max-w-[220px] p-2 rounded-lg text-sm focus:outline-none focus:ring-2 cursor-pointer"
-                style={inputStyle}
-              >
-                <option value="">Choose field…</option>
-                {enabledFieldEntries.map(([key, label]) => (
-                  <option
-                    key={key}
-                    value={key}
-                    disabled={Boolean(
-                      row.fieldKey !== key && usedKeys.has(key)
-                    )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex h-10 min-w-[140px] flex-1 max-w-[220px] items-center justify-between rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
                   >
-                    {label}
-                  </option>
-                ))}
-              </select>
+                    <span className="truncate">
+                      {row.fieldKey ? FIELD_LABELS[row.fieldKey] : "Choose field…"}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                >
+                  {enabledFieldEntries.map(([key, label]) => (
+                    <DropdownMenuItem
+                      key={key}
+                      disabled={Boolean(row.fieldKey !== key && usedKeys.has(key))}
+                      onClick={() => handleFieldChange(row.id, key)}
+                      className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 disabled:opacity-50"
+                    >
+                      {label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              <select
-                value={row.operator}
-                onChange={(e) =>
-                  updateRow(row.id, { operator: e.target.value })
-                }
-                disabled={!row.fieldKey}
-                className="min-w-[120px] max-w-[160px] p-2 rounded-lg text-sm focus:outline-none focus:ring-2 cursor-pointer disabled:opacity-50"
-                style={inputStyle}
-              >
-                {operatorOptionsForField(row.fieldKey).map((op) => (
-                  <option key={op.value} value={op.value}>
-                    {op.label}
-                  </option>
-                ))}
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild disabled={!row.fieldKey}>
+                  <Button
+                    variant="outline"
+                    className="flex h-10 min-w-[120px] max-w-[160px] items-center justify-between rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 disabled:opacity-50"
+                  >
+                    <span className="truncate">
+                      {row.operator
+                        ? operatorOptionsForField(row.fieldKey).find(
+                            (o) => o.value === row.operator
+                          )?.label
+                        : "Select…"}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                >
+                  {operatorOptionsForField(row.fieldKey).map((op) => (
+                    <DropdownMenuItem
+                      key={op.value}
+                      onClick={() => updateRow(row.id, { operator: op.value })}
+                      className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                    >
+                      {op.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {renderValueEditor(row)}
 

@@ -10,8 +10,15 @@ import {
 import { getCustomOptions } from "../../features/actions/globalData";
 import { resetFormSuccess } from "../../features/slices/assign";
 import { getUnAckAlarmData, removeAckAlarm } from "../../features/slices/alarm";
-import { Phone, CheckCircle2, Clock, FileText, Send, AlertCircle } from "lucide-react";
+import { Phone, CheckCircle2, Clock, FileText, Send, AlertCircle, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../components/ui/dropdown-menu";
+import { Button } from "../../components/ui/button";
 
 const AddNoteForm = (props) => {
   const { customOptions } = useSelector((state) => state.globalData);
@@ -138,26 +145,10 @@ const AddNoteForm = (props) => {
     e.target.value = value;
   };
 
-  const customSelectStyles = {
-    control: (provided, state) => ({
-      ...provided,
-      borderRadius: '12px',
-      padding: '4px',
-      border: state.isFocused ? '2px solid #FF6B35' : '1px solid #E2E8F0',
-      boxShadow: 'none',
-      backgroundColor: state.isDisabled ? '#F1F5F9' : 'white',
-      '&:hover': { border: '1px solid #CBD5E1' }
-    }),
-    option: (provided, state) => ({
-      ...provided,
-      backgroundColor: state.isSelected ? '#FF6B35' : state.isFocused ? '#FFF4F0' : 'white',
-      color: state.isSelected ? 'white' : '#1E293B',
-      fontWeight: '600',
-      fontSize: '14px',
-      padding: '10px 15px'
-    }),
-    placeholder: (provided) => ({ ...provided, color: '#94A3B8', fontWeight: '500' }),
-    singleValue: (provided) => ({ ...provided, fontWeight: '700', color: '#1E293B' })
+  const inputStyle = {
+    backgroundColor: "white",
+    border: "1px solid #E2E8F0",
+    color: "#1E293B",
   };
 
   return (
@@ -178,18 +169,33 @@ const AddNoteForm = (props) => {
             control={control}
             rules={{ required: "Phone number is required" }}
             render={({ field }) => (
-              <Select
-                {...field}
-                options={uniquePhones.map((phone) => ({
-                  value: phone,
-                  label: phone,
-                }))}
-                className="text-xs"
-                placeholder="Select phone..."
-                value={field.value ? { value: field.value, label: field.value } : null}
-                onChange={(selected) => field.onChange(selected.value)}
-                styles={customSelectStyles}
-              />
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex h-10 w-full items-center justify-between rounded-xl px-4 py-2 text-xs font-bold outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                  >
+                    <span className="truncate">
+                      {field.value || "Select phone..."}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                >
+                  {uniquePhones.map((phone) => (
+                    <DropdownMenuItem
+                      key={phone}
+                      onClick={() => field.onChange(phone)}
+                      className="cursor-pointer rounded-lg px-3 py-2 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                    >
+                      {phone}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           />
         </div>
@@ -215,22 +221,38 @@ const AddNoteForm = (props) => {
                 }));
 
               return (
-                <Select
-                  {...field}
-                  isDisabled={isAckPending}
-                  options={statusOptions}
-                  className="text-xs"
-                  placeholder="Set result..."
-                  value={field.value ? { value: field.value, label: field.value } : null}
-                  onChange={(selected) => {
-                    field.onChange(selected.value);
-                    setSelectedStatus(selected.value);
-                    setNoteRequired(!selected.isWorked);
-                    setNumberInvalid(selected.isInvalid);
-                  }}
-                  menuPortalTarget={document.body}
-                  styles={customSelectStyles}
-                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild disabled={isAckPending}>
+                    <Button
+                      variant="outline"
+                      className="flex h-10 w-full items-center justify-between rounded-xl px-4 py-2 text-xs font-bold outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 disabled:opacity-50"
+                    >
+                      <span className="truncate">
+                        {field.value || "Set result..."}
+                      </span>
+                      <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                  >
+                    {statusOptions.map((option) => (
+                      <DropdownMenuItem
+                        key={option.value}
+                        onClick={() => {
+                          field.onChange(option.value);
+                          setSelectedStatus(option.value);
+                          setNoteRequired(!option.isWorked);
+                          setNumberInvalid(option.isInvalid);
+                        }}
+                        className="cursor-pointer rounded-lg px-3 py-2 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                      >
+                        {option.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               );
             }}
           />

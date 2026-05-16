@@ -1,9 +1,14 @@
 import React, { useState } from "react";
-import Select from "react-select";
 import { toast } from "sonner";
 import { attendeeTableColumns } from "../../utils/columnData";
 import { useSelector } from "react-redux";
-import { X, ArrowLeftRight } from "lucide-react";
+import { X, ArrowLeftRight, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { Dialog, DialogContent } from "../ui/dialog";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -44,25 +49,12 @@ const SwapAttendeeFieldsModal = ({ onClose, onSubmit, attendees = [], total = 0 
   const titleColor = isDark ? "#f8fafc" : "#0f172a";
   const footerBg = isDark ? "rgba(15,23,42,0.85)" : "#F9FAFB";
 
-  const rsStyles = {
-    control: (base) => ({
-      ...base,
-      minHeight: 45,
-      borderRadius: 12,
-      fontSize: 14,
-      backgroundColor: isDark ? "#0f172a" : "#ffffff",
-      borderColor: isDark ? "#334155" : "#e2e8f0",
-      boxShadow: "none",
-    }),
-    menuPortal: (base) => ({ ...base, zIndex: 10000 }),
-    singleValue: (base) => ({
-      ...base,
-      color: isDark ? "#f8fafc" : "#0f172a",
-    }),
-    placeholder: (base) => ({
-      ...base,
-      color: isDark ? "#64748b" : "#94a3b8",
-    }),
+  const inputStyle = {
+    fontFamily: FONT,
+    backgroundColor: isDark ? "#0f172a" : "#ffffff",
+    border: `1px solid ${isDark ? "#334155" : "#e2e8f0"}`,
+    color: isDark ? "#f8fafc" : "#0f172a",
+    width: "100%",
   };
 
   const cancelBtn = {
@@ -124,14 +116,34 @@ const SwapAttendeeFieldsModal = ({ onClose, onSubmit, attendees = [], total = 0 
             <div className="space-y-6">
               <div>
                 <span style={labelStyle}>Primary Field</span>
-                <Select
-                  options={columnOptions}
-                  value={field1}
-                  onChange={setField1}
-                  styles={rsStyles}
-                  placeholder="Select first field"
-                  menuPortalTarget={document.body}
-                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="flex h-11 w-full items-center justify-between rounded-xl px-4 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                      style={inputStyle}
+                    >
+                      <span className="truncate">
+                        {field1 ? field1.label : "Select first field"}
+                      </span>
+                      <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                  >
+                    {columnOptions.map((o) => (
+                      <DropdownMenuItem
+                        key={o.value}
+                        onClick={() => setField1(o)}
+                        className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                      >
+                        {o.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               <div className="flex justify-center">
@@ -142,14 +154,34 @@ const SwapAttendeeFieldsModal = ({ onClose, onSubmit, attendees = [], total = 0 
 
               <div>
                 <span style={labelStyle}>Replacement Field</span>
-                <Select
-                  options={columnOptions}
-                  value={field2}
-                  onChange={setField2}
-                  styles={rsStyles}
-                  placeholder="Select second field"
-                  menuPortalTarget={document.body}
-                />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="flex h-11 w-full items-center justify-between rounded-xl px-4 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                      style={inputStyle}
+                    >
+                      <span className="truncate">
+                        {field2 ? field2.label : "Select second field"}
+                      </span>
+                      <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                  >
+                    {columnOptions.map((o) => (
+                      <DropdownMenuItem
+                        key={o.value}
+                        onClick={() => setField2(o)}
+                        className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                      >
+                        {o.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
           </div>

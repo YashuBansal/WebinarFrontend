@@ -4,7 +4,14 @@ import { useTheme } from "../../contexts/ThemeContext";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Controller } from "react-hook-form";
-import { Filter, RotateCcw, X } from "lucide-react";
+import { Filter, RotateCcw, X, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
+import { Button } from "../ui/button";
 
 function dateToYMD(d) {
   if (!d || !(d instanceof Date) || Number.isNaN(d.getTime())) return "";
@@ -135,19 +142,43 @@ export default function AdminActivityLogsFilterModal({
                     control={control}
                     defaultValue=""
                     render={({ field }) => (
-                      <select
-                        {...field}
-                        value={field.value || ""}
-                        className="w-full cursor-pointer appearance-none rounded-xl p-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#22B573]/35"
-                        style={getInputStyle(isDark)}
-                      >
-                        <option value="">All Actions</option>
-                        {actionOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="flex h-11 w-full items-center justify-between rounded-xl border-gray-100 bg-white px-4 py-2 text-sm dark:border-slate-800 dark:bg-slate-900 text-slate-700 dark:text-slate-200 outline-none hover:bg-gray-50 dark:hover:bg-white/10 transition-all duration-200"
+                            style={getInputStyle(isDark)}
+                          >
+                            <span className="truncate">
+                              {field.value
+                                ? actionOptions.find((o) => o.value === field.value)
+                                  ?.label || "Select Action"
+                                : "All Actions"}
+                            </span>
+                            <ChevronDown className="ml-2 h-4 w-4 opacity-50 shrink-0" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[300] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                        >
+                          <DropdownMenuItem
+                            onClick={() => field.onChange("")}
+                            className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                          >
+                            All Actions
+                          </DropdownMenuItem>
+                          {actionOptions.map((option) => (
+                            <DropdownMenuItem
+                              key={option.value}
+                              onClick={() => field.onChange(option.value)}
+                              className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                            >
+                              {option.label}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     )}
                   />
                 </div>

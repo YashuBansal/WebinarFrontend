@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { ArrowUp, ArrowDown, ArrowUpDown, Eye, Trash2, Calendar } from 'lucide-react';
+import { ArrowUp, ArrowDown, ArrowUpDown, Eye, Trash2, Calendar, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
 import { formatDateAsNumber } from '../../utils/extra';
 import { motion } from 'framer-motion';
@@ -67,9 +67,13 @@ export const DynamicLeadsTable = ({
                 if (col.onDeleteClick) col.onDeleteClick(item);
               }}
               className="h-8 w-8 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10"
-              title="Delete Contact"
+              title={col.variant === 'cancel' ? "Cancel Request" : "Delete Contact"}
             >
-              <Trash2 className="w-4 h-4 text-red-500" />
+              {col.variant === 'cancel' ? (
+                <XCircle className="w-4 h-4 text-red-500" />
+              ) : (
+                <Trash2 className="w-4 h-4 text-red-500" />
+              )}
             </Button>
           </div>
         );

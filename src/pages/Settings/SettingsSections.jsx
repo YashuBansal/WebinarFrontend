@@ -155,11 +155,10 @@ export function ProfileSettings({ theme, navigate, userData, roles, subscription
       setPreviewUrl(URL.createObjectURL(file));
       setIsUploadingImage(true);
       
-      const payload = {
-        profileImage: file,
-      };
+      const formData = new FormData();
+      formData.append("profileImage", file);
       
-      dispatch(updateUser(payload)).then((res) => {
+      dispatch(updateUser(formData)).then((res) => {
         if (res?.meta?.requestStatus === "fulfilled") {
           successToast("Profile picture updated successfully");
           dispatch(getCurrentUser());

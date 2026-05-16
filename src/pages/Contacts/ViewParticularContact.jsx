@@ -9,12 +9,6 @@ import {
   updateAttendeeLeadType,
 } from "../../features/actions/attendees";
 import {
-  FormControl,
-  MenuItem,
-  Select,
-  ListItemText,
-} from "@mui/material";
-import {
   Mail,
   User,
   Phone,
@@ -35,6 +29,13 @@ import {
   ArrowLeft,
   X
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../components/ui/dropdown-menu";
+import { Button } from "../../components/ui/button";
 import { motion, AnimatePresence } from "framer-motion";
 import { clearLeadType } from "../../features/slices/attendees";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -567,35 +568,60 @@ const ViewParticularContact = () => {
                       </button>
 
                       {/* Lead Type Select - Now inline to the right of WhatsApp */}
-                      <FormControl sx={{ minWidth: 140, flex: 1 }}>
-                        <Select
-                          value={selectedOption || ""}
-                          onChange={handleChange}
-                          className="bg-slate-50 dark:bg-slate-900 rounded-lg font-bold text-xs h-10"
-                          displayEmpty
-                          sx={{
-                            '& .MuiOutlinedInput-notchedOutline': { border: '1px solid #E2E8F0', borderRadius: '10px' },
-                            '& .MuiSelect-select': { padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '8px' }
-                          }}
-                          renderValue={(selected) => {
-                            if (!selected) return <span className="text-[10px] text-slate-400">PRIORITY</span>;
-                            const opt = leadTypeOptions.find(o => o.value === selected);
-                            return (
-                              <div className="flex items-center gap-2">
-                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: opt?.color || "#000" }} />
-                                <span className="text-slate-800 dark:text-slate-200 font-bold">{opt?.label}</span>
-                              </div>
-                            );
-                          }}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="flex h-10 min-w-[140px] items-center justify-between rounded-xl px-3 py-2 text-xs font-bold outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                          >
+                            <span className="truncate">
+                              {selectedOption ? (
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    className="w-2 h-2 rounded-full"
+                                    style={{
+                                      backgroundColor:
+                                        leadTypeOptions.find(
+                                          (o) => o.value === selectedOption
+                                        )?.color || "#000",
+                                    }}
+                                  />
+                                  <span className="text-slate-800 dark:text-slate-200">
+                                    {leadTypeOptions.find(
+                                      (o) => o.value === selectedOption
+                                    )?.label}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-[10px] text-slate-400">
+                                  PRIORITY
+                                </span>
+                              )}
+                            </span>
+                            <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
                         >
                           {leadTypeOptions.map((option) => (
-                            <MenuItem key={option.value} value={option.value} sx={{ py: 1, gap: 1.5, minHeight: 0 }}>
-                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: option.color }} />
-                              <ListItemText primary={option.label} primaryTypographyProps={{ fontWeight: 600, fontSize: '12px' }} />
-                            </MenuItem>
+                            <DropdownMenuItem
+                              key={option.value}
+                              onClick={() =>
+                                handleChange({ target: { value: option.value } })
+                              }
+                              className="cursor-pointer rounded-lg px-3 py-2 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center gap-2"
+                            >
+                              <div
+                                className="w-2 h-2 rounded-full"
+                                style={{ backgroundColor: option.color }}
+                              />
+                              {option.label}
+                            </DropdownMenuItem>
                           ))}
-                        </Select>
-                      </FormControl>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </div>

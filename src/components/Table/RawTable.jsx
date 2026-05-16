@@ -26,9 +26,8 @@ const CellRenderer = memo(
       case "status":
         return (
           <span
-            className={`px-2 py-1 rounded-full text-xs font-medium ${
-              value ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-            }`}
+            className={`px-2 py-1 rounded-full text-xs font-medium ${value ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+              }`}
           >
             {value ? "Active" : "Inactive"}
           </span>
@@ -50,11 +49,10 @@ const CellRenderer = memo(
             {sortedTags.slice(0, 2).map((tag, idx) => (
               <span
                 key={idx}
-                className={`px-2 py-1 rounded-full text-xs ${
-                  tagSet.has(tag)
+                className={`px-2 py-1 rounded-full text-xs ${tagSet.has(tag)
                     ? "bg-gray-100 text-gray-800"
                     : "bg-red-100 text-red-800"
-                }`}
+                  }`}
               >
                 {tag}
               </span>
@@ -100,13 +98,12 @@ const CellRenderer = memo(
         const isRejected = row[column.key2 || "deactivated"];
         return (
           <span
-            className={`px-2 py-1 rounded-full text-xs font-medium ${
-              isApproved
+            className={`px-2 py-1 rounded-full text-xs font-medium ${isApproved
                 ? "bg-green-100 text-green-800"
                 : isRejected
                   ? "bg-red-100 text-red-800"
                   : "bg-yellow-100 text-yellow-800"
-            }`}
+              }`}
           >
             {isApproved ? "Approved" : isRejected ? "Rejected" : "Pending"}
           </span>
@@ -127,8 +124,8 @@ const CellRenderer = memo(
             {value
               ? `${value} (${roles.getRoleNameById(row["role"]) || ""})`
               : column.default || (
-                  <span className="italic text-red-400">N/A</span>
-                )}
+                <span className="italic text-red-400">N/A</span>
+              )}
           </span>
         );
       case "Employee":
@@ -165,7 +162,7 @@ const RawTable = ({
   isLoading,
   selectedRows,
   setSelectedRows,
-  rowClick = () => {},
+  rowClick = () => { },
   isRowClickable = false,
   isLeadType = false,
   sortByOrder = "asc",
@@ -211,11 +208,10 @@ const RawTable = ({
 
       return (
         <div
-          className={`rounded-xl border bg-white shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1 ${
-            isRowSelected(row._id)
+          className={`rounded-xl border bg-white shadow-sm transition-all duration-300 ease-in-out hover:shadow-lg hover:-translate-y-1 ${isRowSelected(row._id)
               ? "ring-2 ring-blue-500 border-transparent"
               : "border-gray-200/80"
-          }`}
+            }`}
         >
           {/* Card Header */}
           <div className="flex items-center justify-between p-3 border-b border-gray-100">
@@ -461,15 +457,13 @@ const RawTable = ({
             tableData?.rows?.map((row, index) => (
               <tr
                 key={row?._id}
-                className={`${
-                  isRowSelected(row?._id) ? "bg-blue-50" : "bg-white"
-                } hover:bg-gray-50 border-b whitespace-nowrap`}
+                className={`${isRowSelected(row?._id) ? "bg-blue-50" : "bg-white"
+                  } hover:bg-gray-50 border-b whitespace-nowrap`}
               >
                 {isLeadType && (
                   <td
-                    className={`text-gray-600 ${
-                      isRowClickable ? "cursor-pointer" : ""
-                    }`}
+                    className={`text-gray-600 ${isRowClickable ? "cursor-pointer" : ""
+                      }`}
                     onClick={() => rowClick(row)}
                   >
                     <div
@@ -481,9 +475,8 @@ const RawTable = ({
                   </td>
                 )}
                 <td
-                  className={`px-4 py-2 h-14 text-gray-600 ${
-                    isRowClickable ? "cursor-pointer" : ""
-                  }`}
+                  className={`px-4 py-2 h-14 text-gray-600 ${isRowClickable ? "cursor-pointer" : ""
+                    }`}
                   onClick={() => rowClick(row)}
                 >
                   {sortByOrder === "asc"
@@ -503,9 +496,8 @@ const RawTable = ({
                 {tableData?.columns?.map((column, colIndex) => (
                   <td
                     key={colIndex}
-                    className={`px-4 py-2 text-gray-600 truncate ${
-                      column.capitalize ? "capitalize" : ""
-                    } ${isRowClickable ? "cursor-pointer" : ""}`}
+                    className={`px-4 py-2 text-gray-600 truncate ${column.capitalize ? "capitalize" : ""
+                      } ${isRowClickable ? "cursor-pointer" : ""}`}
                     onClick={() => rowClick(row)}
                   >
                     <CellRenderer

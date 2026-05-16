@@ -2,6 +2,12 @@ import { motion } from "framer-motion";
 import { createPortal } from "react-dom";
 import { Filter, Download, Bookmark, Maximize, Minimize, Settings2, Tag, ChevronDown, Activity, UserCheck } from "lucide-react";
 import PageLimitEditor from "../PageLimitEditor";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { cn } from "../../lib/utils";
 
@@ -26,6 +32,9 @@ export default function WebinarAttendeesTableShell({
   totalPages,
   limit,
   tableHeader,
+  showAssignmentType = true,
+  showActivityStatus = true,
+  showExport = true,
   children,
 }) {
   const cardBorder = isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.4)";
@@ -87,51 +96,95 @@ export default function WebinarAttendeesTableShell({
             <div className="h-10 w-px bg-slate-200 dark:bg-slate-800 hidden md:block" />
 
             <div className="flex flex-wrap items-center gap-4 w-full md:w-auto">
-              <div className="flex flex-col gap-1.5 flex-1 md:flex-none">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Activity Status</label>
-                <div className="relative group">
-                  <select
-                    className={selectClasses}
-                    value={selectedActivity}
-                    onChange={(e) => { setSelectedActivity(e.target.value); setPage(1); }}
-                  >
-                    <option value="All">All Activities</option>
-                    <option value="Worked">Worked</option>
-                    <option value="Pending">Pending</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform group-hover:translate-y-[-40%]" />
+              {showActivityStatus && (
+                <div className="flex flex-col gap-1.5 flex-1 md:flex-none">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Activity Status</label>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(selectClasses, "flex items-center justify-between pr-3")}
+                        style={inputStyle}
+                      >
+                        <span className="truncate">
+                          {selectedActivity === "All" ? "All Activities" : selectedActivity}
+                        </span>
+                        <ChevronDown className="ml-2 h-4 w-4 opacity-50 shrink-0" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[100] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                    >
+                      {["All", "Worked", "Pending"].map((o) => (
+                        <DropdownMenuItem
+                          key={o}
+                          onClick={() => {
+                            setSelectedActivity(o);
+                            setPage(1);
+                          }}
+                          className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                        >
+                          {o === "All" ? "All Activities" : o}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-              </div>
+              )}
 
-              <div className="flex flex-col gap-1.5 flex-1 md:flex-none">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Assignment</label>
-                <div className="relative group">
-                  <select
-                    className={selectClasses}
-                    value={selectedAssignmentType}
-                    onChange={(e) => { setSelectedAssignmentType(e.target.value); setPage(1); }}
-                  >
-                    <option value="All">All Assignments</option>
-                    <option value="Assigned">Assigned</option>
-                    <option value="Not Assigned">Not Assigned</option>
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform group-hover:translate-y-[-40%]" />
+              {showAssignmentType && (
+                <div className="flex flex-col gap-1.5 flex-1 md:flex-none">
+                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500 ml-1">Assignment</label>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(selectClasses, "flex items-center justify-between pr-3")}
+                        style={inputStyle}
+                      >
+                        <span className="truncate">
+                          {selectedAssignmentType === "All" ? "All Assignments" : selectedAssignmentType}
+                        </span>
+                        <ChevronDown className="ml-2 h-4 w-4 opacity-50 shrink-0" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[100] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                    >
+                      {["All", "Assigned", "Not Assigned"].map((o) => (
+                        <DropdownMenuItem
+                          key={o}
+                          onClick={() => {
+                            setSelectedAssignmentType(o);
+                            setPage(1);
+                          }}
+                          className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                        >
+                          {o === "All" ? "All Assignments" : o}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
-              </div>
+              )}
             </div>
           </div>
 
           {/* Right: Action Buttons */}
           <div className="flex flex-wrap items-center gap-2.5 w-full xl:w-auto justify-end">
-            <button
-              type="button"
-              onClick={onOpenExport}
-              className="rounded-xl flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium hover:bg-black/5 transition-all flex-1 sm:flex-none"
-              style={inputStyle}
-            >
-              <Download className="w-4 h-4 text-gray-500" />
-              <span className="hidden sm:inline">Export</span>
-            </button>
+            {showExport && (
+              <button
+                type="button"
+                onClick={onOpenExport}
+                className="rounded-xl flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium hover:bg-black/5 transition-all flex-1 sm:flex-none"
+                style={inputStyle}
+              >
+                <Download className="w-4 h-4 text-gray-500" />
+                <span className="hidden sm:inline">Export</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={onOpenPresets}

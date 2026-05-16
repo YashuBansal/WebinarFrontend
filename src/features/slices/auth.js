@@ -121,7 +121,7 @@ const authSlice = createSlice({
       })
       .addCase(updateUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.userData = action.payload;
+        state.userData = action.payload?.data || action.payload;
         state.isSuccess = true;
         successToast("User Updated Successfully");
       })

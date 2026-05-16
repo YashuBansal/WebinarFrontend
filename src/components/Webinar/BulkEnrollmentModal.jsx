@@ -1,7 +1,13 @@
 import React, { useState, useMemo } from "react";
 import { useProductsForAdmin, useBulkCreateEnrollments } from "../../hooks/useEnrollments";
 import AppLoader from "../AppLoader";
-import { X, GraduationCap, AlertCircle, RefreshCw } from "lucide-react";
+import { X, GraduationCap, AlertCircle, RefreshCw, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Dialog, DialogContent } from "../ui/dialog";
@@ -164,22 +170,52 @@ const BulkEnrollmentModal = ({
             {/* Product Selection */}
             <div>
               <span style={labelStyle}>Select Product</span>
-              <select
-                value={selectedProductId}
-                onChange={(e) => setSelectedProductId(e.target.value)}
-                className="w-full h-11 px-4 rounded-xl text-sm focus:ring-2 focus:ring-blue-500/20 outline-none transition-all cursor-pointer"
-                style={inputStyle}
-              >
-                <option value="">
-                  {productsLoading ? "Loading products..." : "Choose a product..."}
-                </option>
-                {!productsLoading &&
-                  productDropdownData?.map((product) => (
-                    <option key={product._id} value={product._id}>
-                      {product?.name} | Level: {product?.level} | Price: {product?.price}
-                    </option>
-                  ))}
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex h-11 w-full items-center justify-between rounded-xl px-4 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                    style={inputStyle}
+                  >
+                    <span className="truncate">
+                      {selectedProductId
+                        ? productDropdownData.find((p) => p._id === selectedProductId)
+                            ? `${productDropdownData.find((p) => p._id === selectedProductId).name} | Level: ${productDropdownData.find((p) => p._id === selectedProductId).level}`
+                            : "Choose a product..."
+                        : productsLoading
+                        ? "Loading products..."
+                        : "Choose a product..."}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                >
+                  <DropdownMenuItem
+                    onClick={() => setSelectedProductId("")}
+                    className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  >
+                    Choose a product...
+                  </DropdownMenuItem>
+                  {!productsLoading &&
+                    productDropdownData?.map((product) => (
+                      <DropdownMenuItem
+                        key={product._id}
+                        onClick={() => setSelectedProductId(product._id)}
+                        className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                      >
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-semibold">{product?.name}</span>
+                          <span className="text-[10px] opacity-60">
+                            Level: {product?.level} | Price: {product?.price}
+                          </span>
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Confirmation Section */}

@@ -4,7 +4,13 @@ import { AnimatePresence, motion } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import { X, Filter, RotateCcw } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../../components/ui/dropdown-menu";
+import { ChevronDown, X, Filter, RotateCcw } from "lucide-react";
 import { closeModal } from "../../../features/slices/modalSlice";
 import { setWebinarAttendeesFilters } from "../../../features/slices/filters.slice";
 import { filterTruthyValues, successToast } from "../../../utils/extra";
@@ -387,17 +393,50 @@ const EmployeeAssignmentsFilterModal = ({
                           control={control}
                           defaultValue=""
                           render={({ field }) => (
-                            <select
-                              {...field}
-                              value={field.value || ""}
-                              className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 cursor-pointer"
-                              style={inputStyle}
-                            >
-                              <option value="">All</option>
-                              <option value="male">Male</option>
-                              <option value="female">Female</option>
-                              <option value="others">Other</option>
-                            </select>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="flex h-10 w-full items-center justify-between rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                                >
+                                  <span className="truncate">
+                                    {field.value
+                                      ? field.value.charAt(0).toUpperCase() + field.value.slice(1)
+                                      : "All"}
+                                  </span>
+                                  <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="start"
+                                className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                              >
+                                <DropdownMenuItem
+                                  onClick={() => field.onChange("")}
+                                  className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                >
+                                  All
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => field.onChange("male")}
+                                  className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                >
+                                  Male
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => field.onChange("female")}
+                                  className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                >
+                                  Female
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() => field.onChange("others")}
+                                  className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                >
+                                  Other
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           )}
                         />
                       </div>
@@ -408,19 +447,39 @@ const EmployeeAssignmentsFilterModal = ({
                           control={control}
                           defaultValue=""
                           render={({ field }) => (
-                            <select
-                              {...field}
-                              value={field.value || ""}
-                              className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 cursor-pointer"
-                              style={inputStyle}
-                            >
-                              <option value="">All</option>
-                              {statusOptions.map((opt) => (
-                                <option key={opt.value} value={opt.label}>
-                                  {opt.label}
-                                </option>
-                              ))}
-                            </select>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="flex h-10 w-full items-center justify-between rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                                >
+                                  <span className="truncate">
+                                    {field.value || "All"}
+                                  </span>
+                                  <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="start"
+                                className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                              >
+                                <DropdownMenuItem
+                                  onClick={() => field.onChange("")}
+                                  className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                >
+                                  All
+                                </DropdownMenuItem>
+                                {statusOptions.map((opt) => (
+                                  <DropdownMenuItem
+                                    key={opt.value}
+                                    onClick={() => field.onChange(opt.label)}
+                                    className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                  >
+                                    {opt.label}
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           )}
                         />
                       </div>
@@ -431,19 +490,42 @@ const EmployeeAssignmentsFilterModal = ({
                           control={control}
                           defaultValue=""
                           render={({ field }) => (
-                            <select
-                              {...field}
-                              value={field.value || ""}
-                              className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 cursor-pointer"
-                              style={inputStyle}
-                            >
-                              <option value="">All</option>
-                              {leadTypeOptions.map((opt) => (
-                                <option key={opt.value} value={opt.value}>
-                                  {opt.label}
-                                </option>
-                              ))}
-                            </select>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="flex h-10 w-full items-center justify-between rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                                >
+                                  <span className="truncate">
+                                    {field.value
+                                      ? leadTypeOptions.find((o) => o.value === field.value)?.label
+                                      : "All"}
+                                  </span>
+                                  <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="start"
+                                className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                              >
+                                <DropdownMenuItem
+                                  onClick={() => field.onChange("")}
+                                  className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                >
+                                  All
+                                </DropdownMenuItem>
+                                {leadTypeOptions.map((opt) => (
+                                  <DropdownMenuItem
+                                    key={opt.value}
+                                    onClick={() => field.onChange(opt.value)}
+                                    className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center gap-2"
+                                  >
+                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: opt.color }} />
+                                    {opt.label}
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           )}
                         />
                       </div>
@@ -454,19 +536,39 @@ const EmployeeAssignmentsFilterModal = ({
                           control={control}
                           defaultValue=""
                           render={({ field }) => (
-                            <select
-                              {...field}
-                              value={field.value || ""}
-                              className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 cursor-pointer"
-                              style={inputStyle}
-                            >
-                              <option value="">All</option>
-                              {tagData.map((opt) => (
-                                <option key={opt.value} value={opt.value}>
-                                  {opt.label}
-                                </option>
-                              ))}
-                            </select>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="flex h-10 w-full items-center justify-between rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                                >
+                                  <span className="truncate">
+                                    {field.value || "All"}
+                                  </span>
+                                  <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="start"
+                                className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                              >
+                                <DropdownMenuItem
+                                  onClick={() => field.onChange("")}
+                                  className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                >
+                                  All
+                                </DropdownMenuItem>
+                                {tagData.map((opt) => (
+                                  <DropdownMenuItem
+                                    key={opt.value}
+                                    onClick={() => field.onChange(opt.value)}
+                                    className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                  >
+                                    {opt.label}
+                                  </DropdownMenuItem>
+                                ))}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           )}
                         />
                       </div>
@@ -597,16 +699,33 @@ const EmployeeAssignmentsFilterModal = ({
                       control={control}
                       defaultValue="Time in Session"
                       render={({ field }) => (
-                        <select
-                          {...field}
-                          value={field.value || "Time in Session"}
-                          className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 cursor-pointer"
-                          style={{ ...inputStyle, minWidth: "160px" }}
-                        >
-                          <option>Time in Session</option>
-                          <option>Name</option>
-                          <option>Date Added</option>
-                        </select>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="flex h-10 min-w-[160px] items-center justify-between rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                            >
+                              <span className="truncate">
+                                {field.value || "Time in Session"}
+                              </span>
+                              <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                          >
+                            {["Time in Session", "Name", "Date Added"].map((opt) => (
+                              <DropdownMenuItem
+                                key={opt}
+                                onClick={() => field.onChange(opt)}
+                                className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                              >
+                                {opt}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
                     />
                   </div>
@@ -617,15 +736,33 @@ const EmployeeAssignmentsFilterModal = ({
                       control={control}
                       defaultValue="Z - A"
                       render={({ field }) => (
-                        <select
-                          {...field}
-                          value={field.value || "Z - A"}
-                          className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 cursor-pointer"
-                          style={{ ...inputStyle, minWidth: "100px" }}
-                        >
-                          <option>Z - A</option>
-                          <option>A - Z</option>
-                        </select>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="flex h-10 min-w-[100px] items-center justify-between rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700"
+                            >
+                              <span className="truncate">
+                                {field.value || "Z - A"}
+                              </span>
+                              <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                          >
+                            {["Z - A", "A - Z"].map((opt) => (
+                              <DropdownMenuItem
+                                key={opt}
+                                onClick={() => field.onChange(opt)}
+                                className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                              >
+                                {opt}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
                     />
                   </div>

@@ -13,6 +13,12 @@ import { Button } from "../../components/ui/button";
 import { openModal } from "../../features/slices/modalSlice";
 import { cn } from "../../lib/utils";
 import { useTheme } from "../../contexts/ThemeContext";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../components/ui/dropdown-menu";
 
 const ExportModal = lazy(() => import("../../components/Export/ExportModal"));
 
@@ -132,19 +138,50 @@ const Enrollments = (props) => {
 
             <div className="flex flex-col gap-1.5 w-full md:w-auto">
               <label className={cn("text-[10px] font-black uppercase tracking-widest ml-1", isDark ? "text-slate-500" : "text-slate-400")}>Activity</label>
-              <div className="relative group">
-                <select
-                  className={selectClasses}
-                  value={selected}
-                  onChange={(e) => { setSelected(e.target.value); setPage(1); }}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "flex h-10 min-w-[160px] items-center justify-between rounded-xl px-3 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10",
+                      isDark ? "bg-slate-900 border-slate-800 text-slate-200" : "bg-white border-slate-200 text-slate-700 shadow-sm"
+                    )}
+                  >
+                    <span className="truncate">
+                      {selected === "All"
+                        ? "All Activities"
+                        : productOptions.find((p) => p.value === selected)?.label || "All Activities"}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
                 >
-                  <option value="All">All Activities</option>
+                  <DropdownMenuItem
+                    onClick={() => {
+                      setSelected("All");
+                      setPage(1);
+                    }}
+                    className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  >
+                    All Activities
+                  </DropdownMenuItem>
                   {productOptions.map((product, index) => (
-                    <option key={index} value={product.value}>{product.label}</option>
+                    <DropdownMenuItem
+                      key={index}
+                      onClick={() => {
+                        setSelected(product.value);
+                        setPage(1);
+                      }}
+                      className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                    >
+                      {product.label}
+                    </DropdownMenuItem>
                   ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none transition-transform group-hover:translate-y-[-40%]" />
-              </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
