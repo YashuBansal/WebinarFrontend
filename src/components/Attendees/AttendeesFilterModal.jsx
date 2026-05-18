@@ -217,6 +217,12 @@ const AttendeesFilterModal = ({
     }
 
     const payload = filterTab === "advanced" ? conditionalSanitizeRef.current(data) : data;
+
+    // Backend expects leadType as string[] — wrap single value in array
+    if (payload.leadType && !Array.isArray(payload.leadType)) {
+      payload.leadType = [payload.leadType];
+    }
+
     const filterData = filterTruthyValues(payload);
 
     if (Object.keys(filterData).length) {
@@ -300,9 +306,14 @@ const AttendeesFilterModal = ({
       );
     }
 
-    reset({
-      ...webinarAttendeesFilters,
-    });
+    // Normalize stored filters back to form-friendly shape:
+    // leadType is stored as string[] by the backend but the form uses a scalar string
+    const normalizedFilters = { ...webinarAttendeesFilters };
+    if (Array.isArray(normalizedFilters.leadType)) {
+      normalizedFilters.leadType = normalizedFilters.leadType[0] || "";
+    }
+
+    reset(normalizedFilters);
 
     return () => {
       dispatch(clearEmployeeData());

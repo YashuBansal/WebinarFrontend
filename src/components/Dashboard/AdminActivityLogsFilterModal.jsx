@@ -12,6 +12,7 @@ import {
   DropdownMenuItem,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
+import { DatePicker } from "../ui/date-picker";
 
 function dateToYMD(d) {
   if (!d || !(d instanceof Date) || Number.isNaN(d.getTime())) return "";
@@ -188,14 +189,16 @@ export default function AdminActivityLogsFilterModal({
                     name="fromDate"
                     control={control}
                     render={({ field }) => (
-                      <input
-                        type="date"
-                        value={dateToYMD(field.value)}
-                        onChange={(e) => {
-                          const v = e.target.value;
-                          field.onChange(v ? ymdToLocalDateStart(v) : null);
+                      <DatePicker
+                        date={field.value}
+                        setDate={(d) => {
+                          if (!d) return field.onChange(null);
+                          const newD = new Date(d);
+                          newD.setHours(0, 0, 0, 0);
+                          field.onChange(newD);
                         }}
-                        className="w-full rounded-xl p-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#22B573]/35"
+                        placeholder="From Date"
+                        className="w-full text-sm"
                         style={getInputStyle(isDark)}
                       />
                     )}
@@ -207,14 +210,16 @@ export default function AdminActivityLogsFilterModal({
                     name="toDate"
                     control={control}
                     render={({ field }) => (
-                      <input
-                        type="date"
-                        value={dateToYMD(field.value)}
-                        onChange={(e) => {
-                          const v = e.target.value;
-                          field.onChange(v ? ymdToLocalDateEnd(v) : null);
+                      <DatePicker
+                        date={field.value}
+                        setDate={(d) => {
+                          if (!d) return field.onChange(null);
+                          const newD = new Date(d);
+                          newD.setHours(23, 59, 59, 999);
+                          field.onChange(newD);
                         }}
-                        className="w-full rounded-xl p-2.5 text-sm transition-all focus:outline-none focus:ring-2 focus:ring-[#22B573]/35"
+                        placeholder="To Date"
+                        className="w-full text-sm"
                         style={getInputStyle(isDark)}
                       />
                     )}

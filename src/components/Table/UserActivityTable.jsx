@@ -17,9 +17,8 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
-import DatePicker from "react-datepicker";
 import { useForm, Controller } from "react-hook-form";
-import "react-datepicker/dist/react-datepicker.css";
+import { DatePicker } from "../ui/date-picker";
 
 import { closeModal, openModal } from "../../features/slices/modalSlice";
 import { userActivityTableColumns } from "../../utils/columnData";
@@ -168,11 +167,10 @@ const UserActivityTable = (props) => {
                   control={control}
                   render={({ field }) => (
                     <DatePicker
-                      selected={field.value}
-                      onChange={field.onChange}
-                      className="border p-4 min-w-full h-14 rounded-md"
-                      placeholderText="Date (From)"
-                      dateFormat={dateFormat}
+                      date={field.value}
+                      setDate={field.onChange}
+                      className="min-w-full h-14 rounded-md"
+                      placeholder="Date (From)"
                     />
                   )}
                 />
@@ -183,11 +181,10 @@ const UserActivityTable = (props) => {
                   control={control}
                   render={({ field }) => (
                     <DatePicker
-                      selected={field.value}
-                      onChange={field.onChange}
-                      className="border p-4 min-w-full h-14 rounded-md"
-                      placeholderText="Date (To)"
-                      dateFormat={dateFormat}
+                      date={field.value}
+                      setDate={field.onChange}
+                      className="min-w-full h-14 rounded-md"
+                      placeholder="Date (To)"
                     />
                   )}
                 />

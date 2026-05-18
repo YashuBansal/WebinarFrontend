@@ -35,6 +35,8 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
       dispatch(setActiveHeaderSection("WhatsApp"));
     } else if (location.pathname.startsWith("/zoom")) {
       dispatch(setActiveHeaderSection("Zoom"));
+    } else if (location.pathname.startsWith("/affiliate")) {
+      dispatch(setActiveHeaderSection("Affiliate"));
     } else {
       dispatch(setActiveHeaderSection("Dashboard"));
     }

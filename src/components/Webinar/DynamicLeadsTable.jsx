@@ -24,7 +24,16 @@ export const DynamicLeadsTable = ({
   onToggleSelect,
   onToggleSelectAll,
   isLoading,
+  leadTypeData = [],
 }) => {
+  // Build a fast lookup map: leadType _id (string) -> color
+  const leadTypeColorMap = useMemo(() => {
+    const map = {};
+    (leadTypeData || []).forEach((lt) => {
+      if (lt._id) map[String(lt._id)] = lt.color || null;
+    });
+    return map;
+  }, [leadTypeData]);
   const isDark = theme === 'dark';
   const textPrimary = isDark ? '#f8fafc' : '#071028';
   const textMuted = isDark ? '#94a3b8' : '#64748b';
@@ -42,8 +51,21 @@ export const DynamicLeadsTable = ({
 
   const renderCellContent = (item, col, index) => {
     switch (col.key) {
-      case 'serialNo':
-        return indexOfFirstItem + index + 1;
+      case 'serialNo': {
+        const ltColor = item.leadType ? leadTypeColorMap[String(item.leadType)] : null;
+        return (
+          <span className="relative flex items-center pl-4">
+            {ltColor && (
+              <span
+                className="absolute bottom-[-6px] left-0 top-[-6px] w-1 rounded-full opacity-90"
+                style={{ backgroundColor: ltColor }}
+                aria-hidden
+              />
+            )}
+            {indexOfFirstItem + index + 1}
+          </span>
+        );
+      }
       case 'actions':
         return (
           <div className="flex items-center justify-center gap-1">

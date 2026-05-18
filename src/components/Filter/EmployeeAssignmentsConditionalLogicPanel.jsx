@@ -4,6 +4,7 @@ import { Controller } from "react-hook-form";
 import { Filter, Plus, Trash2, ChevronDown } from "lucide-react";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
+import { DatePicker } from "../ui/date-picker";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -769,11 +770,20 @@ export default function EmployeeAssignmentsConditionalLogicPanel({
               name="dateFrom"
               control={control}
               render={({ field }) => (
-                <Input
-                  {...field}
-                  value={field.value ?? ""}
-                  type="date"
-                  className="w-full p-2 rounded-lg text-sm"
+                <DatePicker
+                  date={field.value ? new Date(field.value) : null}
+                  setDate={(d) => {
+                    if (!d) {
+                      field.onChange("");
+                      return;
+                    }
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    field.onChange(`${year}-${month}-${day}`);
+                  }}
+                  placeholder="From"
+                  className="w-full text-sm"
                   style={inputStyle}
                 />
               )}
@@ -782,11 +792,20 @@ export default function EmployeeAssignmentsConditionalLogicPanel({
               name="dateTo"
               control={control}
               render={({ field }) => (
-                <Input
-                  {...field}
-                  value={field.value ?? ""}
-                  type="date"
-                  className="w-full p-2 rounded-lg text-sm"
+                <DatePicker
+                  date={field.value ? new Date(field.value) : null}
+                  setDate={(d) => {
+                    if (!d) {
+                      field.onChange("");
+                      return;
+                    }
+                    const year = d.getFullYear();
+                    const month = String(d.getMonth() + 1).padStart(2, '0');
+                    const day = String(d.getDate()).padStart(2, '0');
+                    field.onChange(`${year}-${month}-${day}`);
+                  }}
+                  placeholder="To"
+                  className="w-full text-sm"
                   style={inputStyle}
                 />
               )}

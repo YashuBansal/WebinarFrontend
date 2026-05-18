@@ -140,37 +140,7 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
   }
 
   if (section === "bottom") {
-    if (!selectedProject) return null;
-    if (variant === "rail") {
-      return (
-        <div className="flex items-center justify-center py-3 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50 h-[55px]">
-          <div className={`flex h-[32px] w-[32px] items-center justify-center rounded-lg ${
-            isConfigured ? "bg-green-100" : "bg-yellow-100"
-          }`}>
-            <div
-              className={`h-2.5 w-2.5 rounded-full ${isConfigured ? "bg-green-500" : "bg-yellow-500"}`}
-              title={isConfigured ? "Project Configured" : "Setup Required"}
-            />
-          </div>
-        </div>
-      );
-    }
-    return (
-      <div className="px-4 py-3 border-t border-gray-100 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-800/50 h-[55px] flex flex-col justify-center">
-        <div
-          className={`flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs font-semibold ${
-            isConfigured ? "bg-green-100 dark:bg-green-500/20 text-green-700 dark:text-green-400" : "bg-yellow-100 dark:bg-yellow-500/20 text-yellow-700 dark:text-yellow-400"
-          }`}
-        >
-          {isConfigured ? (
-            <CheckCircle className="h-3.5 w-3.5" />
-          ) : (
-            <AlertTriangle className="h-3.5 w-3.5" />
-          )}
-          <span className="truncate">{isConfigured ? "Configured" : "Setup Required"}</span>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   return (

@@ -21,8 +21,15 @@ import { Input } from "../../../components/ui/input";
 import { getCustomOptionsForFilters } from "../../../features/actions/globalData";
 import tagsService from "../../../services/tagsService";
 import EmployeeAssignmentsConditionalLogicPanel from "../../../components/Filter/EmployeeAssignmentsConditionalLogicPanel";
+import { DatePicker } from "../../../components/ui/date-picker";
 
 const FONT = "Inter, sans-serif";
+
+const formatDateForInput = (dateStr) => {
+  if (!dateStr) return null;
+  const d = new Date(dateStr);
+  return Number.isNaN(d.getTime()) ? null : d;
+};
 
 const EmployeeAssignmentsFilterModal = ({
   modalName,
@@ -635,13 +642,18 @@ const EmployeeAssignmentsFilterModal = ({
                           control={control}
                           defaultValue=""
                           render={({ field }) => (
-                            <Input
-                              id="dateFrom"
-                              type="date"
-                              {...field}
-                              value={field.value ?? ""}
-                              className="focus:ring-[#22B573]/40"
+                            <DatePicker
+                              date={formatDateForInput(field.value)}
+                              setDate={(date) => {
+                                field.onChange(
+                                  date
+                                    ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
+                                    : ""
+                                );
+                              }}
+                              className="w-full h-10"
                               style={inputStyle}
+                              placeholder="From"
                             />
                           )}
                         />
@@ -655,13 +667,18 @@ const EmployeeAssignmentsFilterModal = ({
                           control={control}
                           defaultValue=""
                           render={({ field }) => (
-                            <Input
-                              id="dateTo"
-                              type="date"
-                              {...field}
-                              value={field.value ?? ""}
-                              className="focus:ring-[#22B573]/40"
+                            <DatePicker
+                              date={formatDateForInput(field.value)}
+                              setDate={(date) => {
+                                field.onChange(
+                                  date
+                                    ? `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`
+                                    : ""
+                                );
+                              }}
+                              className="w-full h-10"
                               style={inputStyle}
+                              placeholder="To"
                             />
                           )}
                         />

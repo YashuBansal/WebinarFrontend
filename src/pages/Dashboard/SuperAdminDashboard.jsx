@@ -15,6 +15,7 @@ import {
   RevenueByDateChart,
   UserGrowthByDate,
 } from "../../components/Dashboard";
+import { DatePicker } from "../../components/ui/date-picker";
 import { errorToast } from "../../utils/extra";
 import { resetDashboardData } from "../../features/slices/globalData";
 import { useTheme } from "../../contexts/ThemeContext";
@@ -361,15 +362,11 @@ const SuperAdminDashboard = () => {
                   From
                 </span>
                 <div className="relative min-w-0">
-                  <input
-                    type="date"
-                    value={startDate ? toYMD(startDate) : ""}
-                    max={endDate ? toYMD(endDate) : ""}
-                    onChange={(e) => {
-                      const d = ymdToLocalDate(e.target.value);
-                      if (d) handleStartDateChange(d);
-                    }}
-                    className="max-w-full cursor-pointer rounded-lg py-1.5 pl-3 pr-2 outline-none transition-colors hover:bg-white"
+                  <DatePicker
+                    date={startDate}
+                    setDate={handleStartDateChange}
+                    maxDate={endDate}
+                    className="max-w-full rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                     style={{
                       backgroundColor: "transparent",
                       border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
@@ -395,16 +392,12 @@ const SuperAdminDashboard = () => {
                   To
                 </span>
                 <div className="relative min-w-0">
-                  <input
-                    type="date"
-                    value={endDate ? toYMD(endDate) : ""}
-                    min={startDate ? toYMD(startDate) : ""}
-                    max={toYMD(new Date())}
-                    onChange={(e) => {
-                      const d = ymdToLocalDate(e.target.value);
-                      if (d) handleEndDateChange(d);
-                    }}
-                    className="max-w-full cursor-pointer rounded-lg py-1.5 pl-3 pr-2 outline-none transition-colors hover:bg-white"
+                  <DatePicker
+                    date={endDate}
+                    setDate={handleEndDateChange}
+                    minDate={startDate}
+                    maxDate={new Date()}
+                    className="max-w-full rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                     style={{
                       backgroundColor: "transparent",
                       border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",

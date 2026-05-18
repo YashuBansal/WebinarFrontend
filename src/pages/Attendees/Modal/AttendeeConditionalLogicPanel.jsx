@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
-import DatePicker from "react-datepicker";
+import { DatePicker } from "../../../components/ui/date-picker";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import { CalendarDays, Filter, Plus, Trash2, ChevronDown } from "lucide-react";
@@ -751,22 +751,14 @@ export default function AttendeeConditionalLogicPanel({
                 control={control}
                 render={({ field }) => (
                   <DatePicker
-                    selected={normalizePickerDate(field.value)}
-                    onChange={(date) => field.onChange(date)}
-                    placeholderText="mm/dd/yyyy"
-                    dateFormat={pickerDateFormat}
-                    isClearable
-                    customInput={
-                      <Input
-                        className="w-full p-2 rounded-lg text-sm pr-9"
-                        style={inputStyle}
-                        placeholder="Start"
-                      />
-                    }
+                    date={normalizePickerDate(field.value)}
+                    setDate={(date) => field.onChange(date)}
+                    placeholder="Start"
+                    className="w-full text-sm"
+                    style={inputStyle}
                   />
                 )}
               />
-              <CalendarDays className="pointer-events-none absolute right-2 top-2.5 h-4 w-4 text-gray-500" />
             </div>
             <div className="relative flex-1 min-w-[120px]">
               <Controller
@@ -774,22 +766,14 @@ export default function AttendeeConditionalLogicPanel({
                 control={control}
                 render={({ field }) => (
                   <DatePicker
-                    selected={normalizePickerDate(field.value)}
-                    onChange={(date) => field.onChange(date)}
-                    placeholderText="mm/dd/yyyy"
-                    dateFormat={pickerDateFormat}
-                    isClearable
-                    customInput={
-                      <Input
-                        className="w-full p-2 rounded-lg text-sm pr-9"
-                        style={inputStyle}
-                        placeholder="End"
-                      />
-                    }
+                    date={normalizePickerDate(field.value)}
+                    setDate={(date) => field.onChange(date)}
+                    placeholder="End"
+                    className="w-full text-sm"
+                    style={inputStyle}
                   />
                 )}
               />
-              <CalendarDays className="pointer-events-none absolute right-2 top-2.5 h-4 w-4 text-gray-500" />
             </div>
           </div>
         );

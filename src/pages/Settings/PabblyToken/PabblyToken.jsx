@@ -21,8 +21,7 @@ import {
   generatePablyToken,
   getAPIAccessTokens,
 } from "../../../features/actions/auth";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { DatePicker } from "../../../components/ui/date-picker";
 import { clearOTPGenerated } from "../../../features/slices/auth";
 import ConfirmDeleteModal from "../../../components/ConfirmDeleteModal";
 import HubSubpageShell from "../../../components/Layout/HubSubpageShell";
@@ -347,11 +346,10 @@ const PabblyToken = () => {
                 </div>
                 <div className="grid w-full">
                   <DatePicker
-                    selected={expiryDate}
-                    onChange={(date) => setExpiryDate(date)}
-                    isClearable
-                    placeholderText="Expiry (optional)"
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-900 outline-none ring-blue-500/30 focus:ring-2 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                    date={expiryDate}
+                    setDate={(date) => setExpiryDate(date)}
+                    placeholder="Expiry (optional)"
+                    className="h-10 w-full"
                   />
                 </div>
               </div>

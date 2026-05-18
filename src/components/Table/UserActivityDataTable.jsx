@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Modal, Typography, Box, Button } from "@mui/material";
-import DatePicker from "react-datepicker";
 import { useForm, Controller } from "react-hook-form";
-import "react-datepicker/dist/react-datepicker.css";
+import { DatePicker } from "../ui/date-picker";
 
 import { closeModal } from "../../features/slices/modalSlice";
 import { userActivityTableColumns } from "../../utils/columnData";
@@ -93,11 +92,10 @@ const UserActivityTable = (props) => {
                     control={control}
                     render={({ field }) => (
                       <DatePicker
-                        selected={field.value}
-                        onChange={field.onChange}
-                        className="border p-4 min-w-full h-14 rounded-md"
-                        placeholderText="Webinar Date (From)"
-                        dateFormat={dateFormat}
+                        date={field.value}
+                        setDate={field.onChange}
+                        className="min-w-full h-14 rounded-md"
+                        placeholder="Webinar Date (From)"
                       />
                     )}
                   />
@@ -108,11 +106,10 @@ const UserActivityTable = (props) => {
                     control={control}
                     render={({ field }) => (
                       <DatePicker
-                        selected={field.value}
-                        onChange={field.onChange}
-                        className="border p-4 min-w-full h-14 rounded-md"
-                        placeholderText="Webinar Date (To)"
-                        dateFormat={dateFormat}
+                        date={field.value}
+                        setDate={field.onChange}
+                        className="min-w-full h-14 rounded-md"
+                        placeholder="Webinar Date (To)"
                       />
                     )}
                   />

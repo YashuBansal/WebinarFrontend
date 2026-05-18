@@ -21,7 +21,16 @@ import {
   Package,
   Tag,
   IndianRupee,
+  ChevronDown,
 } from "lucide-react";
+
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../components/ui/dropdown-menu";
+
 
 import AppLoader from "../../components/AppLoader";
 import ComponentGuard from "../../components/AccessControl/ComponentGuard";
@@ -1329,23 +1338,38 @@ const ViewProducts = () => {
                         >
                           Level
                         </label>
-                        <select
-                          value={editProductForm.level}
-                          onChange={(e) =>
-                            setEditProductForm({ ...editProductForm, level: e.target.value })
-                          }
-                          className="w-full p-2.5 rounded-lg border text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer appearance-none"
-                          style={inputStyle}
-                        >
-                          <option value="" disabled>
-                            Select level
-                          </option>
-                          {productLevelData.map((item) => (
-                            <option key={item._id || item.level} value={String(item.level)}>
-                              {item.label}
-                            </option>
-                          ))}
-                        </select>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="flex h-11 w-full items-center justify-between rounded-xl px-4 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                              style={inputStyle}
+                            >
+                              <span className="truncate">
+                                {editProductForm.level
+                                  ? productLevelData.find((item) => String(item.level) === String(editProductForm.level))?.label || editProductForm.level
+                                  : "Select level"}
+                              </span>
+                              <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                          >
+                            {productLevelData.map((item) => (
+                              <DropdownMenuItem
+                                key={item._id || item.level}
+                                onClick={() =>
+                                  setEditProductForm({ ...editProductForm, level: String(item.level) })
+                                }
+                                className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                              >
+                                {item.label}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                       <div className="sm:col-span-2">
                         <label
@@ -1354,27 +1378,56 @@ const ViewProducts = () => {
                         >
                           Tag (Optional)
                         </label>
-                        <select
-                          value={editProductForm.tag}
-                          onChange={(e) =>
-                            setEditProductForm({ ...editProductForm, tag: e.target.value })
-                          }
-                          className="w-full p-2.5 rounded-lg border text-sm focus:ring-2 focus:ring-blue-500 cursor-pointer appearance-none"
-                          style={inputStyle}
-                        >
-                          <option value="">No tag</option>
-                          {editProductForm.tag &&
-                            !tagData.some((t) => t.name === editProductForm.tag) && (
-                              <option value={editProductForm.tag}>
-                                {editProductForm.tag}
-                              </option>
-                            )}
-                          {tagData.map((item) => (
-                            <option key={item._id || item.name} value={item.name}>
-                              {item.name}
-                            </option>
-                          ))}
-                        </select>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="flex h-11 w-full items-center justify-between rounded-xl px-4 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                              style={inputStyle}
+                            >
+                              <span className="truncate">
+                                {editProductForm.tag || "No tag"}
+                              </span>
+                              <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                          >
+                            <DropdownMenuItem
+                              onClick={() =>
+                                setEditProductForm({ ...editProductForm, tag: "" })
+                              }
+                              className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                            >
+                              No tag
+                            </DropdownMenuItem>
+                            {editProductForm.tag &&
+                              !tagData.some((t) => t.name === editProductForm.tag) && (
+                                <DropdownMenuItem
+                                  key={editProductForm.tag}
+                                  onClick={() =>
+                                    setEditProductForm({ ...editProductForm, tag: editProductForm.tag })
+                                  }
+                                  className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                >
+                                  {editProductForm.tag}
+                                </DropdownMenuItem>
+                              )}
+                            {tagData.map((item) => (
+                              <DropdownMenuItem
+                                key={item._id || item.name}
+                                onClick={() =>
+                                  setEditProductForm({ ...editProductForm, tag: item.name })
+                                }
+                                className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                              >
+                                {item.name}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                       <div className="sm:col-span-2">
                         <label
@@ -1652,33 +1705,65 @@ const ViewProducts = () => {
                         </div>
                         <div>
                           <span style={labelStyle}>Level</span>
-                          <select
-                            value={filters.level}
-                            onChange={(e) => setFilters({ ...filters, level: e.target.value })}
-                            className="w-full p-2 rounded-xl text-sm focus:outline-none focus:ring-2 appearance-none cursor-pointer"
-                            style={inputStyle}
-                          >
-                            {levelOptions.map((o) => (
-                              <option key={o} value={o}>
-                                {o}
-                              </option>
-                            ))}
-                          </select>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="flex h-10 w-full items-center justify-between rounded-xl px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                                style={inputStyle}
+                              >
+                                <span className="truncate">
+                                  {filters.level || "Select level"}
+                                </span>
+                                <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="start"
+                              className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                            >
+                              {levelOptions.map((o) => (
+                                <DropdownMenuItem
+                                  key={o}
+                                  onClick={() => setFilters({ ...filters, level: o })}
+                                  className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                >
+                                  {o}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                         <div>
                           <span style={labelStyle}>Tags</span>
-                          <select
-                            value={filters.tag}
-                            onChange={(e) => setFilters({ ...filters, tag: e.target.value })}
-                            className="w-full p-2 rounded-xl text-sm focus:outline-none focus:ring-2 appearance-none cursor-pointer"
-                            style={inputStyle}
-                          >
-                            {tagOptions.map((t) => (
-                              <option key={t} value={t}>
-                                {t}
-                              </option>
-                            ))}
-                          </select>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="outline"
+                                className="flex h-10 w-full items-center justify-between rounded-xl px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                                style={inputStyle}
+                              >
+                                <span className="truncate">
+                                  {filters.tag || "Select Tags..."}
+                                </span>
+                                <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="start"
+                              className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                            >
+                              {tagOptions.map((t) => (
+                                <DropdownMenuItem
+                                  key={t}
+                                  onClick={() => setFilters({ ...filters, tag: t })}
+                                  className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                >
+                                  {t}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                         <div>
                           <span style={labelStyle}>Price Range (INR)</span>
@@ -1832,47 +1917,76 @@ const ViewProducts = () => {
                                       </button>
                                     </div>
                                   )}
-                                  <select
-                                    value={condition.field}
-                                    onChange={(e) =>
-                                      handleConditionFieldChange(condition.id, e.target.value)
-                                    }
-                                    className="min-w-[140px] flex-1 max-w-[220px] p-2 rounded-lg border text-sm outline-none focus:ring-2 cursor-pointer"
-                                    style={inputStyle}
-                                  >
-                                    <option value="">Choose field…</option>
-                                    {PRODUCT_ADVANCED_FIELD_KEYS.map((key) => {
-                                      const takenElsewhere = filterConditions.some(
-                                        (c) => c.id !== condition.id && c.field === key
-                                      );
-                                      const disabled =
-                                        takenElsewhere && condition.field !== key;
-                                      return (
-                                        <option key={key} value={key} disabled={disabled}>
-                                          {PRODUCT_FIELD_LABELS[key]}
-                                        </option>
-                                      );
-                                    })}
-                                  </select>
-                                  <select
-                                    value={condition.operator}
-                                    onChange={(e) =>
-                                      handleUpdateCondition(
-                                        condition.id,
-                                        "operator",
-                                        e.target.value
-                                      )
-                                    }
-                                    disabled={!condition.field}
-                                    className="min-w-[120px] max-w-[160px] p-2 rounded-lg border text-sm outline-none focus:ring-2 cursor-pointer disabled:opacity-50"
-                                    style={inputStyle}
-                                  >
-                                    {ops.map((op) => (
-                                      <option key={op.value} value={op.value}>
-                                        {op.label}
-                                      </option>
-                                    ))}
-                                  </select>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="outline"
+                                        className="flex h-10 min-w-[140px] flex-1 max-w-[220px] items-center justify-between rounded-lg px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                                        style={inputStyle}
+                                      >
+                                        <span className="truncate">
+                                          {condition.field ? PRODUCT_FIELD_LABELS[condition.field] : "Choose field…"}
+                                        </span>
+                                        <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                      align="start"
+                                      className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                                    >
+                                      <DropdownMenuItem
+                                        onClick={() => handleConditionFieldChange(condition.id, "")}
+                                        className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                      >
+                                        Choose field…
+                                      </DropdownMenuItem>
+                                      {PRODUCT_ADVANCED_FIELD_KEYS.map((key) => {
+                                        const takenElsewhere = filterConditions.some(
+                                          (c) => c.id !== condition.id && c.field === key
+                                        );
+                                        const disabled = takenElsewhere && condition.field !== key;
+                                        if (disabled) return null;
+                                        return (
+                                          <DropdownMenuItem
+                                            key={key}
+                                            onClick={() => handleConditionFieldChange(condition.id, key)}
+                                            className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                          >
+                                            {PRODUCT_FIELD_LABELS[key]}
+                                          </DropdownMenuItem>
+                                        );
+                                      })}
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild disabled={!condition.field}>
+                                      <Button
+                                        variant="outline"
+                                        disabled={!condition.field}
+                                        className="flex h-10 min-w-[120px] max-w-[160px] items-center justify-between rounded-lg px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 disabled:opacity-50"
+                                        style={inputStyle}
+                                      >
+                                        <span className="truncate">
+                                          {ops.find((o) => o.value === condition.operator)?.label || condition.operator || "Select Operator"}
+                                        </span>
+                                        <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                      align="start"
+                                      className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                                    >
+                                      {ops.map((op) => (
+                                        <DropdownMenuItem
+                                          key={op.value}
+                                          onClick={() => handleUpdateCondition(condition.id, "operator", op.value)}
+                                          className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                        >
+                                          {op.label}
+                                        </DropdownMenuItem>
+                                      ))}
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
                                   {!condition.field ? (
                                     <div
                                       className="w-full min-w-[160px] flex-1 max-w-md"
@@ -1886,37 +2000,75 @@ const ViewProducts = () => {
                                       />
                                     </div>
                                   ) : condition.field === "level" ? (
-                                    <select
-                                      value={condition.value}
-                                      onChange={(e) =>
-                                        handleUpdateCondition(condition.id, "value", e.target.value)
-                                      }
-                                      className="flex-1 min-w-[160px] p-2 rounded-lg border text-sm outline-none focus:ring-2 cursor-pointer"
-                                      style={inputStyle}
-                                    >
-                                      <option value="">Enter value…</option>
-                                      {levelFilterLabels.map((lbl) => (
-                                        <option key={lbl} value={lbl}>
-                                          {lbl}
-                                        </option>
-                                      ))}
-                                    </select>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          className="flex h-10 flex-1 min-w-[160px] items-center justify-between rounded-lg px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                                          style={inputStyle}
+                                        >
+                                          <span className="truncate">
+                                            {condition.value || "Enter value…"}
+                                          </span>
+                                          <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent
+                                        align="start"
+                                        className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                                      >
+                                        <DropdownMenuItem
+                                          onClick={() => handleUpdateCondition(condition.id, "value", "")}
+                                          className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                        >
+                                          Enter value…
+                                        </DropdownMenuItem>
+                                        {levelFilterLabels.map((lbl) => (
+                                          <DropdownMenuItem
+                                            key={lbl}
+                                            onClick={() => handleUpdateCondition(condition.id, "value", lbl)}
+                                            className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                          >
+                                            {lbl}
+                                          </DropdownMenuItem>
+                                        ))}
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
                                   ) : condition.field === "tag" ? (
-                                    <select
-                                      value={condition.value}
-                                      onChange={(e) =>
-                                        handleUpdateCondition(condition.id, "value", e.target.value)
-                                      }
-                                      className="flex-1 min-w-[160px] p-2 rounded-lg border text-sm outline-none focus:ring-2 cursor-pointer"
-                                      style={inputStyle}
-                                    >
-                                      <option value="">Enter value…</option>
-                                      {tagFilterLabels.map((name) => (
-                                        <option key={name} value={name}>
-                                          {name}
-                                        </option>
-                                      ))}
-                                    </select>
+                                    <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                        <Button
+                                          variant="outline"
+                                          className="flex h-10 flex-1 min-w-[160px] items-center justify-between rounded-lg px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                                          style={inputStyle}
+                                        >
+                                          <span className="truncate">
+                                            {condition.value || "Enter value…"}
+                                          </span>
+                                          <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                                        </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent
+                                        align="start"
+                                        className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                                      >
+                                        <DropdownMenuItem
+                                          onClick={() => handleUpdateCondition(condition.id, "value", "")}
+                                          className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                        >
+                                          Enter value…
+                                        </DropdownMenuItem>
+                                        {tagFilterLabels.map((name) => (
+                                          <DropdownMenuItem
+                                            key={name}
+                                            onClick={() => handleUpdateCondition(condition.id, "value", name)}
+                                            className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                                          >
+                                            {name}
+                                          </DropdownMenuItem>
+                                        ))}
+                                      </DropdownMenuContent>
+                                    </DropdownMenu>
                                   ) : isBetweenPrice ? (
                                     <div className="flex gap-2 flex-1 min-w-[180px]">
                                       <input
@@ -2070,21 +2222,36 @@ const ViewProducts = () => {
                       <X className="w-5 h-5 cursor-pointer text-gray-500" />
                     </button>
                   </div>
-                  <select
-                    value={selectedPresetId}
-                    onChange={(e) => setSelectedPresetId(e.target.value)}
-                    className="w-full p-2.5 rounded-xl border mb-6 outline-none"
-                    style={inputStyle}
-                  >
-                    <option value="" disabled>
-                      Select a preset...
-                    </option>
-                    {savedPresets.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="flex h-11 w-full items-center justify-between rounded-xl px-4 py-2 text-sm outline-none mb-6 transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                        style={inputStyle}
+                      >
+                        <span className="truncate">
+                          {selectedPresetId
+                            ? savedPresets.find((p) => p.id === selectedPresetId)?.name || "Select a preset..."
+                            : "Select a preset..."}
+                        </span>
+                        <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                    >
+                      {savedPresets.map((p) => (
+                        <DropdownMenuItem
+                          key={p.id}
+                          onClick={() => setSelectedPresetId(p.id)}
+                          className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                        >
+                          {p.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   <div className="flex justify-between w-full gap-2 flex-wrap">
                     <Button
                       type="button"

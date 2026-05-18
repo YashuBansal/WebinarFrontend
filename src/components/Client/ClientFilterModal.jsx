@@ -10,8 +10,7 @@ import {
   MenuItem,
 } from "@mui/material";
 import { useForm, Controller } from "react-hook-form";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css"; // Required CSS for the date picker
+import { DatePicker } from "../ui/date-picker";
 import { useDispatch, useSelector } from "react-redux";
 import { closeModal } from "../../features/slices/modalSlice";
 import FormInput from "../FormInput";
@@ -339,10 +338,10 @@ const FilterModal = ({ modalName, setFilters, filters }) => {
                   control={control}
                   render={({ field }) => (
                     <DatePicker
-                      selected={field.value}
-                      onChange={(date) => field.onChange(date)}
-                      className="border p-4 lg:max-w-full min-w-full min-h-14 rounded-md flex-1"
-                      placeholderText="Plan Start Date (From)"
+                      date={field.value}
+                      setDate={(date) => field.onChange(date)}
+                      className="lg:max-w-full min-w-full h-14 rounded-md flex-1"
+                      placeholder="Plan Start Date (From)"
                     />
                   )}
                 />
@@ -353,10 +352,10 @@ const FilterModal = ({ modalName, setFilters, filters }) => {
                   control={control}
                   render={({ field }) => (
                     <DatePicker
-                      selected={field.value}
-                      onChange={(date) => field.onChange(date)}
-                      className="border p-4 lg:max-w-full min-w-full min-h-14 rounded-md flex-1"
-                      placeholderText="Plan Start Date (To)"
+                      date={field.value}
+                      setDate={(date) => field.onChange(date)}
+                      className="lg:max-w-full min-w-full h-14 rounded-md flex-1"
+                      placeholder="Plan Start Date (To)"
                     />
                   )}
                 />
@@ -368,10 +367,10 @@ const FilterModal = ({ modalName, setFilters, filters }) => {
                   control={control}
                   render={({ field }) => (
                     <DatePicker
-                      selected={field.value}
-                      onChange={(date) => field.onChange(date)}
-                      className="border p-4 lg:max-w-full min-w-full min-h-14 rounded-md flex-1"
-                      placeholderText="Plan Expiry (From)"
+                      date={field.value}
+                      setDate={(date) => field.onChange(date)}
+                      className="lg:max-w-full min-w-full h-14 rounded-md flex-1"
+                      placeholder="Plan Expiry (From)"
                     />
                   )}
                 />
@@ -383,10 +382,10 @@ const FilterModal = ({ modalName, setFilters, filters }) => {
                   control={control}
                   render={({ field }) => (
                     <DatePicker
-                      selected={field.value}
-                      onChange={(date) => field.onChange(date)}
-                      className="border p-4 lg:max-w-full min-w-full  min-h-14 rounded-md flex-1"
-                      placeholderText="Plan Expiry (To)"
+                      date={field.value}
+                      setDate={(date) => field.onChange(date)}
+                      className="lg:max-w-full min-w-full h-14 rounded-md flex-1"
+                      placeholder="Plan Expiry (To)"
                     />
                   )}
                 />

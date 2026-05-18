@@ -19,6 +19,7 @@ import {
 } from "../../components/ui/dropdown-menu";
 import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
+import { DatePicker } from "../../components/ui/date-picker";
 import { useTheme } from "../../contexts/ThemeContext";
 
 const BRAND = "#22B573";
@@ -248,15 +249,11 @@ const EmployeeDashboard = () => {
                   From
                 </span>
                 <div className="relative min-w-0">
-                  <input
-                    type="date"
-                    value={toYMD(startDate)}
-                    max={toYMD(endDate)}
-                    onChange={(e) => {
-                      const d = ymdToLocalDate(e.target.value);
-                      if (d) handleStartDateChange(d);
-                    }}
-                    className="max-w-full cursor-pointer rounded-lg py-1.5 pl-3 pr-2 outline-none transition-colors hover:bg-white"
+                  <DatePicker
+                    date={startDate}
+                    setDate={handleStartDateChange}
+                    maxDate={endDate}
+                    className="max-w-full rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                     style={{
                       backgroundColor: "transparent",
                       border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
@@ -282,16 +279,12 @@ const EmployeeDashboard = () => {
                   To
                 </span>
                 <div className="relative min-w-0">
-                  <input
-                    type="date"
-                    value={toYMD(endDate)}
-                    min={toYMD(startDate)}
-                    max={toYMD(new Date())}
-                    onChange={(e) => {
-                      const d = ymdToLocalDate(e.target.value);
-                      if (d) handleEndDateChange(d);
-                    }}
-                    className="max-w-full cursor-pointer rounded-lg py-1.5 pl-3 pr-2 outline-none transition-colors hover:bg-white"
+                  <DatePicker
+                    date={endDate}
+                    setDate={handleEndDateChange}
+                    minDate={startDate}
+                    maxDate={new Date()}
+                    className="max-w-full rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                     style={{
                       backgroundColor: "transparent",
                       border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",

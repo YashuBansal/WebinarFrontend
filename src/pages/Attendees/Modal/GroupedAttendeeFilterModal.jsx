@@ -3,8 +3,7 @@ import { toast } from "sonner";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { DatePicker } from "../../../components/ui/date-picker";
 import { closeModal } from "../../../features/slices/modalSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -677,21 +676,14 @@ const GroupedAttendeeFilterModal = ({
                               control={control}
                               render={({ field }) => (
                                 <DatePicker
-                                  selected={normalizePickerDate(field.value)}
-                                  onChange={(date) => field.onChange(date)}
-                                  placeholderText="mm/dd/yyyy"
-                                  dateFormat={pickerDateFormat}
-                                  isClearable
-                                  customInput={
-                                    <Input
-                                      className="w-full p-2 rounded-xl text-sm focus:outline-none focus:ring-2 pr-9"
-                                      style={inputStyle}
-                                    />
-                                  }
+                                  date={normalizePickerDate(field.value)}
+                                  setDate={(date) => field.onChange(date)}
+                                  placeholder="Start Date"
+                                  className="w-full text-sm"
+                                  style={inputStyle}
                                 />
                               )}
                             />
-                            <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-gray-500" />
                           </div>
                         </div>
                         <div>
@@ -702,21 +694,14 @@ const GroupedAttendeeFilterModal = ({
                               control={control}
                               render={({ field }) => (
                                 <DatePicker
-                                  selected={normalizePickerDate(field.value)}
-                                  onChange={(date) => field.onChange(date)}
-                                  placeholderText="mm/dd/yyyy"
-                                  dateFormat={pickerDateFormat}
-                                  isClearable
-                                  customInput={
-                                    <Input
-                                      className="w-full p-2 rounded-xl text-sm focus:outline-none focus:ring-2 pr-9"
-                                      style={inputStyle}
-                                    />
-                                  }
+                                  date={normalizePickerDate(field.value)}
+                                  setDate={(date) => field.onChange(date)}
+                                  placeholder="End Date"
+                                  className="w-full text-sm"
+                                  style={inputStyle}
                                 />
                               )}
                             />
-                            <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-gray-500" />
                           </div>
                         </div>
                       </>

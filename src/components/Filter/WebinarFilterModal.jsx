@@ -2,8 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Controller, useForm } from "react-hook-form";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { DatePicker } from "../ui/date-picker";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
 import { CalendarDays, Copy, Filter, RotateCcw, Save, X, ChevronDown } from "lucide-react";
@@ -297,15 +296,14 @@ const FilterModal = ({
                       control={control}
                       render={({ field }) => (
                         <DatePicker
-                          selected={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          placeholderText="mm/dd/yyyy"
-                          dateFormat={dateFormat}
-                          customInput={<Input className="w-full p-2 rounded-xl text-sm focus:outline-none focus:ring-2 pr-9" style={inputStyle} />}
+                          date={field.value}
+                          setDate={(date) => field.onChange(date)}
+                          placeholder="mm/dd/yyyy"
+                          className="w-full"
+                          style={inputStyle}
                         />
                       )}
                     />
-                    <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
                   </div>
                 </div>
                 <div>
@@ -316,15 +314,14 @@ const FilterModal = ({
                       control={control}
                       render={({ field }) => (
                         <DatePicker
-                          selected={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          placeholderText="mm/dd/yyyy"
-                          dateFormat={dateFormat}
-                          customInput={<Input className="w-full p-2 rounded-xl text-sm focus:outline-none focus:ring-2 pr-9" style={inputStyle} />}
+                          date={field.value}
+                          setDate={(date) => field.onChange(date)}
+                          placeholder="mm/dd/yyyy"
+                          className="w-full"
+                          style={inputStyle}
                         />
                       )}
                     />
-                    <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
                   </div>
                 </div>
               </div>
