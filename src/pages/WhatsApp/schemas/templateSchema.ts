@@ -109,7 +109,7 @@ export const templateFormSchema = z.object({
     .min(1, 'Template name is required')
     .max(512, 'Template name must not exceed 512 characters')
     .regex(/^[a-z0-9_]+$/, 'Name can only contain lowercase letters, numbers, and underscores'),
-  headerFormat: z.string().min(1, 'Template type is required'),
+  headerFormat: z.string().min(1, 'Template type is required').optional(),
   format: z.string().min(1, 'Message content is required').max(1024, 'Message content must not exceed 1024 characters'),
   header: z.string().max(60, 'Header must not exceed 60 characters').optional(),
   headerHandle: z.string().optional(), // For media templates (IMAGE, VIDEO, DOCUMENT)

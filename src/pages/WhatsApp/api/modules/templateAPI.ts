@@ -1,4 +1,4 @@
-import axiosInstance from '../axios';
+import axiosInstance, { API_BASE_URL } from '../axios';
 import axios from 'axios';
 import type {
   CreateTemplatePayload,
@@ -73,7 +73,6 @@ const createTemplate = async (
   projectId: string,
   payload: CreateTemplatePayload
 ): Promise<TemplateCreateResponse> => {
-  const API_BASE_URL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
   
   try {
     // Use direct axios call to bypass the interceptor that converts errors to strings

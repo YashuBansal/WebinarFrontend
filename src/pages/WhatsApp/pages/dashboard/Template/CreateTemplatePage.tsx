@@ -504,6 +504,12 @@ export default function CreateTemplatePage() {
                   {...register('name')}
                   className="h-12 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-semibold text-base"
                 />
+                {errors.name && (
+                  <p className="text-red-500 text-[11px] font-bold mt-2 ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    {errors.name.message}
+                  </p>
+                )}
               </motion.div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -557,6 +563,12 @@ export default function CreateTemplatePage() {
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
+                  {errors.language && (
+                    <p className="text-red-500 text-[11px] font-bold mt-2 ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                      <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                      {errors.language.message}
+                    </p>
+                  )}
                 </motion.div>
               </div>
             </div>
@@ -646,6 +658,12 @@ export default function CreateTemplatePage() {
                 className="w-full min-h-[160px] px-4 py-3 border border-slate-200 dark:border-slate-700/30 rounded-xl bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm resize-none"
                 maxLength={1024}
               />
+              {errors.format && (
+                <p className="text-red-500 text-[11px] font-bold mt-2 ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  {errors.format.message}
+                </p>
+              )}
               <div className="mt-3 p-3 bg-blue-50/50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 rounded-xl flex items-start gap-3">
                 <Info className="h-4 w-4 text-blue-400 shrink-0 mt-0.5" />
                 <p className="text-[12px] text-blue-600 dark:text-blue-400 font-medium leading-relaxed">
@@ -674,6 +692,12 @@ export default function CreateTemplatePage() {
                   maxLength={60}
                   className="h-11 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
                 />
+                {errors.header && (
+                  <p className="text-red-500 text-[11px] font-bold mt-2 ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    {errors.header.message}
+                  </p>
+                )}
               </motion.div>
             )}
 
@@ -789,6 +813,12 @@ export default function CreateTemplatePage() {
                 maxLength={60}
                 className="h-11 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
               />
+              {errors.footer && (
+                <p className="text-red-500 text-[11px] font-bold mt-2 ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                  {errors.footer.message}
+                </p>
+              )}
             </motion.div>
 
             {/* Interactive Actions */}
@@ -998,7 +1028,8 @@ export default function CreateTemplatePage() {
                 const previewMappings = extractVariablesFromText(watchedFormat || '').map((v, i) => ({
                   variable: `{{${v}}}`,
                   staticValue: sampleValues[i] || '',
-                  isDynamic: false
+                  isDynamic: false,
+                  contactField: ''
                 }));
 
                 return (
