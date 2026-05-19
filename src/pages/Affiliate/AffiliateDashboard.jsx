@@ -34,6 +34,7 @@ import { useTheme } from "../../contexts/ThemeContext";
 
 const AffiliateDashboard = ({ view = "dashboard" }) => {
   const {
+    loading,
     referralLink,
     tier1CommissionRate,
     tier2CommissionRate,
@@ -42,6 +43,10 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
     pendingIncome,
     referrals,
     payouts,
+    bankDetails,
+    setBankDetails,
+    savingBank,
+    saveBankDetails,
     requestPayout,
   } = useAffiliateStats();
 
@@ -50,43 +55,18 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
-  // Bank Details Form Persistence
-  const [bankDetails, setBankDetails] = useState(() => {
-    const saved = localStorage.getItem("wlh_bank_details");
-    return saved
-      ? JSON.parse(saved)
-      : {
-        holderName: "",
-        bankBranch: "",
-        accountNumber: "",
-        ifscCode: "",
-        upiId: "",
-        panCardFile: null,
-      };
-  });
-
   // Memoized check if bank account number is already submitted & locked
   const isAccountSubmitted = React.useMemo(() => {
-    try {
-      const saved = localStorage.getItem("wlh_bank_details");
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        return !!parsed.accountNumber;
-      }
-    } catch (e) { }
-    return false;
-  }, []);
-  const [savingBank, setSavingBank] = useState(false);
-  const [confirmAccountNumber, setConfirmAccountNumber] = useState(() => {
-    const saved = localStorage.getItem("wlh_bank_details");
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        return parsed.accountNumber || "";
-      } catch (e) { }
+    return !!bankDetails?.accountNumber;
+  }, [bankDetails?.accountNumber]);
+
+  const [confirmAccountNumber, setConfirmAccountNumber] = useState("");
+
+  React.useEffect(() => {
+    if (bankDetails?.accountNumber) {
+      setConfirmAccountNumber(bankDetails.accountNumber);
     }
-    return "";
-  });
+  }, [bankDetails?.accountNumber]);
 
   React.useEffect(() => {
     const el = document.querySelector(".custom-scrollbar.absolute") || document.querySelector(".custom-scrollbar");
@@ -104,18 +84,13 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSaveBankDetails = (e) => {
+  const handleSaveBankDetails = async (e) => {
     e.preventDefault();
     if (bankDetails.accountNumber !== confirmAccountNumber) {
       toast.error("Bank Account Number and Confirm Account Number do not match!");
       return;
     }
-    setSavingBank(true);
-    setTimeout(() => {
-      localStorage.setItem("wlh_bank_details", JSON.stringify(bankDetails));
-      setSavingBank(false);
-      toast.success("Payout bank account details updated securely!");
-    }, 1000);
+    await saveBankDetails(bankDetails);
   };
 
   // Framer Motion Variants
@@ -277,28 +252,33 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200/50 dark:divide-slate-800/50">
-                      {[
-                        { id: "cust-1", name: "Alex Jones", email: "alex.jones@example.com", number: "+91 98765 43210", invoiceId: "INV-2026-042", purchaseDate: "2026-05-10", planPurchased: "WLH Standard Monthly", commissionAmount: 120.00 },
-                        { id: "cust-2", name: "Sarah Smith", email: "sarah.smith@example.com", number: "+91 87654 32109", invoiceId: "INV-2026-049", purchaseDate: "2026-05-12", planPurchased: "WLH Premium Annual", commissionAmount: 250.00 },
-                        { id: "cust-3", name: "David Miller", email: "david.miller@example.com", number: "+91 76543 21098", invoiceId: "INV-2026-055", purchaseDate: "2026-05-14", planPurchased: "WLH Custom Enterprise", commissionAmount: 12.00 },
-                        { id: "cust-4", name: "Emma Watson", email: "emma.watson@example.com", number: "+91 65432 10987", invoiceId: "INV-2026-061", purchaseDate: "2026-05-16", planPurchased: "WLH Standard Yearly", commissionAmount: 280.00 }
-                      ].map((cust) => (
-                        <tr key={cust.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors" style={{ borderColor: isDark ? "#334155" : "#e2e8f0" }}>
-                          <td className="p-4 text-sm font-bold text-slate-800 dark:text-slate-200">{cust.name}</td>
-                          <td className="p-4 text-sm text-slate-600 dark:text-slate-400 font-medium">{cust.email}</td>
-                          <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400">{cust.number}</td>
-                          <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400">{cust.invoiceId}</td>
-                          <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400">{cust.purchaseDate}</td>
-                          <td className="p-4">
-                            <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200/30 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30">
-                              {cust.planPurchased}
-                            </span>
-                          </td>
-                          <td className="p-4 text-sm font-black text-slate-900 dark:text-slate-50 text-right tabular-nums">
-                            ${cust.commissionAmount.toFixed(2)}
+                      {referrals.filter(r => r.status === 'customer').length === 0 ? (
+                        <tr>
+                          <td colSpan={7} className="p-8 text-center text-sm font-semibold text-slate-400 dark:text-slate-500">
+                            No referred paid customers yet. Share your link to start earning!
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        referrals
+                          .filter((r) => r.status === "customer")
+                          .map((cust) => (
+                            <tr key={cust.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors" style={{ borderColor: isDark ? "#334155" : "#e2e8f0" }}>
+                              <td className="p-4 text-sm font-bold text-slate-800 dark:text-slate-200">{cust.name}</td>
+                              <td className="p-4 text-sm text-slate-600 dark:text-slate-400 font-medium">{cust.email}</td>
+                              <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400">{cust.number}</td>
+                              <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400">{cust.invoiceId || "-"}</td>
+                              <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400">{cust.purchaseDate || "-"}</td>
+                              <td className="p-4">
+                                <span className="inline-flex px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-600 border border-emerald-200/30 dark:bg-emerald-950/20 dark:text-emerald-400 dark:border-emerald-900/30">
+                                  {cust.planPurchased || "WLH Standard"}
+                                </span>
+                              </td>
+                              <td className="p-4 text-sm font-black text-slate-900 dark:text-slate-50 text-right tabular-nums">
+                                ₹{cust.commissionAmount.toFixed(2)}
+                              </td>
+                            </tr>
+                          ))
+                      )}
                     </tbody>
                   </table>
                 ) : (
@@ -312,21 +292,24 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200/50 dark:divide-slate-800/50">
-                      {[
-                        { id: "signup-1", name: "Alex Jones", email: "alex.jones@example.com", number: "+91 98765 43210", registrationDate: "2026-05-10" },
-                        { id: "signup-2", name: "Sarah Smith", email: "sarah.smith@example.com", number: "+91 87654 32109", registrationDate: "2026-05-12" },
-                        { id: "signup-3", name: "David Miller", email: "david.miller@example.com", number: "+91 76543 21098", registrationDate: "2026-05-14" },
-                        { id: "signup-4", name: "Emma Watson", email: "emma.watson@example.com", number: "+91 65432 10987", registrationDate: "2026-05-16" },
-                        { id: "signup-5", name: "James Bond", email: "james.bond@example.com", number: "+91 54321 09876", registrationDate: "2026-05-17" },
-                        { id: "signup-6", name: "Robert Downey", email: "robert.downey@example.com", number: "+91 43210 98765", registrationDate: "2026-05-18" }
-                      ].map((signup) => (
-                        <tr key={signup.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors" style={{ borderColor: isDark ? "#334155" : "#e2e8f0" }}>
-                          <td className="p-4 text-sm font-bold text-slate-800 dark:text-slate-200">{signup.name}</td>
-                          <td className="p-4 text-sm text-slate-600 dark:text-slate-400 font-medium">{signup.email}</td>
-                          <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400">{signup.number}</td>
-                          <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400 text-right">{signup.registrationDate}</td>
+                      {referrals.filter(r => r.status === 'signup').length === 0 ? (
+                        <tr>
+                          <td colSpan={4} className="p-8 text-center text-sm font-semibold text-slate-400 dark:text-slate-500">
+                            No referred signups yet. Share your link to start earning!
+                          </td>
                         </tr>
-                      ))}
+                      ) : (
+                        referrals
+                          .filter((r) => r.status === "signup")
+                          .map((signup) => (
+                            <tr key={signup.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors" style={{ borderColor: isDark ? "#334155" : "#e2e8f0" }}>
+                              <td className="p-4 text-sm font-bold text-slate-800 dark:text-slate-200">{signup.name}</td>
+                              <td className="p-4 text-sm text-slate-600 dark:text-slate-400 font-medium">{signup.email}</td>
+                              <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400">{signup.number}</td>
+                              <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400 text-right">{signup.registrationDate}</td>
+                            </tr>
+                          ))
+                      )}
                     </tbody>
                   </table>
                 )}
@@ -341,11 +324,15 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
           .filter((p) => p.status === "Completed")
           .reduce((sum, p) => sum + p.amount, 0);
 
-        // Systeme.io-style mock invoices for payouts list
-        const affiliateInvoices = [
-          { id: "inv-p01", number: "WLH-AFF-2026-001", date: "2026-04-15", amount: 400.00, status: "Paid", type: "Self-Billing Statement" },
-          { id: "inv-p02", number: "WLH-AFF-2026-002", date: "2026-05-01", amount: 800.00, status: "Paid", type: "Self-Billing Statement" },
-        ];
+        // Derive invoices dynamically from database payout records
+        const affiliateInvoices = payouts.map(p => ({
+          id: p.id,
+          number: p.invoiceRef,
+          date: p.date,
+          amount: p.amount,
+          status: p.status,
+          type: "Self-Billing Statement"
+        }));
 
         return (
           <motion.div
@@ -404,7 +391,7 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
                     <span>Total Amount Earned</span>
                   </div>
                   <h3 className="mt-4 text-3xl font-black tracking-tight text-slate-900 dark:text-slate-50 tabular-nums">
-                    ${totalAmountEarned.toFixed(2)}
+                    ₹{totalAmountEarned.toFixed(2)}
                   </h3>
                   <div className="mt-3 text-[11px] font-semibold text-violet-600 dark:text-violet-400">
                     Lifetime cumulative earnings
@@ -423,7 +410,7 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
                     <span>Payout Pending</span>
                   </div>
                   <h3 className="mt-4 text-3xl font-black tracking-tight text-slate-900 dark:text-slate-50 tabular-nums">
-                    ${requestablePayout.toFixed(2)}
+                    ₹{requestablePayout.toFixed(2)}
                   </h3>
                   <div className="mt-3.5 flex flex-col gap-2">
                     <Button
@@ -435,7 +422,7 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
                         const fee = requestablePayout * 0.10;
                         const net = requestablePayout * 0.90;
                         requestPayout();
-                        toast.success(`Instant payout requested! 10% fee ($${fee.toFixed(2)}) applied. Net $${net.toFixed(2)} is being processed!`);
+                        toast.success(`Instant payout requested! 10% fee (₹${fee.toFixed(2)}) applied. Net ₹${net.toFixed(2)} is being processed!`);
                       }}
                       disabled={requestablePayout <= 0}
                       className={`h-8 w-full rounded-lg text-xs font-bold shadow-md transition-all ${requestablePayout > 0
@@ -463,7 +450,7 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
                     <span>Payouts Done</span>
                   </div>
                   <h3 className="mt-4 text-3xl font-black tracking-tight text-slate-900 dark:text-slate-50 tabular-nums">
-                    ${payoutsDoneAmount.toFixed(2)}
+                    ₹{payoutsDoneAmount.toFixed(2)}
                   </h3>
                   <div className="mt-3 text-[11px] font-semibold text-blue-600 dark:text-blue-400">
                     Successfully disbursed payouts
@@ -503,20 +490,28 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200/50 dark:divide-slate-800/50">
-                      {payouts.map((pay) => (
-                        <tr key={pay.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors" style={{ borderColor: isDark ? "#334155" : "#e2e8f0" }}>
-                          <td className="p-3 text-slate-500 dark:text-slate-400 font-mono text-[11px]">{pay.date}</td>
-                          <td className="p-3 text-xs font-bold text-slate-900 dark:text-slate-50">${pay.amount.toFixed(2)}</td>
-                          <td className="p-3 text-right">
-                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold ${pay.status === "Completed"
-                              ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
-                              : "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400"
-                              }`}>
-                              {pay.status}
-                            </span>
+                      {payouts.length === 0 ? (
+                        <tr>
+                          <td colSpan={3} className="p-4 text-center text-xs font-semibold text-slate-400 dark:text-slate-500">
+                            No payouts logged yet.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        payouts.map((pay) => (
+                          <tr key={pay.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors" style={{ borderColor: isDark ? "#334155" : "#e2e8f0" }}>
+                            <td className="p-3 text-slate-500 dark:text-slate-400 font-mono text-[11px]">{pay.date}</td>
+                            <td className="p-3 text-xs font-bold text-slate-900 dark:text-slate-50">₹{pay.amount.toFixed(2)}</td>
+                            <td className="p-3 text-right">
+                              <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[9px] font-bold ${pay.status === "Completed"
+                                ? "bg-emerald-50 text-emerald-600 dark:bg-emerald-950/30 dark:text-emerald-400"
+                                : "bg-blue-50 text-blue-600 dark:bg-blue-950/30 dark:text-blue-400"
+                                }`}>
+                                {pay.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -553,25 +548,33 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-200/50 dark:divide-slate-800/50">
-                      {affiliateInvoices.map((inv) => (
-                        <tr key={inv.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors" style={{ borderColor: isDark ? "#334155" : "#e2e8f0" }}>
-                          <td className="p-4 text-sm font-bold text-slate-800 dark:text-slate-200 font-mono">{inv.number}</td>
-                          <td className="p-4 text-xs text-slate-500 dark:text-slate-400 font-mono">{inv.date}</td>
-                          <td className="p-4 text-xs font-semibold text-slate-600 dark:text-slate-300">{inv.type}</td>
-                          <td className="p-4 text-sm font-bold text-slate-900 dark:text-slate-50">${inv.amount.toFixed(2)}</td>
-                          <td className="p-4 text-right">
-                            <Button
-                              onClick={() => toast.success(`Preparing and downloading billing PDF statement: ${inv.number}`)}
-                              variant="outline"
-                              size="sm"
-                              className="h-7 text-[10px] font-bold gap-1 rounded-md border-slate-200 dark:border-slate-800 hover:scale-[1.01]"
-                            >
-                              <Copy className="h-3 w-3" />
-                              PDF
-                            </Button>
+                      {affiliateInvoices.length === 0 ? (
+                        <tr>
+                          <td colSpan={5} className="p-4 text-center text-xs font-semibold text-slate-400 dark:text-slate-500">
+                            No billing invoice statements generated yet.
                           </td>
                         </tr>
-                      ))}
+                      ) : (
+                        affiliateInvoices.map((inv) => (
+                          <tr key={inv.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors" style={{ borderColor: isDark ? "#334155" : "#e2e8f0" }}>
+                            <td className="p-4 text-sm font-bold text-slate-800 dark:text-slate-200 font-mono">{inv.number}</td>
+                            <td className="p-4 text-xs text-slate-500 dark:text-slate-400 font-mono">{inv.date}</td>
+                            <td className="p-4 text-xs font-semibold text-slate-600 dark:text-slate-300">{inv.type}</td>
+                            <td className="p-4 text-sm font-bold text-slate-900 dark:text-slate-50">₹{inv.amount.toFixed(2)}</td>
+                            <td className="p-4 text-right">
+                              <Button
+                                onClick={() => toast.success(`Preparing and downloading billing PDF statement: ${inv.number}`)}
+                                variant="outline"
+                                size="sm"
+                                className="h-7 text-[10px] font-bold gap-1 rounded-md border-slate-200 dark:border-slate-800 hover:scale-[1.01]"
+                              >
+                                <Copy className="h-3 w-3" />
+                                PDF
+                              </Button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
                     </tbody>
                   </table>
                 </div>
@@ -1234,7 +1237,16 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
           exit={{ opacity: 0, x: 10 }}
           transition={{ duration: 0.22, ease: "easeOut" }}
         >
-          {renderViewContent()}
+          {loading ? (
+            <div className="h-[40vh] w-full flex items-center justify-center bg-transparent">
+              <div className="flex flex-col items-center gap-3 animate-pulse">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-rose-500"></div>
+                <span className="text-sm font-extrabold text-slate-500 dark:text-slate-400">Loading affiliate details...</span>
+              </div>
+            </div>
+          ) : (
+            renderViewContent()
+          )}
         </motion.div>
       </AnimatePresence>
     </div>
