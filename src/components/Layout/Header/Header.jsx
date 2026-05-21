@@ -23,6 +23,23 @@ const Header = ({ toggleButtonRef }) => {
 
   const { showWarning, daysLeft, expiryDate } = usePlanExpiryWarning(15);
 
+  const newDashboardUrl =
+    import.meta.env.VITE_REACT_APP_NEW_DASHBOARD_URL?.trim() || "";
+  const showNewDashboardLink = (() => {
+    if (!newDashboardUrl) return false;
+    try {
+      const target = new URL(newDashboardUrl, window.location.href);
+      const current = new URL(window.location.href);
+      return (
+        target.origin !== current.origin ||
+        target.pathname !== current.pathname ||
+        target.search !== current.search
+      );
+    } catch {
+      return false;
+    }
+  })();
+
   const handleProfileClick = () => {
     // Navigate to the profile page
     navigate("/profile");
@@ -76,8 +93,8 @@ const Header = ({ toggleButtonRef }) => {
                   ></path>
                 </svg>
               </button>
-              <div className="flex ms-2 gap-1 justify-center md:me-24 items-center">
-                <Link href="/" className="flex  ">
+              <div className="flex ms-2 flex-wrap items-center gap-2 md:gap-3 md:me-8 lg:me-12">
+                <Link to="/" className="flex">
                   <img
                     src="/logo-500.png"
                     alt="Profile"
@@ -85,7 +102,37 @@ const Header = ({ toggleButtonRef }) => {
                     style={{ fill: "#525252" }}
                   />
                 </Link>
-                {HEADER_LABEL && <span className="text-neutral-500 text-xs md:text-[16px]">({HEADER_LABEL})</span>}
+                {HEADER_LABEL && (
+                  <span className="text-neutral-500 text-xs md:text-[16px]">
+                    ({HEADER_LABEL})
+                  </span>
+                )}
+                {showNewDashboardLink ? (
+                  <a
+                    href={newDashboardUrl}
+                    title="Open updated dashboard UI"
+                    className="ml-2 inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm transition-colors hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 sm:ml-3 sm:px-3 sm:py-2 sm:text-sm"
+                  >
+                    <svg
+                      className="h-4 w-4 shrink-0 text-gray-600"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                      aria-hidden
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3"
+                      />
+                    </svg>
+                    <span className="hidden whitespace-nowrap sm:inline">
+                      New dashboard
+                    </span>
+                    <span className="whitespace-nowrap sm:hidden">New UI</span>
+                  </a>
+                ) : null}
               </div>
             </div>
 
@@ -151,7 +198,7 @@ const Header = ({ toggleButtonRef }) => {
               </div>
             </ComponentGuard>
 
-            <div className="flex items-center">
+            <div className="flex items-center gap-2 sm:gap-3">
               <ComponentGuard allowedRoles={[roles.ADMIN, roles.SUPER_ADMIN]}>
                 <ImportExportNotifications userData={userData} roles={roles} />
               </ComponentGuard>
