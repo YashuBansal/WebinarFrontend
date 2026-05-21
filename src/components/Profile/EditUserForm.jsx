@@ -7,7 +7,7 @@ import IconButton from "@mui/material/IconButton";
 import { DateFormat } from "../../utils/extra";
 import { useSelector } from "react-redux";
 import CloseIcon from "@mui/icons-material/Close";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../AppLoader";
 import FormInput from "../FormInput";
 import ComponentGuard from "../AccessControl/ComponentGuard";
 import useRoles from "../../hooks/useRoles";
@@ -170,7 +170,7 @@ const EditUserForm = ({ onSubmit, onClose }) => {
 
       {/* Submit Button */}
       <Button type="submit" variant="contained" color="primary" fullWidth>
-        {isLoading ? <ClipLoader color="#fff" size={20} /> : "Save Info"}
+        {isLoading ? <AppLoader size="md" variant="inverse" /> : "Save Info"}
       </Button>
     </form>
   );

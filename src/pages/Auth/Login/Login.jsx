@@ -3,17 +3,80 @@ import { useForm } from "react-hook-form";
 import { logIn } from "../../../features/actions/auth";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
-import TextField from "@mui/material/TextField";
 
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-const ForgotPasswordModal = lazy(() =>
-  import("../ForgotPassword/ForgotPassword")
+const ForgotPasswordModal = lazy(
+  () => import("../ForgotPassword/ForgotPassword"),
 );
-import TailwindLoader from "../../../components/TailwindLoader";
+import AppLoader from "../../../components/AppLoader";
 import ModalFallback from "../../../components/Fallback/ModalFallback";
+
+const inputClass =
+  "h-12 w-full rounded-lg border border-white/30 bg-white/20 px-3 text-white placeholder:text-white/60 shadow-sm backdrop-blur-sm transition-colors focus:border-wlh-brand focus:bg-white/30 focus:outline-none focus:ring-2 focus:ring-wlh-brand/50 disabled:cursor-not-allowed disabled:opacity-60 autofill:!bg-[rgba(15,23,42,0.85)] autofill:!text-white autofill:shadow-[inset_0_0_0_1000px_rgba(15,23,42,0.85)]";
+
+function EyeIcon(props) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      {...props}
+    >
+      <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+function EyeOffIcon(props) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      {...props}
+    >
+      <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+      <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+      <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.35" />
+      <line x1="2" x2="22" y1="2" y2="22" />
+    </svg>
+  );
+}
+
+function MoonIcon(props) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="20"
+      height="20"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      {...props}
+    >
+      <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+    </svg>
+  );
+}
+
 function Login() {
   const dispatch = useDispatch();
   const { isLoggingIn, isUserLoggedIn } = useSelector((state) => state.auth);
@@ -21,6 +84,7 @@ function Login() {
   const [isPasswordHidden, setPasswordHidden] = useState(false);
   const [forgotModalOpen, setForgotModalOpen] = useState(false);
   const [openCode, setOpenCode] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const {
     register,
     handleSubmit,
@@ -32,13 +96,11 @@ function Login() {
   };
 
   const onSubmit = (data) => {
-    // When the form is submitted, `data` will automatically include `securityCode` if it's visible and registered.
     dispatch(logIn(data)).then((res) => {
       if (res.meta.requestStatus === "fulfilled") {
         if (res.payload?.twoFa) {
-          setOpenCode(true); // Show security code input on the next render
+          setOpenCode(true);
         } else {
-          // Successful login, clear the 2FA state if it was open
           setOpenCode(false);
         }
 
@@ -48,7 +110,6 @@ function Login() {
       }
     });
   };
-
 
   useEffect(() => {
     if (isUserLoggedIn) {
@@ -60,314 +121,312 @@ function Login() {
     document.title = "Signin | Webinar Leads Hub";
   }, []);
 
-
-
-
-// text field
-const glassTextFieldSx = {
-  "& .MuiOutlinedInput-root": {
-    backgroundColor: "rgba(255,255,255,0.07) !important",
-    backdropFilter: "blur(10px)",
-    WebkitBackdropFilter: "blur(10px)",
-    color: "#ffffff !important",
-    height: "52px",
-    borderRadius: "12px",
-    fontSize: "0.95rem",
-
-    "& fieldset": {
-      borderColor: "rgba(255,255,255,0.2) !important",
-    },
-    "&:hover fieldset": {
-      borderColor: "rgba(255,255,255,0.4) !important",
-    },
-    "&.Mui-focused fieldset": {
-      borderColor: "#22B573 !important",
-      borderWidth: "1px",
-    },
-    "& input": {
-      backgroundColor: "transparent !important",
-      color: "#ffffff !important",
-      "&::placeholder": {
-        color: "rgba(255,255,255,0.5) !important",
-        opacity: 1,
-      },
-      "&:-webkit-autofill": {
-        WebkitBoxShadow: "0 0 0 1000px rgba(10, 30, 34, 0.9) inset !important",
-        WebkitTextFillColor: "#ffffff !important",
-        transition: "background-color 5000s ease-in-out 0s",
-      },
-    },
-  },
-  "& .MuiInputLabel-root": {
-    color: "rgba(255,255,255,0.6) !important",
-    fontSize: "0.9rem",
-  },
-  "& .MuiInputLabel-root.Mui-focused": {
-    color: "#22B573 !important",
-  },
-  "& .MuiFormHelperText-root": {
-    color: "rgba(255,255,255,0.5) !important",
-  },
-  "& .MuiInputAdornment-root .MuiSvgIcon-root": {
-    color: "rgba(255,255,255,0.7) !important",
-  },
-  "& .MuiIconButton-root": {
-    color: "rgba(255,255,255,0.7) !important",
-  },
-};
+  const formErrorMessage =
+    errors.email?.message ||
+    errors.password?.message ||
+    errors.securityCode?.message;
 
   return (
-    <div
-      className="h-screen w-full flex items-center justify-center relative overflow-hidden"
-      style={{
-        background: "radial-gradient(circle at top right, #0a2e3a, #05161c 60%), linear-gradient(135deg, #05161c 0%, #0a2e3a 50%, #05161c 100%)"
-      }}
-    >
-      <style>
-        {`
-          @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-20px); }
-            100% { transform: translateY(0px); }
-          }
-          @keyframes float-slow {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-15px); }
-            100% { transform: translateY(0px); }
-          }
-          @keyframes float-lag {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-25px); }
-            100% { transform: translateY(0px); }
-          }
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-          @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0px); }
-          }
-          .animate-fade-in { animation: fadeIn 0.8s ease-out forwards; }
-          .animate-slide-up { animation: slideUp 0.6s ease-out forwards; }
-          .float1 { animation: float 6s ease-in-out infinite; }
-          .float2 { animation: float-lag 8s ease-in-out infinite; }
-          .float3 { animation: float-slow 7s ease-in-out infinite; }
-          .float4 { animation: float 5.5s ease-in-out infinite; animation-delay: 1s; }
-          .float5 { animation: float-lag 9s ease-in-out infinite; animation-delay: 0.5s; }
-          .float6 { animation: float-slow 7.5s ease-in-out infinite; animation-delay: 1.5s; }
-        `}
-      </style>
-  <div className="absolute inset-0 pointer-events-none">
-    <div
-      className="absolute top-[-20%] left-[-20%] w-[600px] h-[600px] rounded-full blur-[150px]"
-      style={{ background: "rgba(55,114,121,0.25)" }}
-    />
-  </div>
-
-  <div className="absolute inset-0 pointer-events-none overflow-hidden">
-    {/* Side Icons with intensified glows */}
-    {/* Top Left - WLH */}
-    <div className="absolute top-[20%] -translate-y-1/2 left-[10%] float2">
-      <div className="relative w-24 h-24">
-        <div className="absolute inset-0 rounded-full bg-blue-400 opacity-60 blur-3xl scale-150"></div>
-        <div className="relative z-10 w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-          <img src="/zapier_icon.png" className="w-14 h-14" />
-        </div>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden font-sans transition-colors duration-500">
+      <div
+        className="absolute inset-0 transition-all duration-500"
+        style={{
+          background:
+            "linear-gradient(135deg, #0a1628 0%, #1a2847 25%, #0f3460 50%, #1a2847 75%, #0a1628 100%)",
+        }}
+      >
+        <div className="animate-pulse-slow absolute left-0 top-0 h-[500px] w-[500px] rounded-full bg-gradient-to-r from-green-500 to-teal-500 opacity-20 blur-3xl" />
+        <div className="animate-pulse-slower absolute bottom-0 right-0 h-[600px] w-[600px] rounded-full bg-gradient-to-r from-blue-500 to-purple-500 opacity-15 blur-3xl" />
+        <div className="animate-pulse-slowest absolute left-1/2 top-1/2 h-[700px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-cyan-500 to-green-400 opacity-10 blur-3xl" />
+        <div className="absolute inset-0 opacity-5" aria-hidden />
       </div>
-    </div>
 
-    {/* Middle Left - Pabbly */}
-    <div className="absolute top-[50%] -translate-y-1/2 left-[8%] float3 hidden md:block">
-      <div className="relative w-24 h-24">
-        <div className="absolute inset-0 rounded-full bg-teal-400 opacity-60 blur-3xl scale-150"></div>
-        <div className="relative z-10 w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-          <img src="/pabbly_logo.png" className="w-12 h-12" />
-        </div>
-      </div>
-    </div>
-
-    {/* Bottom Left - WhatsApp */}
-    <div className="absolute top-[80%] -translate-y-1/2 left-[10%] float1">
-      <div className="relative w-24 h-24">
-        <div className="absolute inset-0 rounded-full bg-green-400 opacity-60 blur-3xl scale-150"></div>
-        <div className="relative z-10 w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-          <img src="/whatsapp_logo.png" className="w-12 h-12" />
-        </div>
-      </div>
-    </div>
-
-    {/* Top Right - Flexifunnel */}
-    <div className="absolute top-[20%] -translate-y-1/2 right-[10%] float4">
-      <div className="relative w-24 h-24">
-        <div className="absolute inset-0 rounded-full bg-green-400 opacity-60 blur-3xl scale-150"></div>
-        <div className="relative z-10 w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-          <img src="/flexifunnel.png" className="w-12 h-12" />
-        </div>
-      </div>
-    </div>
-
-    {/* Middle Right - Systeme */}
-    <div className="absolute top-[50%] -translate-y-1/2 right-[8%] float5 hidden md:block">
-      <div className="relative w-24 h-24">
-        <div className="absolute inset-0 rounded-full bg-blue-400 opacity-60 blur-3xl scale-150"></div>
-        <div className="relative z-10 w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-          <img src="/Systeme.png" className="w-12 h-12" />
-        </div>
-      </div>
-    </div>
-
-    {/* Bottom Right - Zoom */}
-    <div className="absolute top-[80%] -translate-y-1/2 right-[10%] float6">
-      <div className="relative w-24 h-24">
-        <div className="absolute inset-0 rounded-full bg-blue-500 opacity-60 blur-3xl scale-150"></div>
-        <div className="relative z-10 w-24 h-24 bg-white rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(255,255,255,0.3)]">
-          <img src="/zoom.png" className="w-12 h-12" />
-        </div>
-      </div>
-    </div>
-  </div>  
-
-<div className="relative z-10 w-full max-w-md rounded-2xl p-8 pt-10 text-white mx-6 animate-slide-up opacity-0"
-  style={{
-    background: "rgba(10, 30, 34, 0.45)",
-    backdropFilter: "blur(40px) saturate(180%)",
-    WebkitBackdropFilter: "blur(40px) saturate(180%)",
-    border: "1px solid rgba(255,255,255,0.15)",
-    boxShadow: "0 25px 60px rgba(0,0,0,0.5), inset 0 1px 1px rgba(255,255,255,0.1)",
-    animationDelay: "0.2s"
-  }}
->
-
-  <div
-  className="absolute inset-0 pointer-events-none"
-  style={{
-   background:
-  "linear-gradient(120deg, rgba(255,255,255,0.35), rgba(255,255,255,0.08), rgba(255,255,255,0.2))",
-opacity: 0.22,
-  }}
-/>
-  
-        <div className="flex justify-center mb-6">
-          <div className="bg-[#0a1e22] p-2 rounded-lg border border-white/10 shadow-lg">
-            <img
-              className="w-16 h-16 object-contain"
-              src="./wlhLogo.png"
-              alt="Webinar Leads Hub"
-              fetchpriority="high"
-            />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="animate-float1 absolute left-4 top-16 md:left-12 md:top-24 lg:left-24">
+          <div className="relative">
+            <div className="absolute inset-0 h-20 w-20 scale-150 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 opacity-50 blur-2xl md:h-24 md:w-24" />
+            <div className="absolute inset-0 h-20 w-20 rounded-full bg-blue-500 opacity-30 blur-xl animate-pulse md:h-24 md:w-24" />
+            <div
+              className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white p-3 md:h-24 md:w-24 md:p-4"
+              style={{
+                boxShadow:
+                  "0 10px 40px rgba(59, 130, 246, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.9) inset",
+              }}
+            >
+              <img
+                src="/zapier_icon.png"
+                alt=""
+                className="h-full w-full object-contain"
+              />
+            </div>
           </div>
         </div>
-        {/* Heading */}
-        <h1 className="text-center text-3xl font-semibold tracking-wide text-white uppercase">
-          WEBINAR LEADS <span className="text-green-400">HUB</span>
-        </h1>
-        <p className="text-center text-sm text-white/70 mt-3 font-medium">
-          Welcome back 👋
-        </p>
-      
-    {/* form */}
-          <form
-            className="space-y-4 mt-6"
-            autoComplete="on"
-            onSubmit={handleSubmit(onSubmit)}
+
+        <div className="animate-float4 absolute right-4 top-16 md:right-12 md:top-24 lg:right-24">
+          <div className="relative">
+            <div className="absolute inset-0 h-20 w-20 scale-150 rounded-full bg-gradient-to-br from-green-400 to-green-600 opacity-50 blur-2xl md:h-24 md:w-24" />
+            <div className="absolute inset-0 h-20 w-20 rounded-full bg-green-500 opacity-30 blur-xl animate-pulse md:h-24 md:w-24" />
+            <div
+              className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white p-3 md:h-24 md:w-24 md:p-4"
+              style={{
+                boxShadow:
+                  "0 10px 40px rgba(34, 181, 115, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.9) inset",
+              }}
+            >
+              <img
+                src="/flexifunnel.png"
+                alt=""
+                className="h-full w-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="animate-float5 absolute left-4 top-1/2 hidden -translate-y-1/2 md:left-12 md:block lg:left-24">
+          <div className="relative">
+            <div className="absolute inset-0 h-24 w-24 scale-150 rounded-full bg-gradient-to-br from-teal-400 to-teal-600 opacity-50 blur-2xl" />
+            <div className="absolute inset-0 h-24 w-24 rounded-full bg-teal-500 opacity-30 blur-xl animate-pulse" />
+            <div
+              className="relative flex h-24 w-24 items-center justify-center rounded-full bg-white p-4"
+              style={{
+                boxShadow:
+                  "0 10px 40px rgba(20, 184, 166, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.9) inset",
+              }}
+            >
+              <img
+                src="/pabbly_logo.png"
+                alt=""
+                className="h-full w-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="animate-float6 absolute right-4 top-1/2 hidden -translate-y-1/2 md:right-12 md:block lg:right-24">
+          <div className="relative">
+            <div className="absolute inset-0 h-24 w-24 scale-150 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 opacity-50 blur-2xl" />
+            <div className="absolute inset-0 h-24 w-24 rounded-full bg-blue-500 opacity-30 blur-xl animate-pulse" />
+            <div
+              className="relative flex h-24 w-24 items-center justify-center rounded-full bg-white p-4"
+              style={{
+                boxShadow:
+                  "0 10px 40px rgba(59, 130, 246, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.9) inset",
+              }}
+            >
+              <img
+                src="/Systeme.png"
+                alt=""
+                className="h-full w-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="animate-float2 absolute bottom-16 left-4 md:bottom-24 md:left-12 lg:left-24">
+          <div className="relative">
+            <div className="absolute inset-0 h-20 w-20 scale-150 rounded-full bg-gradient-to-br from-green-400 to-green-600 opacity-50 blur-2xl md:h-24 md:w-24" />
+            <div className="absolute inset-0 h-20 w-20 rounded-full bg-green-500 opacity-30 blur-xl animate-pulse md:h-24 md:w-24" />
+            <div
+              className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white p-3 md:h-24 md:w-24 md:p-4"
+              style={{
+                boxShadow:
+                  "0 10px 40px rgba(37, 211, 102, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.9) inset",
+              }}
+            >
+              <img
+                src="/whatsapp_logo.png"
+                alt=""
+                className="h-full w-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="animate-float3 absolute bottom-16 right-4 md:bottom-24 md:right-12 lg:right-24">
+          <div className="relative">
+            <div className="absolute inset-0 h-20 w-20 scale-150 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 opacity-50 blur-2xl md:h-24 md:w-24" />
+            <div className="absolute inset-0 h-20 w-20 rounded-full bg-blue-500 opacity-30 blur-xl animate-pulse md:h-24 md:w-24" />
+            <div
+              className="relative flex h-20 w-20 items-center justify-center rounded-full bg-white p-3 md:h-24 md:w-24 md:p-4"
+              style={{
+                boxShadow:
+                  "0 10px 40px rgba(45, 140, 255, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.9) inset",
+              }}
+            >
+              <img
+                src="/zoom.png"
+                alt=""
+                className="h-full w-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button
+        type="button"
+        className="fixed right-4 top-4 z-50 rounded-full border border-white/20 bg-white/10 p-3 opacity-60 shadow-md backdrop-blur-md md:right-6 md:top-6"
+        style={{ boxShadow: "0 4px 12px rgba(0, 0, 0, 0.2)" }}
+        aria-disabled="true"
+        title="Theme toggle is not available in this app"
+        tabIndex={-1}
+      >
+        <MoonIcon className="text-white" />
+      </button>
+
+      <div
+        className="animate-login-fade relative z-10 mx-4 w-full max-w-md"
+        style={{
+          backgroundColor: "rgba(255, 255, 255, 0.15)",
+          backdropFilter: "blur(15px)",
+          WebkitBackdropFilter: "blur(15px)",
+          borderRadius: "16px",
+          boxShadow: "0 8px 30px rgba(0, 0, 0, 0.25)",
+          border: "1px solid rgba(255, 255, 255, 0.2)",
+          padding: "48px 40px",
+        }}
+      >
+        <div className="mb-8 text-center">
+          <div className="mb-4 flex justify-center">
+            <img
+              src="/wlh-logo.png"
+              alt="Webinar Leads Hub"
+              className="h-24 w-24 object-contain"
+              fetchPriority="high"
+            />
+          </div>
+          <h1
+            className="mb-2 text-3xl text-white"
+            style={{
+              textShadow:
+                "0 2px 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(34, 181, 115, 0.5)",
+            }}
           >
-            {/* Email */}        
-              <TextField
-                fullWidth
-                label="Email"
-                name="email"
-                autoComplete="email"
-                type="email"
-                sx={glassTextFieldSx}
-                {...register("email", { required: true })}
-                error={!!errors.email}
-                helperText={errors.email && "Email is required"}
-                disabled={openCode}
-                autoFocus
-              />
-              <TextField
-                {...register("password", { required: "Password is required" })}
-                fullWidth
-                label="Password"
-                name="password"
-                autoComplete="current-password"
-                variant="outlined"
-                 sx={glassTextFieldSx}
-                // style={{ width: "22rem" }}
+            WEBINAR LEADS <span className="text-wlh-brand">HUB</span>
+          </h1>
+          <p className="text-lg text-white opacity-90">Welcome back 👋</p>
+        </div>
+
+        <form
+          className="space-y-5"
+          autoComplete="on"
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <div>
+            <label htmlFor="email" className="mb-2 block text-sm text-white">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              disabled={openCode}
+              autoFocus={!openCode}
+              className={inputClass}
+              placeholder="Enter your email"
+              {...register("email", { required: "Email is required" })}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="password" className="mb-2 block text-sm text-white">
+              Password
+            </label>
+            <div className="relative">
+              <input
+                id="password"
                 type={isPasswordHidden ? "text" : "password"}
-                error={!!errors.password}
-                helperText={errors.password?.message}
-                disabled={openCode} // Disable when asking for security code
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton
-                        onClick={togglePasswordVisibility}
-                        disabled={openCode}
-                      >
-                        {isPasswordHidden ? (
-                          <VisibilityOffIcon />
-                        ) : (
-                          <Visibility />
-                        )}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
+                autoComplete="current-password"
+                disabled={openCode}
+                className={`${inputClass} pr-11`}
+                placeholder="Enter your password"
+                {...register("password", {
+                  required: "Password is required",
+                })}
               />
-            
-
-            {/* Conditionally render the Security Code input field */}
-            {openCode && (
-              <div className="flex justify-center pt-2">
-                <TextField
-                  {...register("securityCode", {
-                    required: "Security code is required",
-                  })}
-                  fullWidth
-                  label="Security Code"
-                  name="securityCode"
-                  variant="outlined"
-                  sx={glassTextFieldSx}
-                  error={!!errors.securityCode}
-                  helperText={errors.securityCode?.message}
-                  autoFocus
-                />
-              </div>
-            )}
-
-            <div className="flex items-center justify-end pb-2">
               <button
                 type="button"
-                onClick={() => setForgotModalOpen(true)}
-                className="text-sm text-white/70 hover:text-white hover:underline transition-colors"
+                onClick={togglePasswordVisibility}
+                disabled={openCode}
+                className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-white/70 transition-all hover:bg-white/10 hover:text-white disabled:opacity-50"
+                aria-label={
+                  isPasswordHidden ? "Hide password" : "Show password"
+                }
               >
-                Forgot your password?
+                {isPasswordHidden ? <EyeOffIcon /> : <EyeIcon />}
               </button>
             </div>
+          </div>
 
-            <button
-              type="submit"
-              className="w-full mt-2 bg-green-500 hover:bg-green-600 active:scale-[0.98] transition-all text-white py-3 rounded-xl font-semibold text-lg shadow-lg shadow-green-900/20"
-              disabled={isLoggingIn}
-            >
-              {isLoggingIn ? <TailwindLoader size={6} /> : "Sign In"}
-            </button>
-
-              
-           
-          </form>
-
-          {forgotModalOpen && (
-            <Suspense fallback={<ModalFallback />}>
-              <ForgotPasswordModal onClose={() => setForgotModalOpen(false)} />
-            </Suspense>
+          {openCode && (
+            <div className="pt-1">
+              <label
+                htmlFor="securityCode"
+                className="mb-2 block text-sm text-white"
+              >
+                Security Code
+              </label>
+              <input
+                id="securityCode"
+                type="text"
+                autoComplete="one-time-code"
+                autoFocus
+                className={inputClass}
+                placeholder="Enter security code"
+                {...register("securityCode", {
+                  required: "Security code is required",
+                })}
+              />
+            </div>
           )}
-      
+
+          {formErrorMessage && (
+            <div className="rounded-lg bg-red-500/20 px-3 py-2 text-sm text-red-300">
+              {formErrorMessage}
+            </div>
+          )}
+
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <input
+                id="remember"
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 shrink-0 rounded border-white/50 bg-white/10 text-wlh-brand focus:ring-wlh-brand focus:ring-offset-0"
+              />
+              <label
+                htmlFor="remember"
+                className="cursor-pointer text-sm text-white"
+              >
+                Remember me
+              </label>
+            </div>
+            <button
+              type="button"
+              onClick={() => setForgotModalOpen(true)}
+              className="text-sm text-white hover:underline"
+            >
+              Forgot your password?
+            </button>
+          </div>
+
+          <button
+            type="submit"
+            disabled={isLoggingIn}
+            className="flex h-12 w-full items-center justify-center rounded-lg font-medium text-white transition-all hover:scale-[1.02] hover:shadow-glow-button disabled:cursor-not-allowed disabled:opacity-70"
+            style={{ backgroundColor: "#22B573" }}
+          >
+            {isLoggingIn ? <AppLoader size="md" variant="inverse" /> : "Sign In"}
+          </button>
+        </form>
+
+        {forgotModalOpen && (
+          <Suspense fallback={<ModalFallback />}>
+            <ForgotPasswordModal onClose={() => setForgotModalOpen(false)} />
+          </Suspense>
+        )}
       </div>
-      
-      
     </div>
   );
 }

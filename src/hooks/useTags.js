@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import tagsService from "../services/tagsService";
+import tagsService, { normalizeTagsListResponse } from "../services/tagsService";
 import { instance } from "../services/axiosInterceptor";
 import { toast } from "sonner";
 
@@ -8,10 +8,7 @@ export const useTags = () => {
     queryKey: ["tags"],
     queryFn: async () => {
       const response = await tagsService.getTags();
-      if (response?.success && response?.data) {
-        return response.data;
-      }
-      return [];
+      return normalizeTagsListResponse(response);
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -25,7 +22,7 @@ export const useUpdateAttendeeTag = (email, onSuccessCallback) => {
       const response = await tagsService.updateAttendeeAssociationTag(
         email,
         tag,
-        action
+        action,
       );
       if (!response?.success) {
         throw new Error(response?.message || "Failed to update tag");
@@ -45,7 +42,9 @@ export const useUpdateAttendeeTag = (email, onSuccessCallback) => {
       if (onSuccessCallback) {
         onSuccessCallback();
       }
-      toast.success(`Tag ${action === "add" ? "added" : "removed"} successfully`);
+      toast.success(
+        `Tag ${action === "add" ? "added" : "removed"} successfully`,
+      );
     },
     onError: (error) => {
       toast.error(error?.message || "Failed to update tag");
@@ -139,7 +138,7 @@ export const useApplyTagsToEmployeeAssignments = (empId, onSuccessCallback) => {
     mutationFn: async (payload) => {
       const response = await instance.put(
         `/assignment/tag-employee-assignments/${empId}`,
-        payload
+        payload,
       );
       const data = response?.data || response;
       return data;
@@ -151,8 +150,9 @@ export const useApplyTagsToEmployeeAssignments = (empId, onSuccessCallback) => {
       toast.success("Tags applied successfully to employee assignments");
     },
     onError: (error) => {
-      toast.error(error?.message || "Failed to apply tags to employee assignments");
+      toast.error(
+        error?.message || "Failed to apply tags to employee assignments",
+      );
     },
   });
 };
-

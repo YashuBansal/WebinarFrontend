@@ -1,8 +1,8 @@
-import React, { lazy, Suspense, useCallback, useEffect, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Button } from "@mui/material";
-import { Edit, ToggleOn, ToggleOff, Dashboard } from "@mui/icons-material";
+import { Bookmark, Download, Search, UserPlus } from "lucide-react";
 import {
   getAllEmployees,
   getAllEmployeesSilently,
@@ -15,34 +15,45 @@ import {
 } from "../../features/slices/employee";
 import { openModal } from "../../features/slices/modalSlice";
 import useUserSubscription from "../../hooks/useUserSubscription";
-import DataTable from "../../components/Table/DataTable";
 import { employeeTableColumns } from "../../utils/columnData";
-import useRoles from "../../hooks/useRoles";
-import ComponentGuard from "../../components/AccessControl/ComponentGuard";
 import EmployeeFilterModal from "../../components/Filter/EmployeeFilterModal";
 const ExportModal = lazy(() => import("../../components/Export/ExportModal"));
 import { exportEmployeesExcel } from "../../features/actions/export-excel";
 import { socket } from "../../socket";
 import { NotifActionType } from "../../utils/extra";
-import { VisibilityIcon } from "../../components/SVGs";
 import ModalFallback from "../../components/Fallback/ModalFallback";
-import { globalButton } from "../../utils/style";
+import { useTheme } from "../../contexts/ThemeContext";
+import EmployeesTableShell from "../../components/Employees/EmployeesTableShell";
+import EmployeesCardGrid from "../../components/Employees/EmployeesCardGrid";
+import { getRoleNameByID } from "../../utils/roles";
+import FilterPresetModal from "../../components/Filter/FilterPresetModal";
+
+const VIEW_STORAGE_KEY = "employeesListViewMode";
 
 const Employees = () => {
-  // ----------------------- ModalNames for Redux -----------------------
   const activeInactiveModalName = "activeInactiveModal";
   const employeeExportModalName = "EmployeeExportModal";
   const employeeFilterModalName = "EmployeeFilterModal";
   const tableHeader = "Employee Table";
 
-  // ----------------------- Constants -----------------------
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const roles = useRoles();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({});
   const [page, setPage] = useState(searchParams.get("page") || 1);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [presetModalOpen, setPresetModalOpen] = useState(false);
+  const [listView, setListView] = useState(() => {
+    try {
+      const v = localStorage.getItem(VIEW_STORAGE_KEY);
+      return v === "cards" || v === "table" ? v : "table";
+    } catch {
+      return "table";
+    }
+  });
 
   const LIMIT = useSelector((state) => state.pageLimits[tableHeader] || 10);
   const { employeeData, isLoading, isSuccess, totalPages } = useSelector(
@@ -89,9 +100,7 @@ const Employees = () => {
     return () => {
       socket.off("notification", onNotification);
     };
-  }, [fetchEmployeeData]);
-
-  const navigateToAdd = () => navigate("/createEmployee");
+  }, [fetchEmployeeDataSilently]);
 
   useEffect(() => {
     if (isSuccess) {
@@ -104,13 +113,13 @@ const Employees = () => {
       );
       dispatch(clearSuccess());
     }
-  }, [isSuccess]);
+  }, [isSuccess, dispatch, LIMIT, filters]);
 
   useEffect(() => {
     return () => {
       dispatch(clearEmployeeData());
     };
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
     const currentPageInUrl = searchParams.get("page");
@@ -121,118 +130,185 @@ const Employees = () => {
     }
   }, [page, searchParams, setSearchParams]);
 
-  // ------------------- Action Icons -------------------
-  const actionIcons = [
-    {
-      icon: () => (
-        <img
-          src={VisibilityIcon}
-          alt="Bookmark"
-          className="min-h-6 h-6 w-6 min-w-6"
-        />
-      ),
-      tooltip: "View Employee Info",
-      onClick: (item) => {
-        navigate(
-          `/employee/view/${item?._id}?page=1&tabValue=assignments&role=${item?.role}&webinarId=all&userName=${item?.userName}`
-        );
-      },
-      readOnly: true,
-    },
-    ,
-    ...(userData?.isActive
-      ? [
-          {
-            icon: () => (
-              <Dashboard className="text-neutral-500 group-hover:text-neutral-600" />
-            ),
-            tooltip: "Visit Dashboard",
-            onClick: (item) => {
-              dispatch(setEmployeeModeId(item));
-              navigate("/employee/dashboard/" + item?._id);
-            },
-          },
-          {
-            icon: () => (
-              <Edit className="text-blue-500 group-hover:text-blue-600" />
-            ),
-            tooltip: "Edit Employee Data",
-            onClick: (item) => {
-              navigate(`/employee/edit/${item?._id}`);
-            },
-          },
-          {
-            icon: (item) => (
-              <>
-                {item?.isActive ? (
-                  <ToggleOff
-                    fontSize="large"
-                    className="text-red-500 group-hover:text-red-600"
-                  />
-                ) : (
-                  <ToggleOn
-                    fontSize="large"
-                    className="text-green-500 group-hover:text-green-600"
-                  />
-                )}
-              </>
-            ),
-            tooltip: "Toggle Status",
-            onClick: (item) => {
-              dispatch(
-                openModal({
-                  modalName: activeInactiveModalName,
-                  data: item,
-                })
-              );
-            },
-          },
-        ]
-      : []),
-  ];
+  const filteredRows = useMemo(() => {
+    const list = Array.isArray(employeeData) ? employeeData : [];
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((row) => {
+      const blob = [
+        row?.email,
+        row?.userName,
+        row?.phone,
+        getRoleNameByID(row?.role),
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      return blob.includes(q);
+    });
+  }, [employeeData, searchQuery]);
+
+  const openFilterModal = () => {
+    dispatch(openModal({ modalName: employeeFilterModalName }));
+  };
+
+  const openExportModal = () => {
+    dispatch(openModal({ modalName: employeeExportModalName }));
+  };
+
+  const setListViewPersist = useCallback((mode) => {
+    setListView(mode);
+    try {
+      localStorage.setItem(VIEW_STORAGE_KEY, mode);
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   return (
-    <>
-      <div className="pt-14 sm:px-5">
-        {/* Add Employee Button */}
-        <div className="flex justify-end items-center pb-4">
-          <ComponentGuard conditions={[userData?.isActive]}>
-            <button className={globalButton} onClick={navigateToAdd}>
-              Add Employee
-            </button>
-          </ComponentGuard>
+    <div className="p-4 sm:p-6 lg:p-8 max-w-[1600px] mx-auto space-y-6 transition-all duration-300">
+      <motion.div
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.35 }}
+      >
+        <div>
+          <h2
+            className="text-2xl font-bold tracking-tight"
+            style={{ color: isDark ? "#f8fafc" : "#071028" }}
+          >
+            Employees Activity
+          </h2>
+          <p
+            className="text-sm mt-1"
+            style={{ color: isDark ? "#94a3b8" : "#64748b" }}
+          >
+            Monitor sales and call activity in real-time.
+          </p>
         </div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+          {userData?.isActive && (
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={openExportModal}
+                className="rounded-xl flex items-center justify-center gap-2 px-4 py-2 shadow-sm font-semibold text-sm transition-transform hover:scale-[1.02] shrink-0 border"
+                style={{
+                  backgroundColor: isDark ? "#1e293b" : "#ffffff",
+                  color: isDark ? "#f8fafc" : "#0f172a",
+                  borderColor: isDark ? "#334155" : "#e2e8f0",
+                }}
+              >
+                <Download className="w-4 h-4 text-gray-500" />
+                <span>Export</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => navigate("/createEmployee")}
+                className="rounded-xl flex items-center justify-center gap-2 px-4 py-2 shadow-sm font-semibold text-sm transition-transform hover:scale-[1.02] shrink-0"
+                style={{
+                  backgroundColor: "#1877F2",
+                  color: "white",
+                  border: "none",
+                  boxShadow: "0 4px 10px rgba(255, 107, 53, 0.2)",
+                }}
+              >
+                <UserPlus className="w-4 h-4 shrink-0" />
+                <span className="hidden sm:inline">Add Employee</span>
+                <span className="sm:hidden">Add</span>
+              </button>
+            </div>
+          )}
+        </div>
+      </motion.div>
 
-        <DataTable
-          tableHeader={tableHeader}
-          tableUniqueKey="employeeListingTable"
-          filters={filters}
-          setFilters={setFilters}
-          tableData={{
-            columns: employeeTableColumns.filter((column) => {
-              if (column.key === "inactivityTime") {
-                return employeeInactivity;
-              }
-              return true;
-            }),
-            rows: employeeData || [],
-          }}
-          actions={actionIcons}
-          totalPages={totalPages}
+      {listView === "table" ? (
+        <EmployeesTableShell
+          theme={theme}
+          listView={listView}
+          onListViewChange={setListViewPersist}
+          isDark={isDark}
+          isLoading={isLoading}
+          rows={filteredRows}
+          employeeInactivity={employeeInactivity}
+          userData={userData}
           page={page}
           setPage={setPage}
+          totalPages={totalPages || 1}
           limit={LIMIT}
-          filterModalName={employeeFilterModalName}
-          exportModalName={employeeExportModalName}
-          isLoading={isLoading}
+          tableHeader={tableHeader}
+          onOpenFilters={openFilterModal}
+          onOpenExport={openExportModal}
+          onView={(item) =>
+            navigate(
+              `/employee/view/${item?._id}?page=1&tabValue=assignments&role=${item?.role}&webinarId=all&userName=${item?.userName}`
+            )
+          }
+          onDashboard={(item) => {
+            dispatch(setEmployeeModeId(item));
+            navigate("/employee/dashboard/" + item?._id);
+          }}
+          onEdit={(item) => navigate(`/employee/edit/${item?._id}`)}
+          onToggleStatus={(item) =>
+            dispatch(
+              openModal({
+                modalName: activeInactiveModalName,
+                data: item,
+              })
+            )
+          }
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          onOpenPresets={() => setPresetModalOpen(true)}
         />
-      </div>
+      ) : (
+        <EmployeesCardGrid
+          theme={theme}
+          listView={listView}
+          onListViewChange={setListViewPersist}
+          isDark={isDark}
+          isLoading={isLoading}
+          rows={filteredRows}
+          userData={userData}
+          employeeInactivity={employeeInactivity}
+          page={page}
+          setPage={setPage}
+          totalPages={totalPages || 1}
+          limit={LIMIT}
+          tableHeader={tableHeader}
+          onOpenFilters={openFilterModal}
+          onOpenExport={openExportModal}
+          onView={(item) =>
+            navigate(
+              `/employee/view/${item?._id}?page=1&tabValue=assignments&role=${item?.role}&webinarId=all&userName=${item?.userName}`
+            )
+          }
+          onDashboard={(item) => {
+            dispatch(setEmployeeModeId(item));
+            navigate("/employee/dashboard/" + item?._id);
+          }}
+          onEdit={(item) => navigate(`/employee/edit/${item?._id}`)}
+          onToggleStatus={(item) =>
+            dispatch(
+              openModal({
+                modalName: activeInactiveModalName,
+                data: item,
+              })
+            )
+          }
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          onOpenPresets={() => setPresetModalOpen(true)}
+        />
+      )}
 
       <ConfirmActionModal modalName={activeInactiveModalName} />
       <EmployeeFilterModal
         modalName={employeeFilterModalName}
         filters={filters}
         setFilters={setFilters}
+        setPage={setPage}
       />
 
       {exportModalOpen && (
@@ -253,7 +329,17 @@ const Employees = () => {
           />
         </Suspense>
       )}
-    </>
+      {presetModalOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <FilterPresetModal
+            tableName="employeesTable"
+            filters={filters}
+            setFilters={setFilters}
+            setIsPresetModalOpen={setPresetModalOpen}
+          />
+        </Suspense>
+      )}
+    </div>
   );
 };
 

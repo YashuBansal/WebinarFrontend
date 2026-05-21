@@ -16,6 +16,16 @@ import { toast } from "sonner";
 import { errorToast, successToast } from "../../utils/extra";
 import { checkout } from "../actions/razorpay";
 
+/** Accepts raw array or wrapped API shapes for addon lists. */
+function normalizeAddonListPayload(payload) {
+  if (payload == null) return [];
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.addons)) return payload.addons;
+  if (Array.isArray(payload?.results)) return payload.results;
+  return [];
+}
+
 const initialState = {
   isLoading: false,
   isSuccess: false,
@@ -26,6 +36,7 @@ const initialState = {
   singlePlanData: null,
   addonsData: [],
   billingHistory: [],
+  billingHistoryTotal: 0,
   totalPages: 1,
   plansForDropdown: [],
 };
@@ -148,7 +159,7 @@ const pricePlans = createSlice({
       })
       .addCase(getAddons.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.addonsData = Array.isArray(action.payload) ? action.payload : [];
+        state.addonsData = normalizeAddonListPayload(action.payload);
       })
       .addCase(getAddons.rejected, (state, action) => {
         state.isLoading = false;
@@ -159,7 +170,7 @@ const pricePlans = createSlice({
       })
       .addCase(getClientAddons.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.addonsData = Array.isArray(action.payload) ? action.payload : [];
+        state.addonsData = normalizeAddonListPayload(action.payload);
       })
       .addCase(getClientAddons.rejected, (state, action) => {
         state.isLoading = false;
@@ -174,6 +185,7 @@ const pricePlans = createSlice({
           ? action.payload.data
           : [];
         state.totalPages = action.payload.totalPages || 1;
+        state.billingHistoryTotal = Number(action.payload?.totalRecords) || 0;
       })
       .addCase(getAdminBillingHistory.rejected, (state, action) => {
         state.isLoading = false;

@@ -116,9 +116,9 @@ export const createAddon = createAsyncThunk(
 //get AddOn
 export const getAddons = createAsyncThunk(
   "addon/fetchData",
-  async (payload, { rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
-      const response = await instance.get(`addon`, payload);
+      const response = await instance.get(`addon`);
       return response?.data;
     } catch (e) {
       return rejectWithValue(e);

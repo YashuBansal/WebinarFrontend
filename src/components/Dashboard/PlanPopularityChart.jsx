@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -9,11 +9,10 @@ import {
   CategoryScale,
   LinearScale,
 } from "chart.js";
-import { Card, Typography } from "@mui/material";
-import { useDispatch, useSelector } from "react-redux";
-import { getDashboardPlansData } from "../../features/actions/globalData";
+import { Card, CardTitle, CardHeader, CardContent } from "../ui/card";
+import { useSelector } from "react-redux";
+import { useTheme } from "../../contexts/ThemeContext";
 
-// Register the necessary Chart.js components
 ChartJS.register(
   Title,
   Tooltip,
@@ -24,26 +23,26 @@ ChartJS.register(
 );
 
 const PlanPopularityChart = () => {
-  // Dummy data for the plans and their respective subscription counts
+  const { isDark } = useTheme();
   const { plansGraphData = [] } = useSelector((state) => state.globalData);
 
   const data = {
-    labels: plansGraphData.map((plan) => plan?.plan?.name || "-"), // Plan names
+    labels: plansGraphData.map((plan) => plan?.plan?.name || "-"),
     datasets: [
       {
-        label: "Number of Subscriptions",
-        data: plansGraphData.map((plan) => plan?.total || 0), // Subscription counts for each plan
+        label: "Subscriptions",
+        data: plansGraphData.map((plan) => plan?.total || 0),
         backgroundColor: [
-          "rgba(255, 99, 132, 0.2)", // Color for Basic Plan
-          "rgba(54, 162, 235, 0.2)", // Color for Standard Plan
-          "rgba(255, 206, 86, 0.2)", // Color for Premium Plan
-          "rgba(75, 192, 192, 0.2)", // Color for Enterprise Plan
+          "rgba(255, 99, 132, 0.2)",
+          "rgba(54, 162, 235, 0.2)",
+          "rgba(255, 206, 86, 0.2)",
+          "rgba(75, 192, 192, 0.2)",
         ],
         borderColor: [
-          "rgba(255, 99, 132, 1)", // Border color for Basic Plan
-          "rgba(54, 162, 235, 1)", // Border color for Standard Plan
-          "rgba(255, 206, 86, 1)", // Border color for Premium Plan
-          "rgba(75, 192, 192, 1)", // Border color for Enterprise Plan
+          "rgba(255, 99, 132, 1)",
+          "rgba(54, 162, 235, 1)",
+          "rgba(255, 206, 86, 1)",
+          "rgba(75, 192, 192, 1)",
         ],
         borderWidth: 1,
       },
@@ -55,49 +54,69 @@ const PlanPopularityChart = () => {
     maintainAspectRatio: false,
     plugins: {
       title: {
-        display: true,
-        text: "Plan Popularity", // Title of the chart
+        display: false,
       },
       legend: {
         display: true,
-        position: "top", // Position the legend
+        position: "top",
+        labels: {
+          color: isDark ? "#94a3b8" : "#64748b",
+        }
       },
       tooltip: {
         callbacks: {
           label: function (context) {
-            return `${context.dataset.label}: ${context.raw}`; // Customize the tooltip label to show subscriptions
+            return `${context.dataset.label}: ${context.raw}`;
           },
         },
       },
     },
     scales: {
       x: {
+        grid: {
+          color: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+        },
         title: {
           display: true,
-          text: "Plans", // X-axis title
+          text: "Plans",
+          color: isDark ? "#94a3b8" : "#64748b",
         },
+        ticks: {
+          color: isDark ? "#94a3b8" : "#64748b",
+        }
       },
       y: {
+        grid: {
+          color: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+        },
         title: {
           display: true,
-          text: "Subscriptions", // Y-axis title
+          text: "Subscriptions",
+          color: isDark ? "#94a3b8" : "#64748b",
         },
-        beginAtZero: true, // Start Y-axis from 0
+        beginAtZero: true,
+        ticks: {
+          color: isDark ? "#94a3b8" : "#64748b",
+        }
       },
     },
     layout: {
       padding: {
-        bottom: 30, // Add padding to the bottom to make space for labels
+        bottom: 10,
       },
     },
   };
 
   return (
-    <Card className="p-6 shadow w-full h-[60vh] ">
-      <Typography variant="h6" gutterBottom>
-        Plan Popularity Overview
-      </Typography>
-      <Bar data={data} options={options} />
+    <Card className="shadow-sm w-full h-[60vh] border-none bg-transparent">
+      <CardHeader className="px-0 pt-0 pb-4">
+        <CardTitle className="text-lg font-bold text-slate-800 dark:text-slate-200 dark:text-slate-100">
+          Plan Popularity Overview
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex-1 p-0 min-h-0">
+        <Bar data={data} options={options} />
+      </CardContent>
     </Card>
   );
 };

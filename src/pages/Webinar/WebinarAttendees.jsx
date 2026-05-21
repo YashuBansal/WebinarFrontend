@@ -6,6 +6,25 @@ import {
   useRef,
   useCallback,
 } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  ArrowLeft,
+  Copy,
+  ArrowUpDown,
+  Upload,
+  Settings2,
+  Search,
+  Maximize,
+  Minimize,
+  RotateCcw,
+  Star,
+  Filter,
+  Trash2,
+  Save,
+  X,
+  Tag
+} from "lucide-react";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const Pullbacks = lazy(() => import("./Pullbacks"));
 const Enrollments = lazy(() => import("./Enrollments"));
@@ -13,12 +32,7 @@ const WebinarAttendeesPage = lazy(() => import("./WebinarAttendeesPage"));
 
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import Button from "@mui/material/Button";
-import Tabs from "@mui/material/Tabs";
-import Tab from "@mui/material/Tab";
-
 import { createPortal } from "react-dom";
-import { AttachFile, ContentCopy } from "@mui/icons-material";
 import { getLeadType } from "../../features/actions/assign";
 import {
   AssignmentStatus,
@@ -38,8 +52,6 @@ import DataTableFallback from "../../components/Fallback/DataTableFallback";
 import { fetchPullbackRequestCounts } from "../../features/actions/reAssign";
 import { socket } from "../../socket";
 import ModalFallback from "../../components/Fallback/ModalFallback";
-import { globalButton } from "../../utils/style";
-import { useMediaQuery, useTheme } from "@mui/material";
 import AutoAssignmentModal from "./modal/AutoAssignmentModal";
 import tagsService from "../../services/tagsService";
 const WebinarWebhooksListDialog = lazy(() =>
@@ -47,12 +59,10 @@ const WebinarWebhooksListDialog = lazy(() =>
 );
 
 const WebinarAttendees = () => {
+  const { isDark } = useTheme();
   const { id } = useParams();
   const dispatch = useDispatch();
   const logUserActivity = useAddUserActivity();
-
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down("md"));
 
   const { enrollmentCounts } = useSelector((state) => state.attendee);
   const { userData } = useSelector((state) => state.auth);
@@ -67,7 +77,7 @@ const WebinarAttendees = () => {
   const [assignModal, setAssignModal] = useState(false);
   const [reAssignModal, setReAssignModal] = useState(false);
   const [page, setPage] = useState(Number(searchParams.get("page")) || 1);
-  const tabValueRef = useRef(searchParams.get("tabValue") || "");
+  const tabValueRef = useRef(searchParams.get("tabValue") || "preWebinar");
   const subTabValueRef = useRef(searchParams.get("subTabValue") || "attendees");
 
   const [settingModalOpen, setSettingModalOpen] = useState(false);
@@ -75,61 +85,37 @@ const WebinarAttendees = () => {
   const [applyTagsModalOpen, setApplyTagsModalOpen] = useState(false);
   const [bulkEnrollOpen, setBulkEnrollOpen] = useState(false);
 
+  // Sync URL with State
   useEffect(() => {
-    // Get the current values from the URL
     const currentParams = Object.fromEntries([...searchParams.entries()]);
-
-    // Define the new values from your component's state
     const newParams = {
       page: page,
       tabValue: tabValueRef.current,
       subTabValue: subTabValueRef.current,
     };
 
-    // Check if an update is actually needed by comparing current vs. new
     let isDifferent = false;
     for (const key in newParams) {
-      // Compare string representations to handle different types (number vs. string)
-      // and normalize null/undefined to empty strings for a stable comparison.
       if (String(newParams[key] || "") !== String(currentParams[key] || "")) {
         isDifferent = true;
-        break; // A difference was found, no need to check further
+        break;
       }
     }
 
-    // Only call setSearchParams if a value has actually changed
     if (isDifferent) {
-      // Create a clean object for the URL, filtering out any empty values
-      // to prevent params like `&subTabValueRef.current=` from appearing.
       const paramsToSet = {};
       for (const key in newParams) {
-        if (newParams[key]) {
-          paramsToSet[key] = newParams[key];
-        }
+        if (newParams[key]) paramsToSet[key] = newParams[key];
       }
-
-      // Use { replace: true } to avoid polluting browser history with tab/page changes
       setSearchParams(paramsToSet, { replace: true });
     }
-
-    // The dependency array now correctly listens for changes to state variables.
-  }, [
-    page,
-    tabValueRef.current,
-    subTabValueRef.current,
-    searchParams,
-    setSearchParams,
-  ]);
+  }, [page, tabValueRef.current, subTabValueRef.current, searchParams, setSearchParams]);
 
   const fetchWebinarData = useCallback(() => {
     tagsService.getWebinarById(id).then((res) => {
-      if (res?.success) {
-        setWebinarData(res.data);
-      } else {
-        setWebinarData(null);
-      }
+      if (res?.success) setWebinarData(res.data);
     });
-  }, [id, tagsService]);
+  }, [id]);
 
   useEffect(() => {
     dispatch(getLeadType());
@@ -138,11 +124,8 @@ const WebinarAttendees = () => {
     fetchWebinarData();
   }, []);
 
-  function fetchCounts() {
-    if (
-      tabValueRef.current === "preWebinar" ||
-      tabValueRef.current === "postWebinar"
-    ) {
+  const fetchCounts = useCallback(() => {
+    if (["preWebinar", "postWebinar"].includes(tabValueRef.current)) {
       dispatch(
         fetchPullbackRequestCounts({
           webinarId: id,
@@ -151,381 +134,264 @@ const WebinarAttendees = () => {
         })
       );
     }
-  }
+  }, [id, tabValueRef.current]);
 
   useEffect(() => {
-    function onNotification(data) {
-      if (data.actionType === NotifActionType.REASSIGNMENT) {
-        fetchCounts();
-      }
-    }
-    socket.on("notification", onNotification);
-    return () => {
-      socket.off("notification", onNotification);
+    const onNotification = (data) => {
+      if (data.actionType === NotifActionType.REASSIGNMENT) fetchCounts();
     };
-  }, [tabValueRef.current, id]);
+    socket.on("notification", onNotification);
+    return () => socket.off("notification", onNotification);
+  }, [fetchCounts]);
 
-  // Tabs change handler
-  const handleTabChange = (_, newValue) => {
+  const handleTabChange = (newValue) => {
     tabValueRef.current = newValue;
     setPage(1);
     setSelectedRows([]);
     fetchCounts();
-    logUserActivity({
-      action: "switch",
-      type: "tab",
-      detailItem: newValue,
-    });
   };
 
-  const handleSubTabChange = (_, newValue) => {
+  const handleSubTabChange = (newValue) => {
     subTabValueRef.current = newValue;
     setSelectedRows([]);
     setPage(1);
-    // logUserActivity({
-    //   action: "switch",
-    //   type: "tab",
-    //   detailItem: newValue,
-    // });
   };
 
-  // ----------------------- Action Icons -----------------------
+  const cardBg = isDark ? "rgba(30, 41, 59, 0.7)" : "rgba(255, 255, 255, 0.7)";
+  const cardBorder = isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.06)";
 
   return (
-    <div className=" md:px-10 pt-10">
-      {/* Tabs for Sales and Reminder */}
-      <Tabs
-        value={tabValueRef.current}
-        onChange={handleTabChange}
-        centered
-        className="border-b border-gray-200"
-        textColor="primary"
-        indicatorColor="primary"
+    <div className={`min-h-screen p-4 md:p-8 space-y-6 font-sans transition-colors duration-300 ${isDark ? "bg-[#0f172a]" : "bg-[#F8FAFC]"}`}>
+      {/* Glassmorphic Header Card */}
+      <div
+        className="rounded-2xl p-6 border transition-all duration-300"
+        style={{
+          background: cardBg,
+          backdropFilter: 'blur(20px)',
+          borderColor: cardBorder,
+          boxShadow: '0 10px 40px rgba(0,0,0,0.03)'
+        }}
       >
-        <Tab label="Reminder" value="preWebinar" className="text-gray-600" />
-        <Tab label="Sales" value="postWebinar" className="text-gray-600" />
-        <Tab
-          label="Enrollments"
-          value="enrollments"
-          style={{
-            color: "gray",
-          }}
-        />
-      </Tabs>
-
-      <div className="flex  mt-6 justify-between items-center flex-wrap flex-col md:flex-row gap-4">
-        <div className="flex items-center gap-4 md:flex-row flex-col">
-          <Button
-            onClick={() => copyToClipboard(id, "Webinar")}
-            variant="outlined"
-            endIcon={<ContentCopy />}
-            style={{ textTransform: "none" }}
-          >
-            {id}
-          </Button>
-          <span className=" text-md text-neutral-800 capitalize underline-offset-8 underline">
-            {webinarData?.webinarName}
-          </span>
-        </div>
-        <div className="flex gap-2 ">
-          {tabValueRef.current !== "enrollments" && (
-            <div className="flex gap-2">
-              {tabValueRef.current === "preWebinar" && (
-                <button
-                  className={globalButton}
-                  onClick={() => setWebhookDialogOpen(true)}
-                >
-                  Webhook
-                </button>
-              )}
-              <button
-                className={globalButton}
-                onClick={() => setSettingModalOpen(true)}
-              >
-                Settings
-              </button>
-              {console.log(tabValueRef.current, subTabValueRef.current, userData?.isActive)}
-              { (tabValueRef.current === "preWebinar" || tabValueRef.current === "postWebinar") && subTabValueRef.current === "attendees" && userData?.isActive && (
-                <button
-                  className={globalButton}
-                  onClick={() => setApplyTagsModalOpen(true)}
-                >
-                  Apply Tags
-                </button>
-              )}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <Link to="/webinars" className="p-2 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+              </Link>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 tracking-tight">
+                {webinarData?.webinarName || "Webinar Attendees"}
+              </h1>
             </div>
-          )}
+            <div className="flex items-center gap-2 ml-12">
+              <span className="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-bold rounded-lg border border-blue-100 flex items-center gap-2">
+                ID: {id}
+                <button onClick={() => copyToClipboard(id, "Webinar")} className="hover:text-blue-800">
+                  <Copy className="w-3 h-3" />
+                </button>
+              </span>
+            </div>
+          </div>
 
-          {tabValueRef.current === "postWebinar" && (
-            <Link className={globalButton} to={`/webinar-participants/${id}`}>
-              Webinar Participants
-            </Link>
-          )}
+          <div className="flex items-center gap-3 w-full md:w-auto">
+            {tabValueRef.current === "postWebinar" && (
+              <Link
+                to={`/webinar-participants/${id}`}
+                className="flex-1 md:flex-none px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+              >
+                Participants
+              </Link>
+            )}
+            {tabValueRef.current !== "enrollments" && (
+              <>
+                {tabValueRef.current === "preWebinar" && (
+                  <button
+                    onClick={() => setWebhookDialogOpen(true)}
+                    className="flex-1 md:flex-none px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+                  >
+                    Webhooks
+                  </button>
+                )}
+                <button
+                  onClick={() => setSettingModalOpen(true)}
+                  className="flex-1 md:flex-none px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <Settings2 className="w-4 h-4" /> Settings
+                </button>
+                <button
+                  onClick={() => setApplyTagsModalOpen(true)}
+                  className="flex-1 md:flex-none px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <Tag className="w-4 h-4" /> Apply Tag
+                </button>
+              </>
+            )}
+
+          </div>
         </div>
 
-        {tabValueRef.current === "enrollments" && (
-          <div className="flex gap-4">
-            <span className="text-sm text-neutral-900">
-              Total Enrollments:{" "}
-              <span className="font-semibold text-lg text-indigo-500">
-                {enrollmentCounts?.totalEnrollments || 0}
-              </span>
-            </span>
-            <span className="text-sm text-neutral-900">
-              Total Revenue:{" "}
-              <span className="font-semibold text-lg text-indigo-500">
-                {enrollmentCounts?.totalRevenue || 0}
-              </span>
-            </span>
-          </div>
-        )}
+        {/* Custom Tab Toggles */}
+        <div className="mt-8 flex items-center p-1.5 bg-slate-100/50 dark:bg-slate-800/50 rounded-2xl w-full md:w-fit">
+          {[
+            { label: "Reminder", value: "preWebinar" },
+            { label: "Sales", value: "postWebinar" },
+            { label: "Enrollments", value: "enrollments" }
+          ].map((tab) => (
+            <button
+              key={tab.value}
+              onClick={() => handleTabChange(tab.value)}
+              className={`px-8 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 ${tabValueRef.current === tab.value
+                ? "bg-white dark:bg-slate-700 text-blue-600 dark:text-blue-400 shadow-sm"
+                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
+                }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {tabValueRef.current && (
-        <div className="flex gap-4 my-4 justify-between flex-wrap items-center flex-col md:flex-row">
-          <div className="flex flex-wrap gap-4">
-            {subTabValueRef.current === "attendees" &&
-              tabValueRef.current !== "enrollments" &&
-              userData?.isActive && (
+      {/* Main Content Area */}
+      <div className="space-y-4">
+        {/* Sub-Header Actions */}
+        <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex flex-wrap gap-2">
+            {tabValueRef.current !== "enrollments" && subTabValueRef.current === "attendees" && userData?.isActive && (
+              <>
                 <button
-                  className={globalButton}
                   onClick={() => setSwapOpen(true)}
+                  className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm"
                 >
                   Swap Columns
                 </button>
-              )}
-            {selectedRows.length > 0 &&
-              (!(selectedAssignmentType === "All") ||
-                subTabValueRef.current !== "attendees") && (
                 <button
-                  className={globalButton}
-                  onClick={() => {
-                    if (
-                      subTabValueRef.current === "attendees" &&
-                      selectedAssignmentType === "Not Assigned"
-                    ) {
-                      setAssignModal(true);
-                    } else {
-                      setReAssignModal(true);
-                    }
-                  }}
+                  onClick={() => setShowModal(true)}
+                  className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2"
                 >
-                  {subTabValueRef.current === "attendees" &&
-                  selectedAssignmentType === "Not Assigned"
-                    ? "Assign"
-                    : "Re-Assign"}
+                  <Upload className="w-4 h-4" /> Import
                 </button>
-              )}
-            {userData?.isActive &&
-              tabValueRef.current !== "enrollments" &&
-              subTabValueRef.current === "attendees" && (
-                <>
-                  {selectedRows.length === 0 && (
-                    <button
-                      onClick={() => setShowModal((prev) => !prev)}
-                      className={`${globalButton} flex gap-1`}
-                    >
-                      <AttachFile />
-                      Import
-                    </button>
-                  )}
-                  <button
-                    onClick={() => setBulkEnrollOpen(true)}
-                    className={`${globalButton} flex gap-1`}
-                  >
-                    Create Enrollments
-                  </button>
-                </>
-              )}
+                <button
+                  onClick={() => setBulkEnrollOpen(true)}
+                  className="px-4 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all shadow-sm flex items-center gap-2"
+                >
+                  Create Enrollments
+                </button>
+              </>
+            )}
+
+            {selectedRows.length > 0 && (
+              <button
+                onClick={() => (subTabValueRef.current === "attendees" && selectedAssignmentType === "Not Assigned") ? setAssignModal(true) : setReAssignModal(true)}
+                className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all shadow-md"
+              >
+                {(subTabValueRef.current === "attendees" && selectedAssignmentType === "Not Assigned") ? "Assign" : "Re-Assign"}
+              </button>
+            )}
           </div>
 
           {tabValueRef.current !== "enrollments" && (
-            <Tabs
-              value={subTabValueRef.current}
-              onChange={handleSubTabChange}
-              className="border-b border-gray-200"
-              textColor="primary"
-              indicatorColor="primary"
-              variant={isSmallScreen ? "scrollable" : "standard"} // Use scrollable on mobile
-              scrollButtons="auto" // Automatically show scroll buttons if needed
-            >
-              <Tab
-                label="Attendees"
-                value="attendees"
-                sx={{
-                  // Apply smaller styles on extra-small to small screens
-                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                  padding: { xs: "6px 8px", sm: "12px 16px" },
-                  minWidth: { xs: "auto", sm: "90px" },
-                }}
-              />
-              <Tab
-                label={
-                  <div className="flex items-center justify-center">
-                    Pullbacks
-                    {/* Make the badge smaller on mobile */}
-                    <span
-                      className={`ml-1.5 text-xs font-semibold rounded ${
-                        isSmallScreen
-                          ? "px-2 py-0.5 bg-blue-100 text-blue-600"
-                          : "px-2.5 py-0.5 bg-blue-100 text-blue-600"
-                      }`}
-                    >
-                      {reAssignCounts?.pullbacks || 0}
+            <div className="flex items-center p-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl">
+              {[
+                { label: "Attendees", value: "attendees", count: 0 },
+                { label: "Pullbacks", value: AssignmentStatus.REASSIGN_APPROVED, count: reAssignCounts?.pullbacks || 0 },
+                { label: "Requests", value: AssignmentStatus.REASSIGN_REQUESTED, count: reAssignCounts?.requests || 0 }
+              ].map((subTab) => (
+                <button
+                  key={subTab.value}
+                  onClick={() => handleSubTabChange(subTab.value)}
+                  className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all flex items-center gap-2 ${subTabValueRef.current === subTab.value
+                    ? "bg-slate-900 dark:bg-slate-700 text-white"
+                    : "text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    }`}
+                >
+                  {subTab.label}
+                  {subTab.count > 0 && (
+                    <span className={`px-1.5 py-0.5 rounded ${subTabValueRef.current === subTab.value ? "bg-slate-700 dark:bg-slate-600" : "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"}`}>
+                      {subTab.count}
                     </span>
-                  </div>
-                }
-                value={AssignmentStatus.REASSIGN_APPROVED}
-                sx={{
-                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                  padding: { xs: "6px 8px", sm: "12px 16px" },
-                  minWidth: { xs: "auto", sm: "90px" },
-                }}
-              />
-              <Tab
-                label={
-                  <div className="flex items-center justify-center">
-                    Requests
-                    <span
-                      className={`ml-1.5 text-xs font-semibold rounded ${
-                        isSmallScreen
-                          ? "px-2 py-0.5 bg-blue-100 text-blue-600"
-                          : "px-2.5 py-0.5 bg-blue-100 text-blue-600"
-                      }`}
-                    >
-                      {reAssignCounts?.requests || 0}
-                    </span>
-                  </div>
-                }
-                value={AssignmentStatus.REASSIGN_REQUESTED}
-                sx={{
-                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
-                  padding: { xs: "6px 8px", sm: "12px 16px" },
-                  minWidth: { xs: "auto", sm: "90px" },
-                }}
-              />
-            </Tabs>
+                  )}
+                </button>
+              ))}
+            </div>
           )}
         </div>
-      )}
 
-      <Suspense fallback={<DataTableFallback />}>
-        {tabValueRef.current === "" ? (
-          <div className="flex flex-col items-center m-6 justify-center py-20 px-4 border-2 border-dashed border-gray-300 rounded-lg text-gray-600 bg-gray-50 min-h-[300px]">
-            <p className="text-lg font-semibold mb-2">No Tab Selected</p>
-            <p className="text-center max-w-sm">
-              Please select a tab (Reminder, Sales, or Enrollments) above to
-              view the attendees data for this webinar.
-            </p>
-          </div>
-        ) : (
-          <>
-            {""}
-            {subTabValueRef.current === "attendees" &&
-              (tabValueRef.current === "preWebinar" ||
-                tabValueRef.current === "postWebinar") && (
-                <WebinarAttendeesPage
-                  userData={userData}
-                  tabValue={tabValueRef.current}
-                  page={page}
-                  setPage={setPage}
-                  isSwapOpen={isSwapOpen}
-                  setSwapOpen={setSwapOpen}
-                  subTabValue={subTabValueRef.current}
-                  selectedRows={selectedRows}
-                  setSelectedRows={setSelectedRows}
-                  selectedAssignmentType={selectedAssignmentType}
-                  setSelectedAssignmentType={setSelectedAssignmentType}
-                  applyTagsModalOpen={applyTagsModalOpen}
-                  setApplyTagsModalOpen={setApplyTagsModalOpen}
-                  bulkEnrollOpen={bulkEnrollOpen}
-                  setBulkEnrollOpen={setBulkEnrollOpen}
-                />
-              )}
-            {subTabValueRef.current !== "attendees" &&
-              tabValueRef.current !== "enrollments" && (
-                <Pullbacks
-                  subTabValue={subTabValueRef.current}
-                  page={page}
-                  setPage={setPage}
-                  tabValue={tabValueRef.current}
-                  selectedRows={selectedRows}
-                  setSelectedRows={setSelectedRows}
-                  userData={userData}
-                />
-              )}
-            {tabValueRef.current === "enrollments" && (
-              <Enrollments
-                page={page}
-                setPage={setPage}
-                tabValue={tabValueRef.current}
-                webinarData={webinarData}
-              />
-            )}
-          </>
-        )}
-      </Suspense>
+        {/* Dynamic Page Rendering */}
+        <Suspense fallback={<DataTableFallback />}>
+          {tabValueRef.current === "enrollments" ? (
+            <Enrollments page={page} setPage={setPage} tabValue={tabValueRef.current} webinarData={webinarData} />
+          ) : subTabValueRef.current === "attendees" ? (
+            <WebinarAttendeesPage
+              userData={userData}
+              tabValue={tabValueRef.current}
+              page={page}
+              setPage={setPage}
+              isSwapOpen={isSwapOpen}
+              setSwapOpen={setSwapOpen}
+              subTabValue={subTabValueRef.current}
+              selectedRows={selectedRows}
+              setSelectedRows={setSelectedRows}
+              selectedAssignmentType={selectedAssignmentType}
+              setSelectedAssignmentType={setSelectedAssignmentType}
+              applyTagsModalOpen={applyTagsModalOpen}
+              setApplyTagsModalOpen={setApplyTagsModalOpen}
+              bulkEnrollOpen={bulkEnrollOpen}
+              setBulkEnrollOpen={setBulkEnrollOpen}
+              theme={isDark ? "dark" : "light"}
+            />
+          ) : (
+            <Pullbacks
+              subTabValue={subTabValueRef.current}
+              page={page}
+              setPage={setPage}
+              tabValue={tabValueRef.current}
+              selectedRows={selectedRows}
+              setSelectedRows={setSelectedRows}
+              userData={userData}
+            />
+          )}
+        </Suspense>
+      </div>
 
-      {reAssignModal && (
-        <Suspense fallback={<ModalFallback />}>
+      {/* Modal Portals */}
+      <Suspense fallback={<ModalFallback />}>
+        {reAssignModal && (
           <ReAssignmentModal
             selectedRows={selectedRows}
             webinarid={id}
             tabValue={tabValueRef.current}
-            isPullbackVisible={
-              tabValueRef.current !== "enrollments" &&
-              subTabValueRef.current === "attendees"
-            }
+            isPullbackVisible={tabValueRef.current !== "enrollments" && subTabValueRef.current === "attendees"}
             isAttendee={true}
             setReAssignModal={setReAssignModal}
           />
-        </Suspense>
-      )}
-
-      {assignModal &&
-        createPortal(
-          <Suspense fallback={<ModalFallback />}>
-            <EmployeeAssignModal
-              tabValue={tabValueRef.current}
-              selectedRows={selectedRows}
-              setAssignModal={setAssignModal}
-              webinarId={id}
-            />
-          </Suspense>,
-          document.body
         )}
 
-      {showModal &&
-        createPortal(
-          <Suspense fallback={<ModalFallback />}>
-            <UpdateCsvXslxModal
-              tabValue={tabValueRef.current}
-              setModal={setShowModal}
-            />
-          </Suspense>,
-          document.body
+        {assignModal && (
+          <EmployeeAssignModal
+            tabValue={tabValueRef.current}
+            selectedRows={selectedRows}
+            setAssignModal={setAssignModal}
+            webinarId={id}
+          />
         )}
 
-      <AutoAssignmentModal
-        webinarId={id}
-        onClose={() => {
-          setSettingModalOpen(false);
-        }}
-        isOpen={settingModalOpen}
-        webinarData={webinarData}
-        refetchWebinarData={fetchWebinarData}
-      />
+        {showModal && (
+          <UpdateCsvXslxModal
+            tabValue={tabValueRef.current}
+            setModal={setShowModal}
+          />
+        )}
 
-      {webhookDialogOpen && (
-        <Suspense fallback={<ModalFallback />}>
+        {webhookDialogOpen && (
           <WebinarWebhooksListDialog
             webinarId={id}
             isOpen={webhookDialogOpen}
             onClose={() => setWebhookDialogOpen(false)}
             onRefresh={fetchWebinarData}
           />
-        </Suspense>
-      )}
+        )}
+      </Suspense>
+
+      <AutoAssignmentModal webinarId={id} onClose={() => setSettingModalOpen(false)} isOpen={settingModalOpen} webinarData={webinarData} refetchWebinarData={fetchWebinarData} />
     </div>
   );
 };

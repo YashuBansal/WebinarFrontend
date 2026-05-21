@@ -3,14 +3,29 @@ import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import { addLocation } from "../../../features/actions/location";
 import Select from "react-select";
-import FormControl from "@mui/material/FormControl";
-import MenuItem from "@mui/material/MenuItem";
-import { Select as MuiSelect } from "@mui/material";
+import { motion, AnimatePresence } from "framer-motion";
+import { X, User, Phone, MapPin, Briefcase, Users, Save, AlertCircle, Info } from "lucide-react";
 import tagsService from "../../../services/tagsService";
-import TailwindLoader from "../../../components/TailwindLoader";
+import AppLoader from "../../../components/AppLoader";
 import AddRequestLocation from "../../Location/Modal/AddRequestLocation";
 import { states } from "../../../utils/columnData";
 import { capitalizeWords } from "../../../utils/extra";
+import { toast } from "sonner";
+
+const InputWrapper = ({ icon: Icon, label, children, error }) => (
+  <div className="space-y-1">
+    <div className="flex items-center gap-2 mb-0.5">
+      <Icon className="w-3.5 h-3.5 text-slate-400" />
+      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{label}</label>
+    </div>
+    {children}
+    {error && (
+      <span className="text-[10px] font-bold text-rose-500 flex items-center gap-1">
+        <AlertCircle className="w-3 h-3" /> {error}
+      </span>
+    )}
+  </div>
+);
 
 const EditModal = ({
   setModal,
@@ -20,46 +35,11 @@ const EditModal = ({
   locations = [],
   userData,
 }) => {
-  console.log(initialData, "webinarName");
   const dispatch = useDispatch();
-  const {
-    globalLocationsData,
-    isLoading: isLocationLoading,
-    isSuccess,
-  } = useSelector((state) => state.location);
-  const [tagData, setTagData] = useState([]);
+  const { isSuccess } = useSelector((state) => state.location);
   const { isLoading } = useSelector((state) => state.attendee);
 
-  const [selectedState, setSelectedState] = useState("");
-  console.log(selectedState, "selectedState");
-  const [addRequestModal, setAddRequestModal] = useState(false);
-  const [locationData, setLocationData] = useState(null);
-  const [locationsList, setLocationsList] = useState([]);
-
-  useEffect(() => {
-    tagsService.getTags().then((res) => {
-      if (res.success) {
-        setTagData(
-          res.data.map((tag) => ({
-            label: tag.name,
-            value: tag.name,
-          }))
-        );
-      }
-    });
-  }, []);
-
-  function removeBlankAttributes(obj) {
-    const result = {};
-    for (const key in obj) {
-      if (obj[key] !== null && obj[key] !== undefined && obj[key].length > 0) {
-        result[key] = obj[key];
-      }
-    }
-    return result;
-  }
-
-  const { control, register, handleSubmit, setValue } = useForm({
+  const { register, handleSubmit, formState: { errors } } = useForm({
     defaultValues: {
       firstName: initialData?.firstName,
       lastName: initialData?.lastName,
@@ -71,186 +51,141 @@ const EditModal = ({
   });
 
   const onSubmit = (data) => {
-    console.log(initialData?.webinar?.webinarName, "webinarName");
-    data["id"] = initialData?._id;
-    let finalData = removeBlankAttributes(data);
-    finalData.profession = data.profession ?? "";
-
-    finalData["createdBy"] = userData?.userName;
+    const finalData = {
+      ...data,
+      id: initialData?._id,
+      createdBy: userData?.userName,
+      profession: data.profession ?? "",
+    };
     if (Array.isArray(initialData?.webinar) && initialData?.webinar.length > 0)
       finalData["webinarName"] = initialData.webinar[0]?.webinarName;
+
     onConfirmEdit(finalData);
   };
 
-  useLayoutEffect(() => {
-    const filter = locations.filter(
-      (item) => item.state === selectedState.value
-    );
-    console.log("filter", filter);
-
-    setLocationsList(
-      filter.map((item) => ({
-        value: item.name,
-        label: capitalizeWords(item.name),
-      }))
-    );
-  }, [locations, selectedState]);
-
-  useLayoutEffect(() => {
-    if (typeof initialData?.location === "string") {
-      const location = locationsMap.get(
-        initialData.location.trim().toLowerCase()
-      );
-      const locationName = states.find(
-        (item) => item.trim().toLowerCase() === location
-      );
-
-      if (locationName) {
-        setSelectedState({
-          value: locationName.trim().toLowerCase(),
-          label: locationName,
-        });
-      } else {
-        setSelectedState("");
-      }
-    }
-  }, [initialData, locationsMap]);
-
-  useEffect(() => {
-    if (isSuccess) {
-      setAddRequestModal(false);
-      setLocationData(null);
-    }
-  }, [isSuccess]);
-
   return (
-    <div className="fixed top-0 left-0 z-50 flex h-screen w-screen items-center justify-center bg-slate-300/20 backdrop-blur-sm">
-      <div className="flex flex-col gap-6 overflow-hidden rounded bg-white p-6 shadow-xl w-full mx-3 sm:w-[800px]">
-        <h2 className="text-lg font-semibold text-center">
-          Attendee Information
-        </h2>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium">First Name</label>
-              <input
-                {...register("firstName")}
-                type="text"
-                className="mt-1 block w-full h-10 rounded border border-gray-300 px-3 focus:border-teal-500 focus:outline-none"
-                placeholder="Enter First Name"
-              />
-            </div>
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        onClick={() => setModal(null)}
+        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+      />
 
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        className="relative w-full max-w-2xl bg-white dark:bg-slate-800 rounded-2xl shadow-2xl shadow-slate-900/20 overflow-hidden"
+      >
+        {/* Decorative Top Bar */}
+        <div className="h-1.5 w-full bg-gradient-to-r from-[#FF6B35] to-[#FF8C61]" />
+
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700/50 flex items-center justify-between bg-slate-50/30 dark:bg-slate-900/30">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-orange-50 dark:bg-orange-900/30 rounded-xl">
+              <User className="w-5 h-5 text-[#FF6B35] dark:text-[#FF8C61]" />
+            </div>
             <div>
-              <label className="block text-sm font-medium">Last Name</label>
+              <h2 className="text-lg font-black text-slate-800 dark:text-slate-200 uppercase tracking-tight">Edit Attendee</h2>
+              <p className="text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Update Profile Information</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setModal(null)}
+            className="p-1.5 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors"
+          >
+            <X className="w-5 h-5 text-slate-400" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="p-6 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <InputWrapper icon={User} label="First Name" error={errors.firstName?.message}>
+              <input
+                {...register("firstName", { required: "First name is required" })}
+                type="text"
+                placeholder="e.g. John"
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-bold text-slate-700 dark:text-slate-200 focus:border-[#FF6B35] outline-none transition-all"
+              />
+            </InputWrapper>
+
+            <InputWrapper icon={User} label="Last Name">
               <input
                 {...register("lastName")}
                 type="text"
-                className="mt-1 block w-full h-10 rounded border border-gray-300 px-3 focus:border-teal-500 focus:outline-none"
-                placeholder="Enter Last Name"
+                placeholder="e.g. Doe"
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-bold text-slate-700 dark:text-slate-200 focus:border-[#FF6B35] outline-none transition-all"
               />
-            </div>
+            </InputWrapper>
 
-            <div>
-              <label className="block text-sm font-medium">Phone</label>
+            <InputWrapper icon={Phone} label="Phone Number" error={errors.phone?.message}>
               <input
-                {...register("phone")}
+                {...register("phone", { required: "Phone is required" })}
                 type="tel"
-                className="mt-1 block w-full h-10 rounded border border-gray-300 px-3 focus:border-teal-500 focus:outline-none"
-                placeholder="Enter Phone Number"
+                placeholder="+91..."
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-bold text-slate-700 dark:text-slate-200 focus:border-[#FF6B35] outline-none transition-all"
               />
-            </div>
+            </InputWrapper>
 
-            <div>
-              <label className="block text-sm font-medium">Gender</label>
+            <InputWrapper icon={Users} label="Gender">
               <select
                 {...register("gender")}
-                className="mt-1 block w-full h-10 rounded border border-gray-300 px-3 focus:border-teal-500 focus:outline-none"
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-bold text-slate-700 dark:text-slate-200 focus:border-[#FF6B35] outline-none transition-all appearance-none cursor-pointer"
               >
                 <option value="">Select Gender</option>
                 <option value="male">Male</option>
                 <option value="female">Female</option>
                 <option value="others">Others</option>
               </select>
-            </div>
+            </InputWrapper>
 
-            <div>
-              <label className="block text-sm font-medium">Location</label>
+            <InputWrapper icon={MapPin} label="Location">
               <input
                 {...register("location")}
                 type="text"
-                className="mt-1 block w-full h-10 rounded border border-gray-300 px-3 focus:border-teal-500 focus:outline-none"
-                placeholder="Enter Location"
+                placeholder="City, State"
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-bold text-slate-700 dark:text-slate-200 focus:border-[#FF6B35] outline-none transition-all"
               />
-            </div>
+            </InputWrapper>
 
-            <div>
-              <label className="block text-sm font-medium">Profession</label>
+            <InputWrapper icon={Briefcase} label="Profession">
               <input
                 {...register("profession")}
                 type="text"
-                className="mt-1 block w-full h-10 rounded border border-gray-300 px-3 focus:border-teal-500 focus:outline-none"
-                placeholder="Enter Profession"
+                placeholder="e.g. Developer"
+                className="w-full h-10 px-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 text-sm font-bold text-slate-700 dark:text-slate-200 focus:border-[#FF6B35] outline-none transition-all"
               />
-            </div>
-
-            {/* <div>
-              <div className="flex flex-row justify-between">
-                <label className="block text-sm font-medium">State</label>
-              </div>
-              <Select
-                options={states.map((option) => ({
-                  value: option.trim().toLowerCase(),
-                  label: option,
-                }))}
-                className="mt-1 text-sm shadow"
-                placeholder="Choose Location"
-                // Correctly setting the selected option
-                value={selectedState}
-                onChange={(selected) => {
-                  setSelectedState(selected);
-                  setValue("location", "");
-                }}
-                styles={{
-                  control: (provided) => ({
-                    ...provided,
-                    border: "1px solid #CBD5E1", // Red border if there's an error
-                    borderRadius: "7px",
-                  }),
-                  placeHolder: (provided) => ({
-                    ...provided,
-                    color: "#9CA3AF",
-                  }),
-                }}
-              />
-            </div> */}
-
+            </InputWrapper>
           </div>
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full py-2 mt-4 rounded-md bg-blue-600 text-white hover:bg-blue-700 transition duration-150"
-          >
-            {isLoading ? <TailwindLoader size={6} /> : "Submit"}
-          </button>
+
+          {/* Footer Actions */}
+          <div className="flex gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => setModal(null)}
+              className="flex-1 h-11 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 text-[10px] font-black rounded-xl transition-all uppercase tracking-widest"
+            >
+              Discard
+            </button>
+            <button
+              type="submit"
+              disabled={isLoading}
+              className="flex-[2] h-11 bg-[#FF6B35] hover:bg-[#e85a24] disabled:bg-slate-200 text-white text-[10px] font-black rounded-xl transition-all shadow-lg shadow-[#FF6B35]/20 flex items-center justify-center gap-2 uppercase tracking-widest"
+            >
+              {isLoading ? (
+                <AppLoader size="sm" variant="muted" />
+              ) : (
+                <>
+                  <Save className="w-4 h-4" />
+                  Save Changes
+                </>
+              )}
+            </button>
+          </div>
         </form>
-
-        <button
-          onClick={() => setModal(null)}
-          className="inline-flex h-10 items-center justify-center w-full mt-2 text-sm font-medium text-red-600 hover:bg-red-100 rounded-md"
-        >
-          Cancel
-        </button>
-      </div>
-
-      {addRequestModal && (
-        <AddRequestLocation
-          setModal={setAddRequestModal}
-          locationsData={locationData}
-          isLoading={isLocationLoading}
-          title={"Request Location"}
-        />
-      )}
+      </motion.div>
     </div>
   );
 };

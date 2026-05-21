@@ -1,96 +1,176 @@
-import React, { useState, useEffect } from "react";
-import { ClipLoader } from "react-spinners";
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { X, RefreshCw, Trash2 } from "lucide-react";
+import AppLoader from "./AppLoader";
+import { Button } from "./ui/button";
+import { useTheme } from "../contexts/ThemeContext";
+import { cn } from "../lib/utils";
+import { Dialog, DialogContent } from "./ui/dialog";
 
-export default function ConfirmDeleteModal({ setModal, triggerDelete, isLoading, title="Please confirm deletion by entering the number below:" }) {
-  const [generatedNumber, setGeneratedNumber] = useState("");
-  const [inputValue, setInputValue] = useState("");
-  const [isInputValid, setIsInputValid] = useState(true);
+const FONT = "Inter, sans-serif";
 
-  useEffect(() => {
-    const randomNumber = Math.floor(100000 + Math.random() * 900000);
-    setGeneratedNumber(randomNumber);
-  }, []);
- 
-  const handleInputChange = (e) => {
-    setInputValue(e.target.value);
-    setIsInputValid(e.target.value === generatedNumber.toString());
+export default function ConfirmDeleteModal({
+  setModal,
+  triggerDelete,
+  isLoading,
+  title = "Please confirm deletion by entering the number below:",
+  itemName,
+}) {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+  const [confirmationCode, setConfirmationCode] = useState("");
+  const [userInput, setUserInput] = useState("");
+  const [isShaking, setIsShaking] = useState(false);
+
+  const generateCode = () => {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setConfirmationCode(code);
+    setUserInput("");
   };
 
-  const handleConfirmDelete = () => {
-    if (inputValue === "") {
-      setIsInputValid(false);
-      return;
-    }
-    if (isInputValid) {
+  useEffect(() => {
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    setConfirmationCode(code);
+    setUserInput("");
+  }, []);
+
+  const handleClose = () => {
+    setModal(false);
+  };
+
+  const handleConfirm = () => {
+    if (userInput === confirmationCode) {
       triggerDelete();
+    } else {
+      setIsShaking(true);
+      setTimeout(() => setIsShaking(false), 500);
     }
+  };
+
+  const shellBorder = isDark ? "#334155" : "#e5e7eb";
+  const titleColor = isDark ? "#f8fafc" : "#0f172a";
+  const footerBg = isDark ? "#0f172a" : "#F9FAFB";
+
+  const labelStyle = {
+    fontFamily: FONT,
+    fontSize: "10px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+    color: isDark ? "#94a3b8" : "#64748b",
+    marginBottom: "4px",
+    display: "block",
+  };
+
+  const inputStyle = {
+    fontFamily: FONT,
+    backgroundColor: isDark ? "#0f172a" : "#ffffff",
+    border: `1px solid ${isDark ? "#334155" : "#e2e8f0"}`,
+    color: isDark ? "#f8fafc" : "#0f172a",
+  };
+
+  const cancelBtn = {
+    backgroundColor: "transparent",
+    border: "none",
+    color: isDark ? "#94a3b8" : "#64748b",
   };
 
   return (
-    
-    <div className="fixed inset-0 p-4 flex flex-wrap justify-center items-center w-full h-full before:fixed before:inset-0 before:w-full before:h-full before:bg-[rgba(0,0,0,0.5)] overflow-auto font-[sans-serif]"  style={{ zIndex: 100 }}>
-      <div className="w-full max-w-md bg-white shadow-lg rounded-md p-6 relative">
-        <div className="border-b border-b-neutral-500 flex justify-end pb-2">
-          <svg
-            onClick={() => {
-              setModal(false);
-            }}
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-3.5 cursor-pointer shrink-0 fill-black hover:fill-red-500 float-right"
-            viewBox="0 0 320.591 320.591"
-          >
-            <path d="M30.391 318.583a30.37 30.37 0 0 1-21.56-7.288c-11.774-11.844-11.774-30.973 0-42.817L266.643 10.665c12.246-11.459 31.462-10.822 42.921 1.424 10.362 11.074 10.966 28.095 1.414 39.875L51.647 311.295a30.366 30.366 0 0 1-21.256 7.288z"></path>
-            <path d="M287.9 318.583a30.37 30.37 0 0 1-21.257-8.806L8.83 51.963C-2.078 39.225-.595 20.055 12.143 9.146c11.369-9.736 28.136-9.736 39.504 0l259.331 257.813c12.243 11.462 12.876 30.679 1.414 42.922-.456.487-.927.958-1.414 1.414a30.368 30.368 0 0 1-23.078 7.288z"></path>
-          </svg>
-        </div>
-        <div className="mt-8 mb-4 text-center">
-          <h4 className="text-xl font-semibold mt-6">
-            {title}
-          </h4>
-          <div className="text-lg font-bold text-red-500 mb-4">
-            {generatedNumber}
+    <Dialog open={true} onOpenChange={handleClose}>
+      <DialogContent className="max-w-[450px] p-0 overflow-hidden rounded-2xl shadow-2xl border" style={{ backgroundColor: isDark ? "#0f172a" : "#ffffff", borderColor: shellBorder }}>
+        <div className="flex flex-col">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b flex-shrink-0" style={{ borderColor: shellBorder }}>
+            <h3 className="text-lg font-bold flex items-center gap-2" style={{ fontFamily: FONT, color: titleColor }}>
+              <Trash2 className="w-5 h-5 text-red-500 shrink-0" />
+              Confirm Delete
+            </h3>
+            <button type="button" onClick={handleClose} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
           </div>
-          <div className="relative pb-5">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={handleInputChange}
-              placeholder="Enter the number to confirm"
-              className={`border ${
-                isInputValid ? "border-gray-300" : "border-red-500"
-              } p-2 rounded-md w-full`}
-            />
-            {!isInputValid && (
-              <p className="text-red-500 text-sm absolute bottom-0 left-1/2 -translate-x-1/2 text-nowrap">
-                The number entered does not match.
-              </p>
-            )}
+
+          {/* Content */}
+          <div className="p-6 space-y-6">
+            <div className="text-center">
+              {itemName ? (
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400 leading-relaxed">
+                  You are about to delete <span className="font-bold text-red-500 underline underline-offset-4 decoration-2">"{itemName}"</span>. This action is irreversible and will remove all associated data.
+                </p>
+              ) : (
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</p>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex flex-col items-center gap-2 p-5 rounded-xl bg-slate-50 dark:bg-slate-900 border border-dashed border-slate-200 dark:border-slate-800">
+                <span style={labelStyle} className="mb-0">Security Verification Code</span>
+                <div className="flex items-center gap-4">
+                  <span className="text-3xl font-black tracking-[0.5em] text-red-500 select-none">
+                    {confirmationCode}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={generateCode}
+                    disabled={isLoading}
+                    className="p-2 rounded-xl hover:bg-red-100 dark:hover:bg-red-500/10 transition-colors text-red-400 disabled:opacity-50"
+                    title="Regenerate Code"
+                  >
+                    <RefreshCw className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <motion.div
+                  animate={{ x: isShaking ? [0, -10, 10, -10, 10, 0] : 0 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={userInput}
+                    onChange={(e) => setUserInput(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                    placeholder="••••••"
+                    className={cn(
+                      "w-full h-14 rounded-2xl border-2 text-center text-2xl font-black tracking-[0.3em] focus:outline-none transition-all duration-300",
+                      userInput.length === 6
+                        ? userInput === confirmationCode
+                          ? "border-emerald-500 bg-emerald-50 dark:bg-emerald-900 text-emerald-600 shadow-[0_0_20px_rgba(16,185,129,0.1)]"
+                          : "border-red-500 bg-red-50 dark:bg-red-900 text-red-600"
+                        : "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
+                    )}
+                    style={{
+                      fontFamily: FONT,
+                    }}
+                  />
+                </motion.div>
+              </div>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <div className="p-4 border-t flex-shrink-0" style={{ backgroundColor: footerBg, borderColor: shellBorder }}>
+            <div className="flex gap-3">
+              <Button onClick={handleClose} style={cancelBtn} className="flex-1 rounded-xl h-11" disabled={isLoading}>
+                Keep It
+              </Button>
+              <Button
+                onClick={handleConfirm}
+                disabled={userInput !== confirmationCode || isLoading}
+                className={cn(
+                  "flex-1 rounded-xl h-11 font-bold transition-all duration-300",
+                  userInput === confirmationCode && !isLoading
+                    ? "bg-red-600 hover:bg-red-700 text-white shadow-lg shadow-red-600/20 hover:scale-105"
+                    : "bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed opacity-50"
+                )}
+              >
+                {isLoading ? <AppLoader size="sm" variant="inverse" /> : "Confirm Delete"}
+              </Button>
+            </div>
           </div>
         </div>
-        <div className="flex flex-col space-y-2">
-          <button
-            onClick={handleConfirmDelete}
-            type="button"
-            disabled={!isInputValid || isLoading} // Disable if input is not valid
-            className={`px-6 py-2.5 rounded-md text-white text-sm font-semibold border-none outline-none ${
-              isInputValid
-                ? "bg-red-500 hover:bg-red-600"
-                : "bg-gray-300 cursor-not-allowed"
-            }`}
-          >
-            {isLoading ? <ClipLoader color="#fff" size={20} /> : "Delete"}
-          </button>
-          <button
-            onClick={() => {
-              setModal(false);
-            }}
-            type="button"
-            className="px-6 py-2.5 rounded-md text-black text-sm font-semibold border-none outline-none bg-slate-300/70"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

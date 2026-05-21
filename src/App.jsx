@@ -1,10 +1,4 @@
-import {
-  lazy,
-  Suspense,
-  useCallback,
-  useEffect,
-  useState,
-} from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import {
   createBrowserRouter,
   RouterProvider,
@@ -27,6 +21,7 @@ import {
   ViewAttendees,
   CreateEmployee,
   ViewSettings,
+  ViewMaskedTables,
   ViewPlans,
   AddPlan,
   ViewSidebarLinks,
@@ -73,6 +68,7 @@ import {
   TermsPage,
   SupportPage,
   DocumentationPage,
+  WhatsAppWrapper,
 } from "./pages";
 import RouteGuard from "./components/AccessControl/RouteGuard";
 
@@ -96,6 +92,15 @@ import { getNoticeBoard } from "./features/actions/noticeBoard";
 import WebinarParticipants from "./pages/Webinar/Participants/WebinarParticipants";
 import { getUnAcknowledgedAlarms } from "./features/actions/alarm";
 import ErrorFallback from "./components/Fallback/ErrorFallback";
+
+const RedirectToExternal = ({ url }) => {
+  useEffect(() => {
+    if (url) {
+      window.location.href = url;
+    }
+  }, [url]);
+  return null;
+};
 
 const App = () => {
   const dispatch = useDispatch();
@@ -528,6 +533,10 @@ const App = () => {
           element: <ViewSettings />,
         },
         {
+          path: "/maskedtables",
+          element: <ViewMaskedTables />,
+        },
+        {
           path: "/settings/custom-status",
           element: (
             <RouteGuard
@@ -697,6 +706,24 @@ const App = () => {
           element: (
             <RouteGuard roleNames={["ADMIN"]}>
               <InterestPoolPage />
+            </RouteGuard>
+          ),
+        },
+        {
+          path: "/whatsapp/*",
+          element: (
+            <RouteGuard roleNames={["ADMIN"]}>
+              <WhatsAppWrapper />
+            </RouteGuard>
+          ),
+        },
+        {
+          path: "/zoom",
+          element: (
+            <RouteGuard roleNames={["ADMIN"]}>
+              <RedirectToExternal
+                url={import.meta.env.VITE_REACT_APP_ZOOM_URL}
+              />
             </RouteGuard>
           ),
         },

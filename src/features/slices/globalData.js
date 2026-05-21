@@ -36,6 +36,8 @@ const initialState = {
   clientDashboardData: {},
   employeeDashboardData: {},
   tagsData: [],
+  activeHeaderSection: "Dashboard",
+  selectedProject: null,
 };
 
 // ---------------------------------------------------------------------------------------
@@ -70,6 +72,14 @@ export const globalDataSlice = createSlice({
 
     clearClientDashboardData: (state) => {
       state.clientDashboardData = {};
+    },
+
+    setActiveHeaderSection: (state, action) => {
+      state.activeHeaderSection = action.payload;
+    },
+
+    setSelectedProject: (state, action) => {
+      state.selectedProject = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -277,7 +287,9 @@ export const {
   clearClientDashboardData,
   clearEmplyeeDashboardData,
   setTagsData,
-  setSidebarOpen
+  setSidebarOpen,
+  setActiveHeaderSection,
+  setSelectedProject,
 } = globalDataSlice.actions;
 export default globalDataSlice.reducer;
 

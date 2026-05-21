@@ -8,10 +8,6 @@ import React, {
 } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import Select from "@mui/material/Select";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
-import MenuItem from "@mui/material/MenuItem";
 import {
   clearAttendeeData,
   clearSuccess,
@@ -23,39 +19,66 @@ import {
   swapAttendeeFields,
 } from "../../features/actions/attendees";
 import { attendeeTableColumns } from "../../utils/columnData";
-import DataTable from "../../components/Table/DataTable";
-const AttendeesFilterModal = lazy(() =>
-  import("../../components/Attendees/AttendeesFilterModal")
+import { DynamicLeadsTable } from "../../components/Webinar/DynamicLeadsTable";
+import WebinarAttendeesTableShell from "../../components/Attendees/WebinarAttendeesTableShell";
+import { setPageLimit } from "../../features/slices/pageLimits";
+
+const AttendeesFilterModal = lazy(
+  () => import("../../components/Attendees/AttendeesFilterModal"),
 );
 import { resetReAssignSuccess } from "../../features/slices/reAssign.slice";
 import { resetAssignSuccess } from "../../features/slices/assign";
-const ExportWebinarAttendeesModal = lazy(() =>
-  import("../../components/Export/ExportWebinarAttendeesModal")
+const ExportWebinarAttendeesModal = lazy(
+  () => import("../../components/Export/ExportWebinarAttendeesModal"),
 );
-const SwapAttendeeFieldsModal = lazy(() =>
-  import("../../components/Webinar/SwapAttendeeFieldsModal")
+const SwapAttendeeFieldsModal = lazy(
+  () => import("../../components/Webinar/SwapAttendeeFieldsModal"),
 );
-const ApplyTagsModal = lazy(() =>
-  import("../../components/Webinar/ApplyTagsModal")
+const ApplyTagsModal = lazy(
+  () => import("../../components/Webinar/ApplyTagsModal"),
 );
-const BulkEnrollmentModal = lazy(() =>
-  import("../../components/Webinar/BulkEnrollmentModal")
+const BulkEnrollmentModal = lazy(
+  () => import("../../components/Webinar/BulkEnrollmentModal"),
+);
+const FilterPresetModal = lazy(
+  () => import("../../components/Filter/FilterPresetModal"),
 );
 import { createPortal } from "react-dom";
 import ModalFallback from "../../components/Fallback/ModalFallback";
 import { setWebinarAttendeesFilters } from "../../features/slices/filters.slice";
-import { flattenObjectForURLSearchParams, NotifActionType, successToast } from "../../utils/extra";
+import {
+  flattenObjectForURLSearchParams,
+  NotifActionType,
+  successToast,
+} from "../../utils/extra";
 import { socket } from "../../socket";
-import DeleteIcon from "../../components/SVGs/red-bin.svg";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
-import { VisibilityIcon } from "../../components/SVGs";
 import { clearWebinarData } from "../../features/slices/webinarContact";
 import { baseURL } from "../../services/axiosInterceptor";
 import { getTagsData, setTagsData } from "../../features/slices/globalData";
 import tagsService from "../../services/tagsService";
 import { useBulkApplyTagsByFilters } from "../../hooks/useTags";
+import {
+  Maximize,
+  Minimize,
+  RotateCcw,
+  Settings2,
+  Star,
+  Filter,
+  ChevronLeft,
+  ChevronRight,
+  ArrowUpDown,
+  Upload,
+  Tag,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const WebinarAttendeesPage = (props) => {
+  const { isDark } = useTheme();
+  const theme = isDark ? "dark" : "light";
+
   const {
     tabValue,
     page,
@@ -84,13 +107,9 @@ const WebinarAttendeesPage = (props) => {
     ? true
     : false;
 
-  // ------------------------------------------------------------------
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
-
-  const { globalLocationsData } = useSelector((state) => state.location);
 
   const {
     attendeeData,
@@ -103,15 +122,17 @@ const WebinarAttendeesPage = (props) => {
   const { total = 0, totalPages = 1 } = pagination;
 
   const { isSuccess: isSuccessReAssign } = useSelector(
-    (state) => state.reAssign
+    (state) => state.reAssign,
   );
   const { leadTypeData, isSuccess: assignSuccess } = useSelector(
-    (state) => state.assign
+    (state) => state.assign,
   );
   const LIMIT = useSelector((state) => state.pageLimits[tableHeader] || 10);
 
-  const [selected, setSelected] = useState("All");
+  const [selectedActivity, setSelectedActivity] = useState("All");
   const [deleteModal, setDeleteModal] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
+  const [presetModalOpen, setPresetModalOpen] = useState(false);
 
   const {
     webinarAttendeesSortBy,
@@ -122,7 +143,7 @@ const WebinarAttendeesPage = (props) => {
   const sortByOption = useMemo(
     () =>
       tabValue === "preWebinar" ? webinarAttendeesSortBy : salesAttendeesSortBy,
-    [tabValue, webinarAttendeesSortBy, salesAttendeesSortBy]
+    [tabValue, webinarAttendeesSortBy, salesAttendeesSortBy],
   );
 
   const notAllowedFields = useMemo(
@@ -130,7 +151,174 @@ const WebinarAttendeesPage = (props) => {
       tabValue === "preWebinar"
         ? ["assignmentDate", "timeInSession"]
         : ["assignmentDate"],
-    [tabValue]
+    [tabValue],
+  );
+
+  // Column config for DynamicLeadsTable
+  const ALL_COLUMNS = useMemo(
+    () => [
+      {
+        key: "serialNo",
+        label: "S.No",
+        dataKey: "serialNo",
+        widthKey: "serialNo",
+        sortable: false,
+        locked: true,
+      },
+      {
+        key: "email",
+        label: "Email",
+        dataKey: "email",
+        widthKey: "email",
+        sortable: true,
+        locked: true,
+      },
+      {
+        key: "phone",
+        label: "Phone",
+        dataKey: "phone",
+        widthKey: "phone",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "assignedTo",
+        label: "Assigned To",
+        dataKey: "isAssigned",
+        widthKey: "assignedTo",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "firstName",
+        label: "First Name",
+        dataKey: "firstName",
+        widthKey: "firstName",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "lastName",
+        label: "Last Name",
+        dataKey: "lastName",
+        widthKey: "lastName",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "status",
+        label: "Status",
+        dataKey: "status",
+        widthKey: "status",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "gender",
+        label: "Gender",
+        dataKey: "gender",
+        widthKey: "gender",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "location",
+        label: "Location",
+        dataKey: "location",
+        widthKey: "location",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "source",
+        label: "Source",
+        dataKey: "source",
+        widthKey: "source",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "dateTime",
+        label: "Date",
+        dataKey: "createdAt",
+        widthKey: "dateTime",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "tags",
+        label: "Tags",
+        dataKey: "tags",
+        widthKey: "tags",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "enrollments",
+        label: "Enrollments",
+        dataKey: "enrollments",
+        widthKey: "enrollments",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "registeredWebinars",
+        label: "Registered",
+        dataKey: "registeredCount",
+        widthKey: "registeredWebinars",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "attendedWebinars",
+        label: "Attended",
+        dataKey: "attendedCount",
+        widthKey: "attendedWebinars",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "pastWebinarDuration",
+        label: "Duration",
+        dataKey: "timeInSession",
+        widthKey: "pastWebinarDuration",
+        sortable: true,
+        locked: false,
+      },
+      {
+        key: "actions",
+        label: "Actions",
+        dataKey: "actions",
+        widthKey: "actions",
+        sortable: false,
+        locked: true,
+      },
+    ],
+    [],
+  );
+
+  const [columnWidths, setColumnWidths] = useState({
+    serialNo: 60,
+    email: 250,
+    phone: 150,
+    assignedTo: 150,
+    firstName: 150,
+    lastName: 150,
+    status: 150,
+    gender: 100,
+    location: 150,
+    source: 150,
+    dateTime: 200,
+    tags: 200,
+    enrollments: 200,
+    registeredWebinars: 100,
+    attendedWebinars: 100,
+    pastWebinarDuration: 120,
+    actions: 120,
+  });
+
+  const [columnVisibility, setColumnVisibility] = useState(
+    ALL_COLUMNS.reduce((acc, col) => ({ ...acc, [col.key]: true }), {}),
   );
 
   useEffect(() => {
@@ -142,85 +330,45 @@ const WebinarAttendeesPage = (props) => {
 
   const tagsData = useSelector(getTagsData);
 
-  const { mutateAsync: applyTagsByFilters, isPending: isApplyingTags,  } =
+  const { mutateAsync: applyTagsByFilters, isPending: isApplyingTags } =
     useBulkApplyTagsByFilters(() => {
-      // After successful tagging, refetch attendees for first page
-      dispatch(
-        getAttendees({
-          id,
-          isAttended: tabValue === "postWebinar",
-          filters: webinarAttendeesFilters,
-          validCall: selected === "All" ? undefined : selected,
-          assignmentType:
-            selectedAssignmentType === "All"
-              ? undefined
-              : selectedAssignmentType,
-          sort: sortByOption,
-          page: 1,
-          limit: LIMIT,
-        })
-      );
-      // Close the Apply Tags dialog
+      fetchAttendees(1);
       setApplyTagsModalOpen(false);
     });
 
-  useEffect(() => {
-    // Fetch tags if not already loaded
-    if (!tagsData || tagsData.length === 0) {
-      tagsService.getTags().then((res) => {
-        if (res.success) {
-          dispatch(setTagsData(res.data));
-        }
-      });
-    }
-  }, [dispatch, tagsData]);
+  const fetchAttendees = (p = page) => {
+    dispatch(
+      getAttendees({
+        id,
+        isAttended: tabValue === "postWebinar",
+        page: p,
+        limit: LIMIT,
+        filters: webinarAttendeesFilters,
+        validCall: selectedActivity === "All" ? undefined : selectedActivity,
+        assignmentType:
+          selectedAssignmentType === "All" ? undefined : selectedAssignmentType,
+        sort: sortByOption,
+      }),
+    );
+  };
 
   useEffect(() => {
     if (tabValue !== "enrollments" && subTabValue === "attendees") {
-      setSelectedRows([]);
-      dispatch(
-        getAttendees({
-          id,
-          isAttended: tabValue === "postWebinar",
-          page,
-          limit: LIMIT,
-          filters: webinarAttendeesFilters,
-          validCall: selected === "All" ? undefined : selected,
-          assignmentType:
-            selectedAssignmentType === "All"
-              ? undefined
-              : selectedAssignmentType,
-          sort: sortByOption,
-        })
-      );
+      fetchAttendees();
     }
   }, [
     page,
     tabValue,
     LIMIT,
     webinarAttendeesFilters,
-    selected,
+    selectedActivity,
     selectedAssignmentType,
     sortByOption,
   ]);
 
   useEffect(() => {
     if (isSuccess || assignSuccess || isSuccessReAssign) {
-      dispatch(
-        getAttendees({
-          id,
-          isAttended: tabValue === "postWebinar",
-          filters: webinarAttendeesFilters,
-          validCall: selected === "All" ? undefined : selected,
-          assignmentType:
-            selectedAssignmentType === "All"
-              ? undefined
-              : selectedAssignmentType,
-          sort: sortByOption,
-          page: 1,
-          limit: LIMIT,
-        })
-      );
+      fetchAttendees(1);
       dispatch(clearSuccess());
       dispatch(resetReAssignSuccess());
       dispatch(resetAssignSuccess());
@@ -228,7 +376,7 @@ const WebinarAttendeesPage = (props) => {
       setApplyTagsModalOpen(false);
       setSelectedRows([]);
     }
-  }, [isSuccess, assignSuccess, isSuccessReAssign, sortByOption]);
+  }, [isSuccess, assignSuccess, isSuccessReAssign]);
 
   useEffect(() => {
     function onNotification(data) {
@@ -241,78 +389,29 @@ const WebinarAttendeesPage = (props) => {
               page,
               limit: LIMIT,
               filters: webinarAttendeesFilters,
-              validCall: selected === "All" ? undefined : selected,
+              validCall:
+                selectedActivity === "All" ? undefined : selectedActivity,
               assignmentType:
                 selectedAssignmentType === "All"
                   ? undefined
                   : selectedAssignmentType,
               sort: sortByOption,
-            })
+            }),
           );
         }
       }
     }
     socket.on("notification", onNotification);
-    return () => {
-      socket.off("notification", onNotification);
-    };
+    return () => socket.off("notification", onNotification);
   }, [
     page,
     tabValue,
     LIMIT,
     webinarAttendeesFilters,
-    selected,
+    selectedActivity,
     selectedAssignmentType,
     sortByOption,
   ]);
-
-  const actionIcons = useMemo(
-    () => [
-      {
-        icon: () => (
-          <img
-            src={VisibilityIcon}
-            alt="Bookmark"
-            className="min-h-6 h-6 w-6 min-w-6"
-          />
-        ),
-        tooltip: "View Attendee Info",
-        onClick: (item) => {
-          navigate(
-            `/particularContact?email=${item?.email}&attendeeId=${item?._id}`
-          );
-        },
-      },
-      {
-        icon: () => (
-          <img
-            src={DeleteIcon}
-            alt="Edit"
-            className="min-h-6 h-6 w-6 min-w-6"
-          />
-        ),
-        tooltip: "Delete Attendee Info",
-        onClick: (item) => {
-          setDeleteModal(item);
-        },
-      },
-    ],
-    [navigate]
-  );
-
-  const tableData = useMemo(() => {
-    return {
-      columns:
-        tabValue === "postWebinar"
-          ? attendeeTableColumns
-          : attendeeTableColumns.filter((item) => item.key !== "timeInSession"),
-      totalRecords: total,
-      rows: attendeeData.map((row) => ({
-        ...row,
-        leadType: leadTypeData.find((lead) => lead._id === row?.leadType),
-      })),
-    };
-  }, [attendeeData, leadTypeData, tabValue, total]);
 
   const handleColumnSwap = (field1, field2) => {
     dispatch(
@@ -323,226 +422,174 @@ const WebinarAttendeesPage = (props) => {
         webinarId: id,
         isAttended: tabValue === "postWebinar",
         filters: webinarAttendeesFilters,
-        validCall: selected === "All" ? undefined : selected,
+        validCall: selectedActivity === "All" ? undefined : selectedActivity,
         assignmentType:
           selectedAssignmentType === "All" ? undefined : selectedAssignmentType,
-      })
+      }),
     ).then((res) => {
       res?.meta?.requestStatus === "fulfilled" && setSelectedRows([]);
     });
   };
 
-  const AttendeeDropdown = () => {
-    const handleChange = (event) => {
-      const label = event.target.value;
-      setSelected(label);
-      setPage(1);
-    };
-    const handleAssignmentChange = (event) => {
-      const label = event.target.value;
-      setSelectedRows([]);
-      setSelectedAssignmentType(label);
-      setPage(1);
-    };
+  const handleSort = (column) => {
+    const currentSortBy = sortByOption?.sortBy;
+    const currentSortOrder = sortByOption?.sortOrder;
 
-    return (
-      <div className="md:flex gap-4 grid grid-cols-2">
-        <FormControl className="md:w-40 " variant="outlined">
-          <InputLabel id="activity-label">Activity</InputLabel>
-          <Select
-            labelId="activity-label"
-            className="h-10"
-            value={selected}
-            onChange={handleChange}
-            label="Activity"
-          >
-            <MenuItem value="All">All</MenuItem>
-            <MenuItem value="Worked">Worked</MenuItem>
-            <MenuItem value="Pending">Pending</MenuItem>
-          </Select>
-        </FormControl>
+    let newSortBy = column;
+    let newSortOrder = "desc";
 
-        <FormControl className="md:w-40 " variant="outlined">
-          <InputLabel id="assignment-label">Assignment</InputLabel>
-          <Select
-            labelId="assignment-label"
-            className="h-10"
-            value={selectedAssignmentType}
-            onChange={handleAssignmentChange}
-            label="Assignment"
-          >
-            <MenuItem value="All">All</MenuItem>
-            <MenuItem value="Assigned">Assigned</MenuItem>
-            <MenuItem value="Not Assigned"> Not Assigned</MenuItem>
-          </Select>
-        </FormControl>
-      </div>
+    if (currentSortBy === column) {
+      if (currentSortOrder === "desc") {
+        newSortOrder = "asc";
+      } else {
+        // Third click: clear sorting
+        newSortBy = "";
+        newSortOrder = "";
+      }
+    }
+
+    dispatch(
+      setWebinarAttendeesFilters({
+        recordType: tabValue,
+        sortBy: {
+          sortBy: newSortBy,
+          sortOrder: newSortOrder,
+        },
+      }),
     );
   };
 
-// --- 3. Refactored `useCallback` Hook
-const handleCopy = useCallback(
-  /**
-   * Constructs a webinar attendees URL with various filters using bracket notation,
-   * and copies the generated URL to the clipboard.
-   * @param {Object} [additionalFilters={}] - Optional additional filter parameters (can be nested).
-   */
-  (additionalFilters = {}) => {
-    // console.log("Additional filters received:", additionalFilters); // For debugging
-
-    // Ensure constants are accessible (e.g., imported or defined nearby)
-    const WEBINAR_ATTENDEES_ENDPOINT = '/attendees/webinar'; // Example, ideally imported
-    const TAB_VALUE_POST_WEBINAR = 'postWebinar';         // Example, ideally imported
-    const OPTION_ALL = 'All';                             // Example, ideally imported
-
-    // Construct the main object containing all parameters, including nested ones.
-    // This object will be flattened by `flattenObjectForURLSearchParams`.
-    const allQueryParams = {
-      isAttended: tabValue === TAB_VALUE_POST_WEBINAR,
+  const handleCopyApi = useCallback((filters) => {
+    const params = {
       page,
       limit: LIMIT,
-      filters: additionalFilters, // The nested filters object passed into handleCopy
-      validCall: selected === OPTION_ALL ? undefined : selected, // Will be filtered if undefined
-      assignmentType: selectedAssignmentType === OPTION_ALL ? undefined : selectedAssignmentType, // Will be filtered if undefined
-      sort: sortByOption, // Assuming sortByOption is an object like `{ sortBy: 'email', sortOrder: 'asc' }`
-                         // If sortByOption can be `undefined` or `{}` it will be handled by `flattenObjectForURLSearchParams`.
+      filters,
+      fieldName: "attendeeTableConfig",
       webinarId: id,
-      // Add `fieldName` if it's a dynamic variable in your scope that should be part of the URL.
-      // E.g., fieldName: dynamicFieldNameVar,
+      isAttended: tabValue === "postWebinar",
+      validCall: selectedActivity === "All" ? undefined : selectedActivity,
+      assignmentType: selectedAssignmentType === "All" ? undefined : selectedAssignmentType,
+      sort: sortByOption?.sortBy ? sortByOption : undefined,
     };
 
-    // Flatten the entire `allQueryParams` object into a list of `[key, value]` pairs
-    // using bracket notation. This handles nesting and automatically filters out unwanted values.
-    const flattenedParams = flattenObjectForURLSearchParams(allQueryParams);
+    const flattened = flattenObjectForURLSearchParams(params);
+    const searchParams = new URLSearchParams();
+    flattened.forEach(([key, value]) => {
+      searchParams.append(key, value);
+    });
 
-    // Create URLSearchParams from the flattened array.
-    // This will correctly encode all keys (e.g., `filters[email]`) and values.
-    const queryString = new URLSearchParams(flattenedParams).toString();
+    const url = `${baseURL}/attendees/webinar?${searchParams.toString()}`;
+    navigator.clipboard.writeText(url).then(() => {
+      toast.success("API URL copied to clipboard!");
+    }).catch(() => {
+      toast.error("Failed to copy API URL");
+    });
+  }, [id, page, LIMIT, tabValue, selectedActivity, selectedAssignmentType, sortByOption]);
 
-    // Ensure baseURL ends with a slash or WEBINAR_ATTENDEES_ENDPOINT starts with one.
-    // Example: "http://localhost:3001/api/v1" + "/attendees/webinar" -> "http://localhost:3001/api/v1/attendees/webinar"
-    const finalURL = `${baseURL.replace(/\/$/, '')}${WEBINAR_ATTENDEES_ENDPOINT}?${queryString}&fieldName=attendeeTableConfig&accessToken=<BEARER_TOKEN>`;
+  // UI Styling Helpers
+  const textPrimary = theme === "dark" ? "#f8fafc" : "#071028";
+  const textMuted = theme === "dark" ? "#94a3b8" : "#64748b";
+  const cardBg =
+    theme === "dark" ? "rgba(30,41,59,0.7)" : "rgba(255,255,255,0.8)";
+  const cardBorder =
+    theme === "dark" ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)";
+  const dividerColor = theme === "dark" ? "#334155" : "rgba(0,0,0,0.06)";
+  const inputBg = theme === "dark" ? "#0f172a" : "#ffffff";
+  const inputBorder = theme === "dark" ? "#334155" : "#e2e8f0";
 
-    // Copy to clipboard
-    navigator.clipboard.writeText(finalURL)
-      .then(() => {
-        // Assume successToast is a function available in your component's scope
-        successToast("Copied to clipboard!");
-      })
-      .catch(err => {
-        console.error("Failed to copy URL to clipboard: ", err);
-        // Provide user feedback for errors (e.g., using an errorToast function if available)
-        // if (errorToast) {
-        //   errorToast("Failed to copy URL to clipboard. Please try again.");
-        // }
-      });
-  },
-  [
-    id,
-    tabValue,
-    page,
-    LIMIT,
-    selected,
-    selectedAssignmentType,
-    sortByOption, // Crucial dependency as it's now directly flattened
-    baseURL,
-    // If `successToast` or `errorToast` are functions that can change or are memoized themselves,
-    // they should be included in the dependency array.
-    // successToast,
-    // errorToast,
-    // If `fieldName` is a variable used above, include it here:
-    // dynamicFieldNameVar,
-  ]
-);
+  const inputStyle = {
+    backgroundColor: inputBg,
+    border: `1px solid ${inputBorder}`,
+    color: textPrimary,
+    fontFamily: "Inter, sans-serif",
+  };
 
+  const labelStyle = {
+    color: textMuted,
+    fontSize: "11px",
+    fontWeight: 600,
+    marginBottom: "2px",
+    display: "block",
+    textTransform: "uppercase",
+    letterSpacing: "0.5px",
+  };
 
-  const handleApplyTag = useCallback(
-    async (tag) => {
-      await applyTagsByFilters({
-        webinarId: id,
-        isAttended: tabValue === "postWebinar",
-        filters: webinarAttendeesFilters,
-        validCall: selected === "All" ? undefined : selected,
-        assignmentType:
-          selectedAssignmentType === "All" ? undefined : selectedAssignmentType,
-        tag,
-      });
-    },
-    [
-      applyTagsByFilters,
-      id,
-      tabValue,
-      webinarAttendeesFilters,
-      selected,
-      selectedAssignmentType,
-      LIMIT,
-      sortByOption,
-      dispatch,
-    ]
-  );
-
-  const handleBulkEnrollSuccess = useCallback(() => {
-    dispatch(
-      getAttendees({
-        id,
-        isAttended: tabValue === "postWebinar",
-        filters: webinarAttendeesFilters,
-        validCall: selected === "All" ? undefined : selected,
-        assignmentType:
-          selectedAssignmentType === "All"
-            ? undefined
-            : selectedAssignmentType,
-        sort: sortByOption,
-        page: 1,
-        limit: LIMIT,
-      })
-    );
-  }, [
-    dispatch,
-    id,
-    tabValue,
-    webinarAttendeesFilters,
-    selected,
-    selectedAssignmentType,
-    sortByOption,
-    LIMIT,
-  ]);
-
-  const attendeeDropdownElement = useMemo(() => {
-    return <AttendeeDropdown />;
-  }, [selected, selectedAssignmentType]);
+  const indexOfFirstItem = (page - 1) * LIMIT;
+  const indexOfLastItem = Math.min(page * LIMIT, total);
 
   return (
-    <>
-      <DataTable
-        tableHeader={tableHeader}
-        tableUniqueKey="webinarAttendeesTable"
-        buttonGroupContent={attendeeDropdownElement}
-        isSelectVisible={userData?.isActive}
-        sortByOrder={sortByOption?.sortOrder}
-        tableData={tableData}
-        actions={actionIcons}
-        totalPages={totalPages}
+    <div className="space-y-4">
+      {/* Table Container Card */}
+      <WebinarAttendeesTableShell
+        theme={theme}
+        isDark={theme === "dark"}
+        tabValue={tabValue}
+        total={total}
+        selectedActivity={selectedActivity}
+        setSelectedActivity={setSelectedActivity}
+        selectedAssignmentType={selectedAssignmentType}
+        setSelectedAssignmentType={setSelectedAssignmentType}
+        isFullScreen={isFullScreen}
+        setIsFullScreen={setIsFullScreen}
+        onOpenFilters={() =>
+          dispatch({
+            type: "modals/openModal",
+            payload: AttendeesFilterModalName,
+          })
+        }
+        onOpenExport={() =>
+          dispatch({
+            type: "modals/openModal",
+            payload: exportExcelModalName,
+          })
+        }
+        onOpenPresets={() => setPresetModalOpen(true)}
+        filters={webinarAttendeesFilters}
+        setApplyTagsModalOpen={setApplyTagsModalOpen}
         page={page}
         setPage={setPage}
-        selectedRows={selectedRows}
-        setSelectedRows={setSelectedRows}
+        totalPages={totalPages}
         limit={LIMIT}
-        filterModalName={AttendeesFilterModalName}
-        exportModalName={exportExcelModalName}
-        isLoading={isLoading}
-        isLeadType={true}
-        filters={webinarAttendeesFilters}
-        setFilters={(filters) => {
-          dispatch(
-            setWebinarAttendeesFilters({
-              filters: filters,
-            })
-          );
-        }}
-        locations={globalLocationsData}
-      />
+        tableHeader={tableHeader}
+      >
+        <DynamicLeadsTable
+          columns={ALL_COLUMNS.map((col) => ({
+            ...col,
+            onViewClick: (item) =>
+              navigate(
+                `/particularContact?email=${item?.email}&attendeeId=${item?._id}`,
+              ),
+            onDeleteClick: (item) => setDeleteModal(item),
+          }))}
+          selectedRows={selectedRows}
+          onToggleSelect={(id) => {
+            setSelectedRows(prev => {
+              if (prev.includes(id)) return prev.filter(rowId => rowId !== id);
+              return [...prev, id];
+            });
+          }}
+          onToggleSelectAll={(checked, allIds) => {
+            if (checked) setSelectedRows(allIds);
+            else setSelectedRows([]);
+          }}
+          attendees={attendeeData}
+          columnWidths={columnWidths}
+          columnVisibility={columnVisibility}
+          sortColumn={sortByOption?.sortBy}
+          sortDirection={sortByOption?.sortOrder}
+          resizingColumn={null}
+          theme={theme}
+          indexOfFirstItem={indexOfFirstItem}
+          sortedAttendees={attendeeData}
+          onSort={handleSort}
+          onResizeStart={() => { }}
+          onResizeDoubleClick={() => { }}
+          onDeleteClick={() => { }}
+          isLoading={isLoading}
+        />
+      </WebinarAttendeesTableShell>
 
+      {/* Modals */}
       {AttendeesFilterModalOpen && (
         <Suspense fallback={<ModalFallback />}>
           <AttendeesFilterModal
@@ -550,7 +597,7 @@ const handleCopy = useCallback(
             setPage={setPage}
             tabValue={tabValue}
             notAllowed={notAllowedFields}
-            handleCopy={handleCopy}
+            handleCopy={handleCopyApi}
           />
         </Suspense>
       )}
@@ -560,84 +607,109 @@ const handleCopy = useCallback(
           <ExportWebinarAttendeesModal
             modalName={exportExcelModalName}
             filters={webinarAttendeesFilters}
-            sort={sortByOption}
+            isAttended={tabValue === "postWebinar"}
             webinarId={id}
             webinarName={webinarName}
-            isAttended={tabValue === "postWebinar" ? true : false}
-            validCall={selected === "All" ? undefined : selected}
-            assignmentType={
-              selectedAssignmentType === "All"
-                ? undefined
-                : selectedAssignmentType
-            }
+            sort={sortByOption}
+            validCall={selectedActivity === "All" ? undefined : selectedActivity}
+            assignmentType={selectedAssignmentType === "All" ? undefined : selectedAssignmentType}
           />
         </Suspense>
       )}
 
-      {isSwapOpen &&
-        createPortal(
-          <Suspense fallback={<ModalFallback />}>
-            <SwapAttendeeFieldsModal
-              onClose={() => setSwapOpen(false)}
-              onSubmit={handleColumnSwap}
-            />
-          </Suspense>,
-          document.body
-        )}
+      {isSwapOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <SwapAttendeeFieldsModal
+            onClose={() => setSwapOpen(false)}
+            attendees={selectedRows}
+            total={total}
+            onSubmit={(field1, field2, attendees) => {
+              dispatch(
+                swapAttendeeFields({
+                  webinarId: id,
+                  field1,
+                  field2,
+                  attendees,
+                  filters: webinarAttendeesFilters || {},
+                  isAttended: tabValue === "preWebinar" ? false : true,
+                }),
+              );
+            }}
+          />
+        </Suspense>
+      )}
 
-      {deleteModal &&
-        createPortal(
-          <Suspense fallback={<ModalFallback />}>
-            <ConfirmDeleteModal
-              setModal={setDeleteModal}
-              triggerDelete={() =>
-                dispatch(
-                  deleteWebinarAttendees({
-                    attendees: [deleteModal?._id],
-                    webinarId: id,
-                  })
-                )
-              }
-              isLoading={isDeleting}
-            />
-          </Suspense>,
-          document.body
-        )}
+      {applyTagsModalOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <ApplyTagsModal
+            onClose={() => setApplyTagsModalOpen(false)}
+            onSubmit={async (tag) => {
+              await bulkApplyTags({
+                webinarId: id,
+                tag,
+                isAttended: tabValue === "preWebinar" ? false : true,
+                filters: webinarAttendeesFilters,
+              });
+            }}
+            isLoading={isApplyingTags}
+          />
+        </Suspense>
+      )}
 
-      {applyTagsModalOpen &&
-        createPortal(
-          <Suspense fallback={<ModalFallback />}>
-            <ApplyTagsModal
-              onClose={() => setApplyTagsModalOpen(false)}
-              onSubmit={handleApplyTag}
-              isLoading={isApplyingTags}
-            />
-          </Suspense>,
-          document.body
-        )}
+      {bulkEnrollOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <BulkEnrollmentModal
+            onClose={() => setBulkEnrollOpen(false)}
+            webinarId={id}
+            isAttended={tabValue === "preWebinar" ? false : true}
+            selectedRows={selectedRows}
+            total={total}
+            filters={webinarAttendeesFilters}
+            onSuccess={() => {
+              setBulkEnrollOpen(false);
+              setSelectedRows([]);
+            }}
+          />
+        </Suspense>
+      )}
 
-      {bulkEnrollOpen &&
-        createPortal(
-          <Suspense fallback={<ModalFallback />}>
-            <BulkEnrollmentModal
-              onClose={() => setBulkEnrollOpen(false)}
-              webinarId={id}
-              isAttended={tabValue === "postWebinar"}
-              selectedRows={selectedRows}
-              total={total}
-              filters={webinarAttendeesFilters}
-              validCall={selected === "All" ? undefined : selected}
-              assignmentType={
-                selectedAssignmentType === "All"
-                  ? undefined
-                  : selectedAssignmentType
-              }
-              onSuccess={handleBulkEnrollSuccess}
-            />
-          </Suspense>,
-          document.body
-        )}
-    </>
+      {deleteModal && (
+        <Suspense fallback={<ModalFallback />}>
+          <ConfirmDeleteModal
+            setModal={setDeleteModal}
+            triggerDelete={() => {
+              dispatch(
+                deleteWebinarAttendees({
+                  webinarId: id,
+                  attendees: selectedRows,
+                  isAttended: tabValue === "preWebinar" ? false : true,
+                  filters: webinarAttendeesFilters,
+                }),
+              );
+            }}
+            isLoading={isDeleting}
+          />
+        </Suspense>
+      )}
+
+      {presetModalOpen && (
+        <Suspense fallback={<ModalFallback />}>
+          <FilterPresetModal
+            open={presetModalOpen}
+            setIsPresetModalOpen={setPresetModalOpen}
+            tableName={tabValue === "preWebinar" ? "preWebinarAttendeesTable" : "postWebinarAttendeesTable"}
+            filters={webinarAttendeesFilters}
+            setFilters={(next) => {
+              dispatch(setWebinarAttendeesFilters({ 
+                recordType: tabValue,
+                filters: next || {} 
+              }));
+              setPage(1);
+            }}
+          />
+        </Suspense>
+      )}
+    </div>
   );
 };
 

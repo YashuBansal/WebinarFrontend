@@ -1,11 +1,15 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   getPricePlans,
   updatePlansOrder,
 } from "../../../features/actions/pricePlan";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../../../components/AppLoader";
+import { motion } from "framer-motion";
+import { ListOrdered, Sparkles } from "lucide-react";
+import HubSubpageShell from "../../../components/Layout/HubSubpageShell";
+import { Button } from "../../../components/ui/button";
 
 const PlanOrder = () => {
   const dispatch = useDispatch();
@@ -13,7 +17,6 @@ const PlanOrder = () => {
   const { planData, isSuccess, isLoading } = useSelector(
     (state) => state.pricePlans
   );
-  console.log(planData, "planData");
 
   const [plans, setPlans] = useState([]);
 
@@ -46,69 +49,105 @@ const PlanOrder = () => {
     if (!Array.isArray(planData) || planData.length === 0) {
       dispatch(getPricePlans());
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- load once on mount when store has no plans
   }, []);
 
   useEffect(() => {
     if (isSuccess) {
       navigate("/plans");
     }
-  }, [isSuccess]);
+  }, [isSuccess, navigate]);
 
   return (
-    <div className="min-h-screen pt-14 bg-gradient-to-r from-blue-50 to-indigo-100 p-4 md:p-6 flex flex-col items-center">
-      <div className="w-full bg-white shadow-lg rounded-2xl p-3 md:p-6">
-        <div className="flex justify-between items-center mb-6 md:flex-row flex-col gap-3">
-          <h1 className="text-3xl font-bold text-indigo-600 text-center">
-            Plan Reordering Tool
-          </h1>
-          <button
-            onClick={handleUpdateOrder}
-            disabled={isLoading}
-            className="w-40 h-10  bg-indigo-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors duration-300"
+    <HubSubpageShell>
+      <motion.header
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+        className="mb-8 flex flex-col gap-4 sm:mb-10 lg:flex-row lg:items-start lg:justify-between"
+      >
+        <div className="flex min-w-0 flex-1 items-start gap-4">
+          <motion.div
+            aria-hidden
+            className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-500/10 dark:bg-blue-500/15"
+            initial={{ scale: 0.85, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ type: "spring", stiffness: 380, damping: 22, delay: 0.05 }}
           >
-            {isLoading ? (
-              <ClipLoader color="white" size={20} />
-            ) : (
-              "Update Order"
-            )}
-          </button>
+            <ListOrdered className="h-7 w-7 text-blue-500 dark:text-blue-400" />
+          </motion.div>
+          <div className="min-w-0 space-y-1">
+            <div className="flex flex-wrap items-center gap-2">
+              <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
+                Plan order
+              </h1>
+              <Sparkles className="hidden h-5 w-5 text-amber-400 sm:inline sm:h-6 sm:w-6" aria-hidden />
+            </div>
+            <p className="max-w-xl text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+              Set sort order numbers below; the list sorts automatically. Save when you are done — you will return to
+              the plans page.
+            </p>
+          </div>
         </div>
-        <p className="text-center text-gray-600 mb-8">
-          Reorder your plans by updating the numbers below. The list will
-          automatically adjust based on your input.
-        </p>
+        <Button
+          type="button"
+          onClick={handleUpdateOrder}
+          disabled={isLoading}
+          className="h-11 shrink-0 gap-2 rounded-xl bg-blue-500 px-6 font-bold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-600 dark:shadow-blue-900/40"
+        >
+          {isLoading ? (
+            <AppLoader size="md" variant="inverse" />
+          ) : (
+            "Update order"
+          )}
+        </Button>
+      </motion.header>
 
-        <ul className="space-y-6">
-          {sortedPlans.map((plan) => (
-            <li
-              key={plan.id}
-              className="flex items-center justify-between p-4 bg-indigo-50 rounded-lg shadow hover:shadow-md transition-shadow"
-            >
-              <span className="text-lg font-medium text-indigo-700">
-                {plan.name}
-              </span>
-              <div className="flex items-center space-x-4">
-                <label
-                  htmlFor={`order-${plan.id}`}
-                  className="text-sm font-medium text-gray-600"
-                >
-                  Order:
-                </label>
-                <input
-                  id={`order-${plan.id}`}
-                  type="number"
-                  min="0"
-                  onClick={(e) => e.target.select()}
-                  value={plan.sortOrder}
-                  onChange={(e) => handleOrderChange(plan.id, e.target.value)}
-                  className="w-20 px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800/90">
+        <div className="p-5 sm:p-6">
+          <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+            Plans
+          </h2>
+          <ul className="mt-6 space-y-3">
+            {sortedPlans.map((plan, i) => (
+              <motion.li
+                key={plan.id}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(i * 0.05, 0.25), ease: [0.22, 1, 0.36, 1] }}
+                className="flex flex-col gap-4 rounded-2xl border border-slate-200/90 bg-gradient-to-br from-white to-slate-50/80 p-4 shadow-sm dark:border-slate-600 dark:from-slate-900 dark:to-slate-900/80 sm:flex-row sm:items-center sm:justify-between"
+              >
+                <span className="text-base font-black tracking-tight text-slate-900 dark:text-slate-50">
+                  {plan.name}
+                </span>
+                <div className="flex items-center gap-3">
+                  <label
+                    htmlFor={`order-${plan.id}`}
+                    className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400"
+                  >
+                    Order
+                  </label>
+                  <input
+                    id={`order-${plan.id}`}
+                    type="number"
+                    min="0"
+                    onClick={(e) => e.target.select()}
+                    value={plan.sortOrder}
+                    onChange={(e) => handleOrderChange(plan.id, e.target.value)}
+                    className="h-10 w-24 rounded-xl border border-slate-200 bg-white px-3 text-center text-sm font-bold text-slate-900 shadow-inner outline-none focus-visible:ring-2 focus-visible:ring-blue-500 dark:border-slate-600 dark:bg-slate-950 dark:text-slate-100"
+                  />
+                </div>
+              </motion.li>
+            ))}
+          </ul>
+          {sortedPlans.length === 0 && (
+            <p className="mt-8 text-center text-sm font-medium text-slate-500 dark:text-slate-400">
+              No plans loaded yet.
+            </p>
+          )}
+        </div>
       </div>
-    </div>
+    </HubSubpageShell>
   );
 };
 

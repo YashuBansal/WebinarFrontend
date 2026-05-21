@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "sonner";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../../components/AppLoader";
 import { useSelector } from "react-redux";
 
 const RequestReassignmentModal = ({ onClose, onSubmit }) => {
@@ -59,7 +59,7 @@ const RequestReassignmentModal = ({ onClose, onSubmit }) => {
             onClick={handleSubmit}
             className="px-4 py-2 text-sm font-medium w-20 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
           >
-            {assignLoading ? <ClipLoader size={16} /> : " Submit"}
+            {assignLoading ? <AppLoader size="sm" variant="inverse" /> : " Submit"}
           </button>
         </div>
       </div>

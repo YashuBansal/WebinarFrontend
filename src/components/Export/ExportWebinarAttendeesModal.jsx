@@ -1,25 +1,9 @@
-import { useEffect, useState, useRef } from "react"; // Added useRef
-import {
-  Modal,
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  TextField,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Typography,
-  Grid, // Added for layout
-  IconButton, // Potentially for a close button
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close"; // For a dedicated close button
+import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { closeModal } from "../../features/slices/modalSlice";
 import { exportWebinarAttendeesExcel } from "../../features/actions/export-excel";
-import { ClipLoader } from "react-spinners";
-import { attendeeTableColumns, groupedAttendeeTableColumns } from "../../utils/columnData";
+import AppLoader from "../AppLoader";
+import { attendeeTableColumns } from "../../utils/columnData";
 import { resetExportSuccess } from "../../features/slices/export-excel";
 import {
   creattFilterPreset,
@@ -32,28 +16,24 @@ import {
 } from "../../features/slices/filter-preset";
 import DeleteIcon from "../../components/SVGs/red-bin.svg";
 import useUserSubscription from "../../hooks/useUserSubscription";
+import { Dialog, DialogContent } from "../ui/dialog";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Checkbox } from "../ui/checkbox";
+import { Download, X } from "lucide-react";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const tableName = "Webinar Attendees Export";
-
-const modalStyle = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "90%",
-  maxWidth: "700px",
-  bgcolor: "background.paper",
-  borderRadius: "8px",
-  boxShadow: 24,
-  p: { xs: 2, sm: 3 },
-  maxHeight: "90vh",
-  overflowY: "auto",
-  display: "flex",
-  flexDirection: "column",
-};
+const FONT = "Inter, sans-serif";
 
 const ExportWebinarAttendeesModal = ({
   modalName,
+  open = true,
+  title = "Export Excel Options",
+  defaultColumns = null,
+  onSubmitExport = null,
+  presetTableName = null,
+  allowPresetsInSharedMode = false,
   filters,
   isAttended,
   webinarId,
@@ -61,17 +41,24 @@ const ExportWebinarAttendeesModal = ({
   validCall,
   assignmentType,
   sort,
-  flag='attendee'
+  flag = "attendee",
 }) => {
+  const { isDark } = useTheme();
   const dispatch = useDispatch();
-
   const { data: subscription } = useUserSubscription();
   const tableConfig = subscription?.plan?.attendeeTableConfig || {};
+  const employeeInactivity = subscription?.plan?.employeeInactivity;
+  const isSharedMode =
+    Array.isArray(defaultColumns) && typeof onSubmitExport === "function";
+  const enablePresets = !isSharedMode || allowPresetsInSharedMode;
+  const activePresetTableName = presetTableName || tableName;
 
   const { isExportLoading } = useSelector((state) => state.export);
-  const { filterPresets, isSuccess: isPresetCreationSuccess, isLoading: isPresetLoading } = useSelector(
-    (state) => state.filterPreset
-  );
+  const {
+    filterPresets,
+    isSuccess: isPresetCreationSuccess,
+    isLoading: isPresetLoading,
+  } = useSelector((state) => state.filterPreset);
 
   const [limit, setLimit] = useState("");
   const [selectedColumns, setSelectedColumns] = useState([]);
@@ -79,27 +66,35 @@ const ExportWebinarAttendeesModal = ({
   const [includeFilter, setIncludeFilter] = useState(true);
   const [presetNameInput, setPresetNameInput] = useState("");
   const [selectedPresetId, setSelectedPresetId] = useState("");
-
-  // Ref to track manual interaction with checkboxes to prevent useEffect override
   const manualInteractionRef = useRef(false);
+
+  const handleClose = () => {
+    dispatch(closeModal(modalName));
+  };
 
   const handleCheckboxChange = (key) => {
     setSelectedColumns((prev) =>
       prev.includes(key) ? prev.filter((col) => col !== key) : [...prev, key]
     );
     setSelectedPresetId("");
-    manualInteractionRef.current = true; // Indicate manual interaction
-  };
-
-  const handleClose = () => {
-    dispatch(closeModal(modalName));
+    manualInteractionRef.current = true;
   };
 
   const handleSubmit = () => {
-    const limitValue = limit || undefined;
+    const exportLimit = Number(limit) || 0;
+    if (isSharedMode) {
+      onSubmitExport({
+        limit: exportLimit,
+        columns: selectedColumns,
+        filters: includeFilter ? filters || {} : {},
+        includeFilter,
+      });
+      return;
+    }
+
     dispatch(
       exportWebinarAttendeesExcel({
-        limit: Number(limitValue) || 0,
+        limit: exportLimit,
         columns: selectedColumns,
         filters: includeFilter ? filters : {},
         isAttended,
@@ -113,19 +108,29 @@ const ExportWebinarAttendeesModal = ({
   };
 
   useEffect(() => {
-    if (isExportLoading) {
-      dispatch(resetExportSuccess());
-      handleClose();
-    }
-  }, [isExportLoading, dispatch]);
+    if (!isExportLoading) return;
+    if (!isSharedMode) dispatch(resetExportSuccess());
+    handleClose();
+  }, [isExportLoading, dispatch, isSharedMode]);
 
-  // Effect to calculate available columns and manage selected columns based on config/presets
   useEffect(() => {
-    const newAvailableColumns = attendeeTableColumns.filter(
-      (col) => col.key in tableConfig && tableConfig[col.key].downloadable
-    );
-    if (tableConfig["leadType"]?.downloadable) {
-      if (!newAvailableColumns.some((col) => col.key === "leadType")) {
+    let newAvailableColumns = [];
+
+    if (isSharedMode) {
+      newAvailableColumns = (defaultColumns || []).filter((column) => {
+        if (column.key === "inactivityTime" && !employeeInactivity) {
+          return false;
+        }
+        return true;
+      });
+    } else {
+      newAvailableColumns = attendeeTableColumns.filter((col) =>
+        col.key in tableConfig ? tableConfig[col.key].downloadable : true
+      );
+      if (
+        tableConfig.leadType?.downloadable &&
+        !newAvailableColumns.some((col) => col.key === "leadType")
+      ) {
         newAvailableColumns.push({
           header: "LeadType",
           key: "leadType",
@@ -133,14 +138,15 @@ const ExportWebinarAttendeesModal = ({
         });
       }
     }
+
     setColumns(newAvailableColumns);
 
     if (manualInteractionRef.current) {
-      manualInteractionRef.current = false; // Reset flag and do not override manual selection
+      manualInteractionRef.current = false;
       return;
     }
 
-    if (selectedPresetId) {
+    if (enablePresets && selectedPresetId) {
       const presetToApply = (filterPresets || []).find(
         (p) => (p._id || p.name) === selectedPresetId
       );
@@ -150,44 +156,44 @@ const ExportWebinarAttendeesModal = ({
           (key) => availableKeys.includes(key)
         );
         setSelectedColumns(validPresetColumns);
-      } else {
-        // Preset selected but not found or invalid, fall back to default for safety
-        // Or clear selection if preset is invalid.
-        // For now, if preset invalid/not found and `selectedPresetId` is somehow set,
-        // it might be better to clear `selectedPresetId` and let it fall to default.
-        // However, `handleApplyPreset` should ideally prevent setting invalid `selectedPresetId`.
-        // If it resulted in no columns after filtering, setSelectedColumns would be empty.
+        return;
       }
-    } else {
-      // No preset selected, or "Default" was chosen. Set to all available columns.
-      setSelectedColumns(newAvailableColumns.map((col) => col.key));
     }
-  }, [tableConfig, selectedPresetId, filterPresets, dispatch]); // dispatch might not be needed, but good practice if any redux actions were called inside
+
+    setSelectedColumns(newAvailableColumns.map((col) => col.key));
+  }, [
+    tableConfig,
+    selectedPresetId,
+    filterPresets,
+    isSharedMode,
+    enablePresets,
+    defaultColumns,
+    employeeInactivity,
+  ]);
 
   useEffect(() => {
-    dispatch(getFilterPreset(tableName));
+    if (!enablePresets) return undefined;
+    dispatch(getFilterPreset(activePresetTableName));
     return () => {
       dispatch(clearPreset());
     };
-  }, [dispatch]);
+  }, [dispatch, enablePresets, activePresetTableName]);
 
   useEffect(() => {
-    if (isPresetCreationSuccess) {
-      const newPresetName = presetNameInput.trim();
-      setPresetNameInput("");
-      dispatch(resetFilterPresetSuccess());
-      dispatch(getFilterPreset(tableName)).then(() => {
-        // Attempt to select the newly created preset.
-        // This requires filterPresets to be updated.
-        // A more robust way might be for creattFilterPreset to return the new preset.
-        // For now, find by name after refetch.
-        // This selection logic is tricky due to async updates of filterPresets.
-        // A slight delay or check might be needed, or rely on user to select it.
-        // The original logic of setSelectedPresetId(newPresetName) is simpler for now.
-        setSelectedPresetId(newPresetName); // This relies on handleApplyPreset or the main useEffect to pick it up
-      });
-    }
-  }, [isPresetCreationSuccess, dispatch, presetNameInput]);
+    if (!enablePresets || !isPresetCreationSuccess) return;
+    const newPresetName = presetNameInput.trim();
+    setPresetNameInput("");
+    dispatch(resetFilterPresetSuccess());
+    dispatch(getFilterPreset(activePresetTableName)).then(() => {
+      setSelectedPresetId(newPresetName);
+    });
+  }, [
+    isPresetCreationSuccess,
+    dispatch,
+    presetNameInput,
+    enablePresets,
+    activePresetTableName,
+  ]);
 
   const handleSavePreset = () => {
     if (!presetNameInput.trim()) {
@@ -202,44 +208,35 @@ const ExportWebinarAttendeesModal = ({
       alert("Error: A preset with this name already exists.");
       return;
     }
-    const payload = {
-      name: presetNameInput.trim(),
-      tableName,
-      filters: { selectedColumns }, // Save the order as well
-    };
-    dispatch(creattFilterPreset(payload));
+    dispatch(
+      creattFilterPreset({
+        name: presetNameInput.trim(),
+        tableName: activePresetTableName,
+        filters: { selectedColumns },
+      })
+    );
   };
 
   const handleApplyPreset = (presetIdentifier) => {
     setSelectedPresetId(presetIdentifier);
-    manualInteractionRef.current = false; // Applying a preset is not a manual column change
+    manualInteractionRef.current = false;
 
     if (!presetIdentifier) {
-      // "Default Columns" selected from dropdown
-      // The main useEffect will handle setting selectedColumns to all available columns
-      // because selectedPresetId is now "", and manualInteractionRef is false.
-      // Explicitly setting here is also fine:
-      const defaultSelected = columns.map((col) => col.key);
-      setSelectedColumns(defaultSelected);
+      setSelectedColumns(columns.map((col) => col.key));
       return;
     }
 
     const presetToApply = (filterPresets || []).find(
       (p) => (p._id || p.name) === presetIdentifier
     );
+    if (!presetToApply?.filters?.selectedColumns) return;
 
-    if (presetToApply?.filters?.selectedColumns) {
-      const availableKeys = columns.map((col) => col.key);
-      const orderedAndAvailablePresetColumns =
-        presetToApply.filters.selectedColumns.filter((key) =>
-          availableKeys.includes(key)
-        );
-      setSelectedColumns(orderedAndAvailablePresetColumns);
-    } else {
-      // Preset not found or malformed. selectedColumns might remain as is or be cleared by main useEffect.
-      // For safety, if a preset is chosen but invalid, perhaps default:
-      // setSelectedColumns(columns.map((col) => col.key));
-    }
+    const availableKeys = columns.map((col) => col.key);
+    const orderedAndAvailablePresetColumns =
+      presetToApply.filters.selectedColumns.filter((key) =>
+        availableKeys.includes(key)
+      );
+    setSelectedColumns(orderedAndAvailablePresetColumns);
   };
 
   const handleSelectAllToggle = () => {
@@ -248,13 +245,9 @@ const ExportWebinarAttendeesModal = ({
       selectedColumns.length === allColumnKeys.length &&
       allColumnKeys.every((key) => selectedColumns.includes(key));
 
-    if (allCurrentlySelected) {
-      setSelectedColumns([]); // Deselect all
-    } else {
-      setSelectedColumns(allColumnKeys); // Select all
-    }
-    setSelectedPresetId(""); // Custom selection
-    manualInteractionRef.current = true; // Indicate manual interaction
+    setSelectedColumns(allCurrentlySelected ? [] : allColumnKeys);
+    setSelectedPresetId("");
+    manualInteractionRef.current = true;
   };
 
   const areAllSelected =
@@ -262,281 +255,239 @@ const ExportWebinarAttendeesModal = ({
     selectedColumns.length === columns.length &&
     columns.every((col) => selectedColumns.includes(col.key));
 
+  const duplicatePresetName =
+    presetNameInput.trim() &&
+    (filterPresets || []).some((p) => p.name === presetNameInput.trim());
+
   return (
-    <Modal open={true} onClose={handleClose} disablePortal>
-      <Box sx={modalStyle}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <Typography
-            variant="h5"
-            component="h2"
-            sx={{ fontWeight: "semibold" }}
-          >
-            Export Excel Options
-          </Typography>
-          <IconButton onClick={handleClose} size="small">
-            <CloseIcon />
-          </IconButton>
-        </Box>
+    <Dialog open={Boolean(open)} onOpenChange={(v) => !v && handleClose()}>
+      <DialogContent className="w-[92vw] max-w-[980px] p-0 bg-transparent shadow-none border-0">
+        <div className="flex max-h-[90vh] flex-col overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl">
+          <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 px-5 py-4">
+            <h2
+              className="flex items-center gap-2 text-lg font-bold text-slate-900 dark:text-slate-100"
+              style={{ fontFamily: FONT }}
+            >
+              <Download className="h-5 w-5 text-gray-500" />
+              {title}
+            </h2>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="rounded-lg p-1.5 text-slate-500 transition-colors hover:bg-black/5 dark:hover:bg-white/5"
+              aria-label="Close"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
 
-        <Box sx={{ flexGrow: 1, overflowY: "auto", pr: 1, mt: 2 }}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Limit (Max 10,000)"
-                variant="outlined"
-                type="number"
-                placeholder="All"
-                fullWidth
-                value={limit}
-                onChange={(e) => {
-                  if (e.target.value === "") setLimit("");
-                  else {
-                    const value = Number(e.target.value);
-                    if (!isNaN(value) && value > 0 && value <= 10000)
-                      setLimit(value);
-                    else if (value > 10000) setLimit(10000);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  const allowedKeys = [
-                    "Backspace",
-                    "ArrowLeft",
-                    "ArrowRight",
-                    "Delete",
-                    "Tab",
-                  ];
-                  if (
-                    !allowedKeys.includes(e.key) &&
-                    !(e.key >= "0" && e.key <= "9")
-                  )
-                    e.preventDefault();
-                }}
-                InputLabelProps={{ shrink: true }}
-                margin="normal"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal" variant="outlined">
-                <InputLabel id="select-preset-label">Apply Preset</InputLabel>
-                <Select
-                  labelId="select-preset-label"
-                  value={selectedPresetId}
-                  label="Apply Preset"
-                  onChange={(e) => handleApplyPreset(e.target.value)}
+          <div className="flex-1 overflow-y-auto px-5 py-4">
+            <div className={`grid gap-4 ${enablePresets ? "grid-cols-1 md:grid-cols-2" : "grid-cols-1"}`}>
+              <div>
+                <label
+                  className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-500"
+                  style={{ fontFamily: FONT, letterSpacing: "0.04em" }}
                 >
-                  <MenuItem value="">
-                    <em>Default Columns</em>
-                  </MenuItem>
-                  {(filterPresets || []).map((preset) => (
-                    <MenuItem key={preset._id} value={preset._id}>
-                      <div className="flex justify-between items-center w-full">
-                        <span>{preset.name}</span>
-                        <button
-                          disabled={isPresetLoading}
-                          className="hover:bg-gray-300 rounded-full p-2"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            dispatch(deleteFilterPreset(preset._id));
-                          }}
-                        >
-                          <img
-                            src={DeleteIcon}
-                            alt="Edit"
-                            className="min-h-5 h-5 w-5 min-w-5"
-                          />
-                        </button>
-                      </div>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
+                  Limit (Max 10,000)
+                </label>
+                <Input
+                  type="number"
+                  placeholder="All"
+                  value={limit}
+                  onChange={(e) => {
+                    if (e.target.value === "") {
+                      setLimit("");
+                      return;
+                    }
+                    const value = Number(e.target.value);
+                    if (!isNaN(value) && value > 0 && value <= 10000) {
+                      setLimit(value);
+                    } else if (value > 10000) {
+                      setLimit(10000);
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    const allowedKeys = [
+                      "Backspace",
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "Delete",
+                      "Tab",
+                    ];
+                    if (
+                      !allowedKeys.includes(e.key) &&
+                      !(e.key >= "0" && e.key <= "9")
+                    ) {
+                      e.preventDefault();
+                    }
+                  }}
+                  className="h-10 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200 focus:ring-[#22B573]/35"
+                  style={{ fontFamily: FONT }}
+                />
+              </div>
 
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mt: 2,
-              mb: 1,
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "semibold" }}>
-              Select Columns for Export
-            </Typography>
-            {columns.length > 0 && (
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleSelectAllToggle}
-                disabled={columns.length === 0}
+              {enablePresets && (
+                <div>
+                  <label
+                    className="mb-1 block text-[10px] font-bold uppercase tracking-wide text-slate-500"
+                    style={{ fontFamily: FONT, letterSpacing: "0.04em" }}
+                  >
+                    Apply Preset
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <select
+                      value={selectedPresetId}
+                      onChange={(e) => handleApplyPreset(e.target.value)}
+                      className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-sm text-slate-700 dark:text-slate-300 outline-none transition-all focus:ring-2 focus:ring-[#22B573]/35"
+                      style={{ fontFamily: FONT }}
+                    >
+                      <option value="">Default Columns</option>
+                      {(filterPresets || []).map((preset) => (
+                        <option key={preset._id} value={preset._id}>
+                          {preset.name}
+                        </option>
+                      ))}
+                    </select>
+                    {selectedPresetId && (
+                      <button
+                        type="button"
+                        disabled={isPresetLoading}
+                        onClick={() => dispatch(deleteFilterPreset(selectedPresetId))}
+                        className="rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 p-2.5 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10"
+                        title="Delete selected preset"
+                      >
+                        <img
+                          src={DeleteIcon}
+                          alt="Delete"
+                          className="h-4 w-4 min-h-4 min-w-4"
+                        />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="mb-2 mt-5 flex items-center justify-between gap-2">
+              <h3
+                className="text-base font-bold text-slate-900 dark:text-slate-100"
+                style={{ fontFamily: FONT }}
               >
-                {areAllSelected ? "Deselect All" : "Select All"}
-              </Button>
-            )}
-          </Box>
+                Select Columns for Export
+              </h3>
+              {columns.length > 0 && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSelectAllToggle}
+                  className="rounded-xl border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-700 dark:text-slate-300"
+                  style={{ fontFamily: FONT }}
+                >
+                  {areAllSelected ? "Deselect All" : "Select All"}
+                </Button>
+              )}
+            </div>
 
-          <Box
-            className="grid grid-cols-2 sm:grid-cols-3 gap-x-2 gap-y-0"
-            sx={{
-              border: 1,
-              borderColor: "divider",
-              borderRadius: 1,
-              p: 1,
-              maxHeight: { xs: "150px", sm: "250px" }, // Adjusted height a bit
-              overflowY: "auto",
-              mb: 2,
-            }}
-          >
-            {columns.map((column) => (
-              <FormControlLabel
-                key={column.key}
-                control={
+            <div className="mb-3 grid max-h-[250px] grid-cols-2 gap-x-3 gap-y-1 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950/50 p-3 sm:grid-cols-3">
+              {columns.map((column) => (
+                <label
+                  key={column.key}
+                  className="flex cursor-pointer items-center gap-2 py-1 text-sm text-slate-700 dark:text-slate-300"
+                  style={{ fontFamily: FONT }}
+                >
                   <Checkbox
                     checked={selectedColumns.includes(column.key)}
-                    onChange={() => handleCheckboxChange(column.key)}
-                    size="small"
+                    onCheckedChange={() => handleCheckboxChange(column.key)}
+                    className="border-emerald-300 data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
                   />
-                }
-                label={
-                  <div className="flex gap-2 items-center">
-                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
-                      {column.header}
-                    </Typography>
-                    {selectedColumns.includes(column.key) ? (
-                      <div className="text-xs text-white bg-indigo-600 h-6 w-6 flex justify-center items-center rounded-full">
-                        {selectedColumns.indexOf(column.key) + 1}
-                      </div>
-                    ) : null}
-                  </div>
-                }
-                sx={{ m: 0 }}
-              />
-            ))}
-            {columns.length === 0 && (
-              <Typography
-                variant="body2"
-                sx={{ p: 1, color: "text.secondary" }}
-              >
-                No columns available for selection.
-              </Typography>
-            )}
-          </Box>
+                  <span className="truncate">{column.header}</span>
+                  {selectedColumns.includes(column.key) ? (
+                    <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-indigo-600 px-1 text-[10px] font-bold text-white">
+                      {selectedColumns.indexOf(column.key) + 1}
+                    </span>
+                  ) : null}
+                </label>
+              ))}
+              {columns.length === 0 && (
+                <p className="col-span-full p-1 text-sm text-slate-500">
+                  No columns available for selection.
+                </p>
+              )}
+            </div>
 
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: "semibold", mt: 2, mb: 1 }}
-          >
-            Save Current Selection as Preset
-          </Typography>
-          <Grid container spacing={2} alignItems="flex-end">
-            <Grid item xs={12} sm={7} md={8}>
-              <TextField
-                label="New Preset Name"
-                variant="outlined"
-                fullWidth
-                value={presetNameInput}
-                onChange={(e) => setPresetNameInput(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                margin="normal"
+            {enablePresets && (
+              <>
+                <h3
+                  className="mb-2 mt-4 text-base font-bold text-slate-900 dark:text-slate-100"
+                  style={{ fontFamily: FONT }}
+                >
+                  Save Current Selection as Preset
+                </h3>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_auto] sm:items-end">
+                  <Input
+                    placeholder="New preset name"
+                    value={presetNameInput}
+                    onChange={(e) => setPresetNameInput(e.target.value)}
+                    className="h-10 rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 text-slate-800 dark:text-slate-200 focus:ring-[#22B573]/35"
+                    style={{ fontFamily: FONT }}
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={handleSavePreset}
+                    disabled={
+                      !presetNameInput.trim() ||
+                      selectedColumns.length === 0 ||
+                      duplicatePresetName
+                    }
+                    className="rounded-xl border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 px-5 text-slate-600 dark:text-slate-400"
+                    style={{ fontFamily: FONT }}
+                  >
+                    Save Preset
+                  </Button>
+                </div>
+                {duplicatePresetName && (
+                  <p className="mt-1 text-sm text-red-500">
+                    A preset with this name already exists.
+                  </p>
+                )}
+              </>
+            )}
+          </div>
+
+          <div className="flex flex-col gap-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-950 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <label
+              className="flex cursor-pointer items-center gap-2 text-sm text-slate-600 dark:text-slate-400"
+              style={{ fontFamily: FONT }}
+            >
+              <Checkbox
+                checked={includeFilter}
+                onCheckedChange={(checked) => setIncludeFilter(Boolean(checked))}
+                className="border-emerald-300 data-[state=checked]:border-emerald-500 data-[state=checked]:bg-emerald-500"
               />
-            </Grid>
-            <Grid item xs={12} sm={5} md={4}>
+              <span>Filters {includeFilter ? "Included" : "Excluded"}</span>
+            </label>
+            <div className="flex flex-wrap justify-end gap-2">
               <Button
-                variant="outlined"
-                color="primary"
-                onClick={handleSavePreset}
-                disabled={
-                  !presetNameInput.trim() ||
-                  selectedColumns.length === 0 ||
-                  (filterPresets || []).some(
-                    (p) => p.name === presetNameInput.trim()
-                  )
-                }
-                fullWidth
-                sx={{ mb: { xs: 0, sm: "8px" } }}
+                variant="outline"
+                onClick={handleClose}
+                className="min-w-[110px] rounded-xl border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-600 dark:text-slate-400"
+                style={{ fontFamily: FONT }}
               >
-                Save Preset
+                Cancel
               </Button>
-            </Grid>
-          </Grid>
-          {(filterPresets || []).some(
-            (p) => p.name === presetNameInput.trim()
-          ) &&
-            presetNameInput.trim() && (
-              <Typography
-                color="error"
-                variant="caption"
-                display="block"
-                sx={{ mt: 0.5 }}
+              <Button
+                onClick={handleSubmit}
+                disabled={isExportLoading || selectedColumns.length === 0}
+                className="min-w-[130px] rounded-xl bg-[#22b573] font-semibold text-white shadow-md hover:bg-[#1ea567]"
+                style={{ fontFamily: FONT }}
               >
-                A preset with this name already exists.
-              </Typography>
-            )}
-        </Box>
-
-        <Box sx={{ mt: "auto", pt: 2, borderTop: 1, borderColor: "divider" }}>
-          <Grid
-            container
-            spacing={2}
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Grid item xs={12} sm="auto">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={includeFilter}
-                    onChange={() => setIncludeFilter((prev) => !prev)}
-                  />
-                }
-                label={`Filters ${includeFilter ? "Included" : "Excluded"}`}
-              />
-            </Grid>
-            <Grid item xs={12} sm="auto">
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 1,
-                  justifyContent: { xs: "flex-end", sm: "flex-end" },
-                  width: "100%", // Ensure buttons can take space on small screens
-                }}
-              >
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  onClick={handleClose}
-                  sx={{ flexGrow: { xs: 1, sm: 0 } }} // Make cancel button grow on xs
-                >
-                  Cancel
-                </Button>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleSubmit}
-                  disabled={isExportLoading || selectedColumns.length === 0} // Disable if no columns selected
-                  sx={{ flexGrow: { xs: 1, sm: 0 } }} // Make download button grow on xs
-                >
-                  {isExportLoading ? (
-                    <ClipLoader size={20} color="#fff" />
-                  ) : (
-                    "Download"
-                  )}
-                </Button>
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
-      </Box>
-    </Modal>
+                {isExportLoading ? <AppLoader size="md" variant="inverse" /> : "Download"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

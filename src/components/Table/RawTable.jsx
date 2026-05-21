@@ -8,6 +8,7 @@ import useRoles from "../../hooks/useRoles";
 import { getTagsData } from "../../features/slices/globalData";
 import { Link } from "react-router-dom";
 import useMediaQuery from "../../hooks/useMediaQuery";
+import { maskPiiDisplay } from "../../utils/maskPii";
 
 const CellRenderer = memo(
   ({ column, row, isTablesMasked, roles, employeesMap, tagSet }) => {
@@ -44,7 +45,7 @@ const CellRenderer = memo(
         return (
           <div
             title={sortedTags.join(", ")}
-            className="flex  gap-1 md:flex-nowrap flex-wrap"
+            className="flex items-center gap-1 flex-nowrap overflow-hidden"
           >
             {sortedTags.slice(0, 2).map((tag, idx) => (
               <span
@@ -75,7 +76,7 @@ const CellRenderer = memo(
         return (
           <div
             title={filteredChips.join(", ")}
-            className="flex gap-1 md:flex-nowrap flex-wrap"
+            className="flex items-center gap-1 flex-nowrap overflow-hidden"
           >
             {filteredChips.slice(0, 2).map((chip, idx) => (
               <span
@@ -103,8 +104,8 @@ const CellRenderer = memo(
               isApproved
                 ? "bg-green-100 text-green-800"
                 : isRejected
-                ? "bg-red-100 text-red-800"
-                : "bg-yellow-100 text-yellow-800"
+                  ? "bg-red-100 text-red-800"
+                  : "bg-yellow-100 text-yellow-800"
             }`}
           >
             {isApproved ? "Approved" : isRejected ? "Rejected" : "Pending"}
@@ -145,14 +146,14 @@ const CellRenderer = memo(
         if (
           isTablesMasked &&
           ["userName", "email", "phone", "firstName", "lastName"].includes(
-            column.key
+            column.key,
           )
         ) {
-          return `${String(value).slice(0, 3)}***`;
+          return maskPiiDisplay(value, true);
         }
         return String(value);
     }
-  }
+  },
 );
 
 const RawTable = ({
@@ -180,13 +181,13 @@ const RawTable = ({
   const tagSet = useMemo(
     () =>
       new Set(Array.isArray(tagsData) ? tagsData.map((tag) => tag.name) : []),
-    [tagsData]
+    [tagsData],
   );
 
   useEffect(() => {
     if (Array.isArray(employees)) {
       const tempMap = new Map(
-        employees.map((emp) => [emp?._id, emp?.userName])
+        employees.map((emp) => [emp?._id, emp?.userName]),
       );
       setEmployeesMap(tempMap);
     }
@@ -194,7 +195,7 @@ const RawTable = ({
 
   const handleCheckboxChange = (id) => {
     setSelectedRows((prev) =>
-      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((rowId) => rowId !== id) : [...prev, id],
     );
   };
 
@@ -272,7 +273,7 @@ const RawTable = ({
                     >
                       {action.icon(row)}
                     </button>
-                  ))
+                  )),
               )}
             </div>
           </div>
@@ -361,7 +362,7 @@ const RawTable = ({
                     setSelectedRows(
                       e.target.checked
                         ? tableData?.rows?.map((row) => row._id)
-                        : []
+                        : [],
                     )
                   }
                 />
@@ -411,7 +412,7 @@ const RawTable = ({
                     setSelectedRows(
                       e.target.checked
                         ? tableData?.rows?.map((row) => row._id)
-                        : []
+                        : [],
                     )
                   }
                 />
@@ -551,7 +552,7 @@ const RawTable = ({
                             >
                               {action.icon(row)}
                             </button>
-                          ))
+                          )),
                       )}
                     </div>
                   </td>

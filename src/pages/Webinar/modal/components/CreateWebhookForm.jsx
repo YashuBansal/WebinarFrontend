@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Add } from "@mui/icons-material";
+import AppLoader from "../../../../components/AppLoader";
 import tagsService from "../../../../services/tagsService";
 
 const CreateWebhookForm = ({ webinarId, onCreateSuccess }) => {
@@ -69,7 +70,7 @@ const CreateWebhookForm = ({ webinarId, onCreateSuccess }) => {
           >
             {isCreating ? (
               <>
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                <AppLoader size="sm" variant="inverse" />
                 Creating...
               </>
             ) : (

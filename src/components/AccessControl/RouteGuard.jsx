@@ -1,7 +1,8 @@
-import React, { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import useRoles from "../../hooks/useRoles";
+import AppLoader from "../AppLoader";
 // import { roles } from "../../utils/roles";
 export default function RouteGuard({ children, roleNames = [], conditions = [] }) {
   const navigate = useNavigate();
@@ -51,5 +52,14 @@ export default function RouteGuard({ children, roleNames = [], conditions = [] }
     setLoader(false);
   }, [roleNames, role, conditionsKey, navigate]);
   // console.log("role naimgn render loadaer --- >",loader);
-  return loader ? <h1>Loading...</h1> : <>{children}</>;
+  return loader ? (
+    <div className="flex min-h-[40vh] w-full items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <AppLoader size="lg" />
+        <p className="text-sm font-medium text-gray-500">Loading...</p>
+      </div>
+    </div>
+  ) : (
+    <>{children}</>
+  );
 }

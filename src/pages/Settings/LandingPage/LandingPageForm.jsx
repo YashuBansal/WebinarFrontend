@@ -14,8 +14,9 @@ import {
 } from "../../../features/actions/globalData";
 import FormInput from "../../../components/FormInput";
 import PhotoIcon from "../../../components/SVGs/photo.svg";
-import TailwindLoader from '../../../components/TailwindLoader'
+import AppLoader from '../../../components/AppLoader'
 import { globalButton } from "../../../utils/style";
+import HubSubpageShell from "../../../components/Layout/HubSubpageShell";
 
 const LandingPageForm = () => {
   const {
@@ -79,12 +80,12 @@ const LandingPageForm = () => {
   }, [landingGlobalData]);
 
   return (
-    <div className="pt-20 px-4 max-w-5xl mx-auto">
+    <HubSubpageShell maxWidthClass="max-w-5xl">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-6 bg-white shadow-md p-6 rounded-lg"
+        className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-md dark:border-slate-700 dark:bg-slate-900/60 sm:rounded-3xl"
       >
-        <h2 className="text-2xl font-bold mb-6 text-center md:text-left">
+        <h2 className="mb-6 text-center text-2xl font-bold text-slate-900 dark:text-slate-100 md:text-left">
           Landing Page Data
         </h2>
 
@@ -255,7 +256,7 @@ const LandingPageForm = () => {
         >
           {isLoading ? (
             <div className="flex justify-center items-center">
-              <TailwindLoader size={6}/>
+              <AppLoader size="md" variant="inverse" />
               
             </div>
           ) : (
@@ -263,7 +264,7 @@ const LandingPageForm = () => {
           )}
         </button>
       </form>
-    </div>
+    </HubSubpageShell>
   );
 };
 

@@ -1,29 +1,17 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import {
-  DashboardIcon,
-  WebinarIcon,
-  AttendeesIcon,
-  EmployeeIcon,
-  CalendarIcon,
-  ProductsIcon,
-  NoticeBoardIcon,
-  LinksIcon,
-  SettingsIcon,
-  LogoutIcon,
-  RupeeIcon,
-  AssignmentIcon,
-  BillIcon,
-  WhatsappIcon,
-  ZoomIcon,
-} from "./SVGs";
+  Pin,
+  PinOff,
+  X,
+} from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
+import { motion, AnimatePresence } from "framer-motion";
 import { logout } from "../../../features/slices/auth";
 import { getAllSidebarLinks } from "../../../features/actions/sidebarLink";
 import { getNoticeBoard } from "../../../features/actions/noticeBoard";
 import useRoles from "../../../hooks/useRoles";
 import useAddUserActivity from "../../../hooks/useAddUserActivity";
-import ComponentGuard from "../../AccessControl/ComponentGuard";
 import { clearNotifications } from "../../../features/slices/notification";
 import { clearWebinarData } from "../../../features/slices/webinarContact";
 import {
@@ -39,7 +27,20 @@ import {
 } from "../../../features/slices/globalData";
 import useMediaQuery from "../../../hooks/useMediaQuery";
 import useUserSubscription from "../../../hooks/useUserSubscription";
-const Sidebar = ({ toggleButtonRef }) => {
+import DashboardSidebar from "./DashboardSidebar";
+import WhatsAppSidebar from "./WhatsAppSidebar";
+import { useTheme } from "../../../contexts/ThemeContext";
+
+const PANEL_W = 200;
+
+const Sidebar = ({
+  toggleButtonRef,
+  sidebarCollapsed,
+  setSidebarCollapsed,
+  isPinned,
+  setIsPinned,
+}) => {
+  const { isDark } = useTheme();
   const dispatch = useDispatch();
   const roles = useRoles();
   const logUserActivity = useAddUserActivity();
@@ -48,26 +49,71 @@ const Sidebar = ({ toggleButtonRef }) => {
 
   const { isUpdated } = useSelector((state) => state.noticeBoard);
   const { sidebarLinkData } = useSelector((state) => state.sidebarLink);
-  const { userData, isUserLoggedIn } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
   const { data: subscription } = useUserSubscription();
-  const calendarFeatures = subscription?.plan?.calendarFeatures;
-  const { isSidebarOpen } = useSelector((state) => state.globalData);
-  const [showImportantLinks, setShowImportantLinks] = useState(false); // toggle state for sub-links
+  const { isSidebarOpen, activeHeaderSection } = useSelector((state) => state.globalData);
+  const [showImportantLinks, setShowImportantLinks] = useState(false);
   const role = userData?.role || "";
   const { employeeModeData } = useSelector((state) => state.employee);
   const { webinarData } = useSelector((state) => state.webinarContact);
 
-  const sidebarRef = useRef(null);
+  const mobileShellRef = useRef(null);
+  const desktopShellRef = useRef(null);
+  const railScrollRef = useRef(null);
+  const panelScrollRef = useRef(null);
 
-  const isSmallScreen = useMediaQuery("(max-width: 768px)");
+  const isSmallScreen = useMediaQuery("(max-width: 767px)");
+  const isMdUp = useMediaQuery("(min-width: 768px)");
+
+  // Theme colors
+  const isWhatsApp = activeHeaderSection === "WhatsApp";
+  const themeColor = isWhatsApp ? "#22c55e" : "#f97316"; // green-500 : orange-500
+  const themeBgLight = isWhatsApp ? "rgba(34, 197, 94, 0.1)" : "rgba(249, 115, 22, 0.1)";
+
+  // Sync scrolling between rail and panel
+  useEffect(() => {
+    const rail = railScrollRef.current;
+    const panel = panelScrollRef.current;
+
+    if (!rail || !panel) return;
+
+    let isScrollingRail = false;
+    let isScrollingPanel = false;
+
+    const handleRailScroll = () => {
+      if (isScrollingPanel) return;
+      isScrollingRail = true;
+      if (panel.scrollTop !== rail.scrollTop) {
+        panel.scrollTop = rail.scrollTop;
+      }
+      setTimeout(() => { isScrollingRail = false; }, 50);
+    };
+
+    const handlePanelScroll = () => {
+      if (isScrollingRail) return;
+      isScrollingPanel = true;
+      if (rail.scrollTop !== panel.scrollTop) {
+        rail.scrollTop = panel.scrollTop;
+      }
+      setTimeout(() => { isScrollingPanel = false; }, 50);
+    };
+
+    rail.addEventListener("scroll", handleRailScroll, { passive: true });
+    panel.addEventListener("scroll", handlePanelScroll, { passive: true });
+
+    return () => {
+      rail.removeEventListener("scroll", handleRailScroll);
+      panel.removeEventListener("scroll", handlePanelScroll);
+    };
+  }, [activeHeaderSection, railScrollRef.current, panelScrollRef.current]);
 
   useEffect(() => {
     if (isSmallScreen) {
-      dispatch(setSidebarOpen()); // Clear tags data on small screens
+      dispatch(setSidebarOpen(false));
     } else {
-      dispatch(setSidebarOpen(true)); // Set sidebar open on larger screens
+      dispatch(setSidebarOpen(true));
     }
-  }, [isSmallScreen]);
+  }, [isSmallScreen, dispatch]);
 
   useEffect(() => {
     tagsService.getTags().then((res) => {
@@ -76,13 +122,12 @@ const Sidebar = ({ toggleButtonRef }) => {
       }
     });
     return () => {
-      console.log("Clearing tagsData Gloval");
       dispatch(setTagsData());
     };
-  }, []);
+  }, [dispatch]);
 
   useEffect(() => {
-    if (role === role.EMPLOYEE_REMINDER || role === role.EMPLOYEE_SALES) {
+    if (role === roles.EMPLOYEE_REMINDER || role === roles.EMPLOYEE_SALES) {
       dispatch(getEmployeeWebinars({}));
     }
   }, [roles, role]);
@@ -286,7 +331,6 @@ const Sidebar = ({ toggleButtonRef }) => {
     dispatch(clearWebinarData());
     dispatch(clearNotifications());
     dispatch(logout());
-
     dispatch(logOutAndClearCookies()).then(() => {
       const broadcastChannel = new BroadcastChannel("auth-saas-crm");
       broadcastChannel.postMessage({ type: "LOGOUT" });
@@ -332,240 +376,284 @@ const Sidebar = ({ toggleButtonRef }) => {
       fetchNoticeBoard();
       dispatch(getGSTValue());
     }
-
     return () => {
       dispatch(clearWebinarData());
     };
   }, []);
 
   const isActiveRoute = (item) => {
+    if (!item?.path) return false;
     if (location.pathname === item.path.split("?")[0]) return true;
-
-    // Check if the current path starts with any children paths
     if (Array.isArray(item.children)) {
       return item.children.some((child) =>
         location.pathname.startsWith(`/${child}`)
       );
     }
-
     return false;
   };
 
   useEffect(() => {
     const handleClickOutside = (event) => {
+      const inMobile = mobileShellRef.current?.contains(event.target);
+      const inDesktop = desktopShellRef.current?.contains(event.target);
+      const inToggle =
+        toggleButtonRef?.current && toggleButtonRef.current.contains(event.target);
       if (
         isSmallScreen &&
         isSidebarOpen &&
-        sidebarRef.current &&
-        !sidebarRef.current.contains(event.target) &&
-        !(
-          toggleButtonRef?.current &&
-          toggleButtonRef.current.contains(event.target)
-        )
+        !inMobile &&
+        !inDesktop &&
+        !inToggle
       ) {
         dispatch(setSidebarOpen(false));
       }
     };
-
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isSmallScreen, isSidebarOpen, dispatch]);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isSmallScreen, isSidebarOpen, dispatch, toggleButtonRef]);
+
+  const settingsActive = isActiveRoute({
+    path: "settings",
+    children: [
+      "plans",
+      "addons",
+      "api-docs",
+      "settings",
+      "sidebarLinks",
+      "update-landing-page",
+      "product-level",
+      "lead-type",
+      "billing-history",
+      "tags",
+      "locations",
+    ],
+  });
+
+  const dashboardPathActive = location.pathname === "/";
+
+  const enterDesktopSidebar = () => {
+    if (!isPinned) setSidebarCollapsed(false);
+  };
+  const leaveDesktopSidebar = () => {
+    if (!isPinned) setSidebarCollapsed(true);
+  };
+
+  const togglePin = () => {
+    setIsPinned((p) => {
+      const next = !p;
+      if (!next) setSidebarCollapsed(true);
+      else setSidebarCollapsed(false);
+      return next;
+    });
+  };
+
+  const renderContextualSidebar = (variant, section) => {
+    if (activeHeaderSection === "WhatsApp") {
+      return (
+        <WhatsAppSidebar
+          variant={variant}
+          section={section}
+          handleNavigation={handleNavigation}
+        />
+      );
+    }
+    
+    if (section && section !== "middle") return null;
+
+    return (
+      <DashboardSidebar
+        variant={variant}
+        role={role}
+        roles={roles}
+        employeeModeData={employeeModeData}
+        webinarData={webinarData}
+        isUpdated={isUpdated}
+        sidebarLinkData={sidebarLinkData}
+        showImportantLinks={showImportantLinks}
+        toggleImportantLinks={toggleImportantLinks}
+        handleNavigation={handleNavigation}
+        handleLogout={handleLogout}
+        isActiveRoute={isActiveRoute}
+        settingsActive={settingsActive}
+        dashboardPathActive={dashboardPathActive}
+      />
+    );
+  };
 
   if (!userData) {
     navigate("/login");
     return null;
   }
 
-  return (
+  const panelOpen = !sidebarCollapsed || isPinned;
+  const mobileOpen = !isMdUp && isSidebarOpen;
+
+  const mobileShell = (
     <div
-      ref={sidebarRef}
-      id="logo-sidebar"
-      className={`fixed top-0 left-0 w-64 h-screen z-20 pt-20 transition-transform ease-in-out duration-700  -translate-x-full bg-white border-r border-gray-200 ${
-        isSidebarOpen ? "translate-x-0" : ""
-      }`}
-      aria-label="Sidebar"
+      className={`fixed inset-y-0 left-0 z-50 flex w-72 flex-col bg-white dark:bg-slate-900 border-r dark:border-slate-800 shadow-2xl transition-all duration-300 ease-in-out md:hidden ${mobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      ref={mobileShellRef}
     >
-      <div className="h-full px-3 pb-4 overflow-y-auto bg-white">
-        <ul className="space-y-2 font-medium">
-          {/* Dashboard Link */}
-          {!employeeModeData && (
-            <li>
-              <Link
-                to="/"
-                onClick={() => handleNavigation("/dashboard")}
-                className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-300 group ${
-                  location.pathname === "/" ? "bg-gray-300" : ""
-                }`}
-              >
-                <img
-                  src={DashboardIcon}
-                  width={30}
-                  height={30}
-                  alt="Dashboard"
-                />
-                <span className="ms-3">Dashboard</span>
-              </Link>
-            </li>
-          )}
-
-          {/* Render navigation items based on roles */}
-          {navItems.map(
-            (navGroup, index) =>
-              navGroup.roles.includes(role) &&
-              navGroup.items.map((item, idx) => (
-                <li key={`${index}-${idx}`}>
-                  {item.external ? (
-                    <a
-                      href={item.path}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={() => handleNavigation(item.path)}
-                      className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-300 group ${
-                        isActiveRoute(item) ? "bg-gray-300" : ""
-                      }`}
-                    >
-                      {item.icon}
-                      <span className="flex-1 ms-3 whitespace-nowrap">
-                        {item.label}
-                      </span>
-                    </a>
-                  ) : (
-                    <Link
-                      to={item.path}
-                      onClick={() => handleNavigation(item.path)}
-                      className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-300 group ${
-                        isActiveRoute(item) ? "bg-gray-300" : ""
-                      }`}
-                    >
-                      {item.icon}
-                      <span className="flex-1 ms-3 whitespace-nowrap">
-                        {item.label}{" "}
-                        {item.label === "Notice Board" &&
-                          isUpdated &&
-                          roles.isEmployeeId(role) && (
-                            <div className="inline-flex items-center rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-medium text-rose-800">
-                              New
-                            </div>
-                          )}
-                      </span>
-                    </Link>
-                  )}
-                </li>
-              ))
-          )}
-
-          {/* Important Links Section */}
-          <li>
-            <div
-              onClick={toggleImportantLinks}
-              className="flex items-center p-2 text-gray-900 rounded-lg  hover:bg-gray-300 group cursor-pointer"
-            >
-              <img src={LinksIcon} width={25} height={25} alt="Links" />
-              <span className="flex-1 ms-3 whitespace-nowrap">
-                Important Links
-              </span>
-              {showImportantLinks ? (
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M18 15l-6-6-6 6" />
-                </svg>
-              ) : (
-                <svg
-                  width="20"
-                  height="20"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              )}
-            </div>
-
-            {showImportantLinks &&
-              Array.isArray(sidebarLinkData) &&
-              sidebarLinkData.map((item, idx) => (
-                <ul key={idx} className="pl-10 space-y-1 ">
-                  <li>
-                    <a
-                      href={item?.link}
-                      onClick={() => {
-                        addUserActivityLog(item.title, "important link");
-                        closeSidebar(); // Close sidebar after clicking link
-                      }}
-                      target="_blank" // Opens the link in a new tab
-                      rel="noopener noreferrer" // Security measure to prevent tab nabbing
-                      className="flex items-center p-2 cursor-pointer text-gray-600 hover:bg-gray-300 rounded-lg"
-                    >
-                      {item.title}
-                    </a>
-                  </li>
-                </ul>
-              ))}
-          </li>
-
-          {/* Settings Link */}
-          <ComponentGuard
-            allowedRoles={[roles.ADMIN, roles.SUPER_ADMIN]}
-            conditions={[employeeModeData ? false : true]}
+      <div className="flex h-16 items-center justify-between border-b dark:border-slate-800 px-4">
+        <div className="flex items-center gap-2">
+          <img src="/wlh-logo.png" alt="Logo" className="h-8 w-8" />
+          <span className="font-bold text-slate-800 dark:text-slate-100">WLH Dashboard</span>
+        </div>
+        <button
+          onClick={() => dispatch(setSidebarOpen(false))}
+          className="rounded-lg p-1 hover:bg-slate-100 dark:hover:bg-slate-800"
+        >
+          <X className="h-6 w-6 text-slate-500 dark:text-slate-400" />
+        </button>
+      </div>
+      <div className="flex-1 overflow-hidden flex flex-col relative">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeHeaderSection}
+            initial={{ opacity: 0, x: -10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 10 }}
+            transition={{ duration: 0.2 }}
+            className="flex-1 flex flex-col overflow-hidden"
           >
-            <li>
-              <Link
-                to="/settings"
-                onClick={() => handleNavigation("/settings")}
-                className={`flex items-center p-2 text-gray-900 rounded-lg hover:bg-gray-300 group ${
-                  isActiveRoute({
-                    path: "settings",
-                    children: [
-                      "plans",
-                      "addons",
-                      "api-docs",
-                      "settings",
-                      "sidebarLinks",
-                      "update-landing-page",
-                      "product-level",
-                      "lead-type",
-                      "billing-history",
-                      "tags",
-                      "locations",
-                    ],
-                  })
-                    ? "bg-gray-300"
-                    : ""
-                }`}
-              >
-                <img src={SettingsIcon} width={30} height={30} alt="Settings" />
-                <span className="flex-1 ms-3 whitespace-nowrap">Settings</span>
-              </Link>
-            </li>
-          </ComponentGuard>
-
-          {/* Logout Button */}
-          <li>
-            <button
-              onClick={handleLogout}
-              className="flex items-center p-2 text-gray-900 rounded-lg text-start hover:text-red-600 w-full  hover:bg-gray-300 group"
-            >
-              <img src={LogoutIcon} width={30} height={30} alt="Logout" />
-              <span className="flex-1 ms-3 whitespace-nowrap">Sign Out</span>
-            </button>
-          </li>
-        </ul>
+            {activeHeaderSection === "WhatsApp" ? (
+               <div className="flex flex-1 flex-col overflow-hidden">
+                  {renderContextualSidebar("mobile", "top")}
+                  <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
+                     <ul className="space-y-2 px-3">{renderContextualSidebar("mobile", "middle")}</ul>
+                  </div>
+                  {renderContextualSidebar("mobile", "bottom")}
+               </div>
+            ) : (
+               <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
+                  <ul className="space-y-2 px-3">{renderContextualSidebar("mobile")}</ul>
+               </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
+  );
+
+  const railAside = (
+    <aside
+      className="flex h-full w-[80px] flex-col border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-colors duration-300"
+      onMouseEnter={enterDesktopSidebar}
+      onMouseLeave={leaveDesktopSidebar}
+    >
+      <div className="border-b border-gray-200 dark:border-slate-800 px-3 pb-2 pt-3">
+        <button
+          type="button"
+          onClick={togglePin}
+          className="flex w-full items-center justify-center rounded-lg py-2.5 transition-colors"
+          style={{
+            backgroundColor: isPinned ? themeBgLight : "transparent",
+          }}
+          title={isPinned ? "Unpin sidebar" : "Pin sidebar"}
+        >
+          {isPinned ? (
+            <Pin className="h-5 w-5" style={{ color: themeColor, fill: themeColor }} />
+          ) : (
+            <PinOff className="h-5 w-5 text-slate-500" strokeWidth={2} />
+          )}
+        </button>
+      </div>
+      <div className="flex-1 overflow-hidden flex flex-col relative">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeHeaderSection}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className="flex-1 flex flex-col overflow-hidden"
+          >
+            {activeHeaderSection === "WhatsApp" ? (
+               <div className="flex flex-1 flex-col overflow-hidden">
+                  {renderContextualSidebar("rail", "top")}
+                  <div className="flex-1 overflow-y-auto py-2 no-scrollbar" ref={railScrollRef}>
+                     <ul className="space-y-2 px-3">{renderContextualSidebar("rail", "middle")}</ul>
+                  </div>
+                  {renderContextualSidebar("rail", "bottom")}
+               </div>
+            ) : (
+                <div className="flex-1 overflow-y-auto py-2 no-scrollbar" ref={railScrollRef}>
+                  <ul className="space-y-2 px-3">{renderContextualSidebar("rail")}</ul>
+               </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </aside>
+  );
+
+  const labelsAside = (
+    <aside
+      className="flex h-full flex-col overflow-hidden border-r border-gray-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]"
+      style={{
+        width: panelOpen ? PANEL_W : 0,
+        opacity: panelOpen ? 1 : 0,
+      }}
+      onMouseEnter={enterDesktopSidebar}
+      onMouseLeave={leaveDesktopSidebar}
+    >
+      <div className="border-b border-gray-200 dark:border-slate-800 px-3 pb-2 pt-3">
+        <button
+          type="button"
+          onClick={togglePin}
+          className="flex w-full items-center gap-2 rounded-lg px-2 py-2.5 text-left hover:bg-black/[0.04]"
+        >
+          <span
+            className="text-sm font-medium"
+            style={{
+              color: isPinned ? themeColor : (isDark ? "#cbd5e1" : "#1e293b"),
+              fontFamily: "Inter, sans-serif",
+            }}
+          >
+            {isPinned ? "Pinned" : "Pin Sidebar"}
+          </span>
+        </button>
+      </div>
+      <div className="flex-1 overflow-hidden flex flex-col relative">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeHeaderSection}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.2 }}
+            className="flex-1 flex flex-col overflow-hidden"
+          >
+            {activeHeaderSection === "WhatsApp" ? (
+               <div className="flex flex-1 flex-col overflow-hidden">
+                  {renderContextualSidebar("panel", "top")}
+                  <div className="flex-1 overflow-y-auto py-2 custom-scrollbar" ref={panelScrollRef}>
+                     <ul className="space-y-2 px-3">{renderContextualSidebar("panel", "middle")}</ul>
+                  </div>
+                  {renderContextualSidebar("panel", "bottom")}
+               </div>
+            ) : (
+                <div className="flex-1 overflow-y-auto py-2 custom-scrollbar" ref={panelScrollRef}>
+                  <ul className="space-y-2 px-3">{renderContextualSidebar("panel")}</ul>
+               </div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </aside>
+  );
+
+  return (
+    <>
+      {mobileShell}
+      <div
+        className="fixed bottom-0 left-0 top-16 z-40 hidden md:flex"
+        ref={desktopShellRef}
+      >
+        {railAside}
+        {labelsAside}
+      </div>
+    </>
   );
 };
 

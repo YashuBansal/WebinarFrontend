@@ -6,8 +6,13 @@ import { useDispatch, useSelector } from "react-redux";
 import Papa from "papaparse";
 import { useParams } from "react-router-dom";
 import { addAttendees } from "../../../features/actions/attendees";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../../../components/AppLoader";
 import useAddUserActivity from "../../../hooks/useAddUserActivity";
+import { X, UploadCloud, FileText, FileJson, ChevronRight } from "lucide-react";
+import { Button } from "../../../components/ui/button";
+import { Dialog, DialogContent } from "../../../components/ui/dialog";
+import { useTheme } from "../../../contexts/ThemeContext";
+import { cn } from "../../../lib/utils";
 import { formatPhoneNumber, getBestHeaderMatch, successToast } from "../../../utils/extra";
 
 // Define stages for the modal workflow
@@ -179,7 +184,7 @@ const FIELDS_TO_MAP = [
 const MAX_PREVIEW_ROWS = 20;
 const MAX_PREVIEW_COLS = 100;
 
-const UploadXslxModal = ({ tabValue, setModal }) => {
+const UploadCsvModal = ({ tabValue, setModal }) => {
   const logUserActivity = useAddUserActivity();
   const dispatch = useDispatch();
   const { id: webinarId } = useParams();
@@ -198,51 +203,81 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
   const [parsedHeaders, setParsedHeaders] = useState([]);
   const [parsedData, setParsedData] = useState([]);
   const [isParsingFile, setIsParsingFile] = useState(false);
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
+  const rsStyles = {
+    control: (base) => ({
+      ...base,
+      backgroundColor: isDark ? "#0f172a" : "#ffffff",
+      borderColor: isDark ? "#334155" : "#e2e8f0",
+      borderRadius: "12px",
+      minHeight: "42px",
+    }),
+    singleValue: (base) => ({
+      ...base,
+      color: isDark ? "#f8fafc" : "#0f172a",
+    }),
+    menu: (base) => ({
+      ...base,
+      backgroundColor: isDark ? "#1e293b" : "#ffffff",
+      border: "1px solid " + (isDark ? "#334155" : "#e2e8f0"),
+      borderRadius: "12px",
+      overflow: "hidden",
+    }),
+    menuPortal: base => ({ ...base, zIndex: 9999 }),
+    option: (base, { isFocused }) => ({
+      ...base,
+      backgroundColor: isFocused ? (isDark ? "rgba(255,255,255,0.05)" : "#f1f5f9") : "transparent",
+      color: isDark ? "#f8fafc" : "#0f172a",
+    }),
+  };
+
   const mergedAttendeeCountRef = useRef(0);
 
   // --- React Hook Form Setup ---
   const formFields =
     tabValue === "postWebinar"
       ? [
-          ...FIELDS_TO_MAP,
-          {
-            name: "sessionMinutes",
-            label: "Session Minutes",
-            keywords: [
-              "session minutes",
-              "duration",
-              "time in session",
-              "duration minutes",
-              "session time",
-            ],
-            required: false,
-            exampleFormatter: (val) => (val ? val.toString() : ""),
+        ...FIELDS_TO_MAP,
+        {
+          name: "sessionMinutes",
+          label: "Session Minutes",
+          keywords: [
+            "session minutes",
+            "duration",
+            "time in session",
+            "duration minutes",
+            "session time",
+          ],
+          required: false,
+          exampleFormatter: (val) => (val ? val.toString() : ""),
+        },
+        {
+          name: "inTime",
+          label: "Join Time (Datetime)",
+          keywords: ["join time", "jointime"],
+          required: false,
+          exampleFormatter: (val) => {
+            if (val === null || val === undefined || val === "") return "";
+            const date = excelSerialDateToJSDate(val);
+            // Format for display: local date/time string, or original value if conversion fails
+            return date ? date.toLocaleString() : String(val);
           },
-          {
-            name: "inTime",
-            label: "Join Time (Datetime)",
-            keywords: ["join time", "jointime"],
-            required: false,
-            exampleFormatter: (val) => {
-              if (val === null || val === undefined || val === "") return "";
-              const date = excelSerialDateToJSDate(val);
-              // Format for display: local date/time string, or original value if conversion fails
-              return date ? date.toLocaleString() : String(val);
-            },
+        },
+        {
+          name: "outTime",
+          label: "Leave Time (Datetime)",
+          keywords: ["leave time", "leavetime"],
+          required: false,
+          exampleFormatter: (val) => {
+            if (val === null || val === undefined || val === "") return "";
+            const date = excelSerialDateToJSDate(val);
+            // Format for display: local date/time string, or original value if conversion fails
+            return date ? date.toLocaleString() : String(val);
           },
-          {
-            name: "outTime",
-            label: "Leave Time (Datetime)",
-            keywords: ["leave time", "leavetime"],
-            required: false,
-            exampleFormatter: (val) => {
-              if (val === null || val === undefined || val === "") return "";
-              const date = excelSerialDateToJSDate(val);
-              // Format for display: local date/time string, or original value if conversion fails
-              return date ? date.toLocaleString() : String(val);
-            },
-          },
-        ]
+        },
+      ]
       : FIELDS_TO_MAP;
 
   const defaultFormValues = formFields.reduce((acc, field) => {
@@ -582,11 +617,11 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
                 : null,
             totalTimeInSession:
               currentMapping.sessionMinutes &&
-              item[currentMapping.sessionMinutes]
+                item[currentMapping.sessionMinutes]
                 ? parseInt(
-                    String(item[currentMapping.sessionMinutes]).trim(),
-                    10
-                  ) || 0
+                  String(item[currentMapping.sessionMinutes]).trim(),
+                  10
+                ) || 0
                 : 0,
           };
         } else {
@@ -806,351 +841,242 @@ const UploadXslxModal = ({ tabValue, setModal }) => {
     </th>
   ));
 
+  const shellBorder = isDark ? "#334155" : "#e5e7eb";
+  const titleColor = isDark ? "#f8fafc" : "#0f172a";
+  const footerBg = isDark ? "rgba(15,23,42,0.85)" : "#F9FAFB";
+  const labelStyleInner = {
+    fontFamily: "Inter, sans-serif",
+    fontSize: "10px",
+    fontWeight: 700,
+    textTransform: "uppercase",
+    letterSpacing: "0.04em",
+    color: isDark ? "#94a3b8" : "#64748b",
+    marginBottom: "4px",
+    display: "block",
+  };
+
+  const cancelBtn = {
+    backgroundColor: "transparent",
+    border: "none",
+    color: isDark ? "#94a3b8" : "#64748b",
+  };
+  const applyBtn = {
+    backgroundColor: "#22B573",
+    color: "#ffffff",
+    border: "none",
+    boxShadow: "0 4px 10px rgba(34, 181, 115, 0.25)",
+  };
+
   return (
-    <div
-      className="fixed top-0 left-0 z-[9999] flex h-screen w-screen items-center justify-center bg-slate-300/20 backdrop-blur-sm"
-      aria-labelledby="modal-title"
-      aria-modal="true"
-      tabIndex="-1"
-      role="dialog"
-      id="modal-backdrop"
-      onClick={handleBackdropClick}
-    >
-      <div
-        className="rounded bg-white shadow-xl py-2 overflow-y-auto max-h-[90vh] w-[95%] max-w-5xl flex flex-col"
-        role="document"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center px-5 border-b shrink-0">
-          <h3 id="modal-title" className="text-lg font-semibold text-gray-800">
-            Import Attendees -{" "}
-            {tabValue === "preWebinar" ? "Registered" : "Attended"}
-          </h3>
-          <button
-            onClick={handleCloseModal}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-full text-slate-500 hover:bg-slate-100 transition duration-300"
-            aria-label="close dialog"
-            disabled={overallLoading}
-          >
-            <span className="relative only:-mx-5">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-5 w-5"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                strokeWidth="1.5"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
-            </span>
-          </button>
-        </div>
-
-        <div className="px-6 md:px-8 py-4 flex flex-col gap-6 grow overflow-y-auto">
-          {/* Stage 1: Upload File */}
-          {stage === MODAL_STAGES.UPLOAD_FILE && (
-            <div className="w-96 mx-auto h-48 rounded-lg border-2 border-dashed border-slate-300 flex items-center justify-center bg-slate-50">
-              {isParsingFile ? (
-                <div className="flex flex-col items-center">
-                  <ClipLoader color="#3b82f6" size={30} />
-                  <p className="mt-2 text-gray-700 text-sm">Parsing file...</p>
-                </div>
-              ) : (
-                <label
-                  htmlFor="file-upload"
-                  className={`cursor-pointer text-center p-4 md:p-8 ${
-                    overallLoading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                >
-                  <svg
-                    className="w-12 h-12 mx-auto text-indigo-500"
-                    viewBox="0 0 41 40"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      d="M12.1667 26.6667C8.48477 26.6667 5.5 23.6819 5.5 20C5.5 16.8216 7.72428 14.1627 10.7012 13.4949C10.5695 12.9066 10.5 12.2947 10.5 11.6667C10.5 7.0643 14.231 3.33334 18.8333 3.33334C22.8655 3.33334 26.2288 6.19709 27.0003 10.0016C27.0556 10.0006 27.1111 10 27.1667 10C31.769 10 35.5 13.731 35.5 18.3333C35.5 22.3649 32.6371 25.7279 28.8333 26.5M25.5 21.6667L20.5 16.6667M20.5 16.6667L15.5 21.6667M20.5 16.6667L20.5 36.6667"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  </svg>
-                  <p className="mt-3 text-gray-700 max-w-xs mx-auto">
-                    <span className="font-medium text-indigo-600">
-                      Select an CSV file
-                    </span>{" "}
-                    or drag and drop here.
-                  </p>
-                </label>
-              )}
-              <input
-                id="file-upload"
-                accept=".csv, text/csv"
-                type="file"
-                className="hidden"
-                onChange={handleFileUpload}
-                disabled={overallLoading}
-              />
-            </div>
-          )}
-
-          {/* Stage 2: Preview Data & Select Header Row */}
-          {stage === MODAL_STAGES.PREVIEW_DATA && (
-            <div className="space-y-4">
+    <Dialog open={true} onOpenChange={handleCloseModal}>
+      <DialogContent className="max-w-[1000px] p-0 overflow-hidden rounded-2xl shadow-2xl border" style={{ backgroundColor: isDark ? "#1e293b" : "#ffffff", borderColor: shellBorder }}>
+        <div className="flex flex-col max-h-[90vh]">
+          {/* Header */}
+          <div className="flex items-center justify-between p-4 border-b flex-shrink-0" style={{ borderColor: shellBorder }}>
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-blue-50 dark:bg-blue-500/10 rounded-xl">
+                <UploadCloud className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+              </div>
               <div>
-                <p className="text-sm font-medium text-gray-700 mb-2">
-                  File Preview (First {MAX_PREVIEW_ROWS} rows,{" "}
-                  {MAX_PREVIEW_COLS} columns):
+                <h3 className="text-lg font-bold" style={{ color: titleColor }}>
+                  Import Attendees (CSV)
+                </h3>
+                <p className="text-xs text-slate-500">
+                  {tabValue === "preWebinar" ? "Pre-Webinar Registration" : "Post-Webinar Attendance"}
                 </p>
-                <div className="overflow-x-auto border border-slate-300 rounded-md max-h-96">
-                  <table className="min-w-full divide-y divide-slate-200 text-sm">
-                    <thead className="bg-slate-100 sticky top-0 z-10">
-                      <tr>
-                        <th className="px-3 py-2 text-left text-xs font-medium text-gray-600 uppercase tracking-wider whitespace-nowrap">
-                          Select (Row #)
-                        </th>
-                        {previewTableHeadersJSX}
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-slate-200">
-                      {previewDisplayData.map((row, rowIndex) => (
-                        <tr
-                          key={`preview-row-${rowIndex}`}
-                          onClick={() =>
-                            setHeaderRowNumber(String(rowIndex + 1))
-                          }
-                          className={`cursor-pointer hover:bg-slate-50 ${
-                            parseInt(headerRowNumber, 10) === rowIndex + 1
-                              ? "bg-blue-100"
-                              : ""
-                          }`}
-                        >
-                          <td className="px-3 py-2 whitespace-nowrap">
-                            <input
-                              type="radio"
-                              name="headerRowSelect"
-                              checked={
-                                parseInt(headerRowNumber, 10) === rowIndex + 1
-                              }
-                              onChange={() =>
-                                setHeaderRowNumber(String(rowIndex + 1))
-                              }
-                              className="form-radio h-4 w-4 text-blue-600"
-                            />
-                            <span className="ml-2 font-medium">
-                              {rowIndex + 1}
-                            </span>
-                          </td>
-                          {row.map((cell, cellIndex) => (
-                            <td
-                              key={`cell-${rowIndex}-${cellIndex}`}
-                              className="px-3 py-2 whitespace-nowrap truncate max-w-xs"
-                              title={cell}
-                            >
-                              {cell}
-                            </td>
-                          ))}
-                          {/* Fill empty cells if row has fewer than actualColsToDisplayInPreview */}
-                          {Array.from({
-                            length: actualColsToDisplayInPreview - row.length,
-                          }).map((_, k) => (
-                            <td
-                              key={`empty-cell-${rowIndex}-${k}`}
-                              className="px-3 py-2"
-                            ></td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
               </div>
-
-              <div className="flex flex-col sm:flex-row items-center gap-3">
-                <label
-                  htmlFor="header-row-input"
-                  className="font-medium text-sm text-gray-700 sm:w-48 shrink-0"
-                >
-                  Specify Header Row:
-                </label>
-                <input
-                  id="header-row-input"
-                  type="number"
-                  min={1}
-                  max={20}
-                  className="w-full mt-1 sm:mt-0 px-3 py-2 text-gray-700 border border-slate-300 rounded-lg outline-none focus:border-teal-400 shadow-sm disabled:opacity-50"
-                  placeholder="e.g., 1"
-                  value={headerRowNumber}
-                  onChange={(e) => {
-                    const value = e.target.value;
-
-                    // Only allow digits and empty string (for controlled input)
-                    if (value === "" || /^\d+$/.test(value)) {
-                      const number = Number(value);
-                      if (value === "" || (number >= 0 && number <= 20)) {
-                        setHeaderRowNumber(value);
-                      }
-                    }
-                  }}
-                  disabled={overallLoading}
-                />
-              </div>
-
-              <button
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md text-center transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={handlePreviewAndProceedToMap}
-                disabled={
-                  overallLoading ||
-                  !headerRowNumber ||
-                  parseInt(headerRowNumber, 10) < 1 ||
-                  parseInt(headerRowNumber, 10) > rawSheetData.length
-                }
-              >
-                Next: Map Fields
-              </button>
             </div>
-          )}
+            <button type="button" onClick={handleCloseModal} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10" disabled={overallLoading}>
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
 
-          {/* Stage 3: Map Fields */}
-          {stage === MODAL_STAGES.MAP_FIELDS && (
-            <form
-              onSubmit={handleSubmit(onSubmit)}
-              className="h-full flex flex-col"
-            >
-              {" "}
-              {/* Allow form to grow */}
-              <div className="shrink-0">
-                {parsedData.length === 0 && parsedHeaders.length > 0 && (
-                  <p className="text-sm text-orange-600 font-medium mb-2">
-                    No data rows found after the header. You can map headers,
-                    but no data will be imported.
-                  </p>
-                )}
-                {parsedHeaders.length === 0 && (
-                  <p className="text-sm text-red-600 font-medium mb-2">
-                    No headers were parsed. Cannot proceed with mapping. Please
-                    go back and check header row selection.
-                  </p>
+          {/* Content Area */}
+          <div className="p-6 overflow-y-auto custom-scrollbar flex-1">
+            {/* Stage 1: Upload File */}
+            {stage === MODAL_STAGES.UPLOAD_FILE && (
+              <div className="flex flex-col items-center justify-center py-12 border-2 border-dashed rounded-3xl transition-all" style={{ borderColor: isDark ? "#334155" : "#e2e8f0", backgroundColor: isDark ? "rgba(15,23,42,0.5)" : "#F9FAFB" }}>
+                {isParsingFile ? (
+                  <div className="flex flex-col items-center gap-4">
+                    <AppLoader size="lg" />
+                    <p className="text-sm font-medium text-slate-500">Parsing your CSV file...</p>
+                  </div>
+                ) : (
+                  <>
+                    <label htmlFor="csv-upload" className={cn("flex flex-col items-center gap-4 cursor-pointer group", overallLoading && "opacity-50 cursor-not-allowed")}>
+                      <div className="p-4 rounded-2xl bg-blue-500/10 text-blue-500 group-hover:scale-110 transition-transform">
+                        <UploadCloud className="w-10 h-10" />
+                      </div>
+                      <div className="text-center">
+                        <p className="text-lg font-bold text-slate-900 dark:text-slate-100">Click to Upload CSV</p>
+                        <p className="text-sm text-slate-500">or drag and drop your file here</p>
+                      </div>
+                    </label>
+                    <input id="csv-upload" accept=".csv" type="file" className="hidden" onChange={handleFileUpload} disabled={overallLoading} />
+                  </>
                 )}
               </div>
-              <div className="rounded-lg border border-slate-300 overflow-auto grow">
-                {" "}
-                {/* Table takes available space */}
-                <table className="min-w-full text-gray-800 divide-y divide-slate-200">
-                  <thead className="bg-slate-100 sticky top-0 z-10">
-                    <tr>
-                      <th className="px-6 py-3 w-60 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                        Attendee Field
-                      </th>
-                      <th className="px-6 py-3 max-60 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                        File Column
-                      </th>
-                      <th className="px-6 w-72 py-3 text-left text-xs font-medium text-gray-600 uppercase tracking-wider">
-                        Example Value
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-slate-200">
-                    {formFields.map((field, index) => (
-                      <tr key={field.name}>
-                        <td className="px-6 py-1 whitespace-nowrap">
-                          {field.label}{" "}
-                          {field.required && (
-                            <span className="text-red-500">*</span>
-                          )}
-                        </td>
-                        <td className="px-6 py-1 w-60">
-                          <Controller
-                            control={control}
-                            name={field.name}
-                            rules={{
-                              required: field.required
-                                ? `${field.label} mapping is required`
-                                : false,
-                            }}
-                            render={({ field: controllerField }) => (
-                              <Select
-                                {...controllerField}
-                                options={generateSelectOptions(parsedHeaders)}
-                                isClearable={!field.required}
-                                placeholder={
-                                  field.required
-                                    ? `Select ${field.label}`
-                                    : "Optional"
-                                }
-                                isDisabled={
-                                  overallLoading || parsedHeaders.length === 0
-                                }
-                                menuPlacement={
-                                  index > formFields.length - 5 ? "top" : "auto"
-                                } // Adjust for last few items
-                                styles={{
-                                  menuPortal: (base) => ({
-                                    ...base,
-                                    zIndex: 99999,
-                                  }),
-                                }} // Ensure dropdown is on top
-                                menuPortalTarget={document.body}
+            )}
+
+            {/* Stage 2: Preview & Header Row */}
+            {stage === MODAL_STAGES.PREVIEW_DATA && (
+              <div className="space-y-6">
+                <div>
+                  <div className="flex justify-between items-end mb-4">
+                    <div>
+                      <span style={labelStyleInner}>Step 1: Confirm Header Row</span>
+                      <p className="text-xs text-slate-500">Select the row that contains your table headers (e.g., Email, Name).</p>
+                    </div>
+                    {headerRowNumber && (
+                      <div className="flex items-center gap-2 bg-blue-50 dark:bg-blue-500/10 px-3 py-1.5 rounded-lg border border-blue-200 dark:border-blue-500/20">
+                        <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">Selected Row:</span>
+                        <span className="text-sm font-bold text-blue-800 dark:text-blue-300 bg-white dark:bg-slate-800 px-2 py-0.5 rounded shadow-sm">
+                          {headerRowNumber}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="border rounded-xl overflow-hidden shadow-sm" style={{ borderColor: shellBorder }}>
+                    <div className="overflow-x-auto max-h-[400px] custom-scrollbar">
+                      <table className="w-full text-left border-collapse min-w-[800px]">
+                        <thead className="sticky top-0 bg-slate-50 dark:bg-slate-900 z-10">
+                          <tr>
+                            <th className="px-4 py-3 text-[10px] font-bold uppercase tracking-wider text-slate-400 border-b" style={{ borderColor: shellBorder }}>Row</th>
+                            {previewTableHeadersJSX}
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y" style={{ borderColor: shellBorder }}>
+                          {previewDisplayData.map((row, rowIndex) => {
+                            const isSelected = parseInt(headerRowNumber, 10) === rowIndex + 1;
+                            return (
+                              <tr
+                                key={rowIndex}
+                                onClick={() => setHeaderRowNumber(String(rowIndex + 1))}
+                                className={cn("cursor-pointer transition-colors", isSelected ? "bg-blue-500/10" : "hover:bg-slate-50 dark:hover:bg-white/5")}
+                              >
+                                <td className="px-4 py-3">
+                                  <div className={cn("w-6 h-6 rounded-lg border-2 flex items-center justify-center text-[10px] font-bold", isSelected ? "bg-blue-500 border-blue-500 text-white" : "border-slate-300 text-slate-400")}>
+                                    {rowIndex + 1}
+                                  </div>
+                                </td>
+                                {row.map((cell, idx) => (
+                                  <td key={idx} className="px-4 py-3 text-sm text-slate-600 dark:text-slate-300 truncate max-w-[200px]">
+                                    {cell}
+                                  </td>
+                                ))}
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+
+
+              </div>
+            )}
+
+            {/* Stage 3: Field Mapping */}
+            {stage === MODAL_STAGES.MAP_FIELDS && (
+              <form id="map-fields-form" onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <div>
+                  <span style={labelStyleInner}>Step 2: Map File Columns to Attendee Fields</span>
+                  <p className="text-xs text-slate-500 mb-6">Match the columns from your CSV to the fields in our system.</p>
+
+                  <div className="border rounded-2xl overflow-hidden" style={{ borderColor: shellBorder }}>
+                    <table className="w-full text-left border-collapse">
+                      <thead className="bg-slate-50 dark:bg-slate-900">
+                        <tr>
+                          <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">System Field</th>
+                          <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">CSV Column</th>
+                          <th className="px-6 py-4 text-[10px] font-bold uppercase tracking-wider text-slate-400">Preview Data</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y" style={{ borderColor: shellBorder }}>
+                        {formFields.map((field, index) => (
+                          <tr key={field.name} className="hover:bg-slate-50/50 dark:hover:bg-white/5 transition-colors">
+                            <td className="px-6 py-4">
+                              <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{field.label}</span>
+                              {field.required && <span className="text-red-500 ml-1">*</span>}
+                            </td>
+                            <td className="px-6 py-4">
+                              <Controller
+                                control={control}
+                                name={field.name}
+                                rules={{ required: field.required ? "Required" : false }}
+                                render={({ field: rField }) => (
+                                  <Select
+                                    {...rField}
+                                    options={generateSelectOptions(parsedHeaders)}
+                                    styles={rsStyles}
+                                    isClearable={!field.required}
+                                    placeholder="Map Column..."
+                                    menuPortalTarget={document.body}
+                                  />
+                                )}
                               />
-                            )}
-                          />
-                          {errors[field.name] && (
-                            <p className="mt-1 text-sm text-red-600">
-                              {errors[field.name]?.message}
-                            </p>
-                          )}
-                        </td>
-                        <td
-                          className="px-6 py-1 whitespace-nowrap text-sm text-gray-500 truncate max-w-xs"
-                          title={formatDisplayedValue(
-                            selectedMapping[field.name],
-                            parsedData,
-                            field.exampleFormatter
-                          )}
-                        >
-                          {formatDisplayedValue(
-                            selectedMapping[field.name],
-                            parsedData,
-                            field.exampleFormatter
-                          )}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-              <div className="shrink-0 mt-4">
-                {" "}
-                {/* Submit button section */}
-                <button
-                  type="submit"
-                  disabled={
-                    overallLoading ||
-                    !isValid ||
-                    parsedData.length === 0 ||
-                    parsedHeaders.length === 0
-                  }
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-md text-center transition duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                            </td>
+                            <td className="px-6 py-4">
+                              <span className="text-xs font-mono text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded">
+                                {formatDisplayedValue(selectedMapping[field.name], parsedData, field.exampleFormatter) || "[N/A]"}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+
+              </form>
+            )}
+          </div>
+
+          {/* Global Footer (Back/Close) */}
+          <div className="p-4 border-t flex items-center justify-between" style={{ backgroundColor: footerBg, borderColor: shellBorder }}>
+            <div className="text-xs text-slate-500">
+              {stage === MODAL_STAGES.UPLOAD_FILE ? "Choose a file to begin" :
+                stage === MODAL_STAGES.PREVIEW_DATA ? `Row ${headerRowNumber} selected` :
+                  `${parsedData.length} records ready to import`}
+            </div>
+            <div className="flex items-center gap-2">
+              {stage !== MODAL_STAGES.UPLOAD_FILE && (
+                <Button variant="outline" onClick={() => setStage(stage === MODAL_STAGES.MAP_FIELDS ? MODAL_STAGES.PREVIEW_DATA : MODAL_STAGES.UPLOAD_FILE)} className="rounded-xl h-10 px-6">
+                  Back
+                </Button>
+              )}
+
+              {stage === MODAL_STAGES.PREVIEW_DATA && (
+                <Button
+                  onClick={handlePreviewAndProceedToMap}
+                  disabled={!headerRowNumber || overallLoading}
+                  style={applyBtn}
+                  className="rounded-xl h-10 px-8 font-bold transition-all hover:scale-105"
                 >
-                  {overallLoading ? (
-                    <ClipLoader color="#fff" size={20} />
-                  ) : (
-                    "Import Attendees"
-                  )}
-                </button>
-              </div>
-            </form>
-          )}
+                  Confirm & Map Fields <ChevronRight className="w-4 h-4 ml-2" />
+                </Button>
+              )}
+
+              {stage === MODAL_STAGES.MAP_FIELDS && (
+                <Button
+                  type="submit"
+                  form="map-fields-form"
+                  disabled={overallLoading || !isValid}
+                  style={applyBtn}
+                  className="rounded-xl h-10 px-8 font-bold transition-all hover:scale-105"
+                >
+                  {overallLoading ? <AppLoader size="sm" variant="inverse" /> : "Complete Import"}
+                </Button>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 
-export default UploadXslxModal;
+export default UploadCsvModal;

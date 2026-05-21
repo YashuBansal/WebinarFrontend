@@ -19,6 +19,7 @@ import AddRequestLocation from "./Modal/AddRequestLocation";
 import { resetLocationSuccess } from "../../features/slices/location";
 import LocationModal from "./Modal/LocationModal";
 import { globalButton } from "../../utils/style";
+import HubSubpageShell from "../../components/Layout/HubSubpageShell";
 
 const Locations = () => {
   const [selectedModalName, setSelectedModalName] = useState(null);
@@ -199,10 +200,10 @@ const Locations = () => {
   ];
 
   return (
-    <>
-      <div className="pt-14 sm:px-5 px-2">
+    <HubSubpageShell showBack={false}>
+      <div className="rounded-2xl border border-slate-200 bg-white px-2 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/60 sm:rounded-3xl sm:px-5">
         {/* Add location Button */}
-        <div className="flex justify-between gap-2 items-center pb-4">
+        <div className="flex items-center justify-between gap-2 pb-4">
           <div className="flex gap-2">
             <Button variant="outlined" onClick={() => navigate("/locations")}>
               Locations
@@ -293,7 +294,7 @@ const Locations = () => {
           setShowLocationModal={setShowLocationModal}
         />
       )}
-    </>
+    </HubSubpageShell>
   );
 };
 

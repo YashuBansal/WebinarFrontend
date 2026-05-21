@@ -53,7 +53,7 @@ export const getAssignments = createAsyncThunk(
           filters,
           validCall,
           assignmentStatus,
-          sort,
+          sort: sort?.sortBy ? sort : undefined,
           validCallFlag
         },
         {
@@ -89,7 +89,7 @@ export const getAssignmentsSilently = createAsyncThunk(
           filters,
           validCall,
           assignmentStatus,
-          sort,
+          sort: sort?.sortBy ? sort : undefined,
         },
         {
           params: { page, limit, webinarId },

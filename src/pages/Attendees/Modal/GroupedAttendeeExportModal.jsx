@@ -1,23 +1,8 @@
-import { useEffect, useState, useRef } from "react"; // Added useRef
-import {
-  Modal,
-  Box,
-  Button,
-  Checkbox,
-  FormControlLabel,
-  TextField,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Typography,
-  Grid, // Added for layout
-  IconButton, // Potentially for a close button
-} from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close"; // For a dedicated close button
+import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import AppLoader from "../../../components/AppLoader";
+import { X, Trash2 } from "lucide-react";
 import { closeModal } from "../../../features/slices/modalSlice";
-import { ClipLoader } from "react-spinners";
 import { groupedAttendeeTableColumns } from "../../../utils/columnData";
 import { resetExportSuccess } from "../../../features/slices/export-excel";
 import {
@@ -29,32 +14,20 @@ import {
   clearPreset,
   resetFilterPresetSuccess,
 } from "../../../features/slices/filter-preset";
-import DeleteIcon from "../../../components/SVGs/red-bin.svg";
 import { exportGroupedAttendeesExcel } from "../../../features/actions/export-excel";
-import { globalButton } from "../../../utils/style";
 import useUserSubscription from "../../../hooks/useUserSubscription";
+import { Dialog, DialogContent } from "../../../components/ui/dialog";
+import { Button } from "../../../components/ui/button";
+import { Input } from "../../../components/ui/input";
+import { Checkbox } from "../../../components/ui/checkbox";
+import { useTheme } from "../../../contexts/ThemeContext";
 
 const tableName = "All Attendees Export";
 
-const modalStyle = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: "90%",
-  maxWidth: "900px",
-  bgcolor: "background.paper",
-  borderRadius: "8px",
-  boxShadow: 24,
-  p: { xs: 2, sm: 3 },
-  maxHeight: "90vh",
-  overflowY: "auto",
-  display: "flex",
-  flexDirection: "column",
-};
-
 const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
   const dispatch = useDispatch();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
 
   const { data: subscription } = useUserSubscription();
   const tableConfig = subscription?.plan?.attendeeTableConfig || {};
@@ -73,15 +46,25 @@ const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
   const [presetNameInput, setPresetNameInput] = useState("");
   const [selectedPresetId, setSelectedPresetId] = useState("");
 
-  // Ref to track manual interaction with checkboxes to prevent useEffect override
   const manualInteractionRef = useRef(false);
+
+  const panelStyle = {
+    backgroundColor: isDark ? "#1e293b" : "#ffffff",
+    border: `1px solid ${isDark ? "#334155" : "#e5e7eb"}`,
+  };
+
+  const inputStyle = {
+    backgroundColor: isDark ? "#0f172a" : "#ffffff",
+    border: `1px solid ${isDark ? "#334155" : "#e2e8f0"}`,
+    color: isDark ? "#f8fafc" : "#0f172a",
+  };
 
   const handleCheckboxChange = (key) => {
     setSelectedColumns((prev) =>
       prev.includes(key) ? prev.filter((col) => col !== key) : [...prev, key]
     );
     setSelectedPresetId("");
-    manualInteractionRef.current = true; // Indicate manual interaction
+    manualInteractionRef.current = true;
   };
 
   const handleClose = () => {
@@ -107,7 +90,6 @@ const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
     }
   }, [isExportLoading, dispatch]);
 
-  // Effect to calculate available columns and manage selected columns based on config/presets
   useEffect(() => {
     const allColumns = [
       { header: "Email", key: "email", width: 20, type: "" },
@@ -117,8 +99,8 @@ const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
       { header: "Phone", key: "phone", width: 20, type: "" },
     ];
 
-    const newAvailableColumns = allColumns.filter(
-      (col) => col.key in tableConfig && tableConfig[col.key].downloadable
+    const newAvailableColumns = allColumns.filter((col) =>
+      col.key in tableConfig ? tableConfig[col.key].downloadable : true
     );
     if (tableConfig["leadType"]?.downloadable) {
       if (!newAvailableColumns.some((col) => col.key === "leadType")) {
@@ -132,7 +114,7 @@ const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
     setColumns(newAvailableColumns);
 
     if (manualInteractionRef.current) {
-      manualInteractionRef.current = false; // Reset flag and do not override manual selection
+      manualInteractionRef.current = false;
       return;
     }
 
@@ -146,19 +128,11 @@ const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
           (key) => availableKeys.includes(key)
         );
         setSelectedColumns(validPresetColumns);
-      } else {
-        // Preset selected but not found or invalid, fall back to default for safety
-        // Or clear selection if preset is invalid.
-        // For now, if preset invalid/not found and `selectedPresetId` is somehow set,
-        // it might be better to clear `selectedPresetId` and let it fall to default.
-        // However, `handleApplyPreset` should ideally prevent setting invalid `selectedPresetId`.
-        // If it resulted in no columns after filtering, setSelectedColumns would be empty.
       }
     } else {
-      // No preset selected, or "Default" was chosen. Set to all available columns.
       setSelectedColumns(newAvailableColumns.map((col) => col.key));
     }
-  }, [tableConfig, selectedPresetId, filterPresets, dispatch]); // dispatch might not be needed, but good practice if any redux actions were called inside
+  }, [tableConfig, selectedPresetId, filterPresets, dispatch]);
 
   useEffect(() => {
     dispatch(getFilterPreset(tableName));
@@ -173,14 +147,7 @@ const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
       setPresetNameInput("");
       dispatch(resetFilterPresetSuccess());
       dispatch(getFilterPreset(tableName)).then(() => {
-        // Attempt to select the newly created preset.
-        // This requires filterPresets to be updated.
-        // A more robust way might be for creattFilterPreset to return the new preset.
-        // For now, find by name after refetch.
-        // This selection logic is tricky due to async updates of filterPresets.
-        // A slight delay or check might be needed, or rely on user to select it.
-        // The original logic of setSelectedPresetId(newPresetName) is simpler for now.
-        setSelectedPresetId(newPresetName); // This relies on handleApplyPreset or the main useEffect to pick it up
+        setSelectedPresetId(newPresetName);
       });
     }
   }, [isPresetCreationSuccess, dispatch, presetNameInput]);
@@ -201,20 +168,16 @@ const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
     const payload = {
       name: presetNameInput.trim(),
       tableName,
-      filters: { selectedColumns }, // Save the order as well
+      filters: { selectedColumns },
     };
     dispatch(creattFilterPreset(payload));
   };
 
   const handleApplyPreset = (presetIdentifier) => {
     setSelectedPresetId(presetIdentifier);
-    manualInteractionRef.current = false; // Applying a preset is not a manual column change
+    manualInteractionRef.current = false;
 
     if (!presetIdentifier) {
-      // "Default Columns" selected from dropdown
-      // The main useEffect will handle setting selectedColumns to all available columns
-      // because selectedPresetId is now "", and manualInteractionRef is false.
-      // Explicitly setting here is also fine:
       const defaultSelected = columns.map((col) => col.key);
       setSelectedColumns(defaultSelected);
       return;
@@ -231,10 +194,6 @@ const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
           availableKeys.includes(key)
         );
       setSelectedColumns(orderedAndAvailablePresetColumns);
-    } else {
-      // Preset not found or malformed. selectedColumns might remain as is or be cleared by main useEffect.
-      // For safety, if a preset is chosen but invalid, perhaps default:
-      // setSelectedColumns(columns.map((col) => col.key));
     }
   };
 
@@ -245,12 +204,19 @@ const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
       allColumnKeys.every((key) => selectedColumns.includes(key));
 
     if (allCurrentlySelected) {
-      setSelectedColumns([]); // Deselect all
+      setSelectedColumns([]);
     } else {
-      setSelectedColumns(allColumnKeys); // Select all
+      setSelectedColumns(allColumnKeys);
     }
-    setSelectedPresetId(""); // Custom selection
-    manualInteractionRef.current = true; // Indicate manual interaction
+    setSelectedPresetId("");
+    manualInteractionRef.current = true;
+  };
+
+  const deleteSelectedPreset = () => {
+    if (!selectedPresetId) return;
+    dispatch(deleteFilterPreset(selectedPresetId));
+    setSelectedPresetId("");
+    handleApplyPreset("");
   };
 
   const areAllSelected =
@@ -258,279 +224,256 @@ const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
     selectedColumns.length === columns.length &&
     columns.every((col) => selectedColumns.includes(col.key));
 
+  const duplicatePresetName =
+    presetNameInput.trim() &&
+    (filterPresets || []).some((p) => p.name === presetNameInput.trim());
+
   return (
-    <Modal open={true} onClose={handleClose} disablePortal>
-      <Box sx={modalStyle}>
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
+    <Dialog open onOpenChange={(v) => !v && handleClose()}>
+      <DialogContent className="max-w-[900px] border-0 bg-transparent p-0 shadow-none w-[90vw]">
+        <div
+          className="flex flex-col max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden"
+          style={panelStyle}
         >
-          <Typography
-            variant="h5"
-            component="h2"
-            sx={{ fontWeight: "semibold" }}
+          <div
+            className="flex items-center justify-between p-4 border-b shrink-0"
+            style={{
+              borderColor: isDark ? "#334155" : "#e5e7eb",
+            }}
           >
-            Export Excel Options
-          </Typography>
-          <IconButton onClick={handleClose} size="small">
-            <CloseIcon />
-          </IconButton>
-        </Box>
+            <h2
+              className="text-lg font-bold"
+              style={{ color: isDark ? "#f8fafc" : "#0f172a" }}
+            >
+              Export Excel Options
+            </h2>
+            <button
+              type="button"
+              onClick={handleClose}
+              className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
 
-        <Box sx={{ flexGrow: 1, overflowY: "auto", pr: 1, mt: 2 }}>
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={6}>
-              <TextField
-                label="Limit (Max 10,000)"
-                variant="outlined"
-                type="number"
-                placeholder="All"
-                fullWidth
-                value={limit}
-                onChange={(e) => {
-                  if (e.target.value === "") setLimit("");
-                  else {
-                    const value = Number(e.target.value);
-                    if (!isNaN(value) && value > 0 && value <= 10000)
-                      setLimit(value);
-                    else if (value > 10000) setLimit(10000);
-                  }
-                }}
-                onKeyDown={(e) => {
-                  const allowedKeys = [
-                    "Backspace",
-                    "ArrowLeft",
-                    "ArrowRight",
-                    "Delete",
-                    "Tab",
-                  ];
-                  if (
-                    !allowedKeys.includes(e.key) &&
-                    !(e.key >= "0" && e.key <= "9")
-                  )
-                    e.preventDefault();
-                }}
-                InputLabelProps={{ shrink: true }}
-                margin="normal"
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <FormControl fullWidth margin="normal" variant="outlined">
-                <InputLabel id="select-preset-label">Apply Preset</InputLabel>
-                <Select
-                  labelId="select-preset-label"
-                  value={selectedPresetId}
-                  label="Apply Preset"
-                  onChange={(e) => handleApplyPreset(e.target.value)}
+          <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-5 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label
+                  className="block text-xs font-semibold uppercase tracking-wide mb-2"
+                  style={{ color: isDark ? "#94a3b8" : "#64748b" }}
                 >
-                  <MenuItem value="">
-                    <em>Default Columns</em>
-                  </MenuItem>
-                  {(filterPresets || []).map((preset) => (
-                    <MenuItem key={preset._id} value={preset._id}>
-                      <div className="flex justify-between items-center w-full">
-                        <span>{preset.name}</span>
-                        <button
-                          disabled={isPresetLoading}
-                          className="hover:bg-gray-300 rounded-full p-2"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            dispatch(deleteFilterPreset(preset._id));
-                          }}
-                        >
-                          <img
-                            src={DeleteIcon}
-                            alt="Edit"
-                            className="min-h-5 h-5 w-5 min-w-5"
-                          />
-                        </button>
-                      </div>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-          </Grid>
+                  Limit (Max 10,000)
+                </label>
+                <Input
+                  type="number"
+                  placeholder="All"
+                  value={limit}
+                  onChange={(e) => {
+                    if (e.target.value === "") setLimit("");
+                    else {
+                      const value = Number(e.target.value);
+                      if (!isNaN(value) && value > 0 && value <= 10000)
+                        setLimit(String(value));
+                      else if (value > 10000) setLimit("10000");
+                    }
+                  }}
+                  onKeyDown={(e) => {
+                    const allowedKeys = [
+                      "Backspace",
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "Delete",
+                      "Tab",
+                    ];
+                    if (
+                      !allowedKeys.includes(e.key) &&
+                      !(e.key >= "0" && e.key <= "9")
+                    )
+                      e.preventDefault();
+                  }}
+                  className="rounded-xl"
+                  style={inputStyle}
+                />
+              </div>
+              <div>
+                <label
+                  className="block text-xs font-semibold uppercase tracking-wide mb-2"
+                  style={{ color: isDark ? "#94a3b8" : "#64748b" }}
+                >
+                  Apply Preset
+                </label>
+                <div className="flex gap-2 items-start">
+                  <select
+                    value={selectedPresetId}
+                    onChange={(e) => handleApplyPreset(e.target.value)}
+                    className="flex-1 min-w-0 pl-3 pr-3 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-slate-400/30"
+                    style={inputStyle}
+                  >
+                    <option value="">Default Columns</option>
+                    {(filterPresets || []).map((preset) => (
+                      <option key={preset._id} value={preset._id}>
+                        {preset.name}
+                      </option>
+                    ))}
+                  </select>
+                  {selectedPresetId && (
+                    <button
+                      type="button"
+                      disabled={isPresetLoading}
+                      onClick={deleteSelectedPreset}
+                      className="p-2.5 rounded-xl border shrink-0 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
+                      style={inputStyle}
+                      title="Delete selected preset"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-500" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
 
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              mt: 2,
-              mb: 1,
-            }}
-          >
-            <Typography variant="h6" sx={{ fontWeight: "semibold" }}>
-              Select Columns for Export
-            </Typography>
-            {columns.length > 0 && (
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleSelectAllToggle}
-                disabled={columns.length === 0}
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <h3
+                className="text-base font-bold"
+                style={{ color: isDark ? "#f8fafc" : "#0f172a" }}
               >
-                {areAllSelected ? "Deselect All" : "Select All"}
-              </Button>
-            )}
-          </Box>
+                Select Columns for Export
+              </h3>
+              {columns.length > 0 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-xl"
+                  onClick={handleSelectAllToggle}
+                  disabled={columns.length === 0}
+                >
+                  {areAllSelected ? "Deselect All" : "Select All"}
+                </Button>
+              )}
+            </div>
 
-          <Box
-            className="grid grid-cols-2 sm:grid-cols-3 gap-x-2 gap-y-0"
-            sx={{
-              border: 1,
-              borderColor: "divider",
-              borderRadius: 1,
-              p: 1,
-              maxHeight: { xs: "150px", sm: "250px" }, // Adjusted height a bit
-              overflowY: "auto",
-              mb: 2,
-            }}
-          >
-            {columns.map((column) => (
-              <FormControlLabel
-                key={column.key}
-                control={
+            <div
+              className="grid grid-cols-2 sm:grid-cols-3 gap-x-3 gap-y-2 p-3 rounded-xl border max-h-[250px] overflow-y-auto custom-scrollbar"
+              style={{
+                borderColor: isDark ? "#334155" : "#e2e8f0",
+                backgroundColor: isDark ? "#0f172a" : "#f8fafc",
+              }}
+            >
+              {columns.map((column) => (
+                <label
+                  key={column.key}
+                  className="flex items-center gap-2 cursor-pointer text-sm py-1"
+                  style={{ color: isDark ? "#e2e8f0" : "#334155" }}
+                >
                   <Checkbox
                     checked={selectedColumns.includes(column.key)}
-                    onChange={() => handleCheckboxChange(column.key)}
-                    size="small"
+                    onCheckedChange={() => handleCheckboxChange(column.key)}
+                    className={isDark ? "border-slate-500" : ""}
                   />
-                }
-                label={
-                  <div className="flex gap-2 items-center">
-                    <Typography variant="body2" sx={{ fontSize: "0.875rem" }}>
-                      {column.header}
-                    </Typography>
-                    {selectedColumns.includes(column.key) ? (
-                      <div className="text-xs text-white bg-indigo-600 h-6 w-6 flex justify-center items-center rounded-full">
-                        {selectedColumns.indexOf(column.key) + 1}
-                      </div>
-                    ) : null}
-                  </div>
-                }
-                sx={{ m: 0 }}
-              />
-            ))}
-            {columns.length === 0 && (
-              <Typography
-                variant="body2"
-                sx={{ p: 1, color: "text.secondary" }}
-              >
-                No columns available for selection.
-              </Typography>
-            )}
-          </Box>
+                  <span className="flex-1 truncate">{column.header}</span>
+                  {selectedColumns.includes(column.key) ? (
+                    <span className="text-[10px] font-bold text-white bg-indigo-600 h-5 min-w-5 px-1 flex justify-center items-center rounded-full shrink-0">
+                      {selectedColumns.indexOf(column.key) + 1}
+                    </span>
+                  ) : null}
+                </label>
+              ))}
+              {columns.length === 0 && (
+                <p className="text-sm col-span-full text-slate-500">
+                  No columns available for selection.
+                </p>
+              )}
+            </div>
 
-          <Typography
-            variant="h6"
-            sx={{ fontWeight: "semibold", mt: 2, mb: 1 }}
+            <div>
+              <h3
+                className="text-base font-bold mb-2"
+                style={{ color: isDark ? "#f8fafc" : "#0f172a" }}
+              >
+                Save Current Selection as Preset
+              </h3>
+              <div className="flex flex-col sm:flex-row gap-3 items-end">
+                <div className="flex-1 w-full">
+                  <Input
+                    placeholder="New preset name"
+                    value={presetNameInput}
+                    onChange={(e) => setPresetNameInput(e.target.value)}
+                    className="rounded-xl"
+                    style={inputStyle}
+                  />
+                </div>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-xl w-full sm:w-auto shrink-0"
+                  onClick={handleSavePreset}
+                  disabled={
+                    !presetNameInput.trim() ||
+                    selectedColumns.length === 0 ||
+                    duplicatePresetName
+                  }
+                >
+                  Save Preset
+                </Button>
+              </div>
+              {duplicatePresetName && (
+                <p className="text-sm text-red-500 mt-1">
+                  A preset with this name already exists.
+                </p>
+              )}
+            </div>
+          </div>
+
+          <div
+            className="p-4 border-t shrink-0 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+            style={{
+              borderColor: isDark ? "#334155" : "#e5e7eb",
+              backgroundColor: isDark ? "rgba(15,23,42,0.5)" : "#F9FAFB",
+            }}
           >
-            Save Current Selection as Preset
-          </Typography>
-          <Grid container spacing={2} alignItems="flex-end">
-            <Grid item xs={12} sm={7} md={8}>
-              <TextField
-                label="New Preset Name"
-                variant="outlined"
-                fullWidth
-                value={presetNameInput}
-                onChange={(e) => setPresetNameInput(e.target.value)}
-                InputLabelProps={{ shrink: true }}
-                margin="normal"
+            <label className="flex items-center gap-2 cursor-pointer text-sm">
+              <Checkbox
+                checked={includeFilter}
+                onCheckedChange={(c) => setIncludeFilter(Boolean(c))}
+                className={isDark ? "border-slate-500" : ""}
               />
-            </Grid>
-            <Grid item xs={12} sm={5} md={4}>
+              <span style={{ color: isDark ? "#cbd5e1" : "#475569" }}>
+                Filters {includeFilter ? "Included" : "Excluded"}
+              </span>
+            </label>
+            <div className="flex flex-wrap justify-end gap-2">
               <Button
-                variant="outlined"
-                color="primary"
-                onClick={handleSavePreset}
-                disabled={
-                  !presetNameInput.trim() ||
-                  selectedColumns.length === 0 ||
-                  (filterPresets || []).some(
-                    (p) => p.name === presetNameInput.trim()
-                  )
-                }
-                fullWidth
-                sx={{ mb: { xs: 0, sm: "8px" } }}
-              >
-                Save Preset
-              </Button>
-            </Grid>
-          </Grid>
-          {(filterPresets || []).some(
-            (p) => p.name === presetNameInput.trim()
-          ) &&
-            presetNameInput.trim() && (
-              <Typography
-                color="error"
-                variant="caption"
-                display="block"
-                sx={{ mt: 0.5 }}
-              >
-                A preset with this name already exists.
-              </Typography>
-            )}
-        </Box>
-
-        <Box sx={{ mt: "auto", pt: 2, borderTop: 1, borderColor: "divider" }}>
-          <Grid
-            container
-            spacing={2}
-            justifyContent="space-between"
-            alignItems="center"
-          >
-            <Grid item xs={12} sm="auto">
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={includeFilter}
-                    onChange={() => setIncludeFilter((prev) => !prev)}
-                  />
-                }
-                label={`Filters ${includeFilter ? "Included" : "Excluded"}`}
-              />
-            </Grid>
-            <Grid item xs={12} sm="auto">
-              <Box
-                sx={{
-                  display: "flex",
-                  gap: 1,
-                  justifyContent: { xs: "flex-end", sm: "flex-end" },
-                  width: "100%", // Ensure buttons can take space on small screens
+                type="button"
+                variant="outline"
+                onClick={handleClose}
+                className="rounded-xl"
+                style={{
+                  borderColor: isDark ? "#475569" : "#cbd5e1",
+                  color: isDark ? "#cbd5e1" : "#475569",
                 }}
               >
-                <Button
-                  variant="outlined"
-                  color="secondary"
-                  onClick={handleClose}
-                  sx={{ flexGrow: { xs: 1, sm: 0 } }} // Make cancel button grow on xs
-                >
-                  Cancel
-                </Button>
-                <button
-                  className={globalButton}
-                  onClick={handleSubmit}
-                  disabled={isExportLoading || selectedColumns.length === 0} // Disable if no columns selected
-                >
-                  {isExportLoading ? (
-                    <ClipLoader size={20} color="#fff" />
-                  ) : (
-                    "Download"
-                  )}
-                </button>
-              </Box>
-            </Grid>
-          </Grid>
-        </Box>
-      </Box>
-    </Modal>
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isExportLoading || selectedColumns.length === 0}
+                className="rounded-xl px-5 font-semibold text-white min-w-[120px] bg-[#22B573] hover:bg-[#1da366] shadow-md"
+              >
+                {isExportLoading ? (
+                  <AppLoader size="md" variant="inverse" />
+                ) : (
+                  "Download"
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
   );
 };
 

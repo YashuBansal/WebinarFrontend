@@ -10,6 +10,7 @@ import { useParams, useSearchParams } from "react-router-dom";
 import AddonCard from "./AddonCard";
 import { instance } from "../../../services/axiosInterceptor";
 import { errorToast, successToast } from "../../../utils/extra";
+import HubSubpageShell from "../../../components/Layout/HubSubpageShell";
 
 const MyAddOns = () => {
   const dispatch = useDispatch();
@@ -92,12 +93,14 @@ const MyAddOns = () => {
   const expiredAddons = addonsData?.filter((addon) => isExpired(addon)) || [];
 
   return (
-    <div className="bg-gray-100 min-h-screen px-6 pt-14">
-      <h1 className="text-2xl font-bold text-center mb-6">My AddOns</h1>
+    <HubSubpageShell>
+      <h1 className="mb-6 text-center text-2xl font-bold text-slate-900 dark:text-slate-100">
+        My AddOns
+      </h1>
 
       <div className="space-y-10">
         <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          <h2 className="mb-4 text-xl font-semibold text-gray-800 dark:text-slate-200">
             Active AddOns
           </h2>
           {activeAddons.length ? (
@@ -113,12 +116,12 @@ const MyAddOns = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500">No active add-ons found.</p>
+            <p className="text-gray-500 dark:text-slate-400">No active add-ons found.</p>
           )}
         </div>
 
         <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">
+          <h2 className="mb-4 text-xl font-semibold text-gray-800 dark:text-slate-200">
             Expired AddOns
           </h2>
           {expiredAddons.length ? (
@@ -134,11 +137,11 @@ const MyAddOns = () => {
               ))}
             </div>
           ) : (
-            <p className="text-gray-500">No expired add-ons found.</p>
+            <p className="text-gray-500 dark:text-slate-400">No expired add-ons found.</p>
           )}
         </div>
       </div>
-    </div>
+    </HubSubpageShell>
   );
 };
 

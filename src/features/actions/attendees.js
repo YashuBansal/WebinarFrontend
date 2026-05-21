@@ -70,7 +70,7 @@ export const getAttendees = createAsyncThunk(
           isAttended,
           validCall,
           assignmentType,
-          sort,
+          sort: sort?.sortBy ? sort : undefined,
         },
       });
       return response?.data;
@@ -120,7 +120,7 @@ export const getAttendeesSilently = createAsyncThunk(
           isAttended,
           validCall,
           assignmentType,
-          sort,
+          sort: sort?.sortBy ? sort : undefined,
         },
       });
       return response?.data;

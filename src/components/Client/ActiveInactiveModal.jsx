@@ -4,10 +4,10 @@ import {
   Box,
   Tooltip,
   IconButton,
-  CircularProgress,
   TextField,
   Button,
 } from "@mui/material";
+import AppLoader from "../AppLoader";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import { updateClient } from "../../features/actions/client";
@@ -140,7 +140,7 @@ const ActiveInactiveModal = ({ modalName }) => {
             }`}
           >
             {isUpdating ? (
-              <CircularProgress size={20} color="inherit" />
+              <AppLoader size="md" variant="inverse" />
             ) : clientData?.isActive ? (
               "Set as Inactive"
             ) : (

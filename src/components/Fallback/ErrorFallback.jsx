@@ -1,25 +1,30 @@
-import { useRouteError, useNavigate, isRouteErrorResponse } from 'react-router-dom';
+import {
+  useRouteError,
+  useNavigate,
+  isRouteErrorResponse,
+} from "react-router-dom";
 
 function ErrorFallback() {
   const error = useRouteError();
   const navigate = useNavigate();
 
-  let title = 'Oops! Something went wrong.';
-  let message = 'We\'re sorry for the inconvenience. Our team has been notified.';
+  let title = "Oops! Something went wrong.";
+  let message =
+    "We're sorry for the inconvenience. Our team has been notified.";
 
   if (isRouteErrorResponse(error)) {
     if (error.status === 404) {
-      title = 'Page Not Found';
-      message = 'The page you are looking for does not exist.';
+      title = "Page Not Found";
+      message = "The page you are looking for does not exist.";
     } else {
       title = `Error ${error.status}`;
       message = error.statusText;
     }
   }
 
-  const goHome = () => navigate('/');
+  const goHome = () => navigate("/");
 
-  const retry = () => navigate(0);  
+  const retry = () => navigate(0);
 
   return (
     <div
@@ -47,27 +52,30 @@ function ErrorFallback() {
           {title}
         </h1>
 
-        <p className="mt-4 text-base text-slate-600">
-          {message}
-        </p>
+        <p className="mt-4 text-base text-slate-600">{message}</p>
 
         <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
-          <button onClick={retry} className="...">Try Again</button>
-          <button onClick={goHome} className="...">Go to Homepage</button>
+          <button onClick={retry} className="...">
+            Try Again
+          </button>
+          <button onClick={goHome} className="...">
+            Go to Homepage
+          </button>
         </div>
 
-        {process.env.NODE_ENV === 'development' && !isRouteErrorResponse(error) && (
-          <details className="mt-6 text-left">
-            <summary className="cursor-pointer text-sm font-medium text-slate-500 hover:text-slate-700">
-              Show Error Details
-            </summary>
-            <pre className="mt-2 whitespace-pre-wrap break-words rounded-md bg-slate-50 p-4 text-sm text-red-600">
-              {error.message}
-              {'\n\n'}
-              {error.stack}
-            </pre>
-          </details>
-        )}
+        {process.env.NODE_ENV === "development" &&
+          !isRouteErrorResponse(error) && (
+            <details className="mt-6 text-left">
+              <summary className="cursor-pointer text-sm font-medium text-slate-500 hover:text-slate-700">
+                Show Error Details
+              </summary>
+              <pre className="mt-2 whitespace-pre-wrap break-words rounded-md bg-slate-50 p-4 text-sm text-red-600">
+                {error.message}
+                {"\n\n"}
+                {error.stack}
+              </pre>
+            </details>
+          )}
       </div>
     </div>
   );

@@ -3,7 +3,7 @@ import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../AppLoader";
 import { updatePassword } from "../../features/actions/auth";
 import useAddUserActivity from "../../hooks/useAddUserActivity";
 
@@ -140,7 +140,7 @@ function PasswordUpdateForm() {
         {/* Submit Button */}
         <Button type="submit" variant="contained" color="primary" fullWidth>
           {isLoading ? (
-            <ClipLoader color="#fff" size={20} />
+            <AppLoader size="md" variant="inverse" />
           ) : (
             "Update Password"
           )}

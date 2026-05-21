@@ -1,0 +1,139 @@
+import { motion } from 'framer-motion';
+import { Button } from '@/components/ui/button';
+import { 
+  RefreshCw,
+  Plus,
+  ArrowDownUp,
+  Clock,
+  LayoutGrid,
+  Zap
+} from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+interface TemplateHeaderProps {
+  projectName: string;
+  projectId: string;
+  isLoading: boolean;
+  isSyncing?: boolean;
+  isRefreshing?: boolean;
+  lastSyncedAt?: string | null;
+  onRefresh: () => void;
+  onSync?: () => void;
+  activeTab?: string;
+}
+
+export function TemplateHeader({ 
+  projectName, 
+  projectId, 
+  isLoading, 
+  isSyncing, 
+  isRefreshing, 
+  lastSyncedAt, 
+  onRefresh, 
+  onSync,
+  activeTab
+}: TemplateHeaderProps) {
+  const formatLastSynced = (dateString: string | null | undefined) => {
+    if (!dateString) return null;
+    try {
+      const date = new Date(dateString);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+      if (diffHours < 24) return `${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+      if (diffDays < 7) return `${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+      
+      return date.toLocaleString('en-US', { 
+        month: 'short', 
+        day: 'numeric', 
+        year: date.getFullYear() !== now.getFullYear() ? 'numeric' : undefined,
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+      });
+    } catch {
+      return null;
+    }
+  };
+
+  return (
+    <motion.div
+      className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      
+    >
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="space-y-1.5">
+          <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-xs uppercase tracking-widest mb-1">
+            <LayoutGrid className="h-3.5 w-3.5" />
+            Message Templates
+          </div>
+          <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
+            Template Library
+          </h1>
+          <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+            <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+              Manage your identity and message flow for <span className="text-slate-900 dark:text-white font-bold">{projectName}</span>
+            </p>
+            {lastSyncedAt && (
+              <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-0.5 bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 rounded-full text-[10px] font-bold text-slate-400 uppercase tracking-tight">
+                <Clock className="w-3 h-3" />
+                <span>Synced: {formatLastSynced(lastSyncedAt)}</span>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <Button
+            variant="outline"
+            onClick={onRefresh}
+            disabled={isLoading || isRefreshing}
+            className="h-10 px-4 rounded-xl flex items-center gap-2 border-slate-200 dark:border-slate-700/30 text-slate-600 dark:text-slate-400 font-bold text-xs transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${(isLoading || isRefreshing) ? 'animate-spin' : ''}`} />
+            Refresh
+          </Button>
+          
+          {onSync && (
+            <Button
+              variant="outline"
+              onClick={onSync}
+              disabled={isSyncing || isLoading}
+              className="h-10 px-4 rounded-xl flex items-center gap-2 border-slate-200 dark:border-slate-700/30 text-slate-600 dark:text-slate-400 font-bold text-xs transition-all hover:bg-slate-50 dark:hover:bg-slate-900/50"
+            >
+              <ArrowDownUp className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+              Meta Sync
+            </Button>
+          )}
+
+          <Link to={`/whatsapp/dashboard/${projectId}/templates/create`}>
+            <Button 
+              className="h-10 px-6 rounded-xl flex items-center gap-2 text-white font-bold text-xs shadow-xl shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+              style={{ backgroundColor: "#22B573" }}
+            >
+              <Plus className="w-4 h-4" />
+              Create Template
+            </Button>
+          </Link>
+
+          <Link to={`/whatsapp/dashboard/${projectId}/templates/create-session`}>
+            <Button 
+              className="h-10 px-6 rounded-xl flex items-center gap-2 text-white font-bold text-xs shadow-xl shadow-amber-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] bg-amber-500 hover:bg-amber-600 border-none"
+            >
+              <Zap className="h-4 w-4" />
+              Create Session Template
+            </Button>
+          </Link>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+

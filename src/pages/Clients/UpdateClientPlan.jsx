@@ -4,7 +4,7 @@ import { getPricePlans } from "../../features/actions/pricePlan";
 import PlanCard from "../Settings/Plans/PlanCard";
 import { errorToast } from "../../utils/extra";
 import { useNavigate, useParams } from "react-router-dom";
-import { ClipLoader } from "react-spinners";
+import AppLoader from "../../components/AppLoader";
 import { updateClientPlan } from "../../features/actions/client";
 import { resetClientState } from "../../features/slices/client";
 import { Switch, FormControlLabel, Typography, Box } from "@mui/material";
@@ -67,7 +67,7 @@ const UpdateClientPlan = (props) => {
             className=" px-6 w-fit bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-300"
           >
             {isUpdating ? (
-              <ClipLoader size={20} color="#fff" />
+              <AppLoader size="md" variant="inverse" />
             ) : (
               "Confirm Plan"
             )}

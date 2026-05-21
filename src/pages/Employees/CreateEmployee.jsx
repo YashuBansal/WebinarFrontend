@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -7,35 +7,102 @@ import {
   updateEmployee,
 } from "../../features/actions/employee";
 import { useNavigate, useParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
-  FormHelperText,
-  TextField,
-  Button,
-  InputAdornment,
-  IconButton,
-  Chip,
-  Box,
-} from "@mui/material";
-import { ClipLoader } from "react-spinners";
-import { clearSuccess } from "../../features/slices/employee";
-import { getRoleNameByID } from "../../utils/roles";
-import useAddUserActivity from "../../hooks/useAddUserActivity";
-import FormInput from "../../components/FormInput";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+  Eye,
+  EyeOff,
+  User,
+  Mail,
+  Phone,
+  Clock,
+  Zap,
+  Tag,
+  ShieldCheck,
+  KeyRound,
+  ArrowLeft,
+  Loader2,
+} from "lucide-react";
+import ReactSelect from "react-select";
+import { useTheme } from "../../contexts/ThemeContext";
 import tagsService from "../../services/tagsService";
 import { clearSingleClientData } from "../../features/slices/client";
-import ReactSelect from "react-select";
 import useUserSubscription from "../../hooks/useUserSubscription";
+import useAddUserActivity from "../../hooks/useAddUserActivity";
+import { getRoleNameByID } from "../../utils/roles";
+import { successToast } from "../../utils/extra";
+
+const ModernInput = ({
+  label,
+  name,
+  type = "text",
+  placeholder,
+  register,
+  error,
+  icon: Icon,
+  disabled,
+  validation = {},
+  isDark,
+  autoComplete = "off",
+}) => (
+  <div className="space-y-2">
+    <label
+      className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider transition-colors"
+      style={{ color: isDark ? "#94a3b8" : "#64748b" }}
+    >
+      {Icon && <Icon className="w-3 h-3" />}
+      {label}
+    </label>
+    <div className="relative group">
+      <input
+        {...register(name, validation)}
+        type={type}
+        placeholder={placeholder}
+        disabled={disabled}
+        autoComplete={autoComplete}
+        className="w-full h-11 px-4 rounded-xl text-sm outline-none border transition-all duration-300"
+        style={{
+          backgroundColor: isDark ? "rgba(15, 23, 42, 0.4)" : "#ffffff",
+          borderColor: error
+            ? "#ef4444"
+            : isDark
+              ? "rgba(148, 163, 184, 0.15)"
+              : "rgba(226, 232, 240, 1)",
+          color: isDark ? "#f8fafc" : "#0f172a",
+          boxShadow: isDark ? "none" : "0 2px 4px rgba(0,0,0,0.02)",
+        }}
+        onFocus={(e) => {
+          if (!error) e.target.style.borderColor = "#22B573";
+          e.target.style.boxShadow = "0 0 0 4px rgba(34, 181, 115, 0.1)";
+        }}
+        onBlur={(e) => {
+          if (!error)
+            e.target.style.borderColor = isDark
+              ? "rgba(148, 163, 184, 0.15)"
+              : "rgba(226, 232, 240, 1)";
+          e.target.style.boxShadow = isDark ? "none" : "0 2px 4px rgba(0,0,0,0.02)";
+        }}
+      />
+      {error && (
+        <p className="mt-1 text-[11px] font-medium text-red-500 animate-in fade-in slide-in-from-top-1">
+          {error.message}
+        </p>
+      )}
+    </div>
+  </div>
+);
+
+const roleOptions = [
+  { label: "Sales Team", value: "EMPLOYEE_SALES" },
+  { label: "Reminder Team", value: "EMPLOYEE_REMINDER" },
+];
+
 const CreateEmployee = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { id } = useParams();
   const logUserActivity = useAddUserActivity();
   const [tagData, setTagData] = useState([]);
+  const { isDark } = useTheme();
 
   const {
     register,
@@ -50,6 +117,7 @@ const CreateEmployee = () => {
       tags: [],
     },
   });
+
   const { userData } = useSelector((state) => state.auth);
   const { data: subscription } = useUserSubscription();
   const employeeInactivity = subscription?.plan?.employeeInactivity;
@@ -59,62 +127,25 @@ const CreateEmployee = () => {
 
   const [showPassword, setShowPassword] = useState(false);
 
-  const togglePasswordVisibility = () => {
-    setShowPassword((prev) => !prev);
-  };
-
-  const onSubmit = (data) => {
-    const newData = {
-      ...data,
-      validCallTime: isNaN(Number(data.validCallTime))
-        ? 0
-        : Number(data.validCallTime),
-      dailyContactLimit: isNaN(Number(data.dailyContactLimit))
-        ? 0
-        : Number(data.dailyContactLimit),
-      adminId: userData?._id,
-    };
-    if (id) {
-      dispatch(updateEmployee({ id, data: newData })).then((res) => {
-        if (res.meta.requestStatus === "fulfilled") {
-
-          handleSuccess(newData);
-        }
-      });
-    } else {
-      dispatch(addEmployee(newData)).then((res) => {
-        if (res.meta.requestStatus === "fulfilled") {
-
-
-          handleSuccess(newData);
-        }
-      });
+  useEffect(() => {
+    if (isSuccess) {
+      navigate("/employees");
     }
-  };
-
-useEffect(() => {
-  if(isSuccess){
-    navigate("/employees");
-
-  }
-},[isSuccess, navigate])
-
-  const handleSuccess = (newData) => {
-    dispatch(clearSingleClientData());
-    logUserActivity({
-      action: id ? "edit" : "create",
-      type: "Employee",
-      detailItem: newData?.userName,
-    });
-  };
-
-  // Numeric validation (positive values only)
-  const numericValidation = (value) => {
-    return /^[0-9]+$/.test(value) || "Only positive numbers are allowed";
-  };
+  }, [isSuccess, navigate]);
 
   useEffect(() => {
-    reset({});
+    tagsService.getTags().then((res) => {
+      if (res.success) setTagData(res.data);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (id) {
+      dispatch(getEmployee(id));
+    }
+  }, [id, dispatch]);
+
+  useEffect(() => {
     if (singleEmployeeData && id) {
       const roleName = getRoleNameByID(singleEmployeeData?.role)
         .split(" ")
@@ -130,373 +161,363 @@ useEffect(() => {
         tags: singleEmployeeData?.tags || [],
       });
     }
-  }, [singleEmployeeData]);
+  }, [singleEmployeeData, id, reset]);
 
-  useEffect(() => {
-    if (id) {
-      dispatch(getEmployee(id));
-    }
-    return () => {
-      reset();
+  const onSubmit = (data) => {
+    const newData = {
+      ...data,
+      validCallTime: Number(data.validCallTime) || 0,
+      dailyContactLimit: Number(data.dailyContactLimit) || 0,
+      adminId: userData?._id,
     };
-  }, [id]);
+    if (id) {
+      dispatch(updateEmployee({ id, data: newData })).then((res) => {
+        if (res.meta.requestStatus === "fulfilled") {
+          handleSuccess(newData);
+        }
+      });
+    } else {
+      dispatch(addEmployee(newData)).then((res) => {
+        if (res.meta.requestStatus === "fulfilled") {
+          handleSuccess(newData);
+        }
+      });
+    }
+  };
 
-  useEffect(() => {
-    tagsService.getTags().then((res) => {
-      if (res.success) {
-        setTagData(res.data);
-      }
+  const handleSuccess = (newData) => {
+    dispatch(clearSingleClientData());
+    logUserActivity({
+      action: id ? "edit" : "create",
+      type: "Employee",
+      detailItem: newData?.userName,
     });
-  }, []);
+    successToast(id ? "Employee updated successfully" : "Employee created successfully");
+  };
+
+  const tagSelectStyles = useMemo(
+    () => ({
+      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+      control: (base, state) => ({
+        ...base,
+        minHeight: 44,
+        borderRadius: 12,
+        backgroundColor: isDark ? "rgba(15, 23, 42, 0.4)" : "#ffffff",
+        borderColor: state.isFocused
+          ? "#22B573"
+          : isDark
+            ? "rgba(148, 163, 184, 0.15)"
+            : "rgba(226, 232, 240, 1)",
+        boxShadow: state.isFocused
+          ? "0 0 0 4px rgba(34, 181, 115, 0.1)"
+          : "none",
+        "&:hover": { borderColor: "#22B573" },
+      }),
+      menu: (base) => ({
+        ...base,
+        borderRadius: 12,
+        backgroundColor: isDark ? "#1e293b" : "#ffffff",
+        border: `1px solid ${isDark ? "#334155" : "#e2e8f0"}`,
+        boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+        overflow: "hidden",
+      }),
+      option: (base, state) => ({
+        ...base,
+        cursor: "pointer",
+        backgroundColor: state.isFocused
+          ? isDark
+            ? "rgba(34, 181, 115, 0.1)"
+            : "rgba(34, 181, 115, 0.05)"
+          : "transparent",
+        color: isDark ? "#f8fafc" : "#071028",
+        fontSize: "13px",
+      }),
+      multiValue: (base) => ({
+        ...base,
+        borderRadius: 8,
+        backgroundColor: isDark ? "#334155" : "#f0fdf4",
+        border: `1px solid ${isDark ? "#475569" : "#dcfce7"}`,
+      }),
+      multiValueLabel: (base) => ({
+        ...base,
+        color: isDark ? "#f1f5f9" : "#166534",
+        fontSize: "12px",
+        fontWeight: 600,
+      }),
+      multiValueRemove: (base) => ({
+        ...base,
+        color: isDark ? "#94a3b8" : "#166534",
+        ":hover": { backgroundColor: "#fee2e2", color: "#ef4444" },
+      }),
+    }),
+    [isDark]
+  );
 
   return (
-    <div className="p-10">
-      <div className="mt-10">
-        <div className="flex justify-center"></div>
-        <div className="bg-white rounded-lg shadow-lg sm:rounded-lg sm:max-w-5xl mt-8 mx-auto">
-          <h3 className="text-gray-700 text-base text-center bg-gray-100 font-medium sm:text-xl p-2 rounded-t-lg uppercase">
-            {id ? "Update" : "Add"} Employee
-          </h3>
-          <form
-            className="space-y-6 mx-8 sm:mx-2 p-4 py-6"
-            onSubmit={handleSubmit(onSubmit)}
+    <div className="min-h-full p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto space-y-6 transition-all duration-500">
+      <style>
+        {`
+          input:-webkit-autofill,
+          input:-webkit-autofill:hover, 
+          input:-webkit-autofill:focus, 
+          input:-webkit-autofill:active  {
+            -webkit-box-shadow: 0 0 0 30px ${isDark ? "#1e293b" : "white"} inset !important;
+            -webkit-text-fill-color: ${isDark ? "#f8fafc" : "#0f172a"} !important;
+          }
+        `}
+      </style>
+      {/* Header Section */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="flex items-center gap-4"
+      >
+        <button
+          onClick={() => navigate("/employees")}
+          className="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 transition-all hover:bg-slate-50 dark:hover:bg-slate-800 group shadow-sm"
+        >
+          <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:-translate-x-1 transition-transform" />
+        </button>
+        <div>
+          <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
+            {id ? "Employee Profile" : "New Employee"}
+          </h2>
+          <p className="text-sm text-slate-500 dark:text-slate-400">
+            {id ? "Manage details and credentials" : "Onboard a new team member"}
+          </p>
+        </div>
+      </motion.div>
+
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6" autoComplete="off">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Details Card */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="lg:col-span-2 rounded-3xl border border-slate-200/60 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-6 sm:p-8 shadow-xl shadow-slate-200/20 dark:shadow-none"
           >
-            <div className="sm:grid sm:grid-cols-2 sm:gap-6">
-              {/* User Name */}
-              <div className="w-full">
-                <FormInput
-                  name="userName"
-                  label="User Name"
-                  control={control}
-                  validation={{
-                    required: "User Name is required",
-                  }}
-                />
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600">
+                <User className="w-5 h-5" />
               </div>
-              {/* Email */}
-
-              <div className="w-full">
-                <FormInput
-                  name="email"
-                  label="Email"
-                  control={control}
-                  validation={{ required: "Email is required" }}
-                />
-              </div>
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">Basic Information</h3>
             </div>
 
-            <div className="sm:grid sm:grid-cols-2 sm:gap-6">
-              {/* Valid Call Time (seconds) */}
-              <div className="w-full">
-                {/* <TextField
-                  {...register("", )}
-                  
-                  type="number"
-                  variant="outlined"
-                  fullWidth
-                  error={Boolean(errors.validCallTime)}
-                  helperText={errors.validCallTime?.message}
-                  className="mt-2"
-                  inputProps={{ min: 0 }}
-                /> */}
-                <FormInput
-                  name="validCallTime"
-                  label="Valid Call Time (seconds)"
-                  control={control}
-                  validation={{
-                    required: "Valid Call Time is required",
-                    validate: numericValidation,
-                  }}
-                />
-              </div>
-
-              {/* Daily Contact Limit */}
-              <div className="w-full">
-                <FormInput
-                  name="dailyContactLimit"
-                  label="Daily Contact Limit"
-                  control={control}
-                  validation={{
-                    required: "Daily Contact Limit is required",
-                    validate: numericValidation,
-                  }}
-                />
-              </div>
-            </div>
-
-            <div className="sm:grid sm:grid-cols-2 sm:gap-6">
-              {/* Phone Number */}
-              <div className="w-full">
-                <FormInput
-                  name="phone"
-                  label="Phone Number"
-                  placeholder="+91 1234567890"
-                  control={control}
-                  validation={{
-                    required: "Phone number is required",
-                    pattern: {
-                      value: /^\+\d{1,3}\d{9}$/,
-                      message:
-                        "10 Digit Phone number with Country Code is required, eg: +911234567890",
-                    },
-                  }}
-                />
-              </div>
-
-              {/* <Controller
-                name="tags"
-                control={control}
-                defaultValue={[]}
-                render={({ field }) => (
-                  <FormControl fullWidth>
-                    <InputLabel>Tags</InputLabel>
-                    <Select
-                      multiple
-                      label="Tags"
-                      className="max-h-[54px]"
-                      value={field.value || []}
-                      onChange={(e) => field.onChange(e.target.value)}
-                      renderValue={(selected) => {
-                        const visibleChips = selected.slice(0, 2);
-                        const hiddenCount =
-                          selected.length - visibleChips.length;
-
-                        return (
-                          <Box
-                            sx={{
-                              display: "flex",
-                              flexWrap: "nowrap",
-                              gap: 0.5,
-                              overflow: "hidden",
-                              alignItems: "center",
-                            }}
-                          >
-                            {(Array.isArray(visibleChips)
-                              ? visibleChips
-                              : []
-                            ).map((value) => (
-                              <Chip
-                                key={value}
-                                label={value}
-                                onMouseDown={(e) => e.stopPropagation()}
-                                onDelete={() => {
-                                  const newValue = field.value.filter(
-                                    (val) => val !== value
-                                  );
-                                  field.onChange(newValue);
-                                }}
-                              />
-                            ))}
-                            {hiddenCount > 0 && (
-                              <Chip label={`+${hiddenCount} more`} />
-                            )}
-                          </Box>
-                        );
-                      }}
-                    >
-                      {tagData.map((item) => (
-                        <MenuItem
-                          key={item._id}
-                          value={item.name}
-                          selected={field.value.includes(item.name)}
-                          sx={{
-                            backgroundColor: field.value.includes(item.name)
-                              ? "rgba(0, 0, 0, 0.15)" // darker shade for selected
-                              : "transparent",
-                            "&.Mui-selected": {
-                              backgroundColor: "rgba(0, 0, 0, 0.15)",
-                            },
-                            "&.Mui-selected:hover": {
-                              backgroundColor: "rgba(0, 0, 0, 0.35)",
-                            },
-                          }}
-                        >
-                          {item.name}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
-                )}
-              /> */}
-
-              <Controller
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <ModernInput
+                label="User Name"
+                name="userName"
+                placeholder="Enter username"
+                register={register}
+                error={errors.userName}
+                icon={User}
+                isDark={isDark}
+                validation={{ required: "User Name is required" }}
+              />
+              <ModernInput
+                label="Email Address"
+                name="email"
+                type="email"
+                placeholder="example@domain.com"
+                register={register}
+                error={errors.email}
+                icon={Mail}
+                isDark={isDark}
+                validation={{ required: "Email is required" }}
+              />
+              <ModernInput
+                label="Phone Number"
+                name="phone"
+                placeholder="+91 1234567890"
+                register={register}
+                error={errors.phone}
+                icon={Phone}
+                isDark={isDark}
+                validation={{
+                  required: "Phone number is required",
+                  pattern: {
+                    value: /^\+\d{1,3}\d{9}$/,
+                    message: "Format: +[Code][Number]",
+                  },
+                }}
+              />
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                  <Tag className="w-3 h-3" />
+                  Tags
+                </label>
+                <Controller
                   control={control}
                   name="tags"
                   render={({ field }) => (
                     <ReactSelect
                       isMulti
                       value={tagData
-                        .map((item) => ({
-                          label: item.name,
-                          value: item.name,
-                        }))
-                        .filter((option) =>
-                          field.value?.includes(option.value)
-                        )}
-                      className="w-full"
-                      options={tagData.map((item) => ({
-                        label: item.name,
-                        value: item.name,
-                      }))}
-                      onChange={(selectedOptions) => {
-                        field.onChange(
-                          selectedOptions.map((option) => option.value)
-                        );
-                      }}
-                      isClearable={true}
-                      placeholder="Tags"
-                      menuPlacement="auto"
+                        .map((item) => ({ label: item.name, value: item.name }))
+                        .filter((option) => field.value?.includes(option.value))}
+                      options={tagData.map((item) => ({ label: item.name, value: item.name }))}
+                      onChange={(selected) => field.onChange(selected.map((o) => o.value))}
+                      placeholder="Assign tags..."
+                      styles={tagSelectStyles}
                       menuPortalTarget={document.body}
-                      styles={{
-                        // ensure the dropdown is above other elements
-                        menuPortal: (base) => ({
-                          ...base,
-                          zIndex: 9999,
-                        }),
-                        // increase height & round corners of the select box
-                        control: (base, state) => ({
-                          ...base,
-                          minHeight: "54px", // desired height
-                          borderRadius: "4px", // round corners
-                          boxShadow: state.isFocused
-                            ? "0 0 0 2px #2684FF"
-                            : base.boxShadow,
-                          "&:hover": {
-                            borderColor: "#2684FF",
-                          },
-                        }),
-                        // add some vertical padding inside the value container
-                        valueContainer: (base) => ({
-                          ...base,
-                          paddingTop: "8px",
-                          paddingBottom: "8px",
-                        }),
-                      }}
                     />
                   )}
                 />
+              </div>
             </div>
-            <div className="sm:grid sm:grid-cols-2 sm:gap-6">
+
+            <div className="h-px bg-slate-100 dark:bg-slate-800 my-10" />
+
+            <div className="flex items-center gap-3 mb-8">
+              <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600">
+                <Zap className="w-5 h-5" />
+              </div>
+              <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">Operational Limits</h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <ModernInput
+                label="Valid Call Time (sec)"
+                name="validCallTime"
+                type="number"
+                register={register}
+                error={errors.validCallTime}
+                icon={Clock}
+                isDark={isDark}
+                validation={{ required: "Required", min: 0 }}
+              />
+              <ModernInput
+                label="Daily Contact Limit"
+                name="dailyContactLimit"
+                type="number"
+                register={register}
+                error={errors.dailyContactLimit}
+                icon={ShieldCheck}
+                isDark={isDark}
+                validation={{ required: "Required", min: 0 }}
+              />
               {employeeInactivity && (
-                <FormInput
+                <ModernInput
+                  label="Inactivity Time (sec)"
                   name="inactivityTime"
-                  label="Inactivity Time (Seconds)"
-                  control={control}
                   type="number"
-                  validation={{
-                    required: "Inactivity Time is required",
-                    min: {
-                      value: 1,
-                      message: "Value must be at least 1",
-                    },
-                  }}
+                  register={register}
+                  error={errors.inactivityTime}
+                  icon={Clock}
+                  isDark={isDark}
+                  validation={{ required: "Required", min: 1 }}
                 />
               )}
+            </div>
+          </motion.div>
 
-              {/* Employee Type */}
+          {/* Sidebar Section */}
+          <div className="space-y-6">
+            {/* Account Settings Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="rounded-3xl border border-slate-200/60 dark:border-slate-800 bg-white/70 dark:bg-slate-900/60 backdrop-blur-xl p-6 shadow-lg shadow-slate-200/10 dark:shadow-none"
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600">
+                  <KeyRound className="w-5 h-5" />
+                </div>
+                <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">Account Security</h3>
+              </div>
+
               {!id && (
-                <div className="w-full">
-                  <FormControl
-                    fullWidth
-                    variant="outlined"
-                    error={!!errors.role}
-                  >
-                    <InputLabel>Employee Type</InputLabel>
+                <div className="space-y-4 mb-6">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Employee Type
+                    </label>
                     <Controller
                       control={control}
                       name="role"
-                      rules={{ required: "Role is required" }}
+                      rules={{ required: "Type is required" }}
                       render={({ field }) => (
-                        <Select {...field} label="Employee Type">
-                          <MenuItem value="" disabled>
-                            Choose Employee Type
-                          </MenuItem>
-                          <MenuItem value="EMPLOYEE_SALES">Sales</MenuItem>
-                          <MenuItem value="EMPLOYEE_REMINDER">
-                            Reminder
-                          </MenuItem>
-                        </Select>
+                        <ReactSelect
+                          value={roleOptions.find((o) => o.value === field.value)}
+                          onChange={(option) => field.onChange(option?.value)}
+                          options={roleOptions}
+                          placeholder="Select Role"
+                          styles={tagSelectStyles}
+                          menuPortalTarget={document.body}
+                        />
                       )}
                     />
-                    {errors.role && (
-                      <FormHelperText>{errors.role.message}</FormHelperText>
-                    )}
-                  </FormControl>
+                    {errors.role && <p className="text-[11px] text-red-500">{errors.role.message}</p>}
+                  </div>
                 </div>
               )}
-            </div>
 
-            <div className="sm:grid sm:grid-cols-2 sm:gap-6">
-              {/* Password */}
-              <div className="w-full">
-                <TextField
-                  {...register("password", {
-                    required: id ? false : "Password is required",
-                  })}
-                  label="Password"
-                  type={showPassword ? "text" : "password"}
-                  fullWidth
-                  variant="outlined"
-                  error={!!errors.password}
-                  helperText={errors.password?.message}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={() => togglePasswordVisibility()}>
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
-                  }}
-                />
-              </div>
-
-              {/* Confirm Password */}
-              <div className="w-full">
-                <TextField
-                  {...register("confirmPassword", {
-                    required: id ? false : "Please confirm your password",
-                    validate: (value) =>
-                      value === watch("password") || "Passwords do not match",
-                  })}
+              <div className="space-y-4">
+                <div className="relative">
+                  <ModernInput
+                    label="Password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    register={register}
+                    error={errors.password}
+                    isDark={isDark}
+                    validation={{ required: id ? false : "Password required" }}
+                    autoComplete="new-password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-[34px] p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                  >
+                    {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                <ModernInput
                   label="Confirm Password"
+                  name="confirmPassword"
                   type={showPassword ? "text" : "password"}
-                  fullWidth
-                  error={!!errors.confirmPassword}
-                  helperText={errors.confirmPassword?.message}
-                  InputProps={{
-                    endAdornment: (
-                      <InputAdornment position="end">
-                        <IconButton onClick={() => togglePasswordVisibility()}>
-                          {showPassword ? <VisibilityOff /> : <Visibility />}
-                        </IconButton>
-                      </InputAdornment>
-                    ),
+                  placeholder="••••••••"
+                  register={register}
+                  error={errors.confirmPassword}
+                  isDark={isDark}
+                  validation={{
+                    required: id ? false : "Confirm password",
+                    validate: (v) => v === watch("password") || "Passwords do not match",
                   }}
                 />
               </div>
-            </div>
+            </motion.div>
 
-            <div className="mt-6">
-              <Button
+            {/* Action Card */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="rounded-3xl border border-slate-200/60 dark:border-slate-800 bg-emerald-500/5 dark:bg-emerald-500/10 p-6"
+            >
+              <button
                 type="submit"
-                variant="contained"
-                fullWidth
-                className="btn-grad"
                 disabled={isLoading}
+                className="w-full h-12 flex items-center justify-center rounded-2xl bg-emerald-500 text-white font-bold text-sm shadow-lg shadow-emerald-500/30 hover:bg-emerald-600 active:scale-[0.98] transition-all disabled:opacity-50"
               >
                 {isLoading ? (
-                  <ClipLoader color="#fff" size={20} />
+                  <Loader2 className="w-5 h-5 animate-spin" />
                 ) : id ? (
-                  "Update"
+                  "Update Profile"
                 ) : (
-                  "Create"
+                  "Onboard Employee"
                 )}
-              </Button>
-            </div>
-          </form>
+              </button>
+              <p className="text-[10px] text-center mt-4 text-slate-500 dark:text-slate-400 uppercase tracking-widest font-bold">
+                {id ? "Revision Required" : "New Registration" }
+              </p>
+            </motion.div>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

@@ -35,10 +35,15 @@ const useRoles = () => {
       return "Unknown Role";
     }
 
+    // 1. Try to see if roleId is already a key
+    if (rolesObject[roleId]) {
+      return roleId.replace(/_/g, " ");
+    }
+
     const roleEntries = Object.entries(rolesObject);
     const matchedRole = roleEntries.find(([roleName, id]) => id === roleId);
 
-    return matchedRole ? matchedRole[0].replace("_", " ") : "Unknown Role";
+    return matchedRole ? matchedRole[0].replace(/_/g, " ") : "Unknown Role";
   };
 
   // Check if roleName is either 'EMPLOYEE_SALES' or 'EMPLOYEE_REMINDER'
@@ -48,7 +53,7 @@ const useRoles = () => {
       roleName = getRoleNameByID(role);
     } else roleName = getRoleNameByID(roleId);
     const employeeRoles = ["EMPLOYEE SALES", "EMPLOYEE REMINDER"];
-    return employeeRoles.includes(roleName);
+    return employeeRoles.includes(roleName.toUpperCase());
   };
 
   const isAdmin = (roleId) => {
@@ -57,7 +62,7 @@ const useRoles = () => {
       roleName = getRoleNameByID(role);
     } else roleName = getRoleNameByID(roleId);
     const employeeRoles = ["ADMIN"];
-    return employeeRoles.includes(roleName);
+    return employeeRoles.includes(roleName.toUpperCase());
   };
 
   const isSuperAdmin = (roleId) => {
@@ -66,7 +71,7 @@ const useRoles = () => {
       roleName = getRoleNameByID(role);
     } else roleName = getRoleNameByID(roleId);
     const employeeRoles = ["SUPER ADMIN"];
-    return employeeRoles.includes(roleName);
+    return employeeRoles.includes(roleName.toUpperCase());
   };
 
   // Wrap rolesObject with Proxy to handle method calls and undefined fields gracefully

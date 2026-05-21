@@ -1,12 +1,21 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Typography, useMediaQuery } from "@mui/material";
+import { motion } from "framer-motion";
+import {
+  BookOpen,
+  Code2,
+  Copy,
+  Download,
+  Key,
+  Sparkles,
+  Trash2,
+} from "lucide-react";
 import useRoles from "../../../hooks/useRoles";
+import useMediaQuery from "../../../hooks/useMediaQuery";
 import WebinarDropdown from "../../../components/Webinar/WebinarDropdown";
 import ComponentGuard from "../../../components/AccessControl/ComponentGuard";
 import { errorToast, successToast } from "../../../utils/extra";
 import { attendeeTableColumns } from "../../../utils/columnData";
-import { globalButton } from "../../../utils/style";
 import {
   expireTokenStatus,
   generatePablyToken,
@@ -16,6 +25,8 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { clearOTPGenerated } from "../../../features/slices/auth";
 import ConfirmDeleteModal from "../../../components/ConfirmDeleteModal";
+import HubSubpageShell from "../../../components/Layout/HubSubpageShell";
+import { Button } from "../../../components/ui/button";
 
 // This large constant object remains unchanged.
 const webinarFieldDescriptions = {
@@ -107,30 +118,37 @@ const apiCampaignJSONBody = `{
   ]
 }`;
 
-// A reusable responsive header for each info box to reduce code duplication.
+const sectionShell =
+  "space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-6";
+const sectionTitle =
+  "border-b border-slate-200 pb-3 text-xs font-bold uppercase tracking-widest text-slate-400 dark:border-slate-700 dark:text-slate-500";
+
 const InfoBoxHeader = ({ title, onCopy, copyText }) => (
-  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-    <h2 className="text-lg font-semibold text-gray-800">{title}</h2>
-    {onCopy && (
-      <button
+  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+    <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">{title}</h3>
+    {onCopy ? (
+      <Button
+        type="button"
+        variant="outline"
+        size="sm"
+        className="h-9 gap-2 rounded-xl border-slate-200 font-bold dark:border-slate-600"
         onClick={() => onCopy(copyText)}
-        className={`${globalButton} w-full sm:w-auto`}
       >
+        <Copy className="h-3.5 w-3.5" />
         Copy
-      </button>
-    )}
+      </Button>
+    ) : null}
   </div>
 );
 
 const PabblyToken = () => {
-  const { userData, isSuccess } = useSelector((state) => state.auth);
+  const { userData } = useSelector((state) => state.auth);
   const role = userData?.role;
   const roles = useRoles();
   const dispatch = useDispatch();
 
   const [label, setLabel] = useState("");
   const [pabblyTokenData, setPabblyTokenData] = useState([]);
-  console.log(pabblyTokenData);
   const [secondaryJsonBody, setSecondaryJsonBody] = useState(`{
   "email": "client@example.com", // <CLIENT_EMAIL>
   "planId": "673lllu70werjhg2f6917ef4", // <PLAN_ID>
@@ -234,33 +252,73 @@ const PabblyToken = () => {
   };
 
   return (
-    <div className="p-4 sm:p-6 md:p-10 py-10 sm:py-14 flex flex-col items-center text-gray-800 bg-gray-50 min-h-screen">
-      <div className="max-w-4xl w-full space-y-8">
-        <ComponentGuard allowedRoles={[roles.SUPER_ADMIN]}>
-          <Typography
-            variant="h4"
-            component="h1"
-            className="text-center sm:text-left font-bold text-gray-900"
-          >
-            External API for Creating User (Role: ADMIN)
-          </Typography>
-        </ComponentGuard>
+    <HubSubpageShell maxWidthClass="max-w-6xl">
+      <div className="flex w-full flex-col space-y-8 text-slate-800 dark:text-slate-200">
+        <motion.header
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+          className="flex flex-col gap-4 sm:mb-2"
+        >
+          <div className="flex items-start gap-4">
+            <motion.div
+              aria-hidden
+              className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-500/10 dark:bg-blue-500/15"
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ type: "spring", stiffness: 380, damping: 22, delay: 0.05 }}
+            >
+              <Key className="h-7 w-7 text-blue-500 dark:text-blue-400" />
+            </motion.div>
+            <div className="min-w-0 space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
+                  External API token
+                </h1>
+                <Sparkles className="hidden h-5 w-5 text-amber-400 sm:inline sm:h-6 sm:w-6" aria-hidden />
+              </div>
+              <ComponentGuard allowedRoles={[roles.SUPER_ADMIN]}>
+                <p className="max-w-2xl text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+                  Provision clients, subscriptions, and tokens from your own systems — same REST patterns your
+                  engineers already use.
+                </p>
+              </ComponentGuard>
+              <ComponentGuard allowedRoles={[roles.ADMIN]}>
+                <p className="max-w-2xl text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+                  Pull attendees, create leads, and wire campaigns with scoped tokens. Pick a webinar where
+                  relevant.
+                </p>
+              </ComponentGuard>
+            </div>
+          </div>
+        </motion.header>
+
         <ComponentGuard allowedRoles={[roles.ADMIN]}>
-          <Typography
-            variant="h4"
-            component="h1"
-            className="text-center sm:text-left font-bold text-gray-900"
+          <motion.div
+            initial={{ opacity: 0, y: 8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.35 }}
+            className="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-slate-600 dark:bg-slate-900/50 sm:rounded-3xl sm:p-5"
           >
-            External API Documentation
-          </Typography>
-
-          <WebinarDropdown />
+            <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+              <BookOpen className="h-4 w-4 text-blue-500" />
+              Context
+            </div>
+            <WebinarDropdown />
+          </motion.div>
         </ComponentGuard>
 
-        {/* Token Management Section - Combined */}
-        <div className="bg-white shadow-md rounded-lg p-4 sm:p-6 space-y-6">
-          <h2 className="text-xl font-semibold text-gray-800 border-b pb-3">
-            API Token Management
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.05 }}
+          className={sectionShell}
+        >
+          <h2 className={sectionTitle}>
+            <span className="inline-flex items-center gap-2">
+              <Code2 className="h-4 w-4 text-blue-500" />
+              API token management
+            </span>
           </h2>
           
           <div>
@@ -271,51 +329,47 @@ const PabblyToken = () => {
             />
           </div>
 
-          <div className="border-t pt-6">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              Generate New API Token
+          <div className="border-t border-slate-200 pt-6 dark:border-slate-700">
+            <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+              Generate new token
             </h3>
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-              {/* === NEW: Label Input Field === */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+            <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-end">
+              <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2">
                 <div className="w-full">
                   <input
                     type="text"
                     value={label}
                     onChange={(e) => setLabel(e.target.value)}
-                    placeholder="Enter a label  "
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Label (e.g. Zapier production)"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-900 outline-none ring-blue-500/30 placeholder:text-slate-400 focus:ring-2 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                     aria-label="API Token Label"
                   />
                 </div>
-
-                {/* === Existing: Date Picker === */}
-                <div className="w-full grid">
+                <div className="grid w-full">
                   <DatePicker
                     selected={expiryDate}
                     onChange={(date) => setExpiryDate(date)}
                     isClearable
-                    placeholderText="Select expiry date (optional)"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholderText="Expiry (optional)"
+                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-900 outline-none ring-blue-500/30 focus:ring-2 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
                   />
                 </div>
               </div>
-              <button
+              <Button
+                type="button"
+                className="h-10 shrink-0 rounded-xl bg-blue-500 px-5 font-bold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-600 dark:shadow-blue-900/40"
                 onClick={handleGenerateToken}
-                className={`${globalButton} w-full sm:w-auto`}
               >
-                Generate Token
-              </button>
+                Generate token
+              </Button>
             </div>
           </div>
-        </div>
+        </motion.div>
 
         <ComponentGuard allowedRoles={[roles.SUPER_ADMIN]}>
           {/* Clients API Endpoints - Grouped */}
-          <div className="bg-white shadow-md rounded-lg p-4 sm:p-6 space-y-6">
-            <h2 className="text-xl font-semibold text-gray-800 border-b pb-3">
-              Fetch Clients API
-            </h2>
+          <div className={sectionShell}>
+            <h2 className={sectionTitle}>Fetch clients API</h2>
             
             <div className="space-y-4">
 
@@ -325,15 +379,13 @@ const PabblyToken = () => {
                   onCopy={handleCopy}
                   copyText={`${apiUrl}/users/clients?page=1&limit=1000`}
                 />
-                <p className="text-gray-700 text-sm break-words">{`${apiUrl}/users/clients?page=1&limit=1000`}</p>
+                <p className="break-words rounded-xl border border-slate-100 bg-slate-50/80 p-3 font-mono text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">{`${apiUrl}/users/clients?page=1&limit=1000`}</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-white shadow-md rounded-lg p-4 sm:p-6 space-y-6">
-            <h2 className="text-xl font-semibold text-gray-800 border-b pb-3">
-              Client Creation API
-            </h2>
+          <div className={sectionShell}>
+            <h2 className={sectionTitle}>Client creation API</h2>
             
             <div className="space-y-4">
               <div>
@@ -342,31 +394,38 @@ const PabblyToken = () => {
                   onCopy={handleCopy}
                   copyText={authClientAPIEndpoint}
                 />
-                <p className="text-gray-700 text-sm break-words mb-4">
+                <p className="mb-4 break-words rounded-xl border border-slate-100 bg-slate-50/80 p-3 font-mono text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
                   {authClientAPIEndpoint}
                 </p>
 
-                <div className="border-t pt-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                    <h3 className="text-lg font-semibold text-gray-800">
-                      JSON Body:
+                <div className="border-t border-slate-200 pt-4 dark:border-slate-700">
+                  <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                    <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                      JSON body
                     </h3>
-                    <div className="flex gap-2 w-full sm:w-auto">
-                      <button
+                    <div className="flex w-full gap-2 sm:w-auto">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        className="h-9 flex-1 gap-2 rounded-xl font-bold sm:flex-initial"
                         onClick={() => handleDownload(superAdminJsonBody)}
-                        className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors"
                       >
+                        <Download className="h-3.5 w-3.5" />
                         Download
-                      </button>
-                      <button
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="h-9 flex-1 gap-2 rounded-xl bg-blue-500 font-bold text-white hover:bg-blue-600 sm:flex-initial"
                         onClick={() => handleCopy(superAdminJsonBody)}
-                        className={`${globalButton} flex-1`}
                       >
+                        <Copy className="h-3.5 w-3.5" />
                         Copy
-                      </button>
+                      </Button>
                     </div>
                   </div>
-                  <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-auto">
+                  <pre className="overflow-auto rounded-2xl border border-slate-700 bg-slate-950 p-4 font-mono text-xs leading-relaxed text-emerald-100">
                     {superAdminJsonBody}
                   </pre>
                 </div>
@@ -375,10 +434,8 @@ const PabblyToken = () => {
           </div>
 
           {/* Update Client Subscription - Endpoint + JSON Body Combined */}
-          <div className="bg-white shadow-md rounded-lg p-4 sm:p-6 space-y-6">
-            <h2 className="text-xl font-semibold text-gray-800 border-b pb-3">
-              Update Client Subscription Plan
-            </h2>
+          <div className={sectionShell}>
+            <h2 className={sectionTitle}>Update client subscription</h2>
             
             <div>
               <InfoBoxHeader
@@ -386,30 +443,37 @@ const PabblyToken = () => {
                 onCopy={handleCopy}
                 copyText={`${apiUrl}/subscription/update`}
               />
-              <p className="text-gray-700 text-sm break-words mb-4">{`${apiUrl}/subscription/update`}</p>
+              <p className="mb-4 break-words rounded-xl border border-slate-100 bg-slate-50/80 p-3 font-mono text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">{`${apiUrl}/subscription/update`}</p>
             </div>
 
-            <div className="border-t pt-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  JSON Body:
+            <div className="border-t border-slate-200 pt-4 dark:border-slate-700">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                  JSON body
                 </h3>
-                <div className="flex gap-2 w-full sm:w-auto">
-                  <button
+                <div className="flex w-full gap-2 sm:w-auto">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9 flex-1 gap-2 rounded-xl font-bold sm:flex-initial"
                     onClick={() => handleDownload(secondaryJsonBody)}
-                    className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors"
                   >
+                    <Download className="h-3.5 w-3.5" />
                     Download
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="h-9 flex-1 gap-2 rounded-xl bg-blue-500 font-bold text-white hover:bg-blue-600 sm:flex-initial"
                     onClick={() => handleCopy(secondaryJsonBody)}
-                    className={`${globalButton} flex-1`}
                   >
+                    <Copy className="h-3.5 w-3.5" />
                     Copy
-                  </button>
+                  </Button>
                 </div>
               </div>
-              <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-auto">
+              <pre className="overflow-auto rounded-2xl border border-slate-700 bg-slate-950 p-4 font-mono text-xs leading-relaxed text-emerald-100">
                 {secondaryJsonBody}
               </pre>
             </div>
@@ -418,10 +482,8 @@ const PabblyToken = () => {
 
         <ComponentGuard allowedRoles={[roles.ADMIN]}>
           {/* Webinar Attendees APIs - Grouped */}
-          <div className="bg-white shadow-md rounded-lg p-4 sm:p-6 space-y-6">
-            <h2 className="text-xl font-semibold text-gray-800 border-b pb-3">
-              Webinar Attendees APIs
-            </h2>
+          <div className={sectionShell}>
+            <h2 className={sectionTitle}>Webinar attendees APIs</h2>
             
             <div className="space-y-6">
               <div>
@@ -430,20 +492,21 @@ const PabblyToken = () => {
                   onCopy={handleCopy}
                   copyText={salesAttendeesAPIEndpoint}
                 />
-                <p className="text-gray-700 text-sm mb-4 break-words">
+                <p className="mb-4 break-words rounded-xl border border-slate-100 bg-slate-50/80 p-3 font-mono text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
                   {salesAttendeesAPIEndpoint}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {attendeeTableColumns.map((col) => (
                     <button
                       key={col.key}
+                      type="button"
                       onClick={() =>
                         toggleChip(col.key, salesSelectedFields, "sales")
                       }
-                      className={`px-3 py-1 rounded-full text-sm border transition-all ${
+                      className={`rounded-full border px-3 py-1 text-xs font-bold transition-all ${
                         salesSelectedFields.includes(col.key)
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-gray-100 text-gray-800 border-gray-300"
+                          ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-500/25"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:bg-blue-50/80 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300"
                       }`}
                     >
                       {col.header}
@@ -452,24 +515,25 @@ const PabblyToken = () => {
                 </div>
               </div>
 
-              <div className="border-t pt-6">
+              <div className="border-t border-slate-200 pt-6 dark:border-slate-700">
                 <InfoBoxHeader
                   title="Reminder Attendees API Endpoint (Method: GET)"
                   onCopy={handleCopy}
                   copyText={reminderAttendeesAPIEndpoint}
                 />
-                <p className="text-gray-700 text-sm mb-4 break-words">
+                <p className="mb-4 break-words rounded-xl border border-slate-100 bg-slate-50/80 p-3 font-mono text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
                   {reminderAttendeesAPIEndpoint}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {attendeeTableColumns.map((col) => (
                     <button
                       key={col.key}
+                      type="button"
                       onClick={() => toggleChip(col.key, reminderSelectedFields)}
-                      className={`px-3 py-1 rounded-full text-sm border transition-all ${
+                      className={`rounded-full border px-3 py-1 text-xs font-bold transition-all ${
                         reminderSelectedFields.includes(col.key)
-                          ? "bg-blue-600 text-white border-blue-600"
-                          : "bg-gray-100 text-gray-800 border-gray-300"
+                          ? "border-blue-600 bg-blue-600 text-white shadow-md shadow-blue-500/25"
+                          : "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:bg-blue-50/80 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300"
                       }`}
                     >
                       {col.header}
@@ -481,50 +545,55 @@ const PabblyToken = () => {
           </div>
 
           {/* Webinar Lead Creation - Endpoint + JSON Body + Field Descriptions Combined */}
-          <div className="bg-white shadow-md rounded-lg p-4 sm:p-6 space-y-6">
-            <h2 className="text-xl font-semibold text-gray-800 border-b pb-3">
-              Webinar Lead Creation
-            </h2>
-            
+          <div className={sectionShell}>
+            <h2 className={sectionTitle}>Webinar lead creation</h2>
+
             <div>
               <InfoBoxHeader
                 title="Endpoint ( Method: POST )"
                 onCopy={handleCopy}
                 copyText={preWebinarAPIEndpoint}
               />
-              <p className="text-gray-700 text-sm break-words mb-4">
+              <p className="mb-4 break-words rounded-xl border border-slate-100 bg-slate-50/80 p-3 font-mono text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
                 {preWebinarAPIEndpoint}
               </p>
             </div>
 
-            <div className="border-t pt-4">
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  JSON Body:
+            <div className="border-t border-slate-200 pt-4 dark:border-slate-700">
+              <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                  JSON body
                 </h3>
-                <div className="flex gap-2 w-full sm:w-auto">
-                  <button
+                <div className="flex w-full gap-2 sm:w-auto">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    className="h-9 flex-1 gap-2 rounded-xl font-bold sm:flex-initial"
                     onClick={() => handleDownload(adminJsonBody)}
-                    className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors"
                   >
+                    <Download className="h-3.5 w-3.5" />
                     Download
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="h-9 flex-1 gap-2 rounded-xl bg-blue-500 font-bold text-white hover:bg-blue-600 sm:flex-initial"
                     onClick={() => handleCopy(adminJsonBody)}
-                    className={`${globalButton} flex-1`}
                   >
+                    <Copy className="h-3.5 w-3.5" />
                     Copy
-                  </button>
+                  </Button>
                 </div>
               </div>
-              <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-auto">
+              <pre className="overflow-auto rounded-2xl border border-slate-700 bg-slate-950 p-4 font-mono text-xs leading-relaxed text-emerald-100">
                 {adminJsonBody}
               </pre>
             </div>
 
-            <div className="border-t pt-4">
-              <h3 className="text-lg font-semibold mb-4 text-gray-800">
-                Field Descriptions:
+            <div className="border-t border-slate-200 pt-4 dark:border-slate-700">
+              <h3 className="mb-4 text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                Field descriptions
               </h3>
               <div className="space-y-3">
                 {Object.entries(webinarFieldDescriptions).map(
@@ -533,19 +602,19 @@ const PabblyToken = () => {
                       <p
                         className={`font-mono ${
                           key === "webinar" || key === "attendee"
-                            ? "text-red-600"
-                            : "text-blue-600 ps-4 sm:ps-10"
+                            ? "text-red-600 dark:text-red-400"
+                            : "ps-4 text-blue-600 dark:text-blue-400 sm:ps-10"
                         }`}
                       >{`${key}:`}</p>
                       <p
-                        className={`text-gray-600 ${
+                        className={`text-slate-600 dark:text-slate-400 ${
                           key === "webinar" || key === "attendee"
                             ? ""
                             : "ps-4 sm:ps-10"
                         }`}
                       >
                         {description}
-                        <span className="text-neutral-900 font-semibold ml-2">
+                        <span className="ml-2 font-semibold text-slate-900 dark:text-slate-100">
                           {required ? "(Required)" : "(Optional)"}
                         </span>
                       </p>
@@ -558,80 +627,58 @@ const PabblyToken = () => {
         </ComponentGuard>
 
         {/* API Campaign Execution - Endpoint + JSON Body Combined */}
-        <div className="bg-white shadow-md rounded-lg p-4 sm:p-6 space-y-6">
-          <h2 className="text-xl font-semibold text-gray-800 border-b pb-3">
-            API Campaign Execution
-          </h2>
-          
+        <div className={sectionShell}>
+          <h2 className={sectionTitle}>API campaign execution</h2>
+
           <div>
             <InfoBoxHeader
               title="Endpoint ( Method: POST )"
               onCopy={handleCopy}
               copyText={apiCampaignAPIEndpoint}
             />
-            <p className="text-gray-700 text-sm break-words mb-4">
+            <p className="mb-4 break-words rounded-xl border border-slate-100 bg-slate-50/80 p-3 font-mono text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-900/50 dark:text-slate-300">
               {apiCampaignAPIEndpoint}
             </p>
           </div>
 
-          <div className="border-t pt-4">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-              <h3 className="text-lg font-semibold text-gray-800">JSON Body:</h3>
-              <div className="flex gap-2 w-full sm:w-auto">
-                <button
+          <div className="border-t border-slate-200 pt-4 dark:border-slate-700">
+            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
+                JSON body
+              </h3>
+              <div className="flex w-full gap-2 sm:w-auto">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-9 flex-1 gap-2 rounded-xl font-bold sm:flex-initial"
                   onClick={() => handleDownload(apiCampaignJSONBody)}
-                  className="flex-1 bg-gray-200 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-300 transition-colors"
                 >
+                  <Download className="h-3.5 w-3.5" />
                   Download
-                </button>
-                <button
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  className="h-9 flex-1 gap-2 rounded-xl bg-blue-500 font-bold text-white hover:bg-blue-600 sm:flex-initial"
                   onClick={() => handleCopy(apiCampaignJSONBody)}
-                  className={`${globalButton} flex-1`}
                 >
+                  <Copy className="h-3.5 w-3.5" />
                   Copy
-                </button>
+                </Button>
               </div>
             </div>
-            <pre className="bg-gray-100 p-4 rounded-lg text-sm text-gray-700 overflow-auto">
+            <pre className="overflow-auto rounded-2xl border border-slate-700 bg-slate-950 p-4 font-mono text-xs leading-relaxed text-emerald-100">
               {apiCampaignJSONBody}
             </pre>
           </div>
         </div>
       </div>
-    </div>
+    </HubSubpageShell>
   );
 };
 
 export default PabblyToken;
-
-// --- MOCK ICONS (Replace with your actual icon imports) ---
-const CopyIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    fill="currentColor"
-    viewBox="0 0 16 16"
-  >
-    <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z" />
-    <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z" />
-  </svg>
-);
-const DeleteIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="16"
-    height="16"
-    fill="currentColor"
-    viewBox="0 0 16 16"
-  >
-    <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
-    <path
-      fillRule="evenodd"
-      d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z"
-    />
-  </svg>
-);
 
 // The simple, responsive component you asked for.
 const TokenList = ({ pabblyTokenData, onCopy, onDelete }) => {
@@ -651,9 +698,17 @@ const TokenList = ({ pabblyTokenData, onCopy, onDelete }) => {
   // Handle the case where there's no data
   if (!pabblyTokenData || pabblyTokenData.length === 0) {
     return (
-      <div className="text-center py-10 border-2 border-dashed rounded-lg">
-        <p className="text-gray-500">No API tokens found.</p>
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 py-14 text-center dark:border-slate-600 dark:bg-slate-900/40"
+      >
+        <Key className="mb-2 h-10 w-10 text-slate-300 dark:text-slate-600" />
+        <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">No API tokens yet</p>
+        <p className="mt-1 max-w-xs px-4 text-xs font-medium text-slate-500 dark:text-slate-400">
+          Generate a labelled token below — it will appear here with copy and expiry.
+        </p>
+      </motion.div>
     );
   }
 
@@ -661,7 +716,7 @@ const TokenList = ({ pabblyTokenData, onCopy, onDelete }) => {
   if (isSmallScreen) {
     return (
       <div className="space-y-4">
-        {pabblyTokenData.map((token) => {
+        {pabblyTokenData.map((token, i) => {
           const isExpired =
             (token.tokenExpiry && new Date(token.tokenExpiry) < new Date()) ||
             token.isExpired;
@@ -671,49 +726,57 @@ const TokenList = ({ pabblyTokenData, onCopy, onDelete }) => {
             : "Never";
 
           return (
-            <div
+            <motion.div
               key={token._id}
-              className="rounded-lg border bg-white p-4 shadow-sm"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: Math.min(i * 0.06, 0.3) }}
+              className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-600 dark:bg-slate-900/80"
             >
-              <div className="flex items-start justify-between gap-4">
-                <h3 className="font-semibold text-gray-900">{token.label}</h3>
+              <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-4 py-4 dark:border-slate-700">
+                <h3 className="font-bold text-slate-900 dark:text-slate-50">{token.label}</h3>
                 <span
-                  className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                  className={`whitespace-nowrap rounded-full px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
                     isExpired
-                      ? "bg-red-100 text-red-800"
-                      : "bg-green-100 text-green-800"
+                      ? "bg-red-100 text-red-800 dark:bg-red-950/50 dark:text-red-200"
+                      : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
                   }`}
                 >
                   {statusText}
                 </span>
               </div>
-              <div className="mt-3 flex items-center justify-between gap-2 rounded-md bg-gray-100 p-2">
-                <pre className="truncate text-sm text-gray-700">
+              <div className="mx-4 mt-3 flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-slate-950/90 p-2 dark:border-slate-600">
+                <pre className="truncate font-mono text-xs text-emerald-100/90">
                   {token.token}
                 </pre>
-                <button
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 shrink-0 rounded-lg text-emerald-200 hover:bg-white/10 hover:text-white"
                   onClick={() => onCopy(token.token)}
-                  className="flex-shrink-0 rounded-md p-1.5 transition-colors hover:bg-gray-200"
                   aria-label="Copy token"
                 >
-                  <CopyIcon />
-                </button>
+                  <Copy className="h-4 w-4" />
+                </Button>
               </div>
-              <div className="mt-4 flex items-center justify-between border-t border-gray-100 pt-3">
-                <p className="text-xs text-gray-500">
-                  Expires:{" "}
-                  <span className="font-medium text-gray-700">
-                    {expiryText}
-                  </span>
+              <div className="mt-4 flex items-center justify-between border-t border-slate-100 px-4 pb-4 pt-3 dark:border-slate-700">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  Expires{" "}
+                  <span className="text-slate-800 dark:text-slate-200">{expiryText}</span>
                 </p>
-                <button
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="h-8 gap-1.5 rounded-xl border-red-200 font-bold text-red-600 hover:bg-red-50 dark:border-red-900/50 dark:text-red-400 dark:hover:bg-red-950/40"
                   onClick={() => setDeteleModal(token)}
-                  className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50"
                 >
-                  <DeleteIcon /> Delete
-                </button>
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Revoke
+                </Button>
               </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
@@ -722,76 +785,97 @@ const TokenList = ({ pabblyTokenData, onCopy, onDelete }) => {
 
   // --- Desktop View: A table ---
   return (
-    <div className="overflow-x-auto border rounded-lg">
-      <table className="min-w-full text-sm">
-        <thead className="bg-gray-50 text-left">
-          <tr>
-            <th className="px-4 py-3 font-medium text-gray-600">Label</th>
-            <th className="px-4 py-3 font-medium text-gray-600">Token</th>
-            <th className="px-4 py-3 font-medium text-gray-600">Status</th>
-            <th className="px-4 py-3 font-medium text-gray-600">Expires</th>
-            <th className="px-4 py-3 font-medium text-gray-600 text-center">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-200">
-          {pabblyTokenData.map((token) => {
-            const isExpired =
-              (token.tokenExpiry && new Date(token.tokenExpiry) < new Date()) ||
-              token.isExpired;
-            return (
-              <tr
-                key={token._id}
-                className="hover:bg-gray-50 whitespace-nowrap"
-              >
-                <td className="px-4 py-3 font-medium text-gray-800">
-                  {token.label}
-                </td>
-                <td className="px-4 py-3 text-gray-600 font-mono text-xs">
-                  ...{token.token.substring(token.token.length - 30)}
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`rounded-full px-2 py-0.5 text-xs font-semibold ${
-                      isExpired
-                        ? "bg-red-100 text-red-800"
-                        : "bg-green-100 text-green-800"
-                    }`}
-                  >
-                    {isExpired ? "Expired" : "Active"}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-gray-600">
-                  {token.tokenExpiry
-                    ? new Date(token.tokenExpiry).toLocaleDateString()
-                    : "Never"}
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <div className="flex justify-center items-center gap-2">
-                    {!isExpired && (
-                      <>
-                        <button
-                          onClick={() => onCopy(token.token)}
-                          className="p-1.5 rounded-full hover:bg-gray-200"
-                        >
-                          <CopyIcon />
-                        </button>
-                        <button
-                          onClick={() => setDeteleModal(token)}
-                          className="p-1.5 rounded-full hover:bg-red-100 text-red-600"
-                        >
-                          <DeleteIcon />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+    <div className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-600">
+      <div className="overflow-x-auto">
+        <table className="min-w-full text-sm">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-50/90 text-left dark:border-slate-700 dark:bg-slate-900/80">
+              <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Label
+              </th>
+              <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Token
+              </th>
+              <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Status
+              </th>
+              <th className="px-4 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Expires
+              </th>
+              <th className="px-4 py-3 text-center text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-700/80">
+            {pabblyTokenData.map((token, index) => {
+              const isExpired =
+                (token.tokenExpiry && new Date(token.tokenExpiry) < new Date()) ||
+                token.isExpired;
+              return (
+                <motion.tr
+                  key={token._id}
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.25, delay: Math.min(index * 0.04, 0.35) }}
+                  className="whitespace-nowrap bg-white transition-colors hover:bg-slate-50/90 dark:bg-slate-800/20 dark:hover:bg-slate-800/60"
+                >
+                  <td className="px-4 py-3 font-semibold text-slate-900 dark:text-slate-100">
+                    {token.label}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-xs text-slate-600 dark:text-slate-300">
+                    ...{token.token.substring(token.token.length - 30)}
+                  </td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide ${
+                        isExpired
+                          ? "bg-red-100 text-red-800 dark:bg-red-950/50 dark:text-red-200"
+                          : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-200"
+                      }`}
+                    >
+                      {isExpired ? "Expired" : "Active"}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                    {token.tokenExpiry
+                      ? new Date(token.tokenExpiry).toLocaleDateString()
+                      : "Never"}
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <div className="flex items-center justify-center gap-1">
+                      {!isExpired && (
+                        <>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 rounded-xl text-blue-600 hover:bg-blue-50 dark:text-blue-400 dark:hover:bg-blue-950/40"
+                            onClick={() => onCopy(token.token)}
+                            aria-label="Copy token"
+                          >
+                            <Copy className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-9 w-9 rounded-xl text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-950/40"
+                            onClick={() => setDeteleModal(token)}
+                            aria-label="Revoke token"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </td>
+                </motion.tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
 
       {deleteModal && (
         <ConfirmDeleteModal

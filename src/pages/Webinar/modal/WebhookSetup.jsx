@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { ArrowBack, ContentCopy, CheckCircle } from "@mui/icons-material";
 import tagsService from "../../../services/tagsService";
 import { copyToClipboard, errorToast, successToast } from "../../../utils/extra";
-import LoadingSpinner from "./components/LoadingSpinner";
+import AppLoader from "../../../components/AppLoader";
 
 // Helper function to flatten nested objects
 const flattenObject = (obj, prefix = "") => {
@@ -266,7 +266,7 @@ const WebhookSetup = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner size="large" />
+        <AppLoader size="lg" />
       </div>
     );
   }

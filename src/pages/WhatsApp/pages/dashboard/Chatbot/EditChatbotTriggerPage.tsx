@@ -1,0 +1,314 @@
+import { useState, useEffect } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  ArrowLeft,
+  Loader2,
+  Save,
+  Sparkles,
+  Bot,
+  MessageSquare,
+  Hash,
+  Settings2,
+  Zap,
+  Info,
+  AlertCircle
+} from "lucide-react";
+import { useUpdateChatbotTrigger, useChatbotTriggers } from "@/hooks/useChatbotTriggers";
+import { useProjectContext } from "@/context/ProjectContext";
+import type { ResponseType } from "@/api/modules/chatbotTriggers";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
+
+export default function EditChatbotTriggerPage() {
+  const { projectId, triggerId } = useParams<{ projectId: string; triggerId: string }>();
+  const { selectedProject } = useProjectContext();
+  const navigate = useNavigate();
+  const pid = selectedProject?._id ?? projectId ?? "";
+
+  const { data: triggers = [], isLoading } = useChatbotTriggers(pid);
+  const trigger = triggers.find((t) => t._id === triggerId);
+
+  const [keyword, setKeyword] = useState("");
+  const [responseType, setResponseType] = useState<ResponseType>("text");
+  const [responseValue, setResponseValue] = useState("");
+  const [enabled, setEnabled] = useState(true);
+
+  useEffect(() => {
+    if (trigger) {
+      setKeyword(trigger.keyword);
+      setResponseType(trigger.responseType);
+      setResponseValue(trigger.responseValue ?? "");
+      setEnabled(trigger.enabled ?? true);
+    }
+  }, [trigger]);
+
+  const { mutate: updateTrigger, isPending: saving } = useUpdateChatbotTrigger();
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!pid || !triggerId || !keyword.trim() || !responseValue.trim()) return;
+    updateTrigger(
+      {
+        triggerId,
+        projectId: pid,
+        keyword: keyword.trim(),
+        responseType,
+        responseValue: responseValue.trim(),
+        enabled,
+      },
+      {
+        onSuccess: () => navigate(`/whatsapp/dashboard/${projectId}/chatbot`),
+      }
+    );
+  };
+
+  if (isLoading || (!trigger && triggers.length > 0)) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+        <div className="h-12 w-12 rounded-2xl bg-green-50 dark:bg-green-500/10 flex items-center justify-center">
+          <div className="h-6 w-6 border-2 border-green-600 border-t-transparent rounded-full animate-spin" />
+        </div>
+        <p className="text-slate-400 text-sm font-medium animate-pulse">Loading trigger details...</p>
+      </div>
+    );
+  }
+
+  if (!trigger && !isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] p-6 text-center">
+        <div className="h-16 w-16 rounded-2xl bg-red-50 dark:bg-red-500/10 flex items-center justify-center mb-4">
+          <AlertCircle className="h-8 w-8 text-red-500" />
+        </div>
+        <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Trigger Not Found</h3>
+        <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xs mb-6">
+          The trigger you are looking for might have been deleted or doesn't exist.
+        </p>
+        <Link to={`/whatsapp/dashboard/${projectId}/chatbot`}>
+          <Button variant="outline" className="rounded-xl font-bold">
+            Back to Chatbot
+          </Button>
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
+      {/* Premium Header */}
+      <motion.div
+        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5 bg-white dark:bg-slate-800/50 shadow-sm dark:border-slate-700/50"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        
+      >
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <Link to={`/whatsapp/dashboard/${projectId}/chatbot`}>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-xl border border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all text-slate-500 dark:text-slate-400"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+            </Link>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-green-600 dark:text-green-400 font-bold text-xs uppercase tracking-widest mb-0.5">
+                <Bot className="h-3.5 w-3.5" />
+                Edit Automation
+              </div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-2xl">
+                Edit Trigger
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                Modify your keyword and <span className="text-slate-900 dark:text-white font-bold">Auto Response</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={handleSubmit}
+              disabled={saving}
+              className="h-11 px-8 rounded-xl flex items-center gap-2 bg-[#22B573] hover:bg-[#1da467] text-white font-bold text-sm shadow-lg shadow-green-600/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
+            >
+              {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </div>
+      </motion.div>
+
+      <main className="container mx-auto max-w-4xl space-y-6 pb-12">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="group relative bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-2xl p-6 sm:p-8 transition-all duration-300 overflow-hidden"
+        >
+          <div className="absolute top-0 right-0 -mr-24 -mt-24 h-64 w-64 rounded-full bg-green-500/5 blur-[80px] opacity-0 group-hover:opacity-100 transition-opacity" />
+
+          <div className="relative z-10">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Keyword Section */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-8 w-8 rounded-lg bg-green-50 dark:bg-green-500/10 flex items-center justify-center text-green-600 dark:text-green-400">
+                    <Hash className="h-4 w-4" />
+                  </div>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white">Trigger Keyword</h2>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="keyword" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                    Keyword (Case-insensitive)
+                  </Label>
+                  <Input
+                    id="keyword"
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    placeholder="e.g. Price, Help, Menu"
+                    className="h-12 rounded-xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 focus:bg-white focus:ring-green-500/20 transition-all font-medium"
+                    required
+                  />
+                  <p className="text-[11px] text-slate-400 font-medium ml-1">
+                    Updating this will change what keyword triggers this response.
+                  </p>
+                </div>
+              </div>
+
+              <hr className="border-slate-100 dark:border-slate-700/50" />
+
+              {/* Response Section */}
+              <div className="space-y-6">
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="h-8 w-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                    <MessageSquare className="h-4 w-4" />
+                  </div>
+                  <h2 className="text-lg font-black text-slate-900 dark:text-white">Response Action</h2>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="space-y-2">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                      Response Type
+                    </Label>
+                    <Select
+                      value={responseType}
+                      onValueChange={(v) => setResponseType(v as ResponseType)}
+                    >
+                      <SelectTrigger className="h-12 rounded-xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 focus:ring-green-500/20 transition-all font-medium">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl border-slate-200 dark:border-slate-700/50 shadow-xl">
+                        <SelectItem value="text" className="font-medium">Text Message</SelectItem>
+                        <SelectItem value="link" className="font-medium">Web Link / URL</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="md:col-span-2 space-y-2">
+                    <Label htmlFor="responseValue" className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                      {responseType === "link" ? "Target URL" : "Message Content"}
+                    </Label>
+                    {responseType === "link" ? (
+                      <Input
+                        id="responseValue"
+                        type="url"
+                        value={responseValue}
+                        onChange={(e) => setResponseValue(e.target.value)}
+                        placeholder="https://yourlink.com"
+                        className="h-12 rounded-xl border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 focus:bg-white focus:ring-green-500/20 transition-all font-medium"
+                        required
+                      />
+                    ) : (
+                      <textarea
+                        id="responseValue"
+                        className="flex min-h-[120px] w-full rounded-xl border border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 px-4 py-3 text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-400 transition-all custom-scrollbar resize-none"
+                        value={responseValue}
+                        onChange={(e) => setResponseValue(e.target.value)}
+                        placeholder="Type the message to send automatically..."
+                        required
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              <hr className="border-slate-100 dark:border-slate-700/50" />
+
+              {/* Status Section */}
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex items-center gap-4">
+                  <div className="h-8 w-8 rounded-lg bg-orange-50 flex items-center justify-center text-orange-600">
+                    <Settings2 className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold text-slate-900 dark:text-white">Automation Status</h2>
+                    <p className="text-[11px] text-slate-400 font-medium">Control whether this trigger is active</p>
+                  </div>
+                </div>
+
+                <div
+                  className={`flex items-center gap-3 px-4 py-2 rounded-xl border transition-all cursor-pointer ${enabled ? 'bg-green-50 dark:bg-green-500/10 border-green-200 text-green-700 dark:text-green-400 shadow-sm' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-700/50 text-slate-400'}`}
+                  onClick={() => setEnabled(!enabled)}
+                >
+                  <Checkbox
+                    id="enabled"
+                    checked={enabled}
+                    onCheckedChange={(c) => setEnabled(c === true)}
+                    className="border-green-500 data-[state=checked]:bg-green-600"
+                  />
+                  <Label htmlFor="enabled" className="text-xs font-bold cursor-pointer">
+                    {enabled ? "Active & Ready" : "Paused"}
+                  </Label>
+                </div>
+              </div>
+
+              {/* Quick Info */}
+              <div className="p-4 rounded-2xl bg-blue-50 dark:bg-blue-500/10 border border-blue-100 dark:border-blue-500/20 flex gap-4 items-center">
+                <div className="h-8 w-8 rounded-lg bg-white dark:bg-slate-800/50 border border-blue-100 dark:border-blue-500/20 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                  <Info className="h-4 w-4" />
+                </div>
+                <p className="text-[11px] font-medium text-blue-700 leading-relaxed">
+                  <span className="font-bold">Note:</span> Changes take effect immediately. Any user sending the keyword will receive the updated response right away.
+                </p>
+              </div>
+
+              <div className="flex items-center gap-3 pt-4">
+                <Button
+                  type="submit"
+                  disabled={saving}
+                  className="h-11 flex-1 sm:flex-none sm:px-12 rounded-xl flex items-center justify-center gap-2 bg-[#22B573] hover:bg-[#1da467] text-white font-bold text-sm shadow-lg shadow-green-600/10 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                  {saving ? "Saving Changes..." : "Update Trigger"}
+                </Button>
+                <Link to={`/whatsapp/dashboard/${projectId}/chatbot`}>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-11 px-8 rounded-xl font-bold text-sm text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all"
+                  >
+                    Cancel
+                  </Button>
+                </Link>
+              </div>
+            </form>
+          </div>
+        </motion.div>
+      </main>
+    </div>
+  );
+}
+
+

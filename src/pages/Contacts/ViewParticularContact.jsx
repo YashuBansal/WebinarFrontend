@@ -1,4 +1,4 @@
-import { useEffect, useState, Suspense, lazy, useMemo } from "react";
+import { useEffect, useState, Suspense, lazy, useMemo, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AddNoteForm from "./AddNoteForm";
 import { getLeadType, getNotes } from "../../features/actions/assign";
@@ -9,26 +9,35 @@ import {
   updateAttendeeLeadType,
 } from "../../features/actions/attendees";
 import {
-  Alert,
-  Badge,
-  Box,
-  Button,
-  Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
   FormControl,
-  ListItemIcon,
-  ListItemText,
   MenuItem,
   Select,
-  Stack,
+  ListItemText,
 } from "@mui/material";
-import { Add, OpenInNew } from "@mui/icons-material";
+import {
+  Mail,
+  User,
+  Phone,
+  Clock,
+  ExternalLink,
+  Plus,
+  Edit2,
+  Bell,
+  MessageCircle,
+  MoreVertical,
+  ChevronDown,
+  Trash2,
+  Save,
+  Logs,
+  Timer,
+  AlertCircle,
+  Hash,
+  ArrowLeft,
+  X
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { clearLeadType } from "../../features/slices/attendees";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { cancelAlarm, getAttendeeAlarm } from "../../features/actions/alarm";
 import ComponentGuard from "../../components/AccessControl/ComponentGuard";
 import ProductEmailTable from "./ProductEmailTable";
@@ -42,10 +51,19 @@ import { createPortal } from "react-dom";
 import { clearAttendeeAlarm } from "../../features/slices/alarm";
 import { clearNoteData } from "../../features/slices/assign";
 
-import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import NotesSection from "./NotesSection";
 import AttendeeHistoryTable from "./AttendeeHistoryTable";
 import TagsSection from "./TagsSection";
+
+const WhatsAppIcon = ({ className }) => (
+  <svg
+    viewBox="0 0 24 24"
+    fill="currentColor"
+    className={className}
+  >
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+  </svg>
+);
 
 // Lazy load modals
 const ViewFullDetailsModal = lazy(() => import("./Modal/ViewFullDetailModal"));
@@ -57,6 +75,7 @@ const WhatsappModal = lazy(() => import("./Modal/WhatsappModal"));
 const ViewParticularContact = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const roles = useRoles();
 
   const logUserActivity = useAddUserActivity();
@@ -203,7 +222,6 @@ const ViewParticularContact = () => {
       }
       webinarMap.get(webinarName).push(item);
     });
-    console.log("webinarmap --- > ", webinarMap);
 
     const filteredData = [];
 
@@ -257,7 +275,7 @@ const ViewParticularContact = () => {
     // filteredData now contains the processed list with one item per webinarName
     // based on your specified rules.
 
-    setAttendeeHistoryData(filteredData.reverse());
+    setAttendeeHistoryData(filteredData);
   }, [selectedAttendee, attendeeLeadType]);
 
   useEffect(() => {
@@ -362,244 +380,237 @@ const ViewParticularContact = () => {
   }, [attendeeHistoryData, attendeeId, email, navigate]);
 
   return (
-    <div className="px-4 pt-14 space-y-6">
-      <div className="md:p-6 p-3 bg-gray-50 rounded-lg shadow-sm">
-        {/* Header Row (flex-col below lg, flex-row at lg) */}
-        <div className="flex flex-col lg:flex-row gap-4 justify-between items-start lg:items-center mb-6">
-          <h2 className="text-2xl font-bold text-gray-700">
-            Attendee Contact Details
-          </h2>
-          {/* Alarm Alert - flows with header */}
-          {attendeeAlarm && userData?.isActive && (
-            <Alert
-              // Removed positional classes right-6 top-3 as they rely on positioned parent not present here
-              className="w-full md:max-w-[500px] transition duration-300"
-              severity="info"
-              icon={false}
-              action={
-                <Button
-                  color="error"
-                  size="small"
-                  onClick={() => {
-                    openCancelAlarmDialog();
-                  }}
-                >
-                  Cancel Alarm
-                </Button>
-              }
+    <div className="min-h-screen bg-[#F8FAFC] dark:bg-[#0F172A] p-4 lg:p-6 pt-16">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="max-w-[1600px] mx-auto space-y-4"
+      >
+        {/* Header Section */}
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate(-1)}
+              className="p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all shadow-sm group"
+              title="Go Back"
             >
-              <Stack>
-                <Box>
-                  <strong>Date:</strong>
-                  {new Date(attendeeAlarm.date).toLocaleString("en-IN")}
-                </Box>
-                <Box className="line-clamp-1 hover:line-clamp-none overflow-hidden transition duration-300">
-                  <strong>Note:</strong> {attendeeAlarm.note}
-                </Box>
-              </Stack>
-            </Alert>
-          )}
-        </div>
-
-        {/* Main Content Grid (2 columns at lg) */}
-        <div className="grid lg:grid-cols-2 mb-6 gap-6 w-full">
-          {/* Left Column */}
-          <div className="space-y-4 flex flex-col h-full">
-            {" "}
-            {/* Added flex-col h-full and increased space-y */}
-            {/* Email */}
-            <div className="border border-gray-300 rounded-lg py-2 px-4 shadow-sm">
-              {" "}
-              {/* Added border-gray, shadow-sm, adjusted px */}
-              <p>
-                Email :{" "}
-                <span className="ms-2 bg-slate-100 rounded-md px-3 py-1 text-gray-700 font-medium break-all">
-                  {" "}
-                  {/* Adjusted styling */}
-                  {(selectedAttendee && selectedAttendee[0]?._id) || "N/A"}{" "}
-                  {/* Handle empty email */}
-                </span>
+              <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:-translate-x-0.5 transition-transform" />
+            </button>
+            <div className="space-y-0.5">
+              <h1 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+                Attendee <span className="text-[#FF6B35]">Contact Details</span>
+              </h1>
+              <p className="text-slate-500 dark:text-slate-400 text-xs font-medium">
+                View and manage interaction history
               </p>
             </div>
-            {/* Name */}
-            <div className="border border-gray-300 rounded-lg py-2 px-4 shadow-sm">
-              {" "}
-              {/* Added border-gray, shadow-sm, adjusted px */}
-              <p>
-                Name :{" "}
-                {Array.isArray(uniqueNames) && uniqueNames.length > 0 ? (
-                  uniqueNames.map((item, index) => (
-                    <span
-                      key={index}
-                      className="ms-2 bg-slate-100 rounded-md px-3 py-1 text-gray-700 font-medium inline-block mb-1" // Adjusted styling, added inline-block/mb-1 for wrap
-                    >
-                      {`${item || ""}`.trim() || "N/A"}{" "}
-                      {/* Added N/A for empty names */}
-                    </span>
-                  ))
-                ) : (
-                  <span className="ms-2 text-gray-500">N/A</span> // Handle no names
-                )}
-              </p>
-            </div>
-            {/* Phone */}
-            <div className="border border-gray-300 rounded-lg py-2 px-4 shadow-sm flex flex-wrap items-center gap-2">
-              {" "}
-              {/* Added border-gray, shadow-sm, px, flex-wrap, gap */}
-              <span className="font-medium text-gray-700">Phone :</span>{" "}
-              {/* Added font-medium */}
-              <div className="flex gap-3 flex-wrap flex-grow">
-                {" "}
-                {/* Added flex-grow */}
-                {Array.isArray(uniquePhonesCount) &&
-                uniquePhonesCount.length > 0 ? (
-                  uniquePhonesCount.map((item, index) => (
-                    <Badge
-                      key={index}
-                      badgeContent={item.count}
-                      color="primary"
-                      sx={{ "& .MuiBadge-badge": { right: 0, top: -3 } }}
-                    >
-                      {" "}
-                      {/* Adjust badge position slightly */}
-                      <Chip
-                        label={item.label || "N/A"} // Added N/A for empty labels
-                        color={item.isInvalid ? "error" : "default"} // Use "default" color if not error
-                        variant="outlined"
-                        size="small" // Smaller chip size
-                        className="bg-slate-100" // Add a light background
-                      />
-                    </Badge>
-                  ))
-                ) : (
-                  <span className="text-gray-500">N/A</span> // Handle no phones
-                )}
-              </div>
-            </div>
-            {/* Notes List */}
-            <NotesSection
-              email={email}
-              noteData={noteData}
-              roles={roles}
-              setNoteModalData={setNoteModalData}
-            />
           </div>
 
-          {/* Right Column */}
-          <div className="space-y-4 flex flex-col h-full">
-            {" "}
-            {/* Added flex-col h-full and increased space-y */}
-            {/* Buttons and Select */}
-            <ComponentGuard
-              conditions={[employeeModeData ? false : true, userData?.isActive]}
-            >
-              {/* Container for buttons/select with border and shadow */}
-              <div className="border border-gray-300 rounded-lg shadow-sm p-4 flex flex-col sm:flex-row justify-between items-center gap-4">
-                {" "}
-                {/* Added border/shadow/padding, made responsive */}
-                <div className="flex items-center gap-3 w-full sm:w-auto justify-center sm:justify-start">
-                  {" "}
-                  {/* Centered buttons on small screens */}
-                  {setAlarm && (
-                    <Button
-                      variant="contained"
-                      className="h-10 whitespace-nowrap w-full sm:w-auto"
-                      onClick={handleTimerModal}
-                    >
-                      Set Alarm
-                    </Button>
-                  )}
-                  <Button
-                    variant="contained"
-                    className="h-10 whitespace-nowrap w-full sm:w-auto"
-                    onClick={() => setShowLogsModal(true)}
-                  >
-                    Logs
-                  </Button>
-                  <WhatsAppIcon
-                    className="text-green-600 cursor-pointer "
-                    onClick={() => {
-                      setWhatsappModalOpen(true);
-                    }}
-                  />
+          {/* Alarm Alert */}
+          <AnimatePresence>
+            {attendeeAlarm && userData?.isActive && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, x: 20 }}
+                animate={{ opacity: 1, scale: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.95, x: 20 }}
+                className="w-full lg:max-w-sm bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800/50 rounded-xl p-3 shadow-sm relative overflow-hidden"
+              >
+                <div className="flex items-start gap-2.5">
+                  <div className="p-1.5 bg-amber-100 dark:bg-amber-800/30 rounded-lg">
+                    <Bell className="w-4 h-4 text-amber-600 dark:text-amber-400 animate-bounce" />
+                  </div>
+                  <div className="flex-1 space-y-0.5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[10px] font-bold text-amber-700 dark:text-amber-300 uppercase tracking-wider">Scheduled Alarm</span>
+                      <button
+                        onClick={openCancelAlarmDialog}
+                        className="text-[9px] font-bold text-amber-600 hover:text-amber-700 dark:text-amber-400 underline underline-offset-2"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                    <p className="text-xs font-semibold text-slate-800 dark:text-slate-200">
+                      {new Date(attendeeAlarm.date).toLocaleString("en-IN", {
+                        dateStyle: 'medium',
+                        timeStyle: 'short'
+                      })}
+                    </p>
+                  </div>
                 </div>
-                <div className="w-full sm:w-48">
-                  {" "}
-                  {/* Fixed width for select container on larger screens */}
-                  <FormControl fullWidth>
-                    <Select
-                      labelId="lead-type-select-label"
-                      value={selectedOption || ""}
-                      onChange={handleChange}
-                      className="shadow-sm h-10 font-semibold bg-white"
-                      displayEmpty
-                      renderValue={(selected) => {
-                        if (!selected) {
-                          return (
-                            <span style={{ color: "#888" }}>
-                              Select Lead Type
-                            </span> // Placeholder style
-                          );
-                        }
-                        const selectedOption = leadTypeOptions.find(
-                          (option) => option.value === selected
-                        );
-                        return (
-                          <div
-                            style={{
-                              display: "flex",
-                              alignItems: "center",
-                              gap: "8px",
-                            }}
-                            className="text-gray-800" // Ensure selected text color is visible
-                          >
-                            <div
-                              style={{
-                                width: "16px",
-                                height: "16px",
-                                borderRadius: "50%",
-                                backgroundColor:
-                                  selectedOption?.color || "#000",
-                              }}
-                            />
-                            <span>{selectedOption?.label}</span>
-                          </div>
-                        );
-                      }}
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+          {/* Left Column: Contact Info & Interaction History */}
+          <div className="space-y-4">
+
+            {/* Contact Info Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {/* Name & Email Combined Card */}
+              <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3">
+                {/* Full Name Part */}
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className="p-1.5 bg-emerald-50 dark:bg-emerald-900/30 rounded-lg">
+                      <User className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Full Name</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {Array.isArray(uniqueNames) && uniqueNames.length > 0 ? (
+                      uniqueNames.map((item, index) => (
+                        <span key={index} className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg text-xs font-semibold">
+                          {`${item || ""}`.trim() || "N/A"}
+                        </span>
+                      ))
+                    ) : (
+                      <span className="text-slate-400 text-xs italic">No names found</span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="border-t border-slate-100 dark:border-slate-700/50 pt-3">
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <div className="p-1.5 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
+                      <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Email Address</span>
+                  </div>
+                  <p className="text-sm font-bold text-slate-900 dark:text-white break-all">
+                    {(selectedAttendee && selectedAttendee[0]?._id) || "N/A"}
+                  </p>
+                </div>
+              </div>
+
+              {/* Phone Numbers Card (Shifted here) */}
+              <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="p-1.5 bg-orange-50 dark:bg-orange-900/30 rounded-lg">
+                    <Phone className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <span className="text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Phone Numbers</span>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {Array.isArray(uniquePhonesCount) && uniquePhonesCount.length > 0 ? (
+                    uniquePhonesCount.map((item, index) => (
+                      <div key={index} className="relative group">
+                        <div className={`
+                          flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all
+                          ${item.isInvalid
+                            ? 'bg-rose-50 dark:bg-rose-900/20 border-rose-200 dark:border-rose-800/50 text-rose-700 dark:text-rose-400'
+                            : 'bg-slate-50 dark:bg-slate-900 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:border-orange-400 dark:hover:border-orange-500'}
+                        `}>
+                          <span className="text-xs font-bold">{item.label || "N/A"}</span>
+                          {item.count > 0 && (
+                            <span className="flex items-center justify-center min-w-[18px] h-4.5 px-1 bg-[#FF6B35] text-white text-[9px] font-black rounded-full shadow-lg shadow-[#FF6B35]/20">
+                              {item.count}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <span className="text-slate-400 text-xs italic">No phone numbers</span>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Interaction Notes Section */}
+            <div className="h-[390px] flex flex-col">
+              <NotesSection
+                email={email}
+                noteData={noteData}
+                roles={roles}
+                setNoteModalData={setNoteModalData}
+              />
+            </div>
+          </div>
+
+          {/* Right Column: Actions & Form */}
+          <div className="space-y-4">
+
+            {/* Quick Actions & Status Card */}
+            <ComponentGuard conditions={[employeeModeData ? false : true, userData?.isActive]}>
+              <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-xl p-4 shadow-sm">
+                <div className="flex flex-col gap-4">
+                  {/* Action Buttons Row */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {setAlarm && (
+                      <button
+                        onClick={handleTimerModal}
+                        className="flex-1 min-w-[120px] flex items-center justify-center gap-2 h-10 bg-[#FF6B35] hover:bg-[#e85a24] text-white text-xs font-bold rounded-lg transition-all shadow-md shadow-[#FF6B35]/20"
+                      >
+                        <Timer className="w-4 h-4" />
+                        SET ALARM
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowLogsModal(true)}
+                      className="flex-1 min-w-[100px] flex items-center justify-center gap-2 h-10 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 text-xs font-bold rounded-lg transition-all"
                     >
-                      {leadTypeOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          <ListItemIcon>
-                            <div
-                              style={{
-                                width: "16px",
-                                height: "16px",
-                                borderRadius: "50%",
-                                backgroundColor: option.color,
-                              }}
-                            />
-                          </ListItemIcon>
-                          <ListItemText primary={option.label} />
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                      <Logs className="w-4 h-4" />
+                      LOGS
+                    </button>
+
+                    <div className="flex items-center gap-2 flex-grow sm:flex-grow-0">
+                      <button
+                        onClick={() => setWhatsappModalOpen(true)}
+                        className="p-2.5 bg-emerald-50 dark:bg-emerald-900/30 hover:bg-emerald-100 dark:hover:bg-emerald-800/50 rounded-lg transition-all"
+                        title="WhatsApp"
+                      >
+                        <WhatsAppIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      </button>
+
+                      {/* Lead Type Select - Now inline to the right of WhatsApp */}
+                      <FormControl sx={{ minWidth: 140, flex: 1 }}>
+                        <Select
+                          value={selectedOption || ""}
+                          onChange={handleChange}
+                          className="bg-slate-50 dark:bg-slate-900 rounded-lg font-bold text-xs h-10"
+                          displayEmpty
+                          sx={{
+                            '& .MuiOutlinedInput-notchedOutline': { border: '1px solid #E2E8F0', borderRadius: '10px' },
+                            '& .MuiSelect-select': { padding: '8px 12px', display: 'flex', alignItems: 'center', gap: '8px' }
+                          }}
+                          renderValue={(selected) => {
+                            if (!selected) return <span className="text-[10px] text-slate-400">PRIORITY</span>;
+                            const opt = leadTypeOptions.find(o => o.value === selected);
+                            return (
+                              <div className="flex items-center gap-2">
+                                <div className="w-2 h-2 rounded-full" style={{ backgroundColor: opt?.color || "#000" }} />
+                                <span className="text-slate-800 dark:text-slate-200 font-bold">{opt?.label}</span>
+                              </div>
+                            );
+                          }}
+                        >
+                          {leadTypeOptions.map((option) => (
+                            <MenuItem key={option.value} value={option.value} sx={{ py: 1, gap: 1.5, minHeight: 0 }}>
+                              <div className="w-2 h-2 rounded-full" style={{ backgroundColor: option.color }} />
+                              <ListItemText primary={option.label} primaryTypographyProps={{ fontWeight: 600, fontSize: '12px' }} />
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </div>
+                  </div>
                 </div>
               </div>
             </ComponentGuard>
+
             {/* Add Note Section */}
-            <div className="border border-gray-300 rounded-lg shadow-sm h-full flex flex-col overflow-hidden">
-              {" "}
-              {/* Added border-gray, shadow-sm, flex-col, overflow-hidden */}
-              <div className="border-b border-gray-300 px-4 py-2 bg-gray-100">
-                {" "}
-                {/* Adjusted padding/border, added bg-gray */}
-                <span className="font-semibold text-gray-700">Add Note</span>
+            <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-xl shadow-sm overflow-hidden flex flex-col">
+              <div className="px-4 py-2.5 border-b border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-900/50 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-4 bg-[#FF6B35] rounded-full" />
+                  <h3 className="font-bold text-sm text-slate-800 dark:text-slate-200">New Interaction</h3>
+                </div>
               </div>
-              {/* Add Note Form Container with Padding */}
-              <div className="px-4 flex-grow overflow-y-auto scrollbar-thin">
-                {" "}
-                {/* Added padding, flex-grow, overflow/scrollbar */}
+              <div className="flex-grow">
                 <AddNoteForm
                   uniquePhones={uniquePhones}
                   userData={userData}
@@ -613,89 +624,94 @@ const ViewParticularContact = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 ">
-          <AttendeeHistoryTable
-          selectedAttendee={selectedAttendee}
-            attendeeHistoryData={attendeeHistoryData}
-            navigate={navigate}
-            email={email}
-            employeeModeData={employeeModeData}
-            userData={userData}
-            setEditModalData={setEditModalData}
-            formatDateAsNumber={formatDateAsNumber}
-          />
+        {/* Bottom Sections: History & Enrollments */}
+        <div className="grid grid-cols-1 gap-8 pt-6">
 
-          <div className="mt-12 shadow-lg rounded-lg overflow-x-auto">
-            {!attendeeEnrollments && attendeeEnrollments.length <= 0 ? (
-              <div className="text-lg p-2 flex justify-center w-full">
-                No record found
-              </div>
-            ) : (
-              <div className="p-6 bg-white rounded-lg shadow-md">
-                <div className=" mb-2 items-center px-3 text-neutral-800  flex justify-between">
-                  <span className="font-semibold text-xl  ">
-                    Enrollments History
-                  </span>
+          {/* History Table Container */}
+          <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl shadow-sm overflow-hidden">
+            <AttendeeHistoryTable
+              selectedAttendee={selectedAttendee}
+              attendeeHistoryData={attendeeHistoryData}
+              navigate={navigate}
+              email={email}
+              employeeModeData={employeeModeData}
+              userData={userData}
+              setEditModalData={setEditModalData}
+              formatDateAsNumber={formatDateAsNumber}
+            />
+          </div>
 
-                  <ComponentGuard
-                    conditions={[
-                      employeeModeData ? false : true,
-                      userData?.isActive,
-                    ]}
-                  >
-                    <Add
-                      className="cursor-pointer hover:bg-gray-200 transition duration-300"
-                      onClick={() => setShowEnrollmentModal(true)}
-                      fontSize="medium"
-                    >
-                      <OpenInNew />
-                    </Add>
-                  </ComponentGuard>
+          {/* Enrollments History */}
+          <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl shadow-sm overflow-hidden">
+            <div className="p-4 border-b border-slate-200 dark:border-slate-700/50 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/50">
+              <div className="flex items-center gap-3">
+                <div className="p-1.5 bg-orange-50 dark:bg-orange-900/30 rounded-xl">
+                  <Save className="w-4 h-4 text-[#FF6B35] dark:text-[#FF8C61]" />
                 </div>
+                <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">Enrollments History</h3>
+              </div>
 
-                <ProductEmailTable email={email} />
+              <ComponentGuard conditions={[employeeModeData ? false : true, userData?.isActive]}>
+                <button
+                  onClick={() => setShowEnrollmentModal(true)}
+                  className="p-1.5 hover:bg-slate-200 dark:hover:bg-slate-700 rounded-lg transition-colors group"
+                >
+                  <Plus className="w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:rotate-90 transition-transform" />
+                </button>
+              </ComponentGuard>
+            </div>
+
+            <div className="p-4">
+              {!attendeeEnrollments || attendeeEnrollments.length <= 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 text-slate-400 space-y-3 border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-2xl">
+                  <AlertCircle className="w-10 h-10 opacity-20" />
+                  <p className="font-medium italic">No enrollment records found for this attendee</p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <ProductEmailTable email={email} />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Tags & Professions Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <TagsSection
+              tags={attendeeLeadType?.tags}
+              email={email}
+              onTagUpdate={() => {
+                if (email) {
+                  dispatch(getAttendeeLeadTypeByEmail(email));
+                }
+              }}
+            />
+
+            {professionsList.length > 0 && (
+              <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+                <div className="p-4 border-b border-slate-200 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-900/50 flex items-center gap-3">
+                  <div className="p-2 bg-orange-50 dark:bg-orange-900/30 rounded-xl">
+                    <Hash className="w-4 h-4 text-orange-600 dark:text-orange-400" />
+                  </div>
+                  <h3 className="font-bold text-slate-800 dark:text-slate-200">Professions</h3>
+                </div>
+                <div className="p-6 flex flex-wrap gap-2">
+                  {professionsList.map((profession) => (
+                    <span
+                      key={profession}
+                      className="px-4 py-1.5 bg-slate-100 dark:bg-slate-700/50 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600/50 rounded-full text-xs font-bold uppercase tracking-wider hover:border-orange-400 transition-colors cursor-default"
+                    >
+                      {profession}
+                    </span>
+                  ))}
+                </div>
               </div>
             )}
           </div>
-
-
-          <TagsSection
-            tags={attendeeLeadType?.tags}
-            email={email}
-            onTagUpdate={() => {
-              if (email) {
-                dispatch(getAttendeeLeadTypeByEmail(email));
-              }
-            }}
-          />
-
-          {professionsList.length > 0 && (
-            <div className="border border-gray-300 rounded-lg shadow-sm bg-white">
-              <div className="border-b border-gray-300 px-4 py-3 bg-gray-100">
-                <h3 className="font-semibold text-gray-700 text-lg">Professions</h3>
-              </div>
-              <div className="p-4">
-                <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-                  {professionsList.map((profession) => (
-                    <Chip
-                      key={profession}
-                      label={profession}
-                      variant="outlined"
-                      size="small"
-                      className="bg-slate-100 capitalize text-gray-700 border-gray-300"
-                      sx={{
-                        "& .MuiChip-label": {
-                          fontWeight: 500,
-                        },
-                      }}
-                    />
-                  ))}
-                </Stack>
-              </div>
-            </div>
-          )}
         </div>
-      </div>
+      </motion.div>
+
+      {/* Modals & Portals */}
       <Suspense fallback={<ModalFallback />}>
         {noteModalData && (
           <ViewFullDetailsModal
@@ -759,31 +775,59 @@ const ViewParticularContact = () => {
             document.body
           )}
       </Suspense>
-      <Dialog
-        open={openCancelDialog}
-        onClose={closeCancelAlarmDialog}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">{"Cancel Alarm?"}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            Are you sure you want to cancel this alarm?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={closeCancelAlarmDialog}>Disagree</Button>
-          <Button
-            onClick={() => {
-              cancelMyAlarm(attendeeAlarm);
-              closeCancelAlarmDialog();
-            }}
-            autoFocus
-          >
-            Agree
-          </Button>
-        </DialogActions>
-      </Dialog>
+
+      {/* Cancel Alarm Confirmation Modal */}
+      <AnimatePresence>
+        {openCancelDialog && (
+          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={closeCancelAlarmDialog}
+              className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            />
+
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+              className="relative w-full max-w-sm bg-white dark:bg-slate-800 rounded-2xl shadow-2xl shadow-slate-900/20 overflow-hidden"
+            >
+              <div className="h-1.5 w-full bg-rose-500" />
+
+              <div className="p-8 text-center">
+                <div className="mx-auto w-16 h-16 bg-rose-50 dark:bg-rose-900/30 rounded-full flex items-center justify-center mb-6">
+                  <AlertCircle className="w-8 h-8 text-rose-500" />
+                </div>
+
+                <h2 className="text-xl font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight mb-2">Cancel Alarm?</h2>
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+                  This action cannot be undone. Are you sure you want to stop tracking this reminder?
+                </p>
+
+                <div className="flex gap-3 mt-8">
+                  <button
+                    onClick={closeCancelAlarmDialog}
+                    className="flex-1 h-12 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-200 text-xs font-black rounded-xl transition-all uppercase tracking-widest"
+                  >
+                    Go Back
+                  </button>
+                  <button
+                    onClick={() => {
+                      cancelMyAlarm(attendeeAlarm);
+                      closeCancelAlarmDialog();
+                    }}
+                    className="flex-1 h-12 bg-rose-500 hover:bg-rose-600 text-white text-xs font-black rounded-xl transition-all shadow-lg shadow-rose-500/20 uppercase tracking-widest"
+                  >
+                    Stop Alarm
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

@@ -10,10 +10,10 @@ import {
   LinearScale,
   PointElement,
 } from "chart.js";
-import { Card, Typography } from "@mui/material";
+import { Card, CardTitle, CardHeader, CardContent } from "../ui/card";
 import { useSelector } from "react-redux";
+import { useTheme } from "../../contexts/ThemeContext";
 
-// Register Chart.js components
 ChartJS.register(
   Title,
   Tooltip,
@@ -25,26 +25,25 @@ ChartJS.register(
 );
 
 const UserGrowthByDate = () => {
-  // Dummy data: User sign-ups with specific dates
+  const { isDark } = useTheme();
   const { usersGraphData = [] } = useSelector((state) => state.globalData);
 
-  // Prepare data for the chart
   const labels = usersGraphData.map((item) => item?.dateObj?.split("T")[0]);
   const dataCounts = usersGraphData.map((item) => item?.total);
 
   const data = {
-    labels, // X-axis (dates)
+    labels,
     datasets: [
       {
         label: "User Sign-ups",
-        data: dataCounts, // Y-axis (sign-up counts)
-        fill: true, // Fill the area under the line
-        backgroundColor: "rgba(54, 162, 235, 0.2)", // Area fill color
-        borderColor: "rgba(54, 162, 235, 1)", // Line color
-        borderWidth: 2, // Line thickness
-        pointBackgroundColor: "rgba(54, 162, 235, 1)", // Point color
-        pointBorderColor: "#fff", // Point border color
-        tension: 0.4, // Smooth the line
+        data: dataCounts,
+        fill: true,
+        backgroundColor: isDark ? "rgba(54, 162, 235, 0.1)" : "rgba(54, 162, 235, 0.2)",
+        borderColor: "rgba(54, 162, 235, 1)",
+        borderWidth: 2,
+        pointBackgroundColor: "rgba(54, 162, 235, 1)",
+        pointBorderColor: "#fff",
+        tension: 0.4,
       },
     ],
   };
@@ -54,49 +53,69 @@ const UserGrowthByDate = () => {
     maintainAspectRatio: false,
     plugins: {
       title: {
-        display: true,
-        text: "User Growth By Date", // Chart title
+        display: false,
       },
       tooltip: {
         callbacks: {
           label: function (context) {
-            return `${context.dataset.label}: ${context.raw}`; // Tooltip content
+            return `${context.dataset.label}: ${context.raw}`;
           },
         },
       },
       legend: {
-        display: true, // Show legend
+        display: true,
         position: "top",
+        labels: {
+          color: isDark ? "#94a3b8" : "#64748b",
+        }
       },
     },
     scales: {
       x: {
+        grid: {
+          color: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+        },
         title: {
           display: true,
-          text: "Dates", // X-axis title
+          text: "Dates",
+          color: isDark ? "#94a3b8" : "#64748b",
         },
+        ticks: {
+          color: isDark ? "#94a3b8" : "#64748b",
+        }
       },
       y: {
+        grid: {
+          color: isDark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.05)",
+        },
         title: {
           display: true,
-          text: "Sign-ups", // Y-axis title
+          text: "Sign-ups",
+          color: isDark ? "#94a3b8" : "#64748b",
         },
-        beginAtZero: true, // Start Y-axis at 0
+        beginAtZero: true,
+        ticks: {
+          color: isDark ? "#94a3b8" : "#64748b",
+        }
       },
     },
     layout: {
       padding: {
-        bottom: 30, // Add padding to the bottom to make space for labels
+        bottom: 10,
       },
     },
   };
 
   return (
-    <Card className="p-6 shadow w-full  h-[60vh] ">
-      <Typography variant="h6" gutterBottom>
-        User Growth Overview
-      </Typography>
-      <Line data={data} options={options} />
+    <Card className="shadow-sm w-full h-[60vh] border-none bg-transparent">
+      <CardHeader className="px-0 pt-0 pb-4">
+        <CardTitle className="text-lg font-bold text-slate-800 dark:text-slate-200 dark:text-slate-100">
+          User Growth Overview
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="flex-1 p-0 min-h-0">
+        <Line data={data} options={options} />
+      </CardContent>
     </Card>
   );
 };

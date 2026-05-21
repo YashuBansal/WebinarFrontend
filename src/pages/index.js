@@ -16,6 +16,7 @@ const CreateProduct = lazy(() => import("./Products/CreateProduct"));
 const ViewAttendees = lazy(() => import("./Attendees/ViewAttendees"));
 const CreateEmployee = lazy(() => import("./Employees/CreateEmployee"));
 const ViewSettings = lazy(() => import("./Settings/ViewSettings"));
+const ViewMaskedTables = lazy(() => import("./Settings/ViewMaskedTables"));
 const ViewPlans = lazy(() => import("./Settings/Plans/ViewPlans"));
 const AddPlan = lazy(() => import("./Settings/Plans/AddPlan"));
 const ViewSidebarLinks = lazy(() =>
@@ -78,6 +79,7 @@ const PolicyPage = lazy(() => import("./Public/PolicyPage"));
 const TermsPage = lazy(() => import("./Public/TermsPage"));
 const SupportPage = lazy(() => import("./Public/SupportPage"));
 const DocumentationPage = lazy(() => import("./Public/DocumentationPage"));
+const WhatsAppWrapper = lazy(() => import("./WhatsApp/WhatsAppWrapper"));
 
 export {
   CalendarPage,
@@ -102,6 +104,7 @@ export {
   ViewAttendees,
   CreateEmployee,
   ViewSettings,
+  ViewMaskedTables,
   ViewPlans,
   AddPlan,
   ViewSidebarLinks,
@@ -139,4 +142,5 @@ export {
   TermsPage,
   SupportPage,
   DocumentationPage,
+  WhatsAppWrapper,
 };

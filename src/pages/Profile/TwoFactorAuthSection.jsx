@@ -15,7 +15,7 @@ import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import CircularProgress from "@mui/material/CircularProgress";
+import AppLoader from "../../components/AppLoader";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import IconButton from "@mui/material/IconButton";
 
@@ -93,7 +93,7 @@ const TwoFactorAuthSection = () => {
               onClick={handleGenerate}
               disabled={isLoading}
             >
-              {isLoading ? <CircularProgress size={24} /> : "Enable 2FA"}
+              {isLoading ? <AppLoader size="md" variant="inverse" /> : "Enable 2FA"}
             </Button>
           ) : (
             // After clicking "Enable", show setup instructions
@@ -145,7 +145,7 @@ const TwoFactorAuthSection = () => {
                 disabled={isLoading}
               >
                 {isLoading ? (
-                  <CircularProgress size={24} />
+                  <AppLoader size="md" variant="inverse" />
                 ) : (
                   "Verify & Activate"
                 )}
@@ -181,7 +181,7 @@ const TwoFactorAuthSection = () => {
             onClick={handleSubmitCode}
             disabled={isLoading || !verificationCode}
           >
-            {isLoading ? <CircularProgress size={24} /> : "Verify & Disable"}
+            {isLoading ? <AppLoader size="md" variant="error" /> : "Verify & Disable"}
           </Button>
         </Box>
       )}
