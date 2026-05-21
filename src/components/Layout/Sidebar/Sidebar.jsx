@@ -30,6 +30,20 @@ import useUserSubscription from "../../../hooks/useUserSubscription";
 import DashboardSidebar from "./DashboardSidebar";
 import WhatsAppSidebar from "./WhatsAppSidebar";
 import { useTheme } from "../../../contexts/ThemeContext";
+import {
+  AssignmentIcon,
+  AttendeesIcon,
+  BillIcon,
+  CalendarIcon,
+  DashboardIcon,
+  EmployeeIcon,
+  NoticeBoardIcon,
+  ProductsIcon,
+  RupeeIcon,
+  WebinarIcon,
+  WhatsappIcon,
+  ZoomIcon,
+} from "./SVGs";
 
 const PANEL_W = 200;
 
@@ -51,6 +65,7 @@ const Sidebar = ({
   const { sidebarLinkData } = useSelector((state) => state.sidebarLink);
   const { userData } = useSelector((state) => state.auth);
   const { data: subscription } = useUserSubscription();
+  const calendarFeatures = subscription?.plan?.calendarFeatures;
   const { isSidebarOpen, activeHeaderSection } = useSelector((state) => state.globalData);
   const [showImportantLinks, setShowImportantLinks] = useState(false);
   const role = userData?.role || "";
