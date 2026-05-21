@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { LayoutDashboard, Menu, Moon, Sun, Video, X } from "lucide-react";
+import { ArrowUpRight, LayoutDashboard, Menu, Moon, Sun, Video, X } from "lucide-react";
 import { getRoleNameByID } from "../../../utils/roles";
 import { toggleSidebar, setActiveHeaderSection } from "../../../features/slices/globalData";
 import Profile from "./profile.svg";
@@ -71,6 +71,23 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
   const dashboardActive = location.pathname === "/";
   const whatsappActive = location.pathname.startsWith("/whatsapp");
   const zoomActive = location.pathname.startsWith("/zoom");
+
+  const previousDashboardUrl =
+    import.meta.env.VITE_REACT_APP_DASHBOARD_BASE_URL?.trim() || "";
+  const showPreviousDashboardLink = (() => {
+    if (!previousDashboardUrl) return false;
+    try {
+      const target = new URL(previousDashboardUrl, window.location.href);
+      const current = new URL(window.location.href);
+      return (
+        target.origin !== current.origin ||
+        target.pathname !== current.pathname ||
+        target.search !== current.search
+      );
+    } catch {
+      return false;
+    }
+  })();
 
   return (
     <>
@@ -262,6 +279,24 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
           </div>
 
           <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-2 lg:gap-3">
+            {showPreviousDashboardLink ? (
+              <a
+                href={previousDashboardUrl}
+                title="Open previous dashboard UI"
+                className="flex items-center gap-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors hover:opacity-90 sm:gap-1.5 sm:px-2.5 sm:text-sm"
+                style={{
+                  backgroundColor: isDark ? "#1e293b" : "#f9fafb",
+                  borderColor: isDark ? "#334155" : "#e5e7eb",
+                  color: isDark ? "#e2e8f0" : "#334155",
+                }}
+              >
+                <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden />
+                <span className="hidden whitespace-nowrap sm:inline">
+                  Classic dashboard
+                </span>
+                <span className="whitespace-nowrap sm:hidden">Classic</span>
+              </a>
+            ) : null}
             <button
               type="button"
               onClick={toggleTheme}
