@@ -26,9 +26,10 @@ export const injectStore = (_store) => {
 
 const logoutAndRedirectToLogin = () => {
   store?.dispatch({ type: "auth/logout" });
+  const publicPaths = ["/login", "/signup", "/policy", "/terms", "/support", "/documentation"];
   if (
     typeof window !== "undefined" &&
-    window.location.pathname !== "/login"
+    !publicPaths.includes(window.location.pathname)
   ) {
     window.location.href = "/login";
   }
