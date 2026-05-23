@@ -5,14 +5,14 @@ import { Button } from '../../../components/ui/button';
 import { Input } from '../../../components/ui/input';
 import { Label } from '../../../components/ui/label';
 import { useQuickReplies } from '../../../hooks/useQuickReplies';
-import { 
-  Zap, 
-  Loader2, 
-  ArrowLeft, 
-  Save, 
-  Eye, 
-  Info, 
-  LayoutGrid, 
+import {
+  Zap,
+  Loader2,
+  ArrowLeft,
+  Save,
+  Eye,
+  Info,
+  LayoutGrid,
   MessageSquare,
   Image as ImageIcon,
   Video,
@@ -45,21 +45,21 @@ type InteractiveType = 'none' | 'call_to_actions' | 'quick_replies' | 'all';
 export default function CreateSessionTemplatePage() {
   const { projectId } = useParams<{ projectId: string }>();
   const navigate = useNavigate();
-  
+
   // Basic Info
   const [name, setName] = useState('');
   const [content, setContent] = useState('');
   const [language, setLanguage] = useState('en_US');
-  
+
   // Header
   const [headerFormat, setHeaderFormat] = useState<'NONE' | 'TEXT' | 'IMAGE' | 'VIDEO' | 'DOCUMENT'>('NONE');
   const [headerText, setHeaderText] = useState('');
   const [headerHandle, setHeaderHandle] = useState<string | null>(null);
   const [useGenericSample, setUseGenericSample] = useState(false);
-  
+
   // Footer
   const [footerText, setFooterText] = useState('');
-  
+
   // Buttons
   const [interactiveType, setInteractiveType] = useState<InteractiveType>('none');
   const [interactiveActions, setInteractiveActions] = useState<InteractiveAction[]>([]);
@@ -79,17 +79,17 @@ export default function CreateSessionTemplatePage() {
   const addInteractiveAction = (type: InteractiveAction['type']) => {
     // WhatsApp session message limits: max 3 quick replies OR 2 call to actions
     if (type === 'QUICK_REPLY') {
-        const qrCount = interactiveActions.filter(a => a.type === 'QUICK_REPLY').length;
-        if (qrCount >= 3) {
-            toastUtils.error('Maximum 3 Quick Reply buttons allowed');
-            return;
-        }
+      const qrCount = interactiveActions.filter(a => a.type === 'QUICK_REPLY').length;
+      if (qrCount >= 3) {
+        toastUtils.error('Maximum 3 Quick Reply buttons allowed');
+        return;
+      }
     } else {
-        const ctaCount = interactiveActions.filter(a => a.type !== 'QUICK_REPLY').length;
-        if (ctaCount >= 2) {
-            toastUtils.error('Maximum 2 Call to Action buttons allowed');
-            return;
-        }
+      const ctaCount = interactiveActions.filter(a => a.type !== 'QUICK_REPLY').length;
+      if (ctaCount >= 2) {
+        toastUtils.error('Maximum 2 Call to Action buttons allowed');
+        return;
+      }
     }
 
     const newAction: InteractiveAction = {
@@ -99,15 +99,15 @@ export default function CreateSessionTemplatePage() {
       value: ''
     };
     setInteractiveActions([...interactiveActions, newAction]);
-    
+
     // Auto switch type if it was none
     if (interactiveType === 'none') {
-        setInteractiveType(type === 'QUICK_REPLY' ? 'quick_replies' : 'call_to_actions');
+      setInteractiveType(type === 'QUICK_REPLY' ? 'quick_replies' : 'call_to_actions');
     }
   };
 
   const updateInteractiveAction = (id: string, field: keyof InteractiveAction, value: string) => {
-    setInteractiveActions(interactiveActions.map(action => 
+    setInteractiveActions(interactiveActions.map(action =>
       action.id === id ? { ...action, [field]: value } : action
     ));
   };
@@ -135,7 +135,7 @@ export default function CreateSessionTemplatePage() {
 
     // Construct components array
     const components: any[] = [];
-    
+
     if (headerFormat !== 'NONE') {
       const header: any = { type: 'HEADER', format: headerFormat };
       if (headerFormat === 'TEXT') header.text = headerText;
@@ -170,8 +170,10 @@ export default function CreateSessionTemplatePage() {
         components
       } as any);
       navigate(`/whatsapp/dashboard/${projectId}/templates`);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to create session template:', error);
+      const msg = typeof error === 'string' ? error : (error?.response?.data?.message || error?.message || 'Failed to create session template');
+      toastUtils.error(msg);
     }
   };
 
@@ -242,58 +244,58 @@ export default function CreateSessionTemplatePage() {
           {/* Left Column - Form */}
           <div className="lg:col-span-7 space-y-6">
             <div className="grid gap-6">
-                {/* Template Name - Full Width */}
-                <motion.div
+              {/* Template Name - Full Width */}
+              <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-amber-400/50 dark:hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-900/5 dark:hover:shadow-amber-500/10 rounded-[20px] p-6 transition-all duration-300"
-                >
+              >
                 <div className="flex items-center gap-3 mb-4">
-                    <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-amber-600 transition-colors shadow-inner">
+                  <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-amber-600 transition-colors shadow-inner">
                     <LayoutGrid className="h-4 w-4" />
-                    </div>
-                    <div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Template Name</span>
-                      <p className="text-[9px] text-slate-400 mt-0.5">Unique identifier for this session template</p>
-                    </div>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Template Name</span>
+                    <p className="text-[9px] text-slate-400 mt-0.5">Unique identifier for this session template</p>
+                  </div>
                 </div>
                 <Input
-                    placeholder="e.g. support_response_v1"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="h-12 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-semibold text-base"
+                  placeholder="e.g. support_response_v1"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="h-12 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-semibold text-base"
                 />
-                </motion.div>
+              </motion.div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-                  {/* Template Language */}
-                  <motion.div
+                {/* Template Language */}
+                <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
                   className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-amber-400/50 dark:hover:border-amber-500/50 hover:shadow-xl hover:shadow-amber-900/5 dark:hover:shadow-amber-500/10 rounded-[20px] p-6 transition-all duration-300"
-                  >
+                >
                   <div className="flex items-center gap-3 mb-4">
-                      <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-amber-600 transition-colors shadow-inner">
+                    <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-amber-600 transition-colors shadow-inner">
                       <Type className="h-4 w-4" />
-                      </div>
-                      <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Language</span>
+                    </div>
+                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Language</span>
                   </div>
                   <div className="relative">
                     <select
-                        value={language}
-                        onChange={(e) => setLanguage(e.target.value)}
-                        className="w-full h-11 px-4 py-2 border border-slate-200 dark:border-slate-700/30 rounded-xl bg-slate-50/50 dark:bg-slate-900/60 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-sm outline-none appearance-none"
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                      className="w-full h-11 px-4 py-2 border border-slate-200 dark:border-slate-700/30 rounded-xl bg-slate-50/50 dark:bg-slate-900/60 focus:ring-amber-500/20 focus:border-amber-500 transition-all font-medium text-sm outline-none appearance-none"
                     >
-                        {languages.map(lang => (
-                          <option key={lang.value} value={lang.value}>{lang.label}</option>
-                        ))}
+                      {languages.map(lang => (
+                        <option key={lang.value} value={lang.value}>{lang.label}</option>
+                      ))}
                     </select>
                     <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
-                  </motion.div>
-                </div>
+                </motion.div>
+              </div>
             </div>
 
             {/* Header Type */}
@@ -376,7 +378,7 @@ export default function CreateSessionTemplatePage() {
                     {!useGenericSample && (
                       <div className="p-4 border-2 border-dashed border-slate-100 dark:border-slate-700/30 rounded-2xl bg-slate-50/30 dark:bg-slate-900/20">
                         <FileUploader
-                          onFileSelect={() => {}}
+                          onFileSelect={() => { }}
                           onUploadSuccess={(res: any) => {
                             setHeaderHandle(res.data.headerHandle);
                             toastUtils.success('Sample file uploaded!');
@@ -489,8 +491,8 @@ export default function CreateSessionTemplatePage() {
                         key={option}
                         type="button"
                         onClick={() => {
-                            setInteractiveType(option as any);
-                            if (option === 'none') setInteractiveActions([]);
+                          setInteractiveType(option as any);
+                          if (option === 'none') setInteractiveActions([]);
                         }}
                         className={`
                           flex-1 px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all
@@ -585,7 +587,7 @@ export default function CreateSessionTemplatePage() {
                       <div>
                         <h4 className="text-[11px] font-black uppercase tracking-widest text-amber-700 dark:text-amber-400 mb-1">WhatsApp Limitation</h4>
                         <p className="text-xs text-amber-600 dark:text-amber-300/80 font-medium leading-relaxed">
-                          WhatsApp requires at least one button to display a <span className="font-bold">Text Header</span> or <span className="font-bold">Footer</span>. 
+                          WhatsApp requires at least one button to display a <span className="font-bold">Text Header</span> or <span className="font-bold">Footer</span>.
                           A default <span className="font-bold underline">"OK"</span> button will be added automatically to preserve the card layout.
                         </p>
                       </div>

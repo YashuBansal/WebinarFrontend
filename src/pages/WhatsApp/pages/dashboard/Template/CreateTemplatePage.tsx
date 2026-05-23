@@ -336,6 +336,7 @@ export default function CreateTemplatePage() {
     } catch (error) {
       console.error('Failed to create template from page submit:', error);
       const parsed = parseTemplateError(error);
+      toastUtils.error(parsed.message);
 
       if (parsed.source === 'meta') {
         setMetaError(parsed);
