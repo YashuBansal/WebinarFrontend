@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useChat } from '@/hooks/useChat';
 import { useMediaAssets } from '@/hooks/useMediaAssets';
-import { wabaMessageApi } from '@/api/modules/wabaMessageAPI';
 import type { SendTemplateMessagePayload } from '@/schemas/templateSchema';
 import type { ChatMessageDTO } from '@/api/modules/chatAPI';
 import { toastUtils } from '@/lib/utils';
@@ -143,15 +142,6 @@ export function ChatWindow({
     setShowSessionForm(false);
   }, [activeContact]);
 
-  // Mark messages as read when chat is opened
-  useEffect(() => {
-    if (activeContact && projectId) {
-      wabaMessageApi.markAsRead(projectId, activeContact).catch((error) => {
-        console.error('Failed to mark messages as read:', error);
-        // Don't show error toast - this is a background operation
-      });
-    }
-  }, [activeContact, projectId]);
 
   // Track inbound messages and notify via callback
   const prevMessagesLengthRef = useRef(0);

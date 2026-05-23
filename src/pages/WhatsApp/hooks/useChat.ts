@@ -6,6 +6,7 @@ import { toastUtils } from '@/lib/utils';
 import type { SendTemplateMessagePayload } from '@/schemas/templateSchema';
 import { socketManager } from '@/lib/socket';
 import { useQuickReplies } from './useQuickReplies';
+import { wabaMessageApi } from '@/api/modules/wabaMessageAPI';
 
 // Query key constant for invalidating waba message queries
 const WABA_MESSAGE_QUERY_KEY = 'wabaMessage';
@@ -24,7 +25,7 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
   const [canSendDirect, setCanSendDirect] = useState<CanSendDirectResponse | null>(null);
   const lastRequestedPageRef = useRef<number | null>(null);
   const queryClient = useQueryClient();
-  
+
   // Fetch templates for template message rendering
   const { data: templatesData } = useTemplates(projectId || '', { status: 'APPROVED' });
   const templates = templatesData?.data || [];
@@ -34,15 +35,15 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
 
   // Fetch quick replies (session templates)
   const { quickReplies, isLoading: isQuickRepliesLoading } = useQuickReplies(projectId || '');
-  
+
   // Helper function to invalidate contact queries
   const invalidateContactQueries = useCallback(() => {
     if (!projectId) return;
-    queryClient.invalidateQueries({ 
-      queryKey: [WABA_MESSAGE_QUERY_KEY, 'eligible-session-contacts', projectId] 
+    queryClient.invalidateQueries({
+      queryKey: [WABA_MESSAGE_QUERY_KEY, 'eligible-session-contacts', projectId]
     });
-    queryClient.invalidateQueries({ 
-      queryKey: [WABA_MESSAGE_QUERY_KEY, 'unique-phone-numbers', projectId] 
+    queryClient.invalidateQueries({
+      queryKey: [WABA_MESSAGE_QUERY_KEY, 'unique-phone-numbers', projectId]
     });
   }, [projectId, queryClient]);
 
@@ -97,12 +98,17 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
         })
       );
 
+      // Call markAsRead after sending succeeds
+      wabaMessageApi.markAsRead(projectId, phoneNumber)
+        .then(() => invalidateContactQueries())
+        .catch((err) => console.error('Failed to mark read after sendText:', err));
+
       invalidateContactQueries();
       return id;
     } catch (error) {
       console.error('Failed to send text message:', error);
       const failureReason = 'Failed to send message';
-      
+
       // Update message to show failure
       setMessages((prev) =>
         prev.map((m) => {
@@ -113,7 +119,7 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
           return { ...m, status: 'failed', failureReason };
         })
       );
-      
+
       toastUtils.error('Failed to send message');
       throw error;
     }
@@ -121,7 +127,7 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
 
   const sendTemplate = useCallback(async (payload: SendTemplateMessagePayload) => {
     if (!projectId || !phoneNumber) return;
-    
+
     // Optimistic template message:
     // Template delivery is async, and `load(1)` right after API returns can happen before the message is persisted.
     // So we show a placeholder immediately, then replace it when polling fetches the real message from server.
@@ -138,11 +144,11 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
       templateComponents:
         bodyVariables.length > 0
           ? [
-              {
-                type: 'body',
-                parameters: bodyVariables.map((v) => ({ type: 'text', text: v })),
-              },
-            ]
+            {
+              type: 'body',
+              parameters: bodyVariables.map((v) => ({ type: 'text', text: v })),
+            },
+          ]
           : [],
       status: 'pending',
     };
@@ -165,6 +171,11 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
         }),
       );
 
+      // Call markAsRead after sending template succeeds
+      wabaMessageApi.markAsRead(projectId, phoneNumber)
+        .then(() => invalidateContactQueries())
+        .catch((err) => console.error('Failed to mark read after sendTemplate:', err));
+
       invalidateContactQueries();
     } catch (error) {
       console.error('Failed to send template:', error);
@@ -184,7 +195,7 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
 
   const checkCanSendDirect = useCallback(async () => {
     if (!projectId || !phoneNumber) return;
-    
+
     try {
       const result = await chatApi.canSendDirect(projectId, phoneNumber);
       setCanSendDirect(result);
@@ -198,24 +209,27 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
     if (!projectId || !phoneNumber) return;
     load(1);
     checkCanSendDirect();
-  }, [projectId, phoneNumber, load, checkCanSendDirect]);
+    wabaMessageApi.markAsRead(projectId, phoneNumber)
+      .then(() => invalidateContactQueries())
+      .catch((err) => console.error('Failed to mark messages as read on open:', err));
+  }, [projectId, phoneNumber, load, checkCanSendDirect, invalidateContactQueries]);
 
   // Socket connection - uses singleton socket manager
   useEffect(() => {
     const socket = socketManager.getSocket();
-    
+
     if (!socket) return;
 
     // Set up message listener
     const onMessage = (evt: any) => {
       if (!evt?.phoneNumber) return;
-      
+
       // Normalize phone numbers for comparison (handles + prefix differences)
       const normalizedEventPhone = normalizePhoneNumber(evt.phoneNumber);
       const normalizedActivePhone = normalizePhoneNumber(phoneNumber);
       const isActiveContact =
         phoneNumber && normalizedEventPhone === normalizedActivePhone;
-      
+
       // Only update messages list for the currently active contact
       if (isActiveContact) {
         setMessages((prev) => {
@@ -234,7 +248,7 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
             mediaUrl: evt.mediaUrl,
             status: evt.status,
           };
-          
+
           // Check if this message (by ID) is already in the list
           if (incoming._id && prev.some(m => String(m._id) === String(incoming._id))) {
             // Still update the message to get latest status/data
@@ -292,10 +306,17 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
 
           return [...prev, incoming];
         });
-        
+
         // Recheck direct message permission when new inbound message arrives
         if (evt.direction === 'inbound') {
           checkCanSendDirect();
+
+          // INSTANTLY mark as read since we are actively looking at this contact!
+          if (projectId && phoneNumber) {
+            wabaMessageApi.markAsRead(projectId, phoneNumber)
+              .then(() => invalidateContactQueries())
+              .catch((err) => console.error('Failed to mark incoming as read:', err));
+          }
         }
       }
 
@@ -437,12 +458,12 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
     });
   }, [hasMore, loading, page, load]);
 
-  return { 
-    messages, 
-    loading, 
-    hasMore, 
-    loadMore, 
-    sendText, 
+  return {
+    messages,
+    loading,
+    hasMore,
+    loadMore,
+    sendText,
     sendTemplate,
     templates,
     quickReplies,

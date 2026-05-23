@@ -35,12 +35,12 @@ export default function ChatPage() {
     // Check dummy contacts first
     const dummy = DUMMY_CONTACTS.find(c => c.phoneNumber === activePhone);
     if (dummy) {
-      return { 
-        ...dummy, 
+      return {
+        ...dummy,
         _id: `dummy-${dummy.phoneNumber}`,
-        phone: dummy.phoneNumber, 
-        firstName: dummy.name, 
-        lastName: '' 
+        phone: dummy.phoneNumber,
+        firstName: dummy.name,
+        lastName: ''
       };
     }
 
@@ -105,7 +105,10 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-[calc(100vh-64px)] w-full overflow-hidden min-h-0 relative">
+    <div
+      className="flex w-full overflow-hidden min-h-0 relative"
+      style={{ height: 'calc(100vh - var(--header-height, 64px))' }}
+    >
       <div className={`flex-shrink-0 ${activePhone ? 'hidden md:block' : 'block w-full md:w-auto'}`}>
         <ContactsList
           projectId={selectedProject._id}
