@@ -17,8 +17,9 @@ export function useQuickReplies(projectId: string) {
       queryClient.invalidateQueries({ queryKey: ['quick-replies', projectId] });
       toastUtils.success('Quick reply created successfully');
     },
-    onError: () => {
-      toastUtils.error('Failed to create quick reply');
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || 'Failed to create quick reply';
+      toastUtils.error(msg);
     },
   });
 

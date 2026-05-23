@@ -4,6 +4,7 @@ import { lazy } from "react";
 const Layout = lazy(() => import("../components/Layout/Layout"));
 const Dashboard = lazy(() => import("./Dashboard/Dashboard"));
 const Login = lazy(() => import("./Auth/Login/Login"));
+const Signup = lazy(() => import("./Auth/Signup/Signup"));
 const Webinar = lazy(() => import("./Webinar/Webinar"));
 const ComingSoon = lazy(() => import("./NotFound/ComingSoon"));
 const NotFound = lazy(() => import("./NotFound/NotFound"));
@@ -96,6 +97,7 @@ export {
   AttendeeHistory,
   Dashboard,
   Login,
+  Signup,
   Webinar,
   Layout,
   ComingSoon,

@@ -336,6 +336,7 @@ export default function CreateTemplatePage() {
     } catch (error) {
       console.error('Failed to create template from page submit:', error);
       const parsed = parseTemplateError(error);
+      toastUtils.error(parsed.message);
 
       if (parsed.source === 'meta') {
         setMetaError(parsed);
@@ -613,9 +614,83 @@ export default function CreateTemplatePage() {
                   );
                 })}
               </div>
+
+              <AnimatePresence mode="wait">
+                {watchedHeaderFormat === 'TEXT' && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800"
+                  >
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1 mb-2 block">Header Content</Label>
+                    <Input
+                      type="text"
+                      placeholder="Enter header text here"
+                      {...register('header')}
+                      maxLength={60}
+                      className="h-11 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
+                    />
+                    {errors.header && (
+                      <p className="text-red-500 text-[11px] font-bold mt-2 ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
+                        <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                        {errors.header.message}
+                      </p>
+                    )}
+                  </motion.div>
+                )}
+
+                {['IMAGE', 'VIDEO', 'DOCUMENT'].includes(watchedHeaderFormat || '') && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4"
+                  >
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1 block">Media Assets</Label>
+                    <label className="flex items-center gap-3 p-3 bg-slate-50/50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all">
+                      <Checkbox
+                        checked={useGenericSample}
+                        onCheckedChange={(checked) => {
+                          setUseGenericSample(checked as boolean);
+                          if (checked) {
+                            setHeaderHandle(null);
+                            setUploadError('');
+                          }
+                        }}
+                        className="rounded-md border-slate-300 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
+                      />
+                      <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Use generic sample handle</span>
+                    </label>
+
+                    {!useGenericSample && (
+                      <div className="p-4 border-2 border-dashed border-slate-100 dark:border-slate-700/30 rounded-2xl bg-slate-50/30 dark:bg-slate-900/20">
+                        <FileUploader
+                          onFileSelect={handleFileSelect}
+                          onUploadSuccess={handleUploadSuccess}
+                          onUploadError={handleUploadError}
+                          accept={getFileAcceptTypes()}
+                          maxSize={getMaxFileSize()}
+                          uploadEndpoint={
+                            selectedProject
+                              ? `/whatsapp/templates/${selectedProject._id}/upload-sample-media`
+                              : ''
+                          }
+                          uploadFieldName="file"
+                        />
+                      </div>
+                    )}
+
+                    {(headerHandle || useGenericSample) && (
+                      <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-500/10 border border-green-100 dark:border-green-500/20 rounded-xl text-[10px] font-bold text-green-700 dark:text-green-400 uppercase tracking-widest">
+                        <CheckCircle className="h-3.5 w-3.5" />
+                        Sample file is ready
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </motion.div>
-
-
 
             {/* Template Format (Body) */}
             <motion.div
@@ -671,95 +746,6 @@ export default function CreateTemplatePage() {
                 </p>
               </div>
             </motion.div>
-
-            {/* Template Header Text (Condition-based) */}
-            {watchedHeaderFormat === 'TEXT' && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
-              >
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
-                    <Type className="h-4 w-4" />
-                  </div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Header Content</span>
-                </div>
-                <Input
-                  type="text"
-                  placeholder="Enter header text here"
-                  {...register('header')}
-                  maxLength={60}
-                  className="h-11 rounded-xl border-slate-200 dark:border-slate-700/30 bg-slate-50/50 dark:bg-slate-900/60 focus:ring-green-500/20 focus:border-green-500 transition-all font-medium text-sm"
-                />
-                {errors.header && (
-                  <p className="text-red-500 text-[11px] font-bold mt-2 ml-1 flex items-center gap-1 animate-in fade-in slide-in-from-top-1 duration-200">
-                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                    {errors.header.message}
-                  </p>
-                )}
-              </motion.div>
-            )}
-
-            {/* Media Upload Section */}
-            {['IMAGE', 'VIDEO', 'DOCUMENT'].includes(watchedHeaderFormat || '') && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="group relative bg-white dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700/30 hover:border-green-400/50 dark:hover:border-green-500/50 hover:shadow-xl hover:shadow-green-900/5 dark:hover:shadow-green-500/10 rounded-[20px] p-6 transition-all duration-300 overflow-hidden"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 flex items-center justify-center text-slate-400 group-hover:text-green-600 transition-colors">
-                      <Paperclip className="h-4 w-4" />
-                    </div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Media Assets</span>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <label className="flex items-center gap-3 p-3 bg-slate-50/50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all">
-                    <Checkbox
-                      checked={useGenericSample}
-                      onCheckedChange={(checked) => {
-                        setUseGenericSample(checked as boolean);
-                        if (checked) {
-                          setHeaderHandle(null);
-                          setUploadError('');
-                        }
-                      }}
-                      className="rounded-md border-slate-300 data-[state=checked]:bg-green-500 data-[state=checked]:border-green-500"
-                    />
-                    <span className="text-xs font-bold text-slate-600 dark:text-slate-400">Use generic sample handle</span>
-                  </label>
-
-                  {!useGenericSample && (
-                    <div className="p-4 border-2 border-dashed border-slate-100 dark:border-slate-700/30 rounded-2xl bg-slate-50/30 dark:bg-slate-900/20">
-                      <FileUploader
-                        onFileSelect={handleFileSelect}
-                        onUploadSuccess={handleUploadSuccess}
-                        onUploadError={handleUploadError}
-                        accept={getFileAcceptTypes()}
-                        maxSize={getMaxFileSize()}
-                        uploadEndpoint={
-                          selectedProject
-                            ? `/whatsapp/templates/${selectedProject._id}/upload-sample-media`
-                            : ''
-                        }
-                        uploadFieldName="file"
-                      />
-                    </div>
-                  )}
-
-                  {(headerHandle || useGenericSample) && (
-                    <div className="flex items-center gap-2 p-3 bg-green-50 dark:bg-green-500/10 border border-green-100 dark:border-green-500/20 rounded-xl text-[10px] font-bold text-green-700 dark:text-green-400 uppercase tracking-widest">
-                      <CheckCircle className="h-3.5 w-3.5" />
-                      Sample file is ready
-                    </div>
-                  )}
-                </div>
-              </motion.div>
-            )}
 
             {/* Sample Values for Variables */}
             {sampleValues.length > 0 && (

@@ -1,17 +1,12 @@
-import { lazy, Suspense, useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
-import { logIn } from "../../../features/actions/auth";
+import { signUp } from "../../../features/actions/auth";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, Link } from "react-router-dom";
-
-const ForgotPasswordModal = lazy(
-  () => import("../ForgotPassword/ForgotPassword"),
-);
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import AppLoader from "../../../components/AppLoader";
-import ModalFallback from "../../../components/Fallback/ModalFallback";
 
 const inputClass =
-  "h-12 w-full rounded-lg border border-white/30 bg-white/20 px-3 text-white placeholder:text-white/60 shadow-sm backdrop-blur-sm transition-colors focus:border-wlh-brand focus:bg-white/30 focus:outline-none focus:ring-2 focus:ring-wlh-brand/50 disabled:cursor-not-allowed disabled:opacity-60 autofill:!bg-[rgba(15,23,42,0.85)] autofill:!text-white autofill:shadow-[inset_0_0_0_1000px_rgba(15,23,42,0.85)]";
+  "h-10 w-full rounded-lg border border-white/30 bg-white/20 px-3 text-sm text-white placeholder:text-white/50 shadow-sm backdrop-blur-sm transition-colors focus:border-wlh-brand focus:bg-white/30 focus:outline-none focus:ring-2 focus:ring-wlh-brand/50 disabled:cursor-not-allowed disabled:opacity-60 autofill:!bg-[rgba(15,23,42,0.85)] autofill:!text-white autofill:shadow-[inset_0_0_0_1000px_rgba(15,23,42,0.85)]";
 
 function EyeIcon(props) {
   return (
@@ -77,17 +72,42 @@ function MoonIcon(props) {
   );
 }
 
-function Login() {
+function Signup() {
   const dispatch = useDispatch();
-  const { isLoggingIn, isUserLoggedIn } = useSelector((state) => state.auth);
+  const { isLoading, isUserLoggedIn } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [activeRefCode, setActiveRefCode] = useState("");
+
+  useEffect(() => {
+    const urlRef = searchParams.get("ref");
+    const thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
+
+    if (urlRef) {
+      localStorage.setItem("wlh_referrer", urlRef);
+      localStorage.setItem("wlh_referrer_time", Date.now().toString());
+      setActiveRefCode(urlRef);
+    } else {
+      const storedRef = localStorage.getItem("wlh_referrer");
+      const storedTime = localStorage.getItem("wlh_referrer_time");
+
+      if (storedRef && storedTime) {
+        if (Date.now() - parseInt(storedTime, 10) < thirtyDaysInMs) {
+          setActiveRefCode(storedRef);
+        } else {
+          localStorage.removeItem("wlh_referrer");
+          localStorage.removeItem("wlh_referrer_time");
+        }
+      }
+    }
+  }, [searchParams]);
+
   const [isPasswordHidden, setPasswordHidden] = useState(false);
-  const [forgotModalOpen, setForgotModalOpen] = useState(false);
-  const [openCode, setOpenCode] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
+  const [isConfirmPasswordHidden, setConfirmPasswordHidden] = useState(false);
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm();
 
@@ -95,18 +115,25 @@ function Login() {
     setPasswordHidden(!isPasswordHidden);
   };
 
-  const onSubmit = (data) => {
-    dispatch(logIn(data)).then((res) => {
-      if (res.meta.requestStatus === "fulfilled") {
-        if (res.payload?.twoFa) {
-          setOpenCode(true);
-        } else {
-          setOpenCode(false);
-        }
+  const toggleConfirmPasswordVisibility = () => {
+    setConfirmPasswordHidden(!isConfirmPasswordHidden);
+  };
 
-        const broadcastChannel = new BroadcastChannel("auth-saas-crm");
-        broadcastChannel.postMessage({ type: "REFRESH" });
-        broadcastChannel.close();
+  const password = watch("password");
+
+  const onSubmit = (data) => {
+    const payload = {
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      phone: data.phone,
+      ref: activeRefCode || "",
+    };
+    dispatch(signUp(payload)).then((res) => {
+      if (res.meta.requestStatus === "fulfilled") {
+        localStorage.removeItem("wlh_referrer");
+        localStorage.removeItem("wlh_referrer_time");
+        navigate("/login");
       }
     });
   };
@@ -118,16 +145,19 @@ function Login() {
   }, [isUserLoggedIn, navigate]);
 
   useEffect(() => {
-    document.title = "Signin | Webinar Leads Hub";
+    document.title = "Signup | Webinar Leads Hub";
   }, []);
 
   const formErrorMessage =
+    errors.name?.message ||
     errors.email?.message ||
+    errors.phone?.message ||
     errors.password?.message ||
-    errors.securityCode?.message;
+    errors.confirmPassword?.message;
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden font-sans transition-colors duration-500">
+      {/* Immersive Dark Blue Gradient Background */}
       <div
         className="absolute inset-0 transition-all duration-500"
         style={{
@@ -141,6 +171,7 @@ function Login() {
         <div className="absolute inset-0 opacity-5" aria-hidden />
       </div>
 
+      {/* Floating SaaS Elements */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="animate-float1 absolute left-4 top-16 md:left-12 md:top-24 lg:left-24">
           <div className="relative">
@@ -274,6 +305,7 @@ function Login() {
         <MoonIcon className="text-white" />
       </button>
 
+      {/* Glassmorphism Container */}
       <div
         className="animate-login-fade relative z-10 mx-4 w-full max-w-md"
         style={{
@@ -283,20 +315,20 @@ function Login() {
           borderRadius: "16px",
           boxShadow: "0 8px 30px rgba(0, 0, 0, 0.25)",
           border: "1px solid rgba(255, 255, 255, 0.2)",
-          padding: "48px 40px",
+          padding: "24px 32px",
         }}
       >
-        <div className="mb-8 text-center">
-          <div className="mb-4 flex justify-center">
+        <div className="mb-4 text-center">
+          <div className="mb-2 flex justify-center">
             <img
               src="/wlh-logo.png"
               alt="Webinar Leads Hub"
-              className="h-24 w-24 object-contain"
+              className="h-14 w-14 object-contain"
               fetchPriority="high"
             />
           </div>
           <h1
-            className="mb-2 text-3xl text-white"
+            className="mb-0.5 text-xl text-white font-semibold"
             style={{
               textShadow:
                 "0 2px 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(34, 181, 115, 0.5)",
@@ -304,140 +336,155 @@ function Login() {
           >
             WEBINAR LEADS <span className="text-wlh-brand">HUB</span>
           </h1>
-          <p className="text-lg text-white opacity-90">Welcome back 👋</p>
+          <p className="text-xs text-white/90">Create an account 🚀</p>
         </div>
 
         <form
-          className="space-y-5"
+          className="space-y-3"
           autoComplete="on"
           onSubmit={handleSubmit(onSubmit)}
         >
           <div>
-            <label htmlFor="email" className="mb-2 block text-sm text-white">
-              Email
+            <label htmlFor="name" className="mb-1 block text-[11px] font-medium text-white/90">
+              Full Name
+            </label>
+            <input
+              id="name"
+              type="text"
+              className={inputClass}
+              placeholder="Enter your full name"
+              {...register("name", { required: "Full name is required" })}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="email" className="mb-1 block text-[11px] font-medium text-white/90">
+              Email Address
             </label>
             <input
               id="email"
               type="email"
               autoComplete="email"
-              disabled={openCode}
-              autoFocus={!openCode}
               className={inputClass}
-              placeholder="Enter your email"
+              placeholder="Enter your email address"
               {...register("email", { required: "Email is required" })}
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="mb-2 block text-sm text-white">
-              Password
+            <label htmlFor="phone" className="mb-1 block text-[11px] font-medium text-white/90">
+              Phone Number
             </label>
-            <div className="relative">
-              <input
-                id="password"
-                type={isPasswordHidden ? "text" : "password"}
-                autoComplete="current-password"
-                disabled={openCode}
-                className={`${inputClass} pr-11`}
-                placeholder="Enter your password"
-                {...register("password", {
-                  required: "Password is required",
-                })}
-              />
-              <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                disabled={openCode}
-                className="absolute right-2 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-white/70 transition-all hover:bg-white/10 hover:text-white disabled:opacity-50"
-                aria-label={
-                  isPasswordHidden ? "Hide password" : "Show password"
-                }
+            <input
+              id="phone"
+              type="tel"
+              className={inputClass}
+              placeholder="e.g. +919876543210"
+              {...register("phone", {
+                required: "Phone number is required",
+                pattern: {
+                  value: /^\+91\d{10}$/,
+                  message: "Phone number must start with +91 followed by 10 digits",
+                },
+              })}
+            />
+          </div>
+
+          {/* Grid for Password & Confirm Password */}
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label htmlFor="password" className="mb-1 block text-[11px] font-medium text-white/90">
+                Password
+              </label>
+              <div className="relative">
+                <input
+                  id="password"
+                  type={isPasswordHidden ? "text" : "password"}
+                  autoComplete="new-password"
+                  className={`${inputClass} pr-10`}
+                  placeholder="Password"
+                  {...register("password", {
+                    required: "Password is required",
+                    minLength: {
+                      value: 6,
+                      message: "Min 6 characters",
+                    },
+                  })}
+                />
+                <button
+                  type="button"
+                  onClick={togglePasswordVisibility}
+                  className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-white/70 transition-all hover:bg-white/10 hover:text-white"
+                  aria-label={
+                    isPasswordHidden ? "Hide password" : "Show password"
+                  }
+                >
+                  {isPasswordHidden ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+
+            <div>
+              <label
+                htmlFor="confirmPassword"
+                className="mb-1 block text-[11px] font-medium text-white/90"
               >
-                {isPasswordHidden ? <EyeOffIcon /> : <EyeIcon />}
-              </button>
+                Confirm Password
+              </label>
+              <div className="relative">
+                <input
+                  id="confirmPassword"
+                  type={isConfirmPasswordHidden ? "text" : "password"}
+                  autoComplete="new-password"
+                  className={`${inputClass} pr-10`}
+                  placeholder="Confirm password"
+                  {...register("confirmPassword", {
+                    required: "Confirm password",
+                    validate: (value) =>
+                      value === password || "Passwords do not match",
+                  })}
+                />
+                <button
+                  type="button"
+                  onClick={toggleConfirmPasswordVisibility}
+                  className="absolute right-1 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-white/70 transition-all hover:bg-white/10 hover:text-white"
+                  aria-label={
+                    isConfirmPasswordHidden ? "Hide password" : "Show password"
+                  }
+                >
+                  {isConfirmPasswordHidden ? <EyeOffIcon className="h-4 w-4" /> : <EyeIcon className="h-4 w-4" />}
+                </button>
+              </div>
             </div>
           </div>
 
-          {openCode && (
-            <div className="pt-1">
-              <label
-                htmlFor="securityCode"
-                className="mb-2 block text-sm text-white"
-              >
-                Security Code
-              </label>
-              <input
-                id="securityCode"
-                type="text"
-                autoComplete="one-time-code"
-                autoFocus
-                className={inputClass}
-                placeholder="Enter security code"
-                {...register("securityCode", {
-                  required: "Security code is required",
-                })}
-              />
-            </div>
-          )}
-
           {formErrorMessage && (
-            <div className="rounded-lg bg-red-500/20 px-3 py-2 text-sm text-red-300">
+            <div className="rounded-lg bg-red-500/20 px-3 py-1.5 text-[11px] text-red-300">
               {formErrorMessage}
             </div>
           )}
 
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2">
-              <input
-                id="remember"
-                type="checkbox"
-                checked={rememberMe}
-                onChange={(e) => setRememberMe(e.target.checked)}
-                className="h-4 w-4 shrink-0 rounded border-white/50 bg-white/10 text-wlh-brand focus:ring-wlh-brand focus:ring-offset-0"
-              />
-              <label
-                htmlFor="remember"
-                className="cursor-pointer text-sm text-white"
-              >
-                Remember me
-              </label>
-            </div>
-            <button
-              type="button"
-              onClick={() => setForgotModalOpen(true)}
-              className="text-sm text-white hover:underline"
-            >
-              Forgot your password?
-            </button>
-          </div>
-
           <button
             type="submit"
-            disabled={isLoggingIn}
-            className="flex h-12 w-full items-center justify-center rounded-lg font-medium text-white transition-all hover:scale-[1.02] hover:shadow-glow-button disabled:cursor-not-allowed disabled:opacity-70"
+            disabled={isLoading}
+            className="flex h-10 w-full items-center justify-center rounded-lg font-semibold text-white text-sm transition-all hover:scale-[1.01] hover:shadow-glow-button disabled:cursor-not-allowed disabled:opacity-70 mt-4"
             style={{ backgroundColor: "#22B573" }}
           >
-            {isLoggingIn ? <AppLoader size="md" variant="inverse" /> : "Sign In"}
+            {isLoading ? <AppLoader size="sm" variant="inverse" /> : "Sign Up"}
           </button>
 
-          <div className="pt-2 text-center">
-            <p className="text-sm text-white opacity-85">
-              Don't have an account?{" "}
-              <Link to="/signup" className="font-semibold text-wlh-brand hover:underline">
-                Sign Up
+          <div className="pt-1 text-center">
+            <p className="text-xs text-white/80">
+              Already have an account?{" "}
+              <Link to="/login" className="font-semibold text-wlh-brand hover:underline">
+                Sign In
               </Link>
             </p>
           </div>
         </form>
-
-        {forgotModalOpen && (
-          <Suspense fallback={<ModalFallback />}>
-            <ForgotPasswordModal onClose={() => setForgotModalOpen(false)} />
-          </Suspense>
-        )}
       </div>
     </div>
   );
 }
 
-export default Login;
+export default Signup;

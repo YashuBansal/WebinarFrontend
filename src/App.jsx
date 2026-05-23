@@ -10,6 +10,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   Dashboard,
   Login,
+  Signup,
   Webinar,
   Layout,
   ComingSoon,
@@ -777,6 +778,16 @@ const App = () => {
         <Suspense fallback={<></>}>
           {" "}
           <Login />
+        </Suspense>
+      ) : (
+        <Navigate to="/" replace />
+      ),
+    },
+    {
+      path: "/signup",
+      element: !isUserLoggedIn ? (
+        <Suspense fallback={<></>}>
+          <Signup />
         </Suspense>
       ) : (
         <Navigate to="/" replace />

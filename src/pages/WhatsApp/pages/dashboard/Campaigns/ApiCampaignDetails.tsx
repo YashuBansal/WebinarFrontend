@@ -209,10 +209,10 @@ const ApiCampaignDetails = () => {
   return (
     <div className="min-h-full w-full min-w-0 max-w-full box-border p-2 transition-colors duration-500 sm:p-2 md:p-0 lg:p-0 xl:p-2 2xl:p-4">
       <motion.div
-        className="mb-6 rounded-2xl border border-slate-200/60 p-4 sm:p-5"
+        className="mb-6 rounded-2xl border border-slate-200 p-4 sm:p-5 bg-white dark:bg-slate-900 shadow-sm dark:border-slate-800"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        
+
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-4">
@@ -284,45 +284,21 @@ const ApiCampaignDetails = () => {
         </div>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-6 gap-6 mb-8">
-        {[
-          { label: "Volume", val: analytics.total, icon: Activity, color: "text-slate-600 dark:text-slate-400", bg: "bg-slate-50 dark:bg-slate-900/50" },
-          { label: "Dispatched", val: analytics.sent, icon: Zap, color: "text-[#22B573]", bg: "bg-emerald-50 dark:bg-emerald-500/10" },
-          { label: "Received", val: analytics.delivered, icon: CheckCircle2, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-500/10" },
-          { label: "Viewed", val: analytics.read, icon: TrendingUp, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-500/10" },
-          { label: "Actions", val: analytics.clicked, icon: Target, color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-500/10" },
-          { label: "Anomalies", val: analytics.failed, icon: AlertCircle, color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-500/10" },
-        ].map((stat, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: i * 0.05 }}
-            className="rounded-2xl border border-slate-200 dark:border-slate-700/50 bg-white dark:bg-slate-800/50 p-6 hover:shadow-lg hover:shadow-slate-100 transition-all group"
-          >
-            <div className={`h-10 w-10 rounded-xl ${stat.bg} flex items-center justify-center mb-3 group-hover:scale-110 transition-transform`}>
-              <stat.icon className={`h-5 w-5 ${stat.color}`} />
-            </div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">{stat.label}</p>
-            <p className={`text-2xl font-black ${stat.color}`}>{stat.val}</p>
-          </motion.div>
-        ))}
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+        {/* Left Side: Endpoint Specs Card */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="lg:col-span-1 space-y-6"
+          className="lg:col-span-1"
         >
-          <Card className="rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden h-full">
-            <CardHeader className="bg-slate-50/50 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-700/50 p-6">
+          <Card className="rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden h-full flex flex-col justify-between">
+            <CardHeader className="bg-slate-50/50 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-700/50 py-4">
               <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
                 <Settings2 className="h-4 w-4 text-[#22B573]" />
                 Endpoint Specs
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-8">
+            <CardContent className="p-6 flex-1 flex flex-col justify-center">
               <div className="space-y-6">
                 <div>
                   <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Blueprint Template</p>
@@ -337,7 +313,7 @@ const ApiCampaignDetails = () => {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="flex flex-col gap-4">
                   <div className="space-y-1">
                     <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Deployed At</p>
                     <p className="text-xs font-bold text-slate-700 dark:text-slate-300">{formatDateTime12(campaign.createdAt)}</p>
@@ -349,105 +325,81 @@ const ApiCampaignDetails = () => {
                 </div>
 
                 <div>
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3">Health Distribution</p>
-                  <div className="space-y-3">
-                    {[
-                      { label: "Delivery Efficiency", val: analytics.total > 0 ? Math.round((analytics.delivered / analytics.total) * 100) : 0, color: "bg-blue-500" },
-                      { label: "Engagement Velocity", val: analytics.delivered > 0 ? Math.round((analytics.read / analytics.delivered) * 100) : 0, color: "bg-indigo-500" },
-                      { label: "Protocol Stability", val: analytics.total > 0 ? 100 - Math.round((analytics.failed / analytics.total) * 100) : 100, color: "bg-[#22B573]" },
-                    ].map((bar, i) => (
-                      <div key={i} className="space-y-1.5">
-                        <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">
-                          <span>{bar.label}</span>
-                          <span>{bar.val}%</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-900/60 rounded-full overflow-hidden">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${bar.val}%` }}
-                            transition={{ duration: 1, ease: "easeOut" }}
-                            className={`h-full ${bar.color}`}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2">Endpoint Status</p>
+                  <Badge variant="outline" className={`rounded-lg font-black text-[10px] uppercase tracking-widest px-2.5 py-1 ${status.bg} ${status.color} ${status.border} shadow-sm w-fit`}>
+                    <StatusIcon className="h-3.5 w-3.5 mr-1.5" />
+                    {status.label}
+                  </Badge>
                 </div>
               </div>
             </CardContent>
           </Card>
         </motion.div>
 
+        {/* Right Side: Analytics Summary Card */}
         <motion.div
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
           className="lg:col-span-2"
         >
-          <Card className="rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-xl shadow-slate-200/50 overflow-hidden h-full">
-            <CardHeader className="bg-slate-900 border-b border-slate-800 p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle className="text-white text-lg font-black uppercase tracking-widest flex items-center gap-2">
-                    <Code className="h-5 w-5 text-[#22B573]" />
-                    API Execution Hub
-                  </CardTitle>
-                  <CardDescription className="text-slate-400 font-medium mt-1">
-                    Direct integration interface for external systems.
-                  </CardDescription>
-                </div>
-                <div className="h-12 w-12 rounded-2xl bg-[#22B573]/20 flex items-center justify-center text-[#22B573]">
-                  <Sparkles className="h-6 w-6" />
-                </div>
-              </div>
+          <Card className="rounded-2xl border-slate-200 dark:border-slate-700/50 shadow-sm overflow-hidden h-full flex flex-col justify-between">
+            <CardHeader className="bg-slate-50/50 dark:bg-slate-900/60 border-b border-slate-100 dark:border-slate-700/50 py-4">
+              <CardTitle className="text-sm font-black uppercase tracking-widest text-slate-900 dark:text-white flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 text-[#22B573]" />
+                Analytics Summary
+              </CardTitle>
             </CardHeader>
-            <CardContent className="p-6 space-y-8 bg-slate-950">
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">Target Endpoint (POST)</p>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleCopyToClipboard(executeEndpointUrl, "Endpoint URL")}
-                    className="h-8 px-3 rounded-lg text-[#22B573] hover:bg-[#22B573]/10 font-black text-[10px] uppercase tracking-widest transition-all"
-                  >
-                    <Copy className="h-3 w-3 mr-1.5" />
-                    Copy Endpoint
-                  </Button>
-                </div>
-                <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex items-center gap-3">
-                  <div className="h-8 px-2 rounded-lg bg-[#22B573]/20 border border-[#22B573]/30 text-[#22B573] text-[10px] font-black flex items-center justify-center uppercase">POST</div>
-                  <p className="text-sm font-mono text-slate-300 truncate flex-1">{executeEndpointUrl}</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-[10px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">JSON Blueprint Payload</p>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleCopyToClipboard(samplePayloadString, "Sample JSON")}
-                    className="h-8 px-3 rounded-lg text-[#22B573] hover:bg-[#22B573]/10 font-black text-[10px] uppercase tracking-widest transition-all"
-                  >
-                    <Copy className="h-3 w-3 mr-1.5" />
-                    Copy Payload
-                  </Button>
-                </div>
-                <div className="relative group">
-                  <div className="absolute inset-0 bg-[#22B573]/5 blur-3xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-                  <div className="relative rounded-2xl bg-slate-900 border border-slate-800 p-5 overflow-auto max-h-[300px] custom-scrollbar">
-                    <pre className="text-xs sm:text-sm font-mono text-emerald-400 leading-relaxed whitespace-pre-wrap break-words">
-                      {samplePayloadString}
-                    </pre>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/5 border border-white/10">
-                <Activity className="h-5 w-5 text-slate-400 shrink-0" />
-                <p className="text-[11px] font-medium text-slate-400 leading-relaxed">
-                  Authenticate your requests using the project <span className="text-white font-bold">API Key</span> in the <span className="text-white font-bold">Authorization</span> header.
-                </p>
+            <CardContent className="px-6 flex-1 flex flex-col justify-center">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="hover:bg-transparent border-slate-100 dark:border-slate-700/50">
+                      <TableHead className="py-2 text-[10px] font-black uppercase tracking-widest text-slate-400">Metric</TableHead>
+                      <TableHead className="py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Volume</TableHead>
+                      <TableHead className="py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Percentage</TableHead>
+                      <TableHead className="py-2 text-[10px] font-black uppercase tracking-widest text-slate-400 pl-8">Ratio</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {[
+                      { label: "Total Messages", val: analytics.total, icon: Activity, color: "text-slate-600 dark:text-slate-400", bg: "bg-slate-50 dark:bg-slate-900/50", barColor: "bg-slate-400" },
+                      { label: "Sent", val: analytics.sent, icon: Zap, color: "text-[#22B573]", bg: "bg-emerald-50 dark:bg-emerald-500/10", barColor: "bg-[#22B573]" },
+                      { label: "Delivered", val: analytics.delivered, icon: CheckCircle2, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-500/10", barColor: "bg-blue-500" },
+                      { label: "Read", val: analytics.read, icon: TrendingUp, color: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-500/10", barColor: "bg-indigo-500" },
+                      { label: "Failed", val: analytics.failed, icon: AlertCircle, color: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-500/10", barColor: "bg-red-500" },
+                    ].map((row, i) => {
+                      const percentage = analytics.total > 0 ? Math.round((row.val / analytics.total) * 100) : 0;
+                      return (
+                        <TableRow key={i} className="border-slate-50 dark:border-slate-700/30 hover:bg-slate-50/50 dark:hover:bg-slate-900/20 transition-colors">
+                          <TableCell className="py-4 font-bold text-slate-900 dark:text-white">
+                            <div className="flex items-center gap-3">
+                              <div className={`h-8 w-8 rounded-lg ${row.bg} flex items-center justify-center shrink-0`}>
+                                <row.icon className={`h-4 w-4 ${row.color}`} />
+                              </div>
+                              <span className="text-sm font-black uppercase tracking-tight text-slate-700 dark:text-slate-300">{row.label}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="py-4 text-right text-sm font-black text-slate-950 dark:text-slate-50">
+                            {row.val}
+                          </TableCell>
+                          <TableCell className="py-4 text-right text-xs font-bold text-slate-500 dark:text-slate-400">
+                            {row.label === "Total Messages" ? "100%" : `${percentage}%`}
+                          </TableCell>
+                          <TableCell className="py-4 pl-8 min-w-[150px]">
+                            <div className="h-2 w-full bg-slate-100 dark:bg-slate-800/80 rounded-full overflow-hidden max-w-[160px]">
+                              <motion.div
+                                initial={{ width: 0 }}
+                                animate={{ width: row.label === "Total Messages" ? "100%" : `${percentage}%` }}
+                                transition={{ duration: 0.8, ease: "easeOut", delay: i * 0.05 }}
+                                className={`h-full ${row.barColor}`}
+                              />
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               </div>
             </CardContent>
           </Card>
@@ -508,12 +460,15 @@ const ApiCampaignDetails = () => {
                 <Table>
                   <TableHeader className="bg-slate-50/50 dark:bg-slate-900/60">
                     <TableRow className="hover:bg-transparent border-slate-100 dark:border-slate-700/50">
-                      <TableHead className="w-[180px] py-5 pl-8 text-[10px] font-black uppercase tracking-widest text-slate-400">Destination</TableHead>
-                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Identity</TableHead>
-                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">State</TableHead>
-                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Protocol</TableHead>
-                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Timeline</TableHead>
-                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 pr-8">Anomalies</TableHead>
+                      <TableHead className="w-[180px] py-5 pl-8 text-[10px] font-black uppercase tracking-widest text-slate-400">Phone Number</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Template Name</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Status</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Message Type</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Created At</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Sent At</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Delivered At</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400">Read At</TableHead>
+                      <TableHead className="text-[10px] font-black uppercase tracking-widest text-slate-400 pr-8">Error</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -541,9 +496,9 @@ const ApiCampaignDetails = () => {
                             <Badge
                               variant="outline"
                               className={`rounded-lg font-black text-[9px] uppercase tracking-widest px-2 py-0.5 border-none shadow-sm ${msg.status === "read" ? "bg-indigo-50 dark:bg-indigo-500/10 text-indigo-600 dark:text-indigo-400" :
-                                  msg.status === "delivered" ? "bg-emerald-50 dark:bg-emerald-500/10 text-[#22B573]" :
-                                    msg.status === "sent" ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400" :
-                                      msg.status === "failed" ? "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400" : "bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400"
+                                msg.status === "delivered" ? "bg-emerald-50 dark:bg-emerald-500/10 text-[#22B573]" :
+                                  msg.status === "sent" ? "bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400" :
+                                    msg.status === "failed" ? "bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400" : "bg-slate-50 dark:bg-slate-900/50 text-slate-500 dark:text-slate-400"
                                 }`}
                             >
                               {msg.status}
@@ -555,14 +510,24 @@ const ApiCampaignDetails = () => {
                             </Badge>
                           </TableCell>
                           <TableCell>
-                            <div className="flex flex-col gap-0.5">
-                              <span className="text-[11px] font-black text-slate-900 dark:text-white leading-none">
-                                {msg.readAt ? formatDateTime12(msg.readAt) : msg.deliveredAt ? formatDateTime12(msg.deliveredAt) : formatDateTime12(msg.createdAt)}
-                              </span>
-                              <span className="text-[10px] font-bold text-slate-400 leading-none tracking-tight">
-                                {msg.readAt ? "READ" : msg.deliveredAt ? "DELIVERED" : "INITIALIZED"}
-                              </span>
-                            </div>
+                            <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                              {msg.createdAt ? formatDateTime12(msg.createdAt) : "—"}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                              {msg.sentAt ? formatDateTime12(msg.sentAt) : "—"}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                              {msg.deliveredAt ? formatDateTime12(msg.deliveredAt) : "—"}
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-xs font-bold text-slate-600 dark:text-slate-400">
+                              {msg.readAt ? formatDateTime12(msg.readAt) : "—"}
+                            </span>
                           </TableCell>
                           <TableCell className="pr-8">
                             {msg.failureReason ? (

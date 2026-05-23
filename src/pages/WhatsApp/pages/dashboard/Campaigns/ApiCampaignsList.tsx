@@ -13,7 +13,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { ConfirmationDialog } from "@/components/ui/ConfirmationDialog";
+import ConfirmDeleteModal from "../../../../../components/ConfirmDeleteModal";
 import { useProjectContext } from "@/context/ProjectContext";
 import { useApiCampaigns, useDeleteApiCampaign } from "@/hooks/useApiCampaigns";
 import { formatDate12 } from "@/lib/date";
@@ -55,14 +55,8 @@ const ApiCampaignsList = () => {
   const [autoRefreshEnabled, setAutoRefreshEnabled] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [lastRefreshTime, setLastRefreshTime] = useState<Date | null>(null);
-  const [confirmationDialog, setConfirmationDialog] = useState<ConfirmationDialogState>({
-    isOpen: false,
-    title: "",
-    description: "",
-    variant: "default" as "default" | "destructive",
-    onConfirm: async () => { },
-    isLoading: false,
-  });
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedCampaignForDelete, setSelectedCampaignForDelete] = useState<{ id: string; name: string } | null>(null);
   const limit = 10;
 
   const activeProjectId = selectedProject?._id || resolvedProjectId;
@@ -105,51 +99,21 @@ const ApiCampaignsList = () => {
     setCurrentPage(page);
   };
 
-  const showConfirmationDialog = (
-    title: string,
-    description: string,
-    variant: "default" | "destructive",
-    onConfirm: () => Promise<void>
-  ) => {
-    setConfirmationDialog({
-      isOpen: true,
-      title,
-      description,
-      variant,
-      onConfirm,
-      isLoading: false,
-    });
+  const handleCancelApiCampaign = (campaignId: string, campaignName: string) => {
+    setSelectedCampaignForDelete({ id: campaignId, name: campaignName });
+    setDeleteModalOpen(true);
   };
 
-  const closeConfirmationDialog = () => {
-    setConfirmationDialog((prev) => ({
-      ...prev,
-      isOpen: false,
-      isLoading: false,
-    }));
-  };
-
-  const handleConfirmationConfirm = async () => {
-    setConfirmationDialog((prev) => ({ ...prev, isLoading: true }));
+  const handleConfirmDelete = async () => {
+    if (!selectedCampaignForDelete) return;
     try {
-      await confirmationDialog.onConfirm();
-      closeConfirmationDialog();
-    } catch (dialogError) {
-      console.error("Confirmation action failed:", dialogError);
-      setConfirmationDialog((prev) => ({ ...prev, isLoading: false }));
+      await deleteApiCampaignMutation.mutateAsync(selectedCampaignForDelete.id);
+      await refetch();
+      setDeleteModalOpen(false);
+      setSelectedCampaignForDelete(null);
+    } catch (error) {
+      console.error("Deletion failed:", error);
     }
-  };
-
-  const handleCancelApiCampaign = (campaignId: string) => {
-    showConfirmationDialog(
-      "Cancel API Campaign",
-      "Are you sure you want to cancel this API campaign? This action cannot be undone.",
-      "destructive",
-      async () => {
-        await deleteApiCampaignMutation.mutateAsync(campaignId);
-        await refetch();
-      }
-    );
   };
 
   const getStatusBadge = (campaign: any) => {
@@ -477,7 +441,7 @@ const ApiCampaignsList = () => {
                       <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => handleCancelApiCampaign(campaign._id)}
+                        onClick={() => handleCancelApiCampaign(campaign._id, campaign.name)}
                         disabled={deleteApiCampaignMutation.isPending}
                         className="h-10 w-10 rounded-xl border-slate-100 dark:border-slate-700/50 bg-slate-50/50 dark:bg-slate-800/50 text-slate-400 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:border-red-100 transition-all duration-300"
                       >
@@ -495,19 +459,14 @@ const ApiCampaignsList = () => {
         {renderPagination()}
       </div>
 
-      <ConfirmationDialog
-        isOpen={confirmationDialog.isOpen}
-        onClose={closeConfirmationDialog}
-        onConfirm={handleConfirmationConfirm}
-        title={confirmationDialog.title}
-        description={confirmationDialog.description}
-        variant={confirmationDialog.variant}
-        isLoading={confirmationDialog.isLoading}
-        confirmText={
-          confirmationDialog.variant === "destructive" ? "Confirm Delete" : "Confirm"
-        }
-        cancelText="Discard"
-      />
+      {deleteModalOpen && selectedCampaignForDelete && (
+        <ConfirmDeleteModal
+          setModal={setDeleteModalOpen}
+          triggerDelete={handleConfirmDelete}
+          isLoading={deleteApiCampaignMutation.isPending}
+          itemName={selectedCampaignForDelete.name}
+        />
+      )}
     </div>
   );
 };
