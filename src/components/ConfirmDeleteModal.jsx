@@ -5,7 +5,7 @@ import AppLoader from "./AppLoader";
 import { Button } from "./ui/button";
 import { useTheme } from "../contexts/ThemeContext";
 import { cn } from "../lib/utils";
-import { Dialog, DialogContent } from "./ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 
 const FONT = "Inter, sans-serif";
 
@@ -81,10 +81,10 @@ export default function ConfirmDeleteModal({
         <div className="flex flex-col">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b flex-shrink-0" style={{ borderColor: shellBorder }}>
-            <h3 className="text-lg font-bold flex items-center gap-2" style={{ fontFamily: FONT, color: titleColor }}>
+            <DialogTitle className="text-lg font-bold flex items-center gap-2" style={{ fontFamily: FONT, color: titleColor }}>
               <Trash2 className="w-5 h-5 text-red-500 shrink-0" />
               Confirm Delete
-            </h3>
+            </DialogTitle>
             <button type="button" onClick={handleClose} className="p-1.5 rounded-lg hover:bg-black/5 dark:hover:bg-white/10">
               <X className="w-5 h-5 text-gray-500" />
             </button>

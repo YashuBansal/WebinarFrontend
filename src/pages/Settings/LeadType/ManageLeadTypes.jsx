@@ -151,7 +151,7 @@ const LeadTypesForm = () => {
         ) : null}
       </motion.header>
 
-      <div className="min-h-[200px] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800/90">
+      <div className="min-h-[200px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800/90">
         <div className="p-5 sm:p-6">
           <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
             Your lead types

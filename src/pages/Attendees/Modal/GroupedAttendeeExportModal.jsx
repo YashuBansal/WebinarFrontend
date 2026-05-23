@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import AppLoader from "../../../components/AppLoader";
-import { X, Trash2 } from "lucide-react";
+import { ChevronDown, Trash2, X } from "lucide-react";
 import { closeModal } from "../../../features/slices/modalSlice";
 import { groupedAttendeeTableColumns } from "../../../utils/columnData";
 import { resetExportSuccess } from "../../../features/slices/export-excel";
@@ -20,6 +20,13 @@ import { Dialog, DialogContent } from "../../../components/ui/dialog";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Checkbox } from "../../../components/ui/checkbox";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../../components/ui/dropdown-menu";
+
 import { useTheme } from "../../../contexts/ThemeContext";
 
 const tableName = "All Attendees Export";
@@ -305,19 +312,44 @@ const GroupedAttendeesExportModal = ({ modalName, filters, sort }) => {
                   Apply Preset
                 </label>
                 <div className="flex gap-2 items-start">
-                  <select
-                    value={selectedPresetId}
-                    onChange={(e) => handleApplyPreset(e.target.value)}
-                    className="flex-1 min-w-0 pl-3 pr-3 py-2.5 rounded-xl text-sm border focus:outline-none focus:ring-2 focus:ring-slate-400/30"
-                    style={inputStyle}
-                  >
-                    <option value="">Default Columns</option>
-                    {(filterPresets || []).map((preset) => (
-                      <option key={preset._id} value={preset._id}>
-                        {preset.name}
-                      </option>
-                    ))}
-                  </select>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="flex h-10 w-full items-center justify-between rounded-xl border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950 text-slate-700 dark:text-slate-300 outline-none ring-offset-white focus:ring-2 focus:ring-emerald-500/20 hover:bg-slate-50 dark:hover:bg-white/10 transition-all duration-200"
+                        style={inputStyle}
+                      >
+                        <span className="truncate">
+                          {selectedPresetId
+                            ? (filterPresets || []).find(
+                                (p) => (p._id || p.name) === selectedPresetId
+                              )?.name || "Select Preset"
+                            : "Default Columns"}
+                        </span>
+                        <ChevronDown className="h-4 w-4 opacity-50" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="w-[280px] sm:w-[350px] max-h-[300px] z-[300] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                    >
+                      <DropdownMenuItem
+                        onClick={() => handleApplyPreset("")}
+                        className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200"
+                      >
+                        Default Columns
+                      </DropdownMenuItem>
+                      {(filterPresets || []).map((preset) => (
+                        <DropdownMenuItem
+                          key={preset._id}
+                          onClick={() => handleApplyPreset(preset._id)}
+                          className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200"
+                        >
+                          {preset.name}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                   {selectedPresetId && (
                     <button
                       type="button"

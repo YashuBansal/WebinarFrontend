@@ -21,8 +21,7 @@ import {
   generatePablyToken,
   getAPIAccessTokens,
 } from "../../../features/actions/auth";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { DatePicker } from "../../../components/ui/date-picker";
 import { clearOTPGenerated } from "../../../features/slices/auth";
 import ConfirmDeleteModal from "../../../components/ConfirmDeleteModal";
 import HubSubpageShell from "../../../components/Layout/HubSubpageShell";
@@ -119,7 +118,7 @@ const apiCampaignJSONBody = `{
 }`;
 
 const sectionShell =
-  "space-y-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-6";
+  "space-y-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-6";
 const sectionTitle =
   "border-b border-slate-200 pb-3 text-xs font-bold uppercase tracking-widest text-slate-400 dark:border-slate-700 dark:text-slate-500";
 
@@ -298,7 +297,7 @@ const PabblyToken = () => {
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-slate-600 dark:bg-slate-900/50 sm:rounded-3xl sm:p-5"
+            className="rounded-2xl border border-slate-200 bg-white/80 p-4 dark:border-slate-600 dark:bg-slate-900/50 sm:rounded-2xl sm:p-5"
           >
             <div className="mb-3 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
               <BookOpen className="h-4 w-4 text-blue-500" />
@@ -347,11 +346,10 @@ const PabblyToken = () => {
                 </div>
                 <div className="grid w-full">
                   <DatePicker
-                    selected={expiryDate}
-                    onChange={(date) => setExpiryDate(date)}
-                    isClearable
-                    placeholderText="Expiry (optional)"
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm font-medium text-slate-900 outline-none ring-blue-500/30 focus:ring-2 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100"
+                    date={expiryDate}
+                    setDate={(date) => setExpiryDate(date)}
+                    placeholder="Expiry (optional)"
+                    className="h-10 w-full"
                   />
                 </div>
               </div>

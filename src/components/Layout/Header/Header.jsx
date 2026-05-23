@@ -35,10 +35,22 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
       dispatch(setActiveHeaderSection("WhatsApp"));
     } else if (location.pathname.startsWith("/zoom")) {
       dispatch(setActiveHeaderSection("Zoom"));
+    } else if (location.pathname.startsWith("/affiliate")) {
+      dispatch(setActiveHeaderSection("Affiliate"));
     } else {
       dispatch(setActiveHeaderSection("Dashboard"));
     }
   }, [location.pathname, dispatch]);
+
+  useEffect(() => {
+    const isSubHeaderVisible = employeeModeData || (showWarning && showExpiryNotice);
+    const height = isSubHeaderVisible ? 100 : 64;
+    document.documentElement.style.setProperty("--header-height", `${height}px`);
+    // Cleanup on unmount (though Header is usually persistent)
+    return () => {
+      document.documentElement.style.removeProperty("--header-height");
+    };
+  }, [employeeModeData, showWarning, showExpiryNotice]);
 
 
   const handleProfileClick = () => {
@@ -238,10 +250,8 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
               ) : null}
             </Link>
 
-            <a
-              href={import.meta.env.VITE_REACT_APP_ZOOM_URL || "/zoom"}
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/zoom"
               onClick={() => dispatch(setActiveHeaderSection("Zoom"))}
               className={`relative flex flex-shrink-0 flex-col items-center justify-center rounded-xl px-3 py-2 transition-all duration-300 md:px-6 md:py-2.5 ${activeHeaderSection === "Zoom"
                 ? isDark
@@ -275,7 +285,7 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
               {activeHeaderSection === "Zoom" ? (
                 <div className="absolute right-1 top-1 h-1.5 w-1.5 animate-pulse rounded-full bg-blue-500 md:right-1.5 md:top-1.5 md:h-2 md:w-2" />
               ) : null}
-            </a>
+            </Link>
           </div>
 
           <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-2 lg:gap-3">
@@ -316,53 +326,6 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
               )}
             </button>
 
-            <ComponentGuard
-              allowedRoles={[roles.ADMIN]}
-              conditions={[employeeModeData ? true : false]}
-            >
-              <div className="hidden max-w-[220px] items-center justify-between gap-3 rounded-md bg-gray-100 px-3 py-1 shadow-md dark:bg-slate-700/80 md:flex lg:max-w-md">
-                <div className="min-w-0 text-sm">
-                  <p className="truncate font-medium text-gray-600 dark:text-slate-200">
-                    {employeeModeData?.userName}
-                  </p>
-                  <p className="truncate text-gray-500 dark:text-slate-400">
-                    {employeeModeData?.role}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={onExit}
-                  className="shrink-0 rounded bg-red-500 px-3 py-1.5 text-sm font-medium text-white"
-                >
-                  Exit
-                </button>
-              </div>
-            </ComponentGuard>
-
-            <ComponentGuard
-              allowedRoles={[roles.ADMIN]}
-              conditions={[showWarning, showExpiryNotice]}
-            >
-              <div className="mx-2 hidden items-center justify-between gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 dark:border-red-900/50 dark:bg-red-950/40 lg:flex">
-                <Link
-                  to="/plans"
-                  className="whitespace-nowrap text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-                >
-                  Plan expiring in {daysLeft} days on{" "}
-                  {expiryDate && formatDateAsNumber(expiryDate)}, click to see
-                  plans.
-                </Link>
-                <button
-                  type="button"
-                  onClick={() => setShowExpiryNotice(false)}
-                  className="text-gray-400 hover:text-gray-500 dark:text-slate-500 dark:hover:text-slate-400"
-                  aria-label="Close notification"
-                >
-                  <span className="text-lg leading-none">×</span>
-                </button>
-              </div>
-            </ComponentGuard>
-
             <div className="flex items-center gap-0.5 sm:gap-1">
               <ComponentGuard allowedRoles={[roles.ADMIN, roles.SUPER_ADMIN]}>
                 <ImportExportNotifications userData={userData} roles={roles} />
@@ -379,23 +342,48 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
               />
               <button
                 type="button"
-                className="ml-1 flex cursor-pointer items-center gap-2 rounded-lg py-1 pl-1 pr-0 hover:bg-slate-100 dark:hover:bg-slate-700/50 sm:ml-2 sm:gap-3 sm:pr-1"
+                className="group ml-1 flex items-center gap-2 rounded-xl p-1 transition-all duration-300 hover:shadow-md sm:ml-2 sm:gap-3 sm:pr-3"
+                style={{
+                  backgroundColor: isDark ? "#1e293b" : "#f9fafb",
+                  border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
+                }}
                 onClick={handleProfileClick}
               >
-                <div className="hidden text-right sm:block">
-                  <p className="max-w-[120px] truncate text-sm font-medium text-slate-900 dark:text-slate-100 lg:max-w-[160px]">
+                <div className="hidden flex-col items-end leading-tight sm:flex">
+                  <p className="max-w-[120px] truncate text-[13px] font-bold text-slate-900 dark:text-slate-100 lg:max-w-[160px]">
                     {userData?.userName}
                   </p>
-                  <p className="max-w-[120px] truncate text-xs text-slate-500 dark:text-slate-400 lg:max-w-[160px]">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-indigo-500 dark:text-indigo-400">
                     {getRoleNameByID(userData?.role)}
                   </p>
                 </div>
-                <div className="rounded-full bg-indigo-500 p-0.5 ring-2 ring-white shadow-sm dark:ring-slate-600">
-                  <img
-                    src={Profile}
-                    alt=""
-                    className="h-7 w-7 rounded-full object-cover sm:h-8 sm:w-8"
-                  />
+                <div className="relative">
+                  <div className="h-8 w-8 overflow-hidden rounded-lg ring-2 ring-indigo-500/20 transition-all duration-300 group-hover:ring-indigo-500 sm:h-9 sm:w-9 bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center">
+                    {userData?.profileImageUrl ? (
+                      <img
+                        src={userData.profileImageUrl}
+                        alt="User Profile"
+                        className="h-full w-full object-cover"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                          e.target.nextSibling.style.display = 'flex';
+                        }}
+                      />
+                    ) : null}
+                    <div 
+                      className="flex h-full w-full items-center justify-center text-[11px] font-bold text-indigo-600 dark:text-indigo-400 sm:text-xs"
+                      style={{ display: userData?.profileImageUrl ? 'none' : 'flex' }}
+                    >
+                      {(() => {
+                        const name = userData?.userName || "";
+                        if (!name) return "?";
+                        const p = name.trim().split(/\s+/);
+                        if (p.length >= 2) return (p[0][0] + p[1][0]).toUpperCase();
+                        return name.slice(0, 2).toUpperCase();
+                      })()}
+                    </div>
+                  </div>
+                  <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-500 shadow-sm dark:border-slate-800" />
                 </div>
               </button>
             </div>
@@ -403,33 +391,75 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
         </div>
       </header>
 
-      <ComponentGuard
-        allowedRoles={[roles.ADMIN]}
-        conditions={[showWarning, showExpiryNotice]}
-      >
-        <div className="absolute left-1/2 top-[4.5rem] z-50 flex max-w-[90%] -translate-x-1/2 gap-2 rounded-lg border border-red-200 bg-red-50 px-4 py-2 dark:border-red-900/50 dark:bg-red-950/40 lg:hidden">
-          <Link
-            to="/plans"
-            className="flex flex-col text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
-          >
-            <span className="whitespace-nowrap font-medium">
-              Plan expiring in {daysLeft} days
-            </span>
-            <span className="whitespace-nowrap text-sm">
-              on {expiryDate && formatDateAsNumber(expiryDate)}, click to see
-              plans.
-            </span>
-          </Link>
-          <button
-            type="button"
-            onClick={() => setShowExpiryNotice(false)}
-            className="text-gray-400 hover:text-gray-500 dark:text-slate-500 dark:hover:text-slate-400"
-            aria-label="Close notification"
-          >
-            <span className="text-lg leading-none">×</span>
-          </button>
+      {/* Sub-header for Alerts and Employee Status */}
+      {(employeeModeData || (showWarning && showExpiryNotice)) && (
+        <div
+          className="fixed left-0 right-0 top-16 z-50 flex h-9 items-center justify-center gap-4 border-b px-4 transition-all duration-500"
+          style={{
+            backgroundColor: isDark ? "#1e293b" : "#f8fafc",
+            borderColor: isDark ? "#334155" : "#e5e7eb",
+          }}
+        >
+          <div className="flex w-full max-w-7xl items-center justify-between gap-4 overflow-x-auto whitespace-nowrap px-2 scrollbar-hide sm:justify-center">
+            {employeeModeData && (
+              <ComponentGuard
+                allowedRoles={[roles.ADMIN]}
+                conditions={[!!employeeModeData]}
+              >
+                <div className="flex items-center gap-2 text-[11px] sm:text-xs">
+                  <div className="flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/20 text-amber-600 dark:bg-amber-500/10 dark:text-amber-400">
+                    <LayoutDashboard className="h-3 w-3" />
+                  </div>
+                  <span className="font-medium text-slate-500 dark:text-slate-400">
+                    Employee View:
+                  </span>
+                  <span className="font-bold text-slate-900 dark:text-slate-100">
+                    {employeeModeData.userName} ({employeeModeData.role})
+                  </span>
+                  <button
+                    type="button"
+                    onClick={onExit}
+                    className="ml-1 rounded-full bg-red-500 px-3 py-0.5 text-[10px] font-bold text-white hover:bg-red-600 transition-colors shadow-sm"
+                  >
+                    EXIT
+                  </button>
+                </div>
+              </ComponentGuard>
+            )}
+
+            {employeeModeData && showWarning && showExpiryNotice && (
+              <div className="h-4 w-[1px] bg-slate-300 dark:bg-slate-600 sm:block hidden" />
+            )}
+
+            {showWarning && showExpiryNotice && (
+              <ComponentGuard
+                allowedRoles={[roles.ADMIN]}
+                conditions={[showWarning, showExpiryNotice]}
+              >
+                <div className="flex items-center gap-2 text-[11px] sm:text-xs">
+                  <div className="animate-pulse h-2 w-2 rounded-full bg-red-500" />
+                  <Link
+                    to="/plans"
+                    className="font-semibold text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                  >
+                    Plan expires in {daysLeft} days (
+                    {expiryDate && formatDateAsNumber(expiryDate)})
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setShowExpiryNotice(false)}
+                    className="ml-1 flex h-4 w-4 items-center justify-center rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                  >
+                    <X className="h-3 w-3 text-slate-400" />
+                  </button>
+                </div>
+              </ComponentGuard>
+            )}
+          </div>
         </div>
-      </ComponentGuard>
+      )}
+
+
 
       {!isMdUp && isSidebarOpen ? (
         <button

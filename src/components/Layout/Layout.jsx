@@ -106,8 +106,8 @@ const Layout = () => {
         <main
           className="flex-1 relative min-h-0 w-full overflow-hidden"
           style={{
-            marginTop: "64px",
-            height: "calc(100vh - 64px)",
+            marginTop: "var(--header-height, 64px)",
+            height: "calc(100vh - var(--header-height, 64px))",
           }}
         >
           <div className={`custom-scrollbar absolute inset-0 min-w-0 max-w-full overflow-x-hidden ${isChatPage ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>

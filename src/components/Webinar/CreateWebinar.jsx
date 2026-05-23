@@ -10,6 +10,7 @@ import { getAllProductsByAdminId } from "../../features/actions/product";
 import useAddUserActivity from "../../hooks/useAddUserActivity";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "../ui/dialog";
 import { MultiSelectDropdown } from "../MultiSelectDropdown";
+import { DatePicker } from "../ui/date-picker";
 import { useTheme } from "../../contexts/ThemeContext";
 
 function toDateInputValue(date) {
@@ -162,20 +163,13 @@ const CreateWebinar = ({ modalName }) => {
             </div>
 
             <div>
-              <input
-                type="date"
-                placeholder="Select Webinar Date"
-                value={webinarDateInput}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (!v) {
-                    setValue("webinarDate", null, { shouldValidate: true });
-                    return;
-                  }
-                  const [y, m, d] = v.split("-").map(Number);
-                  setValue("webinarDate", new Date(y, m - 1, d), { shouldValidate: true });
+              <DatePicker
+                date={webinarDate}
+                setDate={(date) => {
+                  setValue("webinarDate", date, { shouldValidate: true });
                 }}
-                className="w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 transition-all"
+                placeholder="Select Webinar Date"
+                className="w-full px-4 py-2.5 rounded-xl border text-sm transition-all h-[42px]"
                 style={{
                   backgroundColor: isDark ? "#0f172a" : "#ffffff",
                   borderColor: isDark ? "#334155" : "#e2e8f0",

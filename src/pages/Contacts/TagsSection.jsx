@@ -1,12 +1,13 @@
 import { useState } from "react";
+import { Tag, MoreVertical, Trash2, Plus, AlertCircle, ChevronDown } from "lucide-react";
 import {
-  FormControl,
-  Select,
-  MenuItem,
-  Menu,
-} from "@mui/material";
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../components/ui/dropdown-menu";
+import { Button } from "../../components/ui/button";
 import AppLoader from "../../components/AppLoader";
-import { Tag, MoreVertical, Trash2, Plus, AlertCircle } from "lucide-react";
 import { useTags, useUpdateAttendeeTag } from "../../hooks/useTags";
 import ComponentGuard from "../../components/AccessControl/ComponentGuard";
 import { useSelector } from "react-redux";
@@ -84,41 +85,42 @@ const TagsSection = ({ tags, email, onTagUpdate }) => {
         <ComponentGuard conditions={[employeeModeData ? false : true, userData?.isActive]}>
           <div className="space-y-2">
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Attach New Tag</label>
-            <FormControl fullWidth size="small">
-              <Select
-                value={selectedTag}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setSelectedTag(value);
-                  if (value) handleAddTag(value);
-                }}
-                displayEmpty
-                disabled={isUpdating || isLoadingTags || availableTagsToAdd.length === 0}
-                sx={{
-                  borderRadius: '12px',
-                  backgroundColor: 'white',
-                  dark: { backgroundColor: '#0F172A' },
-                  '& .MuiOutlinedInput-notchedOutline': { border: '1px solid #E2E8F0' },
-                  '&.Mui-focused .MuiOutlinedInput-notchedOutline': { border: '2px solid #6366F1' }
-                }}
-                renderValue={(selected) => {
-                  if (!selected) {
-                    return (
-                      <span className="text-slate-400 text-sm font-medium">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild disabled={isUpdating || isLoadingTags || availableTagsToAdd.length === 0}>
+                <Button
+                  variant="outline"
+                  className="flex h-10 w-full items-center justify-between rounded-xl px-4 py-2 text-sm font-medium outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10 bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-700 disabled:opacity-50"
+                >
+                  <span className="truncate">
+                    {selectedTag ? (
+                      <span className="text-slate-700 dark:text-slate-200 font-bold">{selectedTag}</span>
+                    ) : (
+                      <span className="text-slate-400">
                         {isLoadingTags ? "Loading repository..." : availableTagsToAdd.length === 0 ? "All tags applied" : "Select tag to apply"}
                       </span>
-                    );
-                  }
-                  return <span className="text-sm font-bold text-slate-700 dark:text-slate-200">{selected}</span>;
-                }}
+                    )}
+                  </span>
+                  <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
               >
                 {availableTagsToAdd.map((tag) => (
-                  <MenuItem key={tag._id || tag.name} value={tag.name} sx={{ py: 1.5, px: 2 }}>
-                    <span className="text-sm font-bold">{tag.name}</span>
-                  </MenuItem>
+                  <DropdownMenuItem
+                    key={tag._id || tag.name}
+                    onClick={() => {
+                      setSelectedTag(tag.name);
+                      handleAddTag(tag.name);
+                    }}
+                    className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  >
+                    {tag.name}
+                  </DropdownMenuItem>
                 ))}
-              </Select>
-            </FormControl>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </ComponentGuard>
 
@@ -140,36 +142,29 @@ const TagsSection = ({ tags, email, onTagUpdate }) => {
                     >
                       <span className="text-xs font-bold text-slate-600 dark:text-slate-300">{tag}</span>
                       {canEdit && (
-                        <button
-                          onClick={(e) => handleMenuOpen(e, tag)}
-                          className="p-0.5 hover:bg-white dark:hover:bg-slate-600 rounded-full transition-colors"
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            className="p-0.5 hover:bg-white dark:hover:bg-slate-600 rounded-full transition-colors outline-none"
+                          >
+                            <MoreVertical className="w-3 h-3 text-slate-400" />
+                          </button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="end"
+                          className="min-w-[140px] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1 z-[10000]"
                         >
-                          <MoreVertical className="w-3 h-3 text-slate-400" />
-                        </button>
+                          <DropdownMenuItem
+                            onClick={() => handleRemoveTag(tag)}
+                            disabled={isUpdating}
+                            className="cursor-pointer rounded-lg px-3 py-2 text-sm font-bold hover:bg-rose-50 dark:hover:bg-rose-900/20 text-rose-600 dark:text-rose-400 flex items-center gap-2"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                            Remove Tag
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                       )}
-                      
-                      <Menu
-                        anchorEl={anchorEl}
-                        open={Boolean(anchorEl) && menuTag === tag}
-                        onClose={handleMenuClose}
-                        PaperProps={{
-                          sx: { 
-                            borderRadius: '12px', 
-                            mt: 1, 
-                            boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)',
-                            border: '1px solid #E2E8F0'
-                          }
-                        }}
-                      >
-                        <MenuItem
-                          onClick={() => handleRemoveTag(tag)}
-                          disabled={isUpdating}
-                          sx={{ color: '#EF4444', gap: 1.5, py: 1, px: 2 }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                          <span className="text-sm font-bold">Remove Tag</span>
-                        </MenuItem>
-                      </Menu>
                     </motion.div>
                   );
                 })

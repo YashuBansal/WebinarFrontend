@@ -196,7 +196,7 @@ const BillingHistory = () => {
         </div>
       </motion.header>
 
-      <div className="min-h-[280px] overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800/90">
+      <div className="min-h-[280px] overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800/90">
         <div className="p-5 sm:p-6">
         <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
           <div>
@@ -216,7 +216,7 @@ const BillingHistory = () => {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.35 }}
-            className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 py-16 text-center dark:border-slate-600 dark:bg-slate-900/40 sm:rounded-3xl sm:py-20"
+            className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 py-16 text-center dark:border-slate-600 dark:bg-slate-900/40 sm:rounded-2xl sm:py-20"
           >
             <Wallet className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
             <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">

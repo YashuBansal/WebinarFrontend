@@ -20,7 +20,13 @@ import { Dialog, DialogContent } from "../ui/dialog";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { Checkbox } from "../ui/checkbox";
-import { Download, X } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
+import { ChevronDown, Download, X } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
 
 const tableName = "Webinar Attendees Export";
@@ -335,19 +341,44 @@ const ExportWebinarAttendeesModal = ({
                     Apply Preset
                   </label>
                   <div className="flex items-center gap-2">
-                    <select
-                      value={selectedPresetId}
-                      onChange={(e) => handleApplyPreset(e.target.value)}
-                      className="h-10 w-full rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 text-sm text-slate-700 dark:text-slate-300 outline-none transition-all focus:ring-2 focus:ring-[#22B573]/35"
-                      style={{ fontFamily: FONT }}
-                    >
-                      <option value="">Default Columns</option>
-                      {(filterPresets || []).map((preset) => (
-                        <option key={preset._id} value={preset._id}>
-                          {preset.name}
-                        </option>
-                      ))}
-                    </select>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="flex h-10 w-full items-center justify-between rounded-xl border-slate-200 bg-white px-3 py-2 text-sm dark:border-slate-800 dark:bg-slate-950 text-slate-700 dark:text-slate-300 outline-none ring-offset-white focus:ring-2 focus:ring-emerald-500/20 hover:bg-slate-50 dark:hover:bg-white/10"
+                          style={{ fontFamily: FONT }}
+                        >
+                          <span className="truncate">
+                            {selectedPresetId
+                              ? (filterPresets || []).find(
+                                  (p) => p._id === selectedPresetId
+                                )?.name || "Select Preset"
+                              : "Default Columns"}
+                          </span>
+                          <ChevronDown className="h-4 w-4 opacity-50" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent
+                        align="start"
+                        className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[300] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                      >
+                        <DropdownMenuItem
+                          onClick={() => handleApplyPreset("")}
+                          className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                        >
+                          Default Columns
+                        </DropdownMenuItem>
+                        {(filterPresets || []).map((preset) => (
+                          <DropdownMenuItem
+                            key={preset._id}
+                            onClick={() => handleApplyPreset(preset._id)}
+                            className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200"
+                          >
+                            {preset.name}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
                     {selectedPresetId && (
                       <button
                         type="button"

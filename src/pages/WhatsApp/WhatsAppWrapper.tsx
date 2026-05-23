@@ -52,6 +52,7 @@ function WabaTemplatesSyncOnFirstProjectOpen() {
     syncTemplatesMutation.mutateAsync,
   ]);
 
+
   // Scroll to top on route change
   useEffect(() => {
     const el = document.querySelector(".custom-scrollbar.absolute");

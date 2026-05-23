@@ -595,6 +595,7 @@ export default function CreateProgram() {
 
                     <div className="rounded-2xl bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 p-5 sm:p-6 transition-all group-hover:bg-white dark:group-hover:bg-slate-900 group-hover:border-slate-100 dark:group-hover:border-slate-800">
                       <ProgramTimeSlotsEditor
+                        projectId={projectId}
                         timeSlots={slots}
                         occIndex={occIndex}
                         setSlotsForOccurrence={setSlotsForOccurrence}

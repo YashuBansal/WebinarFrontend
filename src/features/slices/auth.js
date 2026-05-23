@@ -121,7 +121,7 @@ const authSlice = createSlice({
       })
       .addCase(updateUser.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.userData = action.payload;
+        state.userData = action.payload?.data || action.payload;
         state.isSuccess = true;
         successToast("User Updated Successfully");
       })
@@ -167,7 +167,7 @@ const authSlice = createSlice({
         errorToast(action?.payload || "Error getting user subscription");
       })
       .addCase(getCurrentUser.fulfilled, (state, action) => {
-        if (!state.userData) state.userData = action.payload?.data;
+        state.userData = action.payload?.data;
       })
       .addCase(getCurrentUserForUpdate.fulfilled, (state, action) => {
         state.userData = action.payload?.data;

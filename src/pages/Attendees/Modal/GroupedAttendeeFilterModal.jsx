@@ -3,8 +3,7 @@ import { toast } from "sonner";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { useForm, Controller } from "react-hook-form";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { DatePicker } from "../../../components/ui/date-picker";
 import { closeModal } from "../../../features/slices/modalSlice";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -27,7 +26,14 @@ import {
   RotateCcw,
   Save,
   X,
+  ChevronDown,
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../../components/ui/dropdown-menu";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { useTheme } from "../../../contexts/ThemeContext";
@@ -171,6 +177,29 @@ const GroupedAttendeeFilterModal = ({
       placeholder: (base) => ({
         ...base,
         color: isDark ? "#64748b" : "#94a3b8",
+      }),
+      menu: (base) => ({
+        ...base,
+        backgroundColor: isDark ? "#1e293b" : "#ffffff",
+        border: `1px solid ${isDark ? "#334155" : "#e2e8f0"}`,
+        borderRadius: "12px",
+        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+        overflow: "hidden",
+      }),
+      option: (base, { isFocused, isSelected }) => ({
+        ...base,
+        backgroundColor: isSelected
+          ? "#22B573"
+          : isFocused
+          ? isDark
+            ? "rgba(255,255,255,0.1)"
+            : "rgba(0,0,0,0.05)"
+          : "transparent",
+        color: isSelected ? "#ffffff" : isDark ? "#f8fafc" : "#0f172a",
+        cursor: "pointer",
+        ":active": {
+          backgroundColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
+        },
       }),
     }),
     [isDark]
@@ -647,21 +676,14 @@ const GroupedAttendeeFilterModal = ({
                               control={control}
                               render={({ field }) => (
                                 <DatePicker
-                                  selected={normalizePickerDate(field.value)}
-                                  onChange={(date) => field.onChange(date)}
-                                  placeholderText="mm/dd/yyyy"
-                                  dateFormat={pickerDateFormat}
-                                  isClearable
-                                  customInput={
-                                    <Input
-                                      className="w-full p-2 rounded-xl text-sm focus:outline-none focus:ring-2 pr-9"
-                                      style={inputStyle}
-                                    />
-                                  }
+                                  date={normalizePickerDate(field.value)}
+                                  setDate={(date) => field.onChange(date)}
+                                  placeholder="Start Date"
+                                  className="w-full text-sm"
+                                  style={inputStyle}
                                 />
                               )}
                             />
-                            <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-gray-500" />
                           </div>
                         </div>
                         <div>
@@ -672,21 +694,14 @@ const GroupedAttendeeFilterModal = ({
                               control={control}
                               render={({ field }) => (
                                 <DatePicker
-                                  selected={normalizePickerDate(field.value)}
-                                  onChange={(date) => field.onChange(date)}
-                                  placeholderText="mm/dd/yyyy"
-                                  dateFormat={pickerDateFormat}
-                                  isClearable
-                                  customInput={
-                                    <Input
-                                      className="w-full p-2 rounded-xl text-sm focus:outline-none focus:ring-2 pr-9"
-                                      style={inputStyle}
-                                    />
-                                  }
+                                  date={normalizePickerDate(field.value)}
+                                  setDate={(date) => field.onChange(date)}
+                                  placeholder="End Date"
+                                  className="w-full text-sm"
+                                  style={inputStyle}
                                 />
                               )}
                             />
-                            <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-gray-500" />
                           </div>
                         </div>
                       </>
@@ -1026,42 +1041,78 @@ const GroupedAttendeeFilterModal = ({
                       <span style={{ ...labelStyle, marginBottom: 0 }}>
                         Sort By:
                       </span>
-                      <select
-                        value={sortBy.sortBy}
-                        onChange={(e) =>
-                          setSortBy((prev) => ({
-                            ...prev,
-                            sortBy: e.target.value,
-                          }))
-                        }
-                        className="px-2 py-1.5 rounded-lg border text-sm focus:outline-none focus:ring-2 cursor-pointer"
-                        style={inputStyle}
-                      >
-                        {allAttendeesSortByOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="flex h-9 min-w-[140px] items-center justify-between rounded-lg px-3 py-1.5 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                            style={inputStyle}
+                          >
+                            <span className="truncate">
+                              {allAttendeesSortByOptions.find(
+                                (o) => o.value === sortBy.sortBy
+                              )?.label || "Sort By"}
+                            </span>
+                            <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                        >
+                          {allAttendeesSortByOptions.map((o) => (
+                            <DropdownMenuItem
+                              key={o.value}
+                              onClick={() =>
+                                setSortBy((prev) => ({ ...prev, sortBy: o.value }))
+                              }
+                              className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                            >
+                              {o.label}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                     <div className="flex items-center gap-2">
                       <span style={{ ...labelStyle, marginBottom: 0 }}>
                         Order:
                       </span>
-                      <select
-                        value={sortBy.sortOrder}
-                        onChange={(e) =>
-                          setSortBy((prev) => ({
-                            ...prev,
-                            sortOrder: e.target.value,
-                          }))
-                        }
-                        className="px-2 py-1.5 rounded-lg border text-sm focus:outline-none focus:ring-2 cursor-pointer"
-                        style={inputStyle}
-                      >
-                        <option value="asc">A - Z</option>
-                        <option value="desc">Z - A</option>
-                      </select>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="flex h-9 min-w-[100px] items-center justify-between rounded-lg px-3 py-1.5 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                            style={inputStyle}
+                          >
+                            <span className="truncate">
+                              {sortBy.sortOrder === "asc" ? "A - Z" : "Z - A"}
+                            </span>
+                            <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                        >
+                          <DropdownMenuItem
+                            onClick={() =>
+                              setSortBy((prev) => ({ ...prev, sortOrder: "asc" }))
+                            }
+                            className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                          >
+                            A - Z
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={() =>
+                              setSortBy((prev) => ({ ...prev, sortOrder: "desc" }))
+                            }
+                            className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                          >
+                            Z - A
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
 

@@ -83,7 +83,7 @@ const LandingPageForm = () => {
     <HubSubpageShell maxWidthClass="max-w-5xl">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-md dark:border-slate-700 dark:bg-slate-900/60 sm:rounded-3xl"
+        className="space-y-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-md dark:border-slate-700 dark:bg-slate-900/60 sm:rounded-2xl"
       >
         <h2 className="mb-6 text-center text-2xl font-bold text-slate-900 dark:text-slate-100 md:text-left">
           Landing Page Data

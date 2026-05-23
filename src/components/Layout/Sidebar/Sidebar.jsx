@@ -4,6 +4,7 @@ import {
   Pin,
   PinOff,
   X,
+  Coins,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
@@ -14,6 +15,7 @@ import useRoles from "../../../hooks/useRoles";
 import useAddUserActivity from "../../../hooks/useAddUserActivity";
 import { clearNotifications } from "../../../features/slices/notification";
 import { clearWebinarData } from "../../../features/slices/webinarContact";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   getGSTValue,
   logOutAndClearCookies,
@@ -29,6 +31,8 @@ import useMediaQuery from "../../../hooks/useMediaQuery";
 import useUserSubscription from "../../../hooks/useUserSubscription";
 import DashboardSidebar from "./DashboardSidebar";
 import WhatsAppSidebar from "./WhatsAppSidebar";
+import ZoomSidebar from "./ZoomSidebar";
+import AffiliateSidebar from "./AffiliateSidebar";
 import { useTheme } from "../../../contexts/ThemeContext";
 import {
   AssignmentIcon,
@@ -60,6 +64,7 @@ const Sidebar = ({
   const logUserActivity = useAddUserActivity();
   const location = useLocation();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const { isUpdated } = useSelector((state) => state.noticeBoard);
   const { sidebarLinkData } = useSelector((state) => state.sidebarLink);
@@ -82,8 +87,9 @@ const Sidebar = ({
 
   // Theme colors
   const isWhatsApp = activeHeaderSection === "WhatsApp";
-  const themeColor = isWhatsApp ? "#22c55e" : "#f97316"; // green-500 : orange-500
-  const themeBgLight = isWhatsApp ? "rgba(34, 197, 94, 0.1)" : "rgba(249, 115, 22, 0.1)";
+  const isZoom = activeHeaderSection === "Zoom";
+  const themeColor = isWhatsApp ? "#22c55e" : (isZoom ? "#3b82f6" : "#f97316");
+  const themeBgLight = isWhatsApp ? "rgba(34, 197, 94, 0.1)" : (isZoom ? "rgba(59, 130, 246, 0.1)" : "rgba(249, 115, 22, 0.1)");
 
   // Sync scrolling between rail and panel
   useEffect(() => {
@@ -343,6 +349,10 @@ const Sidebar = ({
       action: "logout",
       details: "User logged out successfully",
     });
+
+    // Clear the global TanStack Query cache to prevent data leakage
+    queryClient.clear();
+
     dispatch(clearWebinarData());
     dispatch(clearNotifications());
     dispatch(logout());
@@ -463,6 +473,16 @@ const Sidebar = ({
   };
 
   const renderContextualSidebar = (variant, section) => {
+    if (location.pathname.startsWith("/affiliate")) {
+      return (
+        <AffiliateSidebar
+          variant={variant}
+          section={section}
+          handleNavigation={handleNavigation}
+        />
+      );
+    }
+
     if (activeHeaderSection === "WhatsApp") {
       return (
         <WhatsAppSidebar
@@ -472,7 +492,17 @@ const Sidebar = ({
         />
       );
     }
-    
+
+    if (activeHeaderSection === "Zoom") {
+      return (
+        <ZoomSidebar
+          variant={variant}
+          section={section}
+          handleNavigation={handleNavigation}
+        />
+      );
+    }
+
     if (section && section !== "middle") return null;
 
     return (
@@ -492,6 +522,66 @@ const Sidebar = ({
         settingsActive={settingsActive}
         dashboardPathActive={dashboardPathActive}
       />
+    );
+  };
+
+  const renderSidebarFooter = (variant) => {
+    if (location.pathname.startsWith("/affiliate")) {
+      return null;
+    }
+
+    if (variant === "rail") {
+      const footerHeight = panelOpen ? "h-[96px]" : "h-[64px]";
+      return (
+        <div className={`flex items-center justify-center py-3 border-t border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 ${footerHeight} transition-all duration-[400ms] ease-[cubic-bezier(0.4,0,0.2,1)]`}>
+          <Link
+            to="/affiliate/getstarted"
+            onClick={() => handleNavigation("/affiliate/getstarted")}
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-700 to-rose-900 shadow-md shadow-red-900/30 text-white hover:scale-105 transition-all"
+            title="Earn with Us"
+          >
+            <Coins className="h-5 w-5" />
+          </Link>
+        </div>
+      );
+    }
+
+    if (variant === "panel") {
+      return (
+        <div className="border-t border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 h-[96px] flex flex-col justify-center overflow-hidden">
+          <div className="w-[200px] px-3.5 flex flex-col justify-center gap-1.5 shrink-0">
+            <Link
+              to="/affiliate/getstarted"
+              onClick={() => handleNavigation("/affiliate/getstarted")}
+              className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-700 to-rose-900 px-3 py-2 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-red-900/30 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-red-900/40"
+              style={{ fontFamily: "Inter, sans-serif" }}
+            >
+              <Coins className="h-3.5 w-3.5" />
+              <span>Earn with Us</span>
+            </Link>
+            <p className="text-[10px] text-center font-semibold text-slate-500 dark:text-slate-400 leading-tight">
+              Refer WLH and earn recurring 20% commission on each sale.
+            </p>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div className="px-3.5 py-3 border-t border-slate-100 dark:border-slate-800/80 bg-white dark:bg-slate-900 h-[96px] flex flex-col justify-center gap-1.5">
+        <Link
+          to="/affiliate/getstarted"
+          onClick={() => handleNavigation("/affiliate/getstarted")}
+          className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-red-700 to-rose-900 px-3 py-2 text-xs font-black uppercase tracking-wider text-white shadow-md shadow-red-900/30 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-red-900/40"
+          style={{ fontFamily: "Inter, sans-serif" }}
+        >
+          <Coins className="h-3.5 w-3.5" />
+          <span>Earn with Us</span>
+        </Link>
+        <p className="text-[10px] text-center font-semibold text-slate-500 dark:text-slate-400 leading-tight">
+          Refer WLH and earn recurring 20% commission on each sale.
+        </p>
+      </div>
     );
   };
 
@@ -531,18 +621,21 @@ const Sidebar = ({
             transition={{ duration: 0.2 }}
             className="flex-1 flex flex-col overflow-hidden"
           >
-            {activeHeaderSection === "WhatsApp" ? (
-               <div className="flex flex-1 flex-col overflow-hidden">
-                  {renderContextualSidebar("mobile", "top")}
-                  <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
-                     <ul className="space-y-2 px-3">{renderContextualSidebar("mobile", "middle")}</ul>
-                  </div>
-                  {renderContextualSidebar("mobile", "bottom")}
-               </div>
+            {activeHeaderSection === "WhatsApp" || activeHeaderSection === "Zoom" || location.pathname.startsWith("/affiliate") ? (
+              <div className="flex flex-1 flex-col overflow-hidden">
+                {renderContextualSidebar("mobile", "top")}
+                <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
+                  <ul className="space-y-2 px-3">{renderContextualSidebar("mobile", "middle")}</ul>
+                </div>
+                {renderSidebarFooter("mobile")}
+              </div>
             ) : (
-               <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
+              <div className="flex flex-1 flex-col overflow-hidden">
+                <div className="flex-1 overflow-y-auto py-2 custom-scrollbar">
                   <ul className="space-y-2 px-3">{renderContextualSidebar("mobile")}</ul>
-               </div>
+                </div>
+                {renderSidebarFooter("mobile")}
+              </div>
             )}
           </motion.div>
         </AnimatePresence>
@@ -583,18 +676,21 @@ const Sidebar = ({
             transition={{ duration: 0.2 }}
             className="flex-1 flex flex-col overflow-hidden"
           >
-            {activeHeaderSection === "WhatsApp" ? (
-               <div className="flex flex-1 flex-col overflow-hidden">
-                  {renderContextualSidebar("rail", "top")}
-                  <div className="flex-1 overflow-y-auto py-2 no-scrollbar" ref={railScrollRef}>
-                     <ul className="space-y-2 px-3">{renderContextualSidebar("rail", "middle")}</ul>
-                  </div>
-                  {renderContextualSidebar("rail", "bottom")}
-               </div>
+            {activeHeaderSection === "WhatsApp" || activeHeaderSection === "Zoom" || location.pathname.startsWith("/affiliate") ? (
+              <div className="flex flex-1 flex-col overflow-hidden">
+                {renderContextualSidebar("rail", "top")}
+                <div className="flex-1 overflow-y-auto py-2 no-scrollbar" ref={railScrollRef}>
+                  <ul className="space-y-2 px-3">{renderContextualSidebar("rail", "middle")}</ul>
+                </div>
+                {renderSidebarFooter("rail")}
+              </div>
             ) : (
+              <div className="flex flex-1 flex-col overflow-hidden">
                 <div className="flex-1 overflow-y-auto py-2 no-scrollbar" ref={railScrollRef}>
                   <ul className="space-y-2 px-3">{renderContextualSidebar("rail")}</ul>
-               </div>
+                </div>
+                {renderSidebarFooter("rail")}
+              </div>
             )}
           </motion.div>
         </AnimatePresence>
@@ -639,18 +735,21 @@ const Sidebar = ({
             transition={{ duration: 0.2 }}
             className="flex-1 flex flex-col overflow-hidden"
           >
-            {activeHeaderSection === "WhatsApp" ? (
-               <div className="flex flex-1 flex-col overflow-hidden">
-                  {renderContextualSidebar("panel", "top")}
-                  <div className="flex-1 overflow-y-auto py-2 custom-scrollbar" ref={panelScrollRef}>
-                     <ul className="space-y-2 px-3">{renderContextualSidebar("panel", "middle")}</ul>
-                  </div>
-                  {renderContextualSidebar("panel", "bottom")}
-               </div>
+            {activeHeaderSection === "WhatsApp" || activeHeaderSection === "Zoom" || location.pathname.startsWith("/affiliate") ? (
+              <div className="flex flex-1 flex-col overflow-hidden">
+                {renderContextualSidebar("panel", "top")}
+                <div className="flex-1 overflow-y-auto py-2 custom-scrollbar" ref={panelScrollRef}>
+                  <ul className="space-y-2 px-3">{renderContextualSidebar("panel", "middle")}</ul>
+                </div>
+                {renderSidebarFooter("panel")}
+              </div>
             ) : (
+              <div className="flex flex-1 flex-col overflow-hidden">
                 <div className="flex-1 overflow-y-auto py-2 custom-scrollbar" ref={panelScrollRef}>
                   <ul className="space-y-2 px-3">{renderContextualSidebar("panel")}</ul>
-               </div>
+                </div>
+                {renderSidebarFooter("panel")}
+              </div>
             )}
           </motion.div>
         </AnimatePresence>
@@ -662,7 +761,8 @@ const Sidebar = ({
     <>
       {mobileShell}
       <div
-        className="fixed bottom-0 left-0 top-16 z-40 hidden md:flex"
+        className="fixed bottom-0 left-0 z-40 hidden md:flex"
+        style={{ top: "var(--header-height, 64px)" }}
         ref={desktopShellRef}
       >
         {railAside}

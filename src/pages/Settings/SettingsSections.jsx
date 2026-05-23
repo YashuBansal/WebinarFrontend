@@ -26,6 +26,7 @@ import {
   FileImage,
   UserCircle2,
   Camera,
+  Loader2,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Switch } from "../../components/ui/switch";
@@ -49,7 +50,21 @@ import { getAPIAccessTokens } from "../../features/actions/auth";
 import { getLeadType } from "../../features/actions/assign";
 import productLevelService from "../../services/productLevelService";
 import { useTags } from "../../hooks/useTags";
-import { formatDateAsNumber, successToast } from "../../utils/extra";
+import { formatDateAsNumber, successToast, DateFormat } from "../../utils/extra";
+import EditUserForm from "../../components/Profile/EditUserForm";
+import PasswordUpdateForm from "../../components/Profile/PasswordUpdateForm";
+import TwoFactorAuthSection from "../Profile/TwoFactorAuthSection";
+import SubscriptionDetails from "../Profile/SubscriptionDetails";
+import { 
+  deleteUserDocumet, 
+  getCurrentUser, 
+  updateUser 
+} from "../../features/actions/auth";
+import ComponentGuard from "../../components/AccessControl/ComponentGuard";
+import { ExpandLess, ExpandMore, Delete } from "@mui/icons-material";
+import { Collapse, IconButton, Typography, Box } from "@mui/material";
+import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
+import useAddUserActivity from "../../hooks/useAddUserActivity";
 
 function initialsFromName(name) {
   if (!name || typeof name !== "string") return "?";
@@ -87,66 +102,274 @@ function planFeaturesList(plan) {
   return lines.length ? lines : ["View all features on the Plans page"];
 }
 
-export function ProfileSettings({ theme, navigate, userData }) {
+export function ProfileSettings({ theme, navigate, userData, roles, subscription }) {
+  const dispatch = useDispatch();
+  const logUserActivity = useAddUserActivity();
+  const { isLoading, isSuccess } = useSelector((state) => state.auth);
+
+  const [isEditingInfo, setIsEditingInfo] = useState(false);
+  const [isDocumentOpen, setIsDocumentOpen] = useState(false);
+  const [docToDelete, setDocToDelete] = useState(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [previewUrl, setPreviewUrl] = useState(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+
+  const dateFormat = userData?.dateFormat || DateFormat.DD_MM_YYYY;
+  const usedContacts = subscription?.contactCount ?? 0;
+
+  const toggleEdit = () => setIsEditingInfo((prev) => !prev);
+
+  const handleDeleteDocument = () => {
+    if (!docToDelete) return;
+    dispatch(deleteUserDocumet(docToDelete.filename)).then((res) => {
+      if (res?.meta?.requestStatus === "fulfilled") {
+        logUserActivity({
+          action: "delete",
+          type: "document",
+          detailItem: docToDelete.filename,
+        });
+        setDeleteModalOpen(false);
+      }
+    });
+  };
+
+  const handleSaveInfo = (data) => {
+    if (data.document) data.document = data.document[0];
+    dispatch(updateUser(data));
+    logUserActivity({
+      action: "update",
+      details: "User updated the profile information via settings",
+    });
+  };
+
+  useEffect(() => {
+    if (isSuccess) {
+      setIsEditingInfo(false);
+      setIsUploadingImage(false);
+    }
+  }, [isSuccess]);
+
+  const handleImageChange = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPreviewUrl(URL.createObjectURL(file));
+      setIsUploadingImage(true);
+      
+      const formData = new FormData();
+      formData.append("profileImage", file);
+      
+      dispatch(updateUser(formData)).then((res) => {
+        if (res?.meta?.requestStatus === "fulfilled") {
+          successToast("Profile picture updated successfully");
+          dispatch(getCurrentUser());
+        }
+        setIsUploadingImage(false);
+      });
+
+      logUserActivity({
+        action: "update",
+        details: "User updated their profile picture",
+      });
+    }
+  };
+
+  const isDark = theme === "dark";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 max-w-full">
+      {/* Header Profile Summary */}
       <div
-        className="p-6 sm:p-8 rounded-3xl border flex flex-col sm:flex-row items-center gap-8"
+        className="p-6 sm:p-8 rounded-2xl border flex flex-col sm:flex-row items-center gap-8 transition-all duration-300"
         style={{
-          backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
-          borderColor: theme === "dark" ? "#334155" : "#e2e8f0",
+          backgroundColor: isDark ? "#1e293b" : "#ffffff",
+          borderColor: isDark ? "#334155" : "#e2e8f0",
           boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
         }}
       >
         <div className="relative group">
-          <Avatar className="size-28 sm:size-32 ring-4 ring-offset-2 ring-offset-transparent transition-all duration-300 group-hover:ring-blue-500/30 ring-blue-500/10">
-            {previewUrl ? (
-              <AvatarImage src={previewUrl} alt="Profile" />
-            ) : userData?.profileImageUrl ? (
-              <AvatarImage src={userData.profileImageUrl} alt="Profile" />
-            ) : null}
-            <AvatarFallback className="text-2xl sm:text-3xl">
-              {initialsFromName(userData?.userName)}
-            </AvatarFallback>
-          </Avatar>
-          <label className="absolute bottom-1 right-1 flex size-10 cursor-pointer items-center justify-center rounded-full bg-[#1877F2] text-white shadow-lg transition-transform hover:scale-105 ring-2 ring-white dark:ring-slate-900">
-            <Camera className="size-4" />
-            <input
-              type="file"
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) setPreviewUrl(URL.createObjectURL(f));
-              }}
-            />
-          </label>
+          <div className="relative size-28 sm:size-32">
+            <Avatar className="size-full ring-4 ring-offset-2 ring-offset-transparent transition-all duration-300 group-hover:ring-indigo-500/30 ring-indigo-500/10 rounded-2xl overflow-hidden">
+              {previewUrl ? (
+                <AvatarImage src={previewUrl} alt="Profile" />
+              ) : userData?.profileImageUrl ? (
+                <AvatarImage src={userData.profileImageUrl} alt="Profile" />
+              ) : null}
+              <AvatarFallback className="text-2xl sm:text-3xl bg-indigo-50 dark:bg-indigo-900/20 text-indigo-500">
+                {initialsFromName(userData?.userName)}
+              </AvatarFallback>
+            </Avatar>
+            <label className={`absolute -bottom-2 -right-2 flex size-10 cursor-pointer items-center justify-center rounded-xl bg-indigo-600 text-white shadow-lg transition-all hover:scale-110 hover:bg-indigo-700 ring-4 ring-white dark:ring-slate-900 ${isUploadingImage ? 'opacity-50 cursor-not-allowed' : ''}`}>
+              {isUploadingImage ? <Loader2 className="size-5 animate-spin" /> : <Camera className="size-5" />}
+              <input
+                type="file"
+                accept="image/*"
+                className="hidden"
+                disabled={isUploadingImage}
+                onChange={handleImageChange}
+              />
+            </label>
+          </div>
         </div>
-        <div className="flex-1 text-center sm:text-left space-y-3">
-          <h3
-            className="text-xl font-bold"
-            style={{ color: theme === "dark" ? "#f8fafc" : "#1e293b" }}
-          >
-            {userData?.userName || "Your account"}
-          </h3>
-          <p className="text-sm text-gray-500 font-medium">
-            Photo preview is local only until profile upload is wired. Edit
-            name, email, and password on the full profile page.
+
+        <div className="flex-1 text-center sm:text-left space-y-4">
+          <div>
+            <h3 className="text-2xl font-black tracking-tight" style={{ color: isDark ? "#f8fafc" : "#0f172a" }}>
+              {userData?.userName || "User Profile"}
+            </h3>
+            <div className="mt-1 flex flex-wrap justify-center sm:justify-start items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full bg-indigo-500/10 text-indigo-500 text-[10px] font-bold uppercase tracking-wider">
+                {roles.getRoleNameById(userData?.role)}
+              </span>
+              <span className="text-gray-400 text-xs">•</span>
+              <span className="text-gray-500 text-sm font-medium">{userData?.email}</span>
+            </div>
+          </div>
+          <p className="text-sm text-gray-500 font-medium max-w-md">
+            Manage your personal information, security preferences, and active subscription details in one unified view.
           </p>
-          <Button
-            type="button"
-            onClick={() => navigate("/profile")}
-            className="rounded-xl font-bold bg-[#22B573] text-white hover:opacity-95"
-          >
-            Open full profile
-          </Button>
         </div>
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* User Information Card */}
+        <div 
+          className="rounded-2xl border p-6 sm:p-8"
+          style={{
+            backgroundColor: isDark ? "#1e293b" : "#ffffff",
+            borderColor: isDark ? "#334155" : "#e2e8f0",
+          }}
+        >
+          <div className="flex items-center justify-between mb-8">
+            <h4 className="text-lg font-bold flex items-center gap-2">
+              <UserCircle2 className="size-5 text-indigo-500" />
+              User Information
+            </h4>
+            <Button
+              onClick={toggleEdit}
+              variant="ghost"
+              size="sm"
+              className="rounded-xl font-bold gap-2 text-indigo-500 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/20"
+            >
+              {isEditingInfo ? <X className="size-4" /> : <Pencil className="size-4" />}
+              {isEditingInfo ? "Cancel" : "Edit Profile"}
+            </Button>
+          </div>
+
+          {!isEditingInfo ? (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <ProfileDetail label="Full Name" value={userData?.userName} />
+                <ProfileDetail label="Email Address" value={userData?.email} />
+                <ProfileDetail label="Phone Number" value={userData?.phone || "Not provided"} />
+                <ProfileDetail label="Company" value={userData?.companyName || "Not provided"} />
+                <ProfileDetail label="Date Format" value={dateFormat?.toUpperCase().replaceAll("-", "/")} />
+                <ComponentGuard allowedRoles={[roles.ADMIN]}>
+                  <ProfileDetail label="GST Number" value={userData?.gst || "Not provided"} />
+                </ComponentGuard>
+              </div>
+
+              <ComponentGuard allowedRoles={[roles.ADMIN, roles.SUPER_ADMIN]}>
+                <div className="pt-4 border-t border-gray-100 dark:border-gray-700/50">
+                   <ProfileDetail label="Office Address" value={userData?.address || "No address saved"} />
+                </div>
+              </ComponentGuard>
+
+              <ComponentGuard allowedRoles={[roles.ADMIN]}>
+                <div className="pt-4 mt-2">
+                  <button
+                    onClick={() => setIsDocumentOpen(!isDocumentOpen)}
+                    className="flex items-center justify-between w-full p-4 rounded-2xl bg-gray-50 dark:bg-slate-900/50 hover:bg-gray-100 dark:hover:bg-slate-900 transition-colors"
+                  >
+                    <span className="text-sm font-bold flex items-center gap-2">
+                      <FileImage className="size-4 text-indigo-500" />
+                      Verification Documents
+                    </span>
+                    {isDocumentOpen ? <ExpandLess /> : <ExpandMore />}
+                  </button>
+                  <Collapse in={isDocumentOpen} timeout="auto" unmountOnExit>
+                    <div className="pt-3 space-y-2 px-2">
+                      {Array.isArray(userData?.documents) && userData.documents.length > 0 ? (
+                        userData.documents.map((doc, idx) => (
+                          <div key={idx} className="flex items-center justify-between p-3 rounded-xl border border-dashed border-gray-200 dark:border-gray-700">
+                            <span className="text-xs font-medium truncate max-w-[200px]">{doc?.originalname}</span>
+                            <button
+                              onClick={() => {
+                                setDocToDelete(doc);
+                                setDeleteModalOpen(true);
+                              }}
+                              className="p-1.5 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20"
+                            >
+                              <Delete fontSize="small" />
+                            </button>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-xs text-gray-500 py-4 text-center italic">No documents uploaded yet</p>
+                      )}
+                    </div>
+                  </Collapse>
+                </div>
+              </ComponentGuard>
+            </div>
+          ) : (
+            <div className="mt-4">
+              <EditUserForm onSubmit={handleSaveInfo} onClose={toggleEdit} />
+            </div>
+          )}
+        </div>
+
+        {/* Security & Password Section */}
+        <div className="space-y-8">
+          <div className="space-y-8">
+            <div 
+              className="rounded-2xl border p-6 sm:p-8 shadow-sm h-full"
+              style={{
+                backgroundColor: isDark ? "#1e293b" : "#ffffff",
+                borderColor: isDark ? "#334155" : "#e2e8f0",
+              }}
+            >
+              <h4 className="text-lg font-bold flex items-center gap-2 mb-8">
+                <Shield className="size-5 text-emerald-500" />
+                Password & Security
+              </h4>
+              <PasswordUpdateForm />
+            </div>
+            
+            <ComponentGuard allowedRoles={[roles.SUPER_ADMIN]}>
+              <TwoFactorAuthSection />
+            </ComponentGuard>
+          </div>
+        </div>
+      </div>
+
+      {/* Subscription Details Section */}
+      <SubscriptionDetails
+        roles={roles}
+        subscription={subscription}
+        usedContacts={usedContacts}
+      />
+
+      {deleteModalOpen && (
+        <ConfirmDeleteModal
+          setModal={setDeleteModalOpen}
+          triggerDelete={handleDeleteDocument}
+          isLoading={isLoading}
+        />
+      )}
     </div>
   );
 }
+
+const ProfileDetail = ({ label, value }) => (
+  <div className="space-y-1">
+    <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">
+      {label}
+    </p>
+    <p className="text-[15px] font-semibold text-slate-700 dark:text-slate-200 truncate">
+      {value || "—"}
+    </p>
+  </div>
+);
 
 export function PlansSettings({ theme, navigate, subscription, isSuperAdmin }) {
   const dispatch = useDispatch();
@@ -246,7 +469,7 @@ export function PlansSettings({ theme, navigate, subscription, isSuperAdmin }) {
   return (
     <div className="space-y-6">
       <div
-        className="p-6 rounded-3xl border relative overflow-hidden"
+        className="p-6 rounded-2xl border relative overflow-hidden"
         style={{
           backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
           borderColor: theme === "dark" ? "#334155" : "#e2e8f0",
@@ -334,7 +557,7 @@ export function PlansSettings({ theme, navigate, subscription, isSuperAdmin }) {
           {catalogPlans.map((plan) => (
             <div
               key={plan._id}
-              className={`p-6 rounded-3xl border transition-all duration-300 hover:scale-[1.02] ${
+              className={`p-6 rounded-2xl border transition-all duration-300 hover:scale-[1.02] ${
                 plan.current ? "ring-2 ring-blue-500" : ""
               }`}
               style={{
@@ -449,7 +672,7 @@ export function AddonsSettings({ theme, navigate, isSuper }) {
           return (
             <div
               key={addon._id}
-              className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl border flex gap-3 sm:gap-5 hover:shadow-xl transition-all group"
+              className="p-4 sm:p-6 rounded-2xl sm:rounded-2xl border flex gap-3 sm:gap-5 hover:shadow-xl transition-all group"
               style={{
                 backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
                 borderColor: theme === "dark" ? "#334155" : "#e2e8f0",
@@ -533,7 +756,7 @@ export function TagsSettings({ theme, navigate }) {
   return (
     <div className="space-y-6">
       <div
-        className="min-h-[280px] rounded-3xl border p-6 shadow-sm"
+        className="min-h-[280px] rounded-2xl border p-6 shadow-sm"
         style={{
           backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
           borderColor: theme === "dark" ? "#334155" : "#e2e8f0",
@@ -635,7 +858,7 @@ export function BillingSettings({ theme, navigate }) {
   return (
     <div className="space-y-4">
       <div
-        className="rounded-2xl sm:rounded-3xl border overflow-hidden shadow-sm overflow-x-auto custom-scrollbar"
+        className="rounded-2xl sm:rounded-2xl border overflow-hidden shadow-sm overflow-x-auto custom-scrollbar"
         style={{
           backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
           borderColor: theme === "dark" ? "#334155" : "#e2e8f0",
@@ -770,7 +993,7 @@ export function ApiSettings({ theme, navigate }) {
   return (
     <div className="space-y-6">
       <div
-        className="p-6 rounded-3xl border bg-gradient-to-br"
+        className="p-6 rounded-2xl border bg-gradient-to-br"
         style={{
           backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
           borderColor: theme === "dark" ? "#334155" : "#e2e8f0",
@@ -913,7 +1136,7 @@ export function LeadTypesSettings({ theme, navigate }) {
         return (
           <div
             key={lt._id || lt.label || i}
-            className="p-4 rounded-3xl border flex items-center gap-5 hover:bg-black/5 transition-all"
+            className="p-4 rounded-2xl border flex items-center gap-5 hover:bg-black/5 transition-all"
             style={{
               backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
               borderColor: theme === "dark" ? "#334155" : "#e2e8f0",
@@ -1013,7 +1236,7 @@ export function ProductLevelSettings({ theme, navigate }) {
   return (
     <div className="space-y-6">
       <div
-        className="p-4 sm:p-8 rounded-3xl border relative overflow-hidden"
+        className="p-4 sm:p-8 rounded-2xl border relative overflow-hidden"
         style={{
           backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
           borderColor: theme === "dark" ? "#334155" : "#e2e8f0",
@@ -1127,7 +1350,7 @@ export function MaskedTablesSettings() {
           </p>
         </div>
       </motion.div>
-      <div className="min-h-[120px] overflow-hidden rounded-3xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-6">
+      <div className="min-h-[120px] overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-700 dark:bg-slate-800/90 sm:p-6">
         <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
           Tables
         </h2>
@@ -1189,7 +1412,7 @@ export function CustomOptionsSettings({
   return (
     <div className="space-y-4 sm:space-y-6">
       <div
-        className="p-4 sm:p-6 rounded-2xl sm:rounded-3xl border space-y-4 max-w-xl"
+        className="p-4 sm:p-6 rounded-2xl sm:rounded-2xl border space-y-4 max-w-xl"
         style={{
           backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
           borderColor: theme === "dark" ? "#334155" : "#e2e8f0",
@@ -1231,7 +1454,7 @@ export function LinkoutSettings({
 }) {
   return (
     <div
-      className="p-6 rounded-3xl border space-y-4"
+      className="p-6 rounded-2xl border space-y-4"
       style={{
         backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
         borderColor: theme === "dark" ? "#334155" : "#e2e8f0",

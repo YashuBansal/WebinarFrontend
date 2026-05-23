@@ -103,7 +103,7 @@ const PlanOrder = () => {
         </Button>
       </motion.header>
 
-      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800/90">
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800/90">
         <div className="p-5 sm:p-6">
           <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
             Plans

@@ -69,7 +69,10 @@ import {
   SupportPage,
   DocumentationPage,
   WhatsAppWrapper,
+  ZoomLiveWrapper,
+  AffiliateDashboard,
 } from "./pages";
+
 import RouteGuard from "./components/AccessControl/RouteGuard";
 
 import {
@@ -644,6 +647,30 @@ const App = () => {
           element: <Profile />,
         },
         {
+          path: "/affiliate",
+          element: <AffiliateDashboard view="dashboard" />,
+        },
+        {
+          path: "/affiliate/getstarted",
+          element: <AffiliateDashboard view="dashboard" />,
+        },
+        {
+          path: "/affiliate/referrals",
+          element: <AffiliateDashboard view="referrals" />,
+        },
+        {
+          path: "/affiliate/ledger",
+          element: <AffiliateDashboard view="ledger" />,
+        },
+        {
+          path: "/affiliate/bank",
+          element: <AffiliateDashboard view="bank" />,
+        },
+        {
+          path: "/affiliate/plans",
+          element: <AffiliateDashboard view="plans" />,
+        },
+        {
           path: "/notice-board/update",
           element: (
             <RouteGuard roleNames={["ADMIN", "SUPER_ADMIN"]}>
@@ -718,15 +745,14 @@ const App = () => {
           ),
         },
         {
-          path: "/zoom",
+          path: "/zoom/*",
           element: (
             <RouteGuard roleNames={["ADMIN"]}>
-              <RedirectToExternal
-                url={import.meta.env.VITE_REACT_APP_ZOOM_URL}
-              />
+              <ZoomLiveWrapper />
             </RouteGuard>
           ),
         },
+
       ],
     },
     {

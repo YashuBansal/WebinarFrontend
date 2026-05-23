@@ -22,6 +22,12 @@ import {
   MaximizeIcon,
   MinimizeIcon,
 } from "../SVGs";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
 import { successToast } from "../../utils/extra";
 
 const DataTable = ({
@@ -45,9 +51,9 @@ const DataTable = ({
   isLoading = false,
   selectedRows = [], // Removed useMemo for simpler prop handling
   employees = [], // Removed useMemo
-  rowClick = (row) => {},
+  rowClick = (row) => { },
   isRowClickable = false,
-  setSelectedRows = () => {},
+  setSelectedRows = () => { },
   isLeadType = false,
   locations = null,
   sortByOrder = "asc",
@@ -56,38 +62,20 @@ const DataTable = ({
   const logUserActivity = useAddUserActivity();
 
   const [isPresetModalOpen, setIsPresetModalOpen] = useState(false);
-  const [open, setOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false);
-  const menuRef = useRef(null);
   const { userData } = useSelector((state) => state.auth);
-
-  const handleClick = () => setOpen(!open);
-  const handleClose = () => setOpen(false);
 
   const toggleMaximize = () => {
     setIsMaximized((prev) => !prev);
   };
 
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        handleClose();
-      }
-    };
-    if (open) {
-      document.addEventListener("mousedown", handleOutsideClick);
-    }
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, [open]);
+
   return (
     <div
-      className={`bg-gray-50 transition-all duration-300 ${
-        isMaximized
-          ? "fixed top-0 left-0 inset-0 w-screen h-screen z-[100] overflow-auto p-4 md:p-6" // Adjusted padding for mobile
-          : "relative p-4 md:p-6 rounded-lg" // Adjusted padding
-      }`}
+      className={`bg-gray-50 transition-all duration-300 ${isMaximized
+        ? "fixed top-0 left-0 inset-0 w-screen h-screen z-[100] overflow-auto p-4 md:p-6" // Adjusted padding for mobile
+        : "relative p-4 md:p-6 rounded-lg" // Adjusted padding
+        }`}
     >
       {/* 1. HEADER SECTION: Stacks title and actions on mobile */}
       <div className="flex flex-col md:flex-row gap-4 justify-between md:items-center mb-4">
@@ -124,43 +112,35 @@ const DataTable = ({
           {userData?.isActive &&
             tableUniqueKey !== "viewAssignmentsTable" &&
             exportModalName !== "" && (
-              <div className="relative">
-                <button
-                  className="p-2 hover:bg-gray-200 rounded-full group"
-                  onClick={handleClick}
-                >
-                  <img src={ThreeDotsIcon} alt="Menu" className="h-6 w-6" />
-                </button>
-                {open && (
-                  <div
-                    ref={menuRef}
-                    className="absolute right-0 top-full px-2 mt-1 bg-white shadow-lg rounded-md py-2 border border-gray-100 z-50 min-w-max"
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-2 hover:bg-gray-200 rounded-full group outline-none">
+                    <img src={ThreeDotsIcon} alt="Menu" className="h-6 w-6" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48 z-[300]">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      dispatch(openModal({ modalName: exportModalName }));
+                    }}
+                    className="cursor-pointer"
                   >
-                    <button
-                      onClick={() => {
-                        dispatch(openModal({ modalName: exportModalName }));
-                        handleClose();
-                      }}
-                      className="w-full py-2 px-2 text-sm text-gray-700 hover:bg-gray-50 text-left flex items-center"
-                    >
-                      <img
-                        src={GreenDownloadIcon}
-                        alt="Download"
-                        className="h-4 w-4"
-                      />
-                      <span className="text-sm px-4 font-medium">Export</span>
-                    </button>
-                  </div>
-                )}
-              </div>
+                    <img
+                      src={GreenDownloadIcon}
+                      alt="Download"
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm px-2 font-medium">Export</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
         </div>
       </div>
 
       <div
-        className={`flex flex-col md:flex-row flex-wrap gap-4 ${
-          buttonGroupContent ? "justify-between" : "justify-end"
-        } py-2 items-stretch md:items-center`}
+        className={`flex flex-col md:flex-row flex-wrap gap-4 ${buttonGroupContent ? "justify-between" : "justify-end"
+          } py-2 items-stretch md:items-center`}
       >
         {buttonGroupContent && (
           <div className="flex-shrink-0">{buttonGroupContent}</div>

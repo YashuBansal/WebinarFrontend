@@ -2,11 +2,16 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "framer-motion";
 import { Controller, useForm } from "react-hook-form";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
+import { DatePicker } from "../ui/date-picker";
 import { useDispatch, useSelector } from "react-redux";
 import { toast } from "sonner";
-import { CalendarDays, Copy, Filter, RotateCcw, Save, X } from "lucide-react";
+import { CalendarDays, Copy, Filter, RotateCcw, Save, X, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
 import { closeModal } from "../../features/slices/modalSlice";
 import { filterTruthyValues, successToast } from "../../utils/extra";
 import useAddUserActivity from "../../hooks/useAddUserActivity";
@@ -215,19 +220,43 @@ const FilterModal = ({
                     control={control}
                     name="assignedEmployee"
                     render={({ field }) => (
-                      <select
-                        value={field.value || ""}
-                        onChange={(e) => field.onChange(e.target.value)}
-                        className="w-full p-2 rounded-xl text-sm focus:outline-none focus:ring-2 appearance-none cursor-pointer"
-                        style={inputStyle}
-                      >
-                        <option value="">All Employees</option>
-                        {options.map((employee, idx) => (
-                          <option key={`employee-${idx}-${employee.value}`} value={employee.value}>
-                            {employee.label}
-                          </option>
-                        ))}
-                      </select>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className="flex h-11 w-full items-center justify-between rounded-xl border-gray-200 bg-white px-4 py-2 text-sm dark:border-slate-800 dark:bg-slate-900 text-slate-700 dark:text-slate-200 outline-none hover:bg-gray-50 dark:hover:bg-white/10 transition-all duration-200"
+                            style={inputStyle}
+                          >
+                            <span className="truncate">
+                              {field.value
+                                ? options.find((o) => o.value === field.value)?.label ||
+                                  "Select Employee"
+                                : "All Employees"}
+                            </span>
+                            <ChevronDown className="ml-2 h-4 w-4 opacity-50 shrink-0" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                          align="start"
+                          className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[300] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                        >
+                          <DropdownMenuItem
+                            onClick={() => field.onChange("")}
+                            className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200"
+                          >
+                            All Employees
+                          </DropdownMenuItem>
+                          {options.map((employee, idx) => (
+                            <DropdownMenuItem
+                              key={`employee-${idx}-${employee.value}`}
+                              onClick={() => field.onChange(employee.value)}
+                              className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200"
+                            >
+                              {employee.label}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     )}
                   />
                 </div>
@@ -267,15 +296,14 @@ const FilterModal = ({
                       control={control}
                       render={({ field }) => (
                         <DatePicker
-                          selected={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          placeholderText="mm/dd/yyyy"
-                          dateFormat={dateFormat}
-                          customInput={<Input className="w-full p-2 rounded-xl text-sm focus:outline-none focus:ring-2 pr-9" style={inputStyle} />}
+                          date={field.value}
+                          setDate={(date) => field.onChange(date)}
+                          placeholder="mm/dd/yyyy"
+                          className="w-full"
+                          style={inputStyle}
                         />
                       )}
                     />
-                    <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
                   </div>
                 </div>
                 <div>
@@ -286,15 +314,14 @@ const FilterModal = ({
                       control={control}
                       render={({ field }) => (
                         <DatePicker
-                          selected={field.value}
-                          onChange={(date) => field.onChange(date)}
-                          placeholderText="mm/dd/yyyy"
-                          dateFormat={dateFormat}
-                          customInput={<Input className="w-full p-2 rounded-xl text-sm focus:outline-none focus:ring-2 pr-9" style={inputStyle} />}
+                          date={field.value}
+                          setDate={(date) => field.onChange(date)}
+                          placeholder="mm/dd/yyyy"
+                          className="w-full"
+                          style={inputStyle}
                         />
                       )}
                     />
-                    <CalendarDays className="pointer-events-none absolute right-3 top-2.5 h-4 w-4 text-gray-500 dark:text-gray-400" />
                   </div>
                 </div>
               </div>
@@ -319,21 +346,84 @@ const FilterModal = ({
               <div className="flex flex-wrap items-center gap-4">
                 <div className="flex items-center gap-2">
                   <span style={{ ...labelStyle, marginBottom: 0 }}>Sort By:</span>
-                  <select value={sortField || "name"} onChange={(e) => setSortField?.(e.target.value)} className="px-2 py-1.5 rounded-lg border text-sm focus:outline-none focus:ring-2 cursor-pointer" style={inputStyle}>
-                    <option value="name">Webinar Name</option>
-                    <option value="date">Date</option>
-                    <option value="registrations">Registrations</option>
-                    <option value="participants">Participants</option>
-                    <option value="attendees">Attendees</option>
-                    <option value="unAttended">Un-Attended</option>
-                  </select>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="flex h-9 w-[160px] items-center justify-between rounded-lg border px-3 py-1.5 text-sm outline-none transition-all duration-200 hover:bg-slate-50 dark:hover:bg-white/10"
+                        style={inputStyle}
+                      >
+                        <span className="truncate">
+                          {{
+                            name: "Webinar Name",
+                            date: "Date",
+                            registrations: "Registrations",
+                            participants: "Participants",
+                            attendees: "Attendees",
+                            unAttended: "Un-Attended",
+                          }[sortField] || "Webinar Name"}
+                        </span>
+                        <ChevronDown className="ml-2 h-4 w-4 opacity-50 shrink-0" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="w-[180px] max-h-[300px] z-[300] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                    >
+                      {[
+                        { value: "name", label: "Webinar Name" },
+                        { value: "date", label: "Date" },
+                        { value: "registrations", label: "Registrations" },
+                        { value: "participants", label: "Participants" },
+                        { value: "attendees", label: "Attendees" },
+                        { value: "unAttended", label: "Un-Attended" },
+                      ].map((opt) => (
+                        <DropdownMenuItem
+                          key={opt.value}
+                          onClick={() => setSortField?.(opt.value)}
+                          className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200"
+                        >
+                          {opt.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
                 <div className="flex items-center gap-2">
                   <span style={{ ...labelStyle, marginBottom: 0 }}>Order:</span>
-                  <select value={sortDirection || "asc"} onChange={(e) => setSortDirection?.(e.target.value)} className="px-2 py-1.5 rounded-lg border text-sm focus:outline-none focus:ring-2 cursor-pointer" style={inputStyle}>
-                    <option value="asc">A - Z / Lowest First</option>
-                    <option value="desc">Z - A / Highest First</option>
-                  </select>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="flex h-9 w-[180px] items-center justify-between rounded-lg border px-3 py-1.5 text-sm outline-none transition-all duration-200 hover:bg-slate-50 dark:hover:bg-white/10"
+                        style={inputStyle}
+                      >
+                        <span className="truncate">
+                          {sortDirection === "asc"
+                            ? "A - Z / Lowest First"
+                            : "Z - A / Highest First"}
+                        </span>
+                        <ChevronDown className="ml-2 h-4 w-4 opacity-50 shrink-0" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="w-[200px] z-[300] bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                    >
+                      {[
+                        { value: "asc", label: "A - Z / Lowest First" },
+                        { value: "desc", label: "Z - A / Highest First" },
+                      ].map((opt) => (
+                        <DropdownMenuItem
+                          key={opt.value}
+                          onClick={() => setSortDirection?.(opt.value)}
+                          className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200"
+                        >
+                          {opt.label}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
 

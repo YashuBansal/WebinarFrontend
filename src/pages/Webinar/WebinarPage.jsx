@@ -54,6 +54,12 @@ import {
   BookmarkIcon,
   FilterIcon,
 } from "../../components/SVGs";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../components/ui/dropdown-menu";
 import useUserSubscription from "../../hooks/useUserSubscription";
 import { useTheme } from "../../contexts/ThemeContext";
 
@@ -210,32 +216,13 @@ const Webinar = () => {
       : []),
   ];
 
-  const [open, setOpen] = useState(false);
   const [isMaximized, setIsMaximized] = useState(false); // State for maximize/minimize
-  const menuRef = useRef(null);
   const [isPresetModalOpen, setIsPresetModalOpen] = useState(false);
 
-  useEffect(() => {
-    const handleOutsideClick = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        handleClose();
-      }
-    };
 
-    if (open) {
-      document.addEventListener("mousedown", handleOutsideClick);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleOutsideClick);
-    };
-  }, [open]);
   const toggleMaximize = () => {
     setIsMaximized((prev) => !prev);
   };
-
-  const handleClick = () => setOpen(!open);
-  const handleClose = () => setOpen(false);
 
   return (
     <div className="px-6 md:px-10 pt-14 min-h-screen">
@@ -267,12 +254,12 @@ const Webinar = () => {
       </div>
       <div
         className={`transition-all duration-300 ${isMaximized
-            ? "fixed top-0 left-0 inset-0 w-screen h-screen z-[100] overflow-auto p-6"
-            : "relative p-6 rounded-lg"
+          ? "fixed top-0 left-0 inset-0 w-screen h-screen z-[100] overflow-auto p-6"
+          : "relative p-6 rounded-lg"
           }`}
         style={{
-          backgroundColor: isMaximized 
-            ? (isDark ? "#0f172a" : "#F2F4F6") 
+          backgroundColor: isMaximized
+            ? (isDark ? "#0f172a" : "#F2F4F6")
             : (isDark ? "rgba(30, 41, 59, 0.7)" : "rgba(249, 250, 251, 0.8)"),
           backdropFilter: isMaximized ? "none" : "blur(16px)",
           border: isMaximized ? "none" : `1px solid ${isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"}`,
@@ -308,43 +295,38 @@ const Webinar = () => {
             </button>
 
             {userData?.isActive && exportModalName !== "" && (
-              <div className="relative">
-                <button
-                  className="p-2 hover:bg-gray-200 rounded-full group"
-                  onClick={handleClick}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full group transition-colors outline-none">
+                    <img
+                      src={ThreeDotsIcon}
+                      alt="Menu"
+                      className="h-6 w-6 opacity-70 group-hover:opacity-100"
+                      style={{ filter: isDark ? "invert(1) brightness(2)" : "none" }}
+                    />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-48 z-[300] rounded-xl border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-2xl p-1.5"
                 >
-                  <img src={ThreeDotsIcon} alt="Menu" className="h-6 w-6" />
-                </button>
-
-                {open && (
-                  <div
-                    ref={menuRef}
-                    className="absolute right-0 top-full px-2 mt-1 shadow-lg rounded-md py-2 z-50 min-w-max"
-                    style={{
-                      backgroundColor: isDark ? "#1e293b" : "#ffffff",
-                      border: `1px solid ${isDark ? "#334155" : "#e5e7eb"}`,
+                  <DropdownMenuItem
+                    onClick={() => {
+                      dispatch(openModal({ modalName: exportModalName }));
                     }}
+                    className="cursor-pointer flex items-center gap-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors p-2"
                   >
-                    <button
-                      onClick={() => {
-                        dispatch(openModal({ modalName: exportModalName }));
-                        handleClose();
-                      }}
-                      className="w-full py-2 px-2 text-sm text-left flex items-center transition-colors rounded-lg hover:bg-black/5 dark:hover:bg-white/5"
-                      style={{ color: isDark ? "#cbd5e1" : "#334155" }}
-                    >
-                      <img
-                        src={GreenDownloadIcon}
-                        alt="Download"
-                        className="h-4 w-4"
-                      />
-                      <span className="text-sm px-4 font-medium"> Export</span>
-                    </button>
-
-                    {/* Maximize/Minimize button has been moved out of this menu */}
-                  </div>
-                )}
-              </div>
+                    <img
+                      src={GreenDownloadIcon}
+                      alt="Download"
+                      className="h-4 w-4"
+                    />
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                      Export
+                    </span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>
@@ -396,7 +378,7 @@ const Webinar = () => {
           <table className="w-full text-sm">
             <thead className="sticky top-0 z-10" style={{ backgroundColor: isDark ? "#0f172a" : "#f8fafc" }}>
               <tr>
-                <th 
+                <th
                   className="py-6 px-4 font-normal text-sm whitespace-nowrap text-start"
                   style={{ color: isDark ? "#94a3b8" : "#64748b" }}
                 >
@@ -412,9 +394,9 @@ const Webinar = () => {
                   </th>
                 ))}
                 {Array.isArray(actionIcons) && actionIcons.length > 0 && (
-                  <th 
+                  <th
                     className="px-4 py-3 font-normal text-sm sticky right-0 z-10"
-                    style={{ 
+                    style={{
                       color: isDark ? "#94a3b8" : "#64748b",
                       backgroundColor: isDark ? "#0f172a" : "#f8fafc"
                     }}
@@ -448,7 +430,7 @@ const Webinar = () => {
                   <tr
                     key={row?._id}
                     className="border-b whitespace-nowrap transition-colors hover:bg-black/5 dark:hover:bg-white/5"
-                    style={{ 
+                    style={{
                       borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
                     }}
                   >
@@ -494,9 +476,9 @@ const Webinar = () => {
                       </td>
                     ))}
                     {Array.isArray(actionIcons) && actionIcons.length > 0 && (
-                      <td 
+                      <td
                         className="px-4 py-2 sticky right-0 border-l"
-                        style={{ 
+                        style={{
                           backgroundColor: isDark ? "#1e293b" : "#ffffff",
                           borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)"
                         }}

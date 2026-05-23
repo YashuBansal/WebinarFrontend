@@ -1,7 +1,13 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Controller } from "react-hook-form";
-import DatePicker from "react-datepicker";
-import { CalendarDays, Filter, Plus, Trash2 } from "lucide-react";
+import { DatePicker } from "../ui/date-picker";
+import { CalendarDays, Filter, Plus, Trash2, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 
@@ -539,22 +545,43 @@ export default function WebinarConditionalLogicPanel({
               control={control}
               name="assignedEmployee"
               render={({ field }) => (
-                <select
-                  value={field.value || ""}
-                  onChange={(e) => field.onChange(e.target.value)}
-                  className="w-full p-2 rounded-lg text-sm focus:outline-none focus:ring-2 cursor-pointer"
-                  style={inputStyle}
-                >
-                  <option value="">All employees</option>
-                  {(employeeOptions || []).map((employee, idx) => (
-                    <option
-                      key={`emp-${idx}-${employee.value}`}
-                      value={employee.value}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="flex h-11 w-full items-center justify-between rounded-lg border px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-slate-50 dark:hover:bg-white/10"
+                      style={inputStyle}
                     >
-                      {employee.label}
-                    </option>
-                  ))}
-                </select>
+                      <span className="truncate">
+                        {field.value
+                          ? employeeOptions.find((o) => o.value === field.value)
+                              ?.label || "Select employee"
+                          : "All employees"}
+                      </span>
+                      <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[300] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                  >
+                    <DropdownMenuItem
+                      onClick={() => field.onChange("")}
+                      className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                    >
+                      All employees
+                    </DropdownMenuItem>
+                    {(employeeOptions || []).map((employee, idx) => (
+                      <DropdownMenuItem
+                        key={`emp-${idx}-${employee.value}`}
+                        onClick={() => field.onChange(employee.value)}
+                        className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200"
+                      >
+                        {employee.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             />
           </div>
@@ -568,22 +595,14 @@ export default function WebinarConditionalLogicPanel({
                 control={control}
                 render={({ field }) => (
                   <DatePicker
-                    selected={normalizePickerDate(field.value)}
-                    onChange={(date) => field.onChange(date)}
-                    placeholderText="mm/dd/yyyy"
-                    dateFormat={pickerDateFormat}
-                    isClearable
-                    customInput={
-                      <Input
-                        className="w-full p-2 rounded-lg text-sm pr-9"
-                        style={inputStyle}
-                        placeholder="From"
-                      />
-                    }
+                    date={normalizePickerDate(field.value)}
+                    setDate={(date) => field.onChange(date)}
+                    placeholder="From"
+                    className="w-full text-sm"
+                    style={inputStyle}
                   />
                 )}
               />
-              <CalendarDays className="pointer-events-none absolute right-2 top-2.5 h-4 w-4 text-gray-500" />
             </div>
             <div className="relative flex-1 min-w-[120px]">
               <Controller
@@ -591,22 +610,14 @@ export default function WebinarConditionalLogicPanel({
                 control={control}
                 render={({ field }) => (
                   <DatePicker
-                    selected={normalizePickerDate(field.value)}
-                    onChange={(date) => field.onChange(date)}
-                    placeholderText="mm/dd/yyyy"
-                    dateFormat={pickerDateFormat}
-                    isClearable
-                    customInput={
-                      <Input
-                        className="w-full p-2 rounded-lg text-sm pr-9"
-                        style={inputStyle}
-                        placeholder="To"
-                      />
-                    }
+                    date={normalizePickerDate(field.value)}
+                    setDate={(date) => field.onChange(date)}
+                    placeholder="To"
+                    className="w-full text-sm"
+                    style={inputStyle}
                   />
                 )}
               />
-              <CalendarDays className="pointer-events-none absolute right-2 top-2.5 h-4 w-4 text-gray-500" />
             </div>
           </div>
         );
@@ -718,41 +729,77 @@ export default function WebinarConditionalLogicPanel({
 
               {renderAndOrToggle(row, index)}
 
-              <select
-                value={row.fieldKey}
-                onChange={(e) => handleFieldChange(row.id, e.target.value)}
-                className="min-w-[140px] flex-1 max-w-[220px] p-2 rounded-lg text-sm focus:outline-none focus:ring-2 cursor-pointer"
-                style={inputStyle}
-              >
-                <option value="">Choose field…</option>
-                {enabledFieldEntries.map(([key, label]) => (
-                  <option
-                    key={key}
-                    value={key}
-                    disabled={Boolean(
-                      row.fieldKey !== key && usedKeys.has(key)
-                    )}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="min-w-[140px] flex-1 max-w-[220px] flex h-11 items-center justify-between rounded-lg border px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-slate-50 dark:hover:bg-white/10"
+                    style={inputStyle}
                   >
-                    {label}
-                  </option>
-                ))}
-              </select>
+                    <span className="truncate">
+                      {row.fieldKey
+                        ? FIELD_LABELS[row.fieldKey] || "Choose field…"
+                        : "Choose field…"}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[300] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                >
+                  <DropdownMenuItem
+                    onClick={() => handleFieldChange(row.id, "")}
+                    className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  >
+                    Choose field…
+                  </DropdownMenuItem>
+                  {enabledFieldEntries.map(([key, label]) => (
+                    <DropdownMenuItem
+                      key={key}
+                      disabled={Boolean(row.fieldKey !== key && usedKeys.has(key))}
+                      onClick={() => handleFieldChange(row.id, key)}
+                      className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200"
+                    >
+                      {label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-              <select
-                value={row.operator}
-                onChange={(e) =>
-                  updateRow(row.id, { operator: e.target.value })
-                }
-                disabled={!row.fieldKey}
-                className="min-w-[120px] max-w-[160px] p-2 rounded-lg text-sm focus:outline-none focus:ring-2 cursor-pointer disabled:opacity-50"
-                style={inputStyle}
-              >
-                {operatorOptionsForField(row.fieldKey).map((op) => (
-                  <option key={op.value} value={op.value}>
-                    {op.label}
-                  </option>
-                ))}
-              </select>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild disabled={!row.fieldKey}>
+                  <Button
+                    variant="outline"
+                    disabled={!row.fieldKey}
+                    className="min-w-[120px] max-w-[160px] flex h-11 items-center justify-between rounded-lg border px-3 py-2 text-sm outline-none transition-all duration-200 disabled:opacity-50 hover:bg-slate-50 dark:hover:bg-white/10"
+                    style={inputStyle}
+                  >
+                    <span className="truncate">
+                      {row.fieldKey
+                        ? operatorOptionsForField(row.fieldKey).find(
+                            (o) => o.value === row.operator
+                          )?.label || "Operator"
+                        : "Operator"}
+                    </span>
+                    <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[300] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                >
+                  {operatorOptionsForField(row.fieldKey).map((op) => (
+                    <DropdownMenuItem
+                      key={op.value}
+                      onClick={() => updateRow(row.id, { operator: op.value })}
+                      className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200"
+                    >
+                      {op.label}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
               {renderValueEditor(row)}
 

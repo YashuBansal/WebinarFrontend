@@ -11,6 +11,7 @@ import {
   filterTruthyValues,
   successToast,
 } from "../../utils/extra";
+import { toast } from "sonner";
 import useAddUserActivity from "../../hooks/useAddUserActivity";
 import { getCustomOptionsForFilters } from "../../features/actions/globalData";
 import {
@@ -28,6 +29,12 @@ import useUserSubscription from "../../hooks/useUserSubscription";
 import Select from "react-select";
 import CreatableSelect from "react-select/creatable";
 import { Dialog, DialogContent } from "../ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
 import { useTheme } from "../../contexts/ThemeContext";
 
 import AttendeeConditionalLogicPanel from "../Filter/AttendeeConditionalLogicPanel";
@@ -173,6 +180,29 @@ const AttendeesFilterModal = ({
         ...base,
         color: isDark ? "#64748b" : "#94a3b8",
       }),
+      menu: (base) => ({
+        ...base,
+        backgroundColor: isDark ? "#1e293b" : "#ffffff",
+        border: `1px solid ${isDark ? "#334155" : "#e2e8f0"}`,
+        borderRadius: "12px",
+        boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1)",
+        overflow: "hidden",
+      }),
+      option: (base, { isFocused, isSelected }) => ({
+        ...base,
+        backgroundColor: isSelected
+          ? "#22B573"
+          : isFocused
+          ? isDark
+            ? "rgba(255,255,255,0.1)"
+            : "rgba(0,0,0,0.05)"
+          : "transparent",
+        color: isSelected ? "#ffffff" : isDark ? "#f8fafc" : "#0f172a",
+        cursor: "pointer",
+        ":active": {
+          backgroundColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
+        },
+      }),
     }),
     [isDark]
   );
@@ -187,6 +217,12 @@ const AttendeesFilterModal = ({
     }
 
     const payload = filterTab === "advanced" ? conditionalSanitizeRef.current(data) : data;
+
+    // Backend expects leadType as string[] — wrap single value in array
+    if (payload.leadType && !Array.isArray(payload.leadType)) {
+      payload.leadType = [payload.leadType];
+    }
+
     const filterData = filterTruthyValues(payload);
 
     if (Object.keys(filterData).length) {
@@ -270,9 +306,14 @@ const AttendeesFilterModal = ({
       );
     }
 
-    reset({
-      ...webinarAttendeesFilters,
-    });
+    // Normalize stored filters back to form-friendly shape:
+    // leadType is stored as string[] by the backend but the form uses a scalar string
+    const normalizedFilters = { ...webinarAttendeesFilters };
+    if (Array.isArray(normalizedFilters.leadType)) {
+      normalizedFilters.leadType = normalizedFilters.leadType[0] || "";
+    }
+
+    reset(normalizedFilters);
 
     return () => {
       dispatch(clearEmployeeData());
@@ -533,12 +574,40 @@ const AttendeesFilterModal = ({
                       name="gender"
                       control={control}
                       render={({ field }) => (
-                        <select {...field} style={inputStyle} className="w-full h-10 rounded-xl px-3 border focus:ring-2 cursor-pointer">
-                          <option value="">All</option>
-                          <option value="Male">Male</option>
-                          <option value="Female">Female</option>
-                          <option value="Other">Other</option>
-                        </select>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="flex h-10 w-full items-center justify-between rounded-xl px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                              style={inputStyle}
+                            >
+                              <span className="truncate">
+                                {field.value || "All"}
+                              </span>
+                              <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                          >
+                            <DropdownMenuItem
+                              onClick={() => field.onChange("")}
+                              className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                            >
+                              All
+                            </DropdownMenuItem>
+                            {["Male", "Female", "Other"].map((o) => (
+                              <DropdownMenuItem
+                                key={o}
+                                onClick={() => field.onChange(o)}
+                                className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                              >
+                                {o}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
                     />
                   </div>
@@ -551,12 +620,40 @@ const AttendeesFilterModal = ({
                       name="status"
                       control={control}
                       render={({ field }) => (
-                        <select {...field} style={inputStyle} className="w-full h-10 rounded-xl px-3 border focus:ring-2 cursor-pointer">
-                          <option value="">All</option>
-                          {(customOptionsForFilters?.status || []).map(o => (
-                            <option key={o} value={o}>{o}</option>
-                          ))}
-                        </select>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="flex h-10 w-full items-center justify-between rounded-xl px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                              style={inputStyle}
+                            >
+                              <span className="truncate">
+                                {field.value || "All"}
+                              </span>
+                              <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                          >
+                            <DropdownMenuItem
+                              onClick={() => field.onChange("")}
+                              className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                            >
+                              All
+                            </DropdownMenuItem>
+                            {(customOptionsForFilters?.status || []).map((o) => (
+                              <DropdownMenuItem
+                                key={o}
+                                onClick={() => field.onChange(o)}
+                                className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                              >
+                                {o}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
                     />
                   </div>
@@ -569,12 +666,40 @@ const AttendeesFilterModal = ({
                       name="source"
                       control={control}
                       render={({ field }) => (
-                        <select {...field} style={inputStyle} className="w-full h-10 rounded-xl px-3 border focus:ring-2 cursor-pointer">
-                          <option value="">All</option>
-                          {(customOptionsForFilters?.source || []).map(o => (
-                            <option key={o} value={o}>{o}</option>
-                          ))}
-                        </select>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="flex h-10 w-full items-center justify-between rounded-xl px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                              style={inputStyle}
+                            >
+                              <span className="truncate">
+                                {field.value || "All"}
+                              </span>
+                              <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                          >
+                            <DropdownMenuItem
+                              onClick={() => field.onChange("")}
+                              className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                            >
+                              All
+                            </DropdownMenuItem>
+                            {(customOptionsForFilters?.source || []).map((o) => (
+                              <DropdownMenuItem
+                                key={o}
+                                onClick={() => field.onChange(o)}
+                                className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                              >
+                                {o}
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
                     />
                   </div>
@@ -587,12 +712,61 @@ const AttendeesFilterModal = ({
                       name="leadType"
                       control={control}
                       render={({ field }) => (
-                        <select {...field} style={inputStyle} className="w-full h-10 rounded-xl px-3 border focus:ring-2 cursor-pointer">
-                          <option value="">All</option>
-                          {leadTypeOptions.map(o => (
-                            <option key={o.value} value={o.value}>{o.label}</option>
-                          ))}
-                        </select>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="outline"
+                              className="flex h-10 w-full items-center justify-between rounded-xl px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                              style={inputStyle}
+                            >
+                              <span className="truncate flex items-center gap-2">
+                                {field.value ? (
+                                  <>
+                                    <div
+                                      style={{
+                                        backgroundColor: leadTypeOptions.find(
+                                          (o) => o.value === field.value
+                                        )?.color,
+                                      }}
+                                      className="w-4 h-4 rounded-sm shrink-0"
+                                    />
+                                    {leadTypeOptions.find((o) => o.value === field.value)
+                                      ?.label || "Select Lead Type"}
+                                  </>
+                                ) : (
+                                  "All"
+                                )}
+                              </span>
+                              <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="start"
+                            className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                          >
+                            <DropdownMenuItem
+                              onClick={() => field.onChange("")}
+                              className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                            >
+                              All
+                            </DropdownMenuItem>
+                            {leadTypeOptions.map((o) => (
+                              <DropdownMenuItem
+                                key={o.value}
+                                onClick={() => field.onChange(o.value)}
+                                className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <div
+                                    style={{ backgroundColor: o.color }}
+                                    className="w-4 h-4 rounded-sm shrink-0"
+                                  />
+                                  {o.label}
+                                </div>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       )}
                     />
                   </div>
@@ -664,25 +838,72 @@ const AttendeesFilterModal = ({
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <div className="flex items-center gap-3">
                 <span style={labelStyle} className="mb-0">Sort By</span>
-                <select
-                  value={sortBy.sortBy}
-                  onChange={(e) => setSortBy(prev => ({ ...prev, sortBy: e.target.value }))}
-                  className="px-3 py-1.5 rounded-xl border text-sm focus:outline-none focus:ring-2 cursor-pointer h-10"
-                  style={inputStyle}
-                >
-                  {(tabValue === "preWebinar" ? webinarAttendeesSortByOptions : salesAttendeesSortByOptions).map(o => (
-                    <option key={o.value} value={o.value}>{o.label}</option>
-                  ))}
-                </select>
-                <select
-                  value={sortBy.sortOrder}
-                  onChange={(e) => setSortBy(prev => ({ ...prev, sortOrder: e.target.value }))}
-                  className="px-3 py-1.5 rounded-xl border text-sm focus:outline-none focus:ring-2 cursor-pointer h-10"
-                  style={inputStyle}
-                >
-                  <option value="asc">A - Z</option>
-                  <option value="desc">Z - A</option>
-                </select>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="flex h-10 min-w-[140px] items-center justify-between rounded-xl px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                      style={inputStyle}
+                    >
+                      <span className="truncate">
+                        {(tabValue === "preWebinar"
+                          ? webinarAttendeesSortByOptions
+                          : salesAttendeesSortByOptions
+                        ).find((o) => o.value === sortBy.sortBy)?.label || "Sort By"}
+                      </span>
+                      <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                  >
+                    {(tabValue === "preWebinar"
+                      ? webinarAttendeesSortByOptions
+                      : salesAttendeesSortByOptions
+                    ).map((o) => (
+                      <DropdownMenuItem
+                        key={o.value}
+                        onClick={() => setSortBy((prev) => ({ ...prev, sortBy: o.value }))}
+                        className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                      >
+                        {o.label}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className="flex h-10 min-w-[100px] items-center justify-between rounded-xl px-3 py-2 text-sm outline-none transition-all duration-200 hover:bg-black/5 dark:hover:bg-white/10"
+                      style={inputStyle}
+                    >
+                      <span className="truncate">
+                        {sortBy.sortOrder === "asc" ? "A - Z" : "Z - A"}
+                      </span>
+                      <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent
+                    align="start"
+                    className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[10000] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                  >
+                    <DropdownMenuItem
+                      onClick={() => setSortBy((prev) => ({ ...prev, sortOrder: "asc" }))}
+                      className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                    >
+                      A - Z
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => setSortBy((prev) => ({ ...prev, sortOrder: "desc" }))}
+                      className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                    >
+                      Z - A
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
 
               <div className="flex items-center gap-2">

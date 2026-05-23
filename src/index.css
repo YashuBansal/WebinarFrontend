@@ -154,6 +154,10 @@ input.dateTime-picker[type="datetime-local"]::-webkit-calendar-picker-indicator 
   background: transparent;
 }
 
+.dark input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+}
+
 /* .MuiBackdrop-root {
   z-index: 1300 !important;
 } */

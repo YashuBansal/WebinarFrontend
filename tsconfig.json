@@ -18,7 +18,8 @@
     "types": ["vite/client"],
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/pages/WhatsApp/*"]
+      "@/*": ["src/pages/WhatsApp/*"],
+      "@zoom/*": ["src/pages/ZoomLive/*"]
     }
   },
   "include": ["src"]

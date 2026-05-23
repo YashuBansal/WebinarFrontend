@@ -376,61 +376,9 @@ const DashboardSidebar = ({
       });
     });
 
-    if (variant === "mobile") {
-      pushRow(
-        "important",
-        <li key="m-imp-wrap">
-          <button
-            type="button"
-            onClick={toggleImportantLinks}
-            className="flex w-full items-center justify-between gap-2 rounded-xl px-3 py-2.5 text-left font-medium text-gray-700 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800"
-          >
-            <span className="flex items-center gap-3 min-w-0">
-              <Link2 className="h-5 w-5 text-slate-500 shrink-0" strokeWidth={2} />
-              <span className="truncate whitespace-nowrap">Important Links</span>
-            </span>
-            <ChevronDown
-              className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${showImportantLinks ? "rotate-180" : ""
-                }`}
-              strokeWidth={2}
-            />
-          </button>
-          {showImportantLinks &&
-            Array.isArray(sidebarLinkData) &&
-            sidebarLinkData.map((imp, i) => (
-              <ul key={`m-imp-${i}`} className="mt-1 space-y-1 pl-4">
-                <li>
-                  <a
-                    href={imp?.link}
-                    onClick={() => {
-                      handleNavigation(imp.title);
-                    }}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block rounded-lg px-3 py-2 text-sm text-gray-600 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-800"
-                  >
-                    {imp.title}
-                  </a>
-                </li>
-              </ul>
-            ))}
-        </li>
-      );
-    }
+
 
     if (variant === "rail") {
-      pushRow(
-        "rail-important",
-        <li key="r-imp">
-          <button
-            type="button"
-            onClick={toggleImportantLinks}
-            className="flex w-full items-center justify-center rounded-lg py-2.5 hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
-          >
-            <Link2 className="h-5 w-5 text-slate-500" strokeWidth={2} />
-          </button>
-        </li>
-      );
       pushRow(
         "rail-settings",
         <ComponentGuard
@@ -472,43 +420,6 @@ const DashboardSidebar = ({
     }
 
     if (variant === "panel") {
-      pushRow(
-        "panel-important",
-        <li key="p-imp">
-          <button
-            type="button"
-            onClick={toggleImportantLinks}
-            className="flex w-full items-center justify-between rounded-lg px-2 py-2.5 text-left text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
-            style={{ fontFamily: "Inter, sans-serif" }}
-          >
-            <span className="truncate whitespace-nowrap">Important Links</span>
-            <ChevronDown
-              className={`h-4 w-4 shrink-0 text-slate-500 transition-transform ${showImportantLinks ? "rotate-180" : ""
-                }`}
-              strokeWidth={2}
-            />
-          </button>
-          {showImportantLinks &&
-            Array.isArray(sidebarLinkData) &&
-            sidebarLinkData.map((imp, i) => (
-              <ul key={`p-imp-${i}`} className="space-y-1 pl-2">
-                <li>
-                  <a
-                    href={imp?.link}
-                    onClick={() => {
-                      handleNavigation(imp.title);
-                    }}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="block rounded-lg px-2 py-1.5 text-sm text-slate-600 dark:text-slate-400 hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
-                  >
-                    {imp.title}
-                  </a>
-                </li>
-              </ul>
-            ))}
-        </li>
-      );
       pushRow(
         "panel-settings",
         <ComponentGuard

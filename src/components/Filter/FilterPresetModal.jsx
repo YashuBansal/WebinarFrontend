@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Edit, Trash2, X, Bookmark } from "lucide-react";
+import { Edit, Trash2, X, Bookmark, ChevronDown } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../ui/dropdown-menu";
 import { useDispatch, useSelector } from "react-redux";
 import {
   creattFilterPreset,
@@ -147,24 +153,46 @@ const FilterPresetModal = ({
                   />
                 </>
               ) : (
-                <>
+                <div className="relative">
                   <Bookmark className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none z-[1]" />
-                  <select
-                    value={selectedPresetId}
-                    onChange={(e) => setSelectedPresetId(e.target.value)}
-                    className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm appearance-none cursor-pointer border shadow-xs focus:outline-none focus:ring-2 focus:ring-slate-400/30"
-                    style={inputStyle}
-                  >
-                    <option value="" disabled>
-                      Select a preset...
-                    </option>
-                    {presets.map((p) => (
-                      <option key={p._id} value={p._id}>
-                        {p.name}
-                      </option>
-                    ))}
-                  </select>
-                </>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="flex h-11 w-full items-center justify-between rounded-xl border-gray-200 bg-white pl-10 pr-4 py-2.5 text-sm dark:border-slate-800 dark:bg-slate-900 text-slate-700 dark:text-slate-200 outline-none hover:bg-gray-50 dark:hover:bg-white/10 transition-all duration-200"
+                        style={inputStyle}
+                      >
+                        <span className="truncate">
+                          {selectedPresetId
+                            ? presets.find((p) => p._id === selectedPresetId)?.name ||
+                              "Select a preset..."
+                            : "Select a preset..."}
+                        </span>
+                        <ChevronDown className="h-4 w-4 opacity-50 shrink-0" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="start"
+                      className="w-[var(--radix-dropdown-menu-trigger-width)] min-w-[var(--radix-dropdown-menu-trigger-width)] max-h-[300px] z-[300] overflow-y-auto overflow-x-hidden custom-scrollbar bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
+                    >
+                      {presets.length === 0 ? (
+                        <div className="px-3 py-2 text-sm text-slate-500 text-center">
+                          No presets found
+                        </div>
+                      ) : (
+                        presets.map((p) => (
+                          <DropdownMenuItem
+                            key={p._id}
+                            onClick={() => setSelectedPresetId(p._id)}
+                            className="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-slate-200"
+                          >
+                            {p.name}
+                          </DropdownMenuItem>
+                        ))
+                      )}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               )}
             </div>
           </div>

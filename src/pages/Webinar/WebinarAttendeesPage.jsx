@@ -560,7 +560,8 @@ const WebinarAttendeesPage = (props) => {
                 `/particularContact?email=${item?.email}&attendeeId=${item?._id}`,
               ),
             onDeleteClick: (item) => setDeleteModal(item),
-          }))}
+          }))
+          }
           selectedRows={selectedRows}
           onToggleSelect={(id) => {
             setSelectedRows(prev => {
@@ -586,6 +587,7 @@ const WebinarAttendeesPage = (props) => {
           onResizeDoubleClick={() => { }}
           onDeleteClick={() => { }}
           isLoading={isLoading}
+          leadTypeData={leadTypeData}
         />
       </WebinarAttendeesTableShell>
 

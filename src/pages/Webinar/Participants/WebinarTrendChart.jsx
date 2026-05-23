@@ -1,46 +1,39 @@
 import { useState } from "react";
 import Chart from "react-apexcharts";
+import { Loader2, Activity } from "lucide-react";
 
-// A simple loading spinner component
+// A high-fidelity loading spinner component
 const ChartSpinner = () => (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "100%",
-    }}
-  >
-    <div>Loading Chart...</div>
+  <div className="flex flex-col justify-center items-center h-full gap-3 text-slate-500 dark:text-slate-400">
+    <Loader2 className="h-8 w-8 animate-spin text-indigo-500" />
+    <span className="text-sm font-semibold tracking-wide">Analyzing Attendee Trends...</span>
   </div>
 );
 
-// A simple "No Data" message component
+// A premium "No Data" message component
 const NoDataMessage = () => (
-  <div
-    style={{
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      height: "100%",
-    }}
-  >
-    <div>No attendee data available for this period.</div>
+  <div className="flex flex-col justify-center items-center h-full gap-3 text-slate-400 p-6 text-center">
+    <div className="h-12 w-12 rounded-2xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-300">
+      <Activity className="h-6 w-6" />
+    </div>
+    <div>
+      <h4 className="text-sm font-bold text-slate-700 dark:text-slate-300">No Activity Detected</h4>
+      <p className="text-[11px] text-slate-400 mt-1 max-w-[240px]">There is no attendee activity recorded for this period.</p>
+    </div>
   </div>
 );
 
 const WebinarTrendChart = ({
   chartSeries,
-  isLoading, // Receive the loading prop
+  isLoading,
   onChangeOfVisibleDateRange,
 }) => {
-  // All your chartOptions can remain the same. No changes needed there.
   const [chartOptions] = useState({
     chart: {
       id: "attendees-per-minute-chart",
       type: "area",
       height: 350,
-      fontFamily: "inherit",
+      fontFamily: "Outfit, Inter, system-ui, sans-serif",
       toolbar: {
         show: true,
         tools: {
@@ -69,31 +62,31 @@ const WebinarTrendChart = ({
         },
       },
     },
-    colors: ["#3366FF"],
+    colors: ["#6366f1"], // Premium Indigo
     dataLabels: {
       enabled: false,
     },
     stroke: {
       curve: "smooth",
-      width: 2,
+      width: 2.5,
     },
     fill: {
       type: "gradient",
       gradient: {
         shadeIntensity: 1,
-        opacityFrom: 0.7,
-        opacityTo: 0.9,
+        opacityFrom: 0.35,
+        opacityTo: 0.05,
         stops: [0, 100],
         colorStops: [
           {
             offset: 0,
-            color: "#3366FF",
-            opacity: 0.2,
+            color: "#6366f1",
+            opacity: 0.3,
           },
           {
             offset: 100,
-            color: "#3366FF",
-            opacity: 0.05,
+            color: "#6366f1",
+            opacity: 0.0,
           },
         ],
       },
@@ -101,6 +94,11 @@ const WebinarTrendChart = ({
     xaxis: {
       type: "datetime",
       labels: {
+        style: {
+          colors: "#94a3b8",
+          fontSize: "11px",
+          fontWeight: 500,
+        },
         formatter: function (value, timestamp) {
           const options = {
             timeZone: "Asia/Kolkata",
@@ -108,7 +106,6 @@ const WebinarTrendChart = ({
             minute: "2-digit",
             hour12: true,
           };
-          // --- MODIFICATION: Convert am/pm to uppercase ---
           const timeString = new Date(timestamp).toLocaleString(
             "en-IN",
             options
@@ -117,23 +114,36 @@ const WebinarTrendChart = ({
         },
       },
       title: {
-        text: "Time",
+        text: "Timeline (IST)",
+        style: {
+          color: "#94a3b8",
+          fontSize: "12px",
+          fontWeight: 600,
+        },
+      },
+      axisBorder: {
+        show: false,
       },
       axisTicks: {
         show: true,
-        borderType: "solid",
-        color: "#78909C",
-        height: 6,
-        offsetX: 0,
-        offsetY: 0,
+        color: "#e2e8f0",
       },
     },
     yaxis: {
       title: {
-        text: "Number of Attendees",
+        text: "Attendees",
+        style: {
+          color: "#94a3b8",
+          fontSize: "12px",
+          fontWeight: 600,
+        },
       },
       min: 0,
       labels: {
+        style: {
+          colors: "#94a3b8",
+          fontSize: "11px",
+        },
         formatter: function (val) {
           return Math.max(0, Math.round(val));
         },
@@ -141,6 +151,7 @@ const WebinarTrendChart = ({
     },
     tooltip: {
       enabled: true,
+      theme: "light",
       x: {
         formatter: function (value) {
           const options = {
@@ -151,7 +162,6 @@ const WebinarTrendChart = ({
             minute: "2-digit",
             hour12: true,
           };
-          // --- MODIFICATION: Convert am/pm to uppercase ---
           const dateTimeString = new Date(value).toLocaleString(
             "en-IN",
             options
@@ -161,10 +171,10 @@ const WebinarTrendChart = ({
       },
       y: {
         formatter: function (val) {
-          return `Attendees: ${Math.round(val)}`;
+          return `${Math.round(val)} Present`;
         },
         title: {
-          formatter: () => "",
+          formatter: () => "Attendees: ",
         },
       },
       marker: {
@@ -175,8 +185,8 @@ const WebinarTrendChart = ({
     },
     grid: {
       show: true,
-      borderColor: "#e7e7e7",
-      strokeDashArray: 0,
+      borderColor: "rgba(148, 163, 184, 0.12)",
+      strokeDashArray: 4,
       position: "back",
       xaxis: {
         lines: {
@@ -189,10 +199,10 @@ const WebinarTrendChart = ({
         },
       },
       padding: {
-        top: 0,
-        right: 0,
+        top: 10,
+        right: 10,
         bottom: 0,
-        left: 0,
+        left: 10,
       },
     },
     markers: {
@@ -201,47 +211,45 @@ const WebinarTrendChart = ({
         sizeOffset: 4,
       },
     },
-    title: {
-      text: "Number of Attendees Present Each Minute",
-      align: "left",
-      margin: 20,
-      offsetX: 0,
-      offsetY: 0,
-      floating: false,
-      style: {
-        fontSize: "18px",
-        fontWeight: "bold",
-        fontFamily: "inherit",
-        color: "#263238",
-      },
-    },
   });
 
-  // *** NEW: Logic to handle loading and empty states ***
   if (isLoading) {
     return (
-      <div className="relative" style={{ height: "400px", width: "100%" }}>
+      <div className="relative h-[350px] w-full flex items-center justify-center bg-white/50 dark:bg-slate-900/50 backdrop-blur-md rounded-2xl border border-slate-200/50 dark:border-slate-800/30">
         <ChartSpinner />
       </div>
     );
   }
 
-  // Check if there is actual data to display AFTER loading is complete.
-  // We check `chartSeries[0]?.data?.length`.
   const hasData = chartSeries && chartSeries[0]?.data?.length > 0;
 
   return (
-    <div className="relative" style={{ height: "400px", width: "100%" }}>
-      {hasData ? (
-        <Chart
-          options={chartOptions}
-          series={chartSeries} // This is now in the correct format [{ name: '...', data: [...] }]
-          type="area"
-          height={350}
-        />
-      ) : (
-        <NoDataMessage />
-      )}
+    <div className="relative w-full bg-white/60 dark:bg-slate-900/60 backdrop-blur-xl rounded-[24px] p-6 border border-slate-200/40 dark:border-slate-800/30 shadow-xl shadow-slate-100/50 dark:shadow-none">
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <div className="h-6 w-6 rounded bg-indigo-50 dark:bg-indigo-950 flex items-center justify-center text-indigo-500">
+            <Activity className="h-4.5 w-4.5" />
+          </div>
+          <h3 className="text-sm font-bold text-slate-800 dark:text-slate-200">
+            Attendee Presence Trend
+          </h3>
+        </div>
+        <span className="text-[10px] uppercase font-black tracking-widest text-slate-400">
+          Minute-by-Minute Analytics
+        </span>
+      </div>
+      <div className="h-[350px]">
+        {hasData ? (
+          <Chart
+            options={chartOptions}
+            series={chartSeries}
+            type="area"
+            height={320}
+          />
+        ) : (
+          <NoDataMessage />
+        )}
+      </div>
     </div>
   );
 };

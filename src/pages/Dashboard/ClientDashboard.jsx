@@ -22,7 +22,15 @@ import { Search, ChevronDown } from "lucide-react";
 import AppLoader, { AppLoaderCenter } from "../../components/AppLoader";
 import { getIconConfig, statusToAccentColor } from "../../components/Dashboard/dashboardNewUiHelpers";
 import { motion } from "framer-motion";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "../../components/ui/dropdown-menu";
+import { Button } from "../../components/ui/button";
 import { Card } from "../../components/ui/card";
+import { DatePicker } from "../../components/ui/date-picker";
 import { useTheme } from "../../contexts/ThemeContext";
 
 function toYMD(d) {
@@ -330,98 +338,44 @@ const ClientDashboard = () => {
       >
         <div className="flex min-w-0 flex-col items-start justify-between gap-4 lg:flex-row lg:items-center lg:gap-6">
           <div className="flex min-w-0 w-full items-center gap-4 lg:w-auto">
-            <div className="relative w-full min-w-0 sm:w-[250px]">
-              <button
-                type="button"
-                onClick={() => {
-                  if (webinarHasRows) setWebinarOpen(!webinarOpen);
-                }}
-                className={`flex w-full items-center justify-between gap-2 rounded-xl px-4 py-2.5 transition-all duration-200 ${
-                  webinarHasRows
-                    ? "cursor-pointer hover:shadow-md"
-                    : "cursor-not-allowed opacity-70"
-                }`}
-                style={{
-                  backgroundColor: isDark ? "#1e293b" : "#F9FAFB",
-                  border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
-                  fontFamily: "Inter, sans-serif",
-                  fontSize: "14px",
-                  fontWeight: 500,
-                  color: isDark ? "#f8fafc" : "#071028",
-                  textAlign: "left",
-                }}
-              >
-                <span className="truncate">{webinarLabel()}</span>
-                <ChevronDown
-                  className="h-4 w-4 shrink-0 transition-transform duration-200"
-                  style={{
-                    color: isDark ? "#94a3b8" : "#64748b",
-                    transform: webinarOpen ? "rotate(180deg)" : "rotate(0deg)",
-                  }}
-                />
-              </button>
-
-              {webinarOpen && webinarHasRows && (
-                <div
-                  className="absolute left-0 top-full z-20 mt-2 w-full overflow-hidden rounded-xl"
-                  style={{
-                    backgroundColor: isDark ? "#1e293b" : "#ffffff",
-                    border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
-                    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.3)",
-                  }}
+            <div className="w-full min-w-0 sm:w-[320px]">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="flex h-11 w-full items-center justify-between rounded-xl border-gray-100 bg-white px-4 py-2 text-sm dark:border-slate-800 dark:bg-slate-900 text-slate-700 dark:text-slate-200 outline-none hover:bg-gray-50 dark:hover:bg-slate-800 transition-all duration-200"
+                  >
+                    <span className="truncate">{webinarLabel()}</span>
+                    <ChevronDown className="ml-2 h-4 w-4 opacity-50 shrink-0" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-[320px] max-h-[400px] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 shadow-xl p-1"
                 >
-                  <div className="custom-scrollbar max-h-[300px] overflow-y-auto">
-                    <button
-                      type="button"
-                      disabled
-                      className="w-full cursor-not-allowed px-4 py-2.5 text-left transition-colors hover:bg-gray-50"
-                      style={{
-                        fontFamily: "Inter, sans-serif",
-                        fontSize: "13px",
-                        fontWeight: 500,
-                        color: isDark ? "#64748b" : "#94a3b8",
-                        borderBottom: isDark ? "1px solid #334155" : "1px solid #f3f4f6",
-                      }}
+                  <DropdownMenuItem
+                    onClick={() => onWebinarPick("select")}
+                    className="cursor-pointer rounded-lg px-3 py-2.5 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  >
+                    Select webinar
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => onWebinarPick("all")}
+                    className="cursor-pointer rounded-lg px-3 py-2.5 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
+                  >
+                    All webinars
+                  </DropdownMenuItem>
+                  {(webinarData || []).map((w) => (
+                    <DropdownMenuItem
+                      key={w?._id}
+                      onClick={() => onWebinarPick(w?._id)}
+                      className="cursor-pointer rounded-lg px-3 py-2.5 text-sm hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200"
                     >
-                      Select
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => onWebinarPick("all")}
-                      className="w-full border-b border-gray-100 dark:border-slate-800 px-4 py-2.5 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-800"
-                      style={{
-                        fontFamily: "Inter, sans-serif",
-                        fontSize: "13px",
-                        fontWeight: 500,
-                        color: isDark ? "#f8fafc" : "#071028",
-                      }}
-                    >
-                      All
-                    </button>
-                    {webinarData.map((webinar, idx) => (
-                      <button
-                        type="button"
-                        key={webinar._id || idx}
-                        onClick={() => onWebinarPick(webinar._id)}
-                        className="w-full px-4 py-2.5 text-left transition-colors hover:bg-gray-50 dark:hover:bg-slate-800"
-                        style={{
-                          fontFamily: "Inter, sans-serif",
-                          fontSize: "13px",
-                          fontWeight: 500,
-                          color: isDark ? "#f8fafc" : "#071028",
-                          borderBottom:
-                            idx !== webinarData.length - 1
-                              ? isDark ? "1px solid #334155" : "1px solid #f3f4f6"
-                              : "none",
-                        }}
-                      >
-                        {webinar?.webinarName} —{" "}
-                        {formatDateAsNumber(webinar?.webinarDate)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
+                      {`${w?.webinarName} — ${formatDateAsNumber(w?.webinarDate)}`}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 
@@ -440,15 +394,11 @@ const ClientDashboard = () => {
                   From
                 </span>
                 <div className="relative min-w-0">
-                  <input
-                    type="date"
-                    value={toYMD(startDate)}
-                    max={toYMD(endDate)}
-                    onChange={(e) => {
-                      const d = ymdToLocalDate(e.target.value);
-                      if (d) handleStartDateChange(d);
-                    }}
-                    className="max-w-full cursor-pointer rounded-lg py-1.5 pl-3 pr-2 outline-none transition-all hover:bg-black/5 dark:hover:bg-white/5"
+                  <DatePicker
+                    date={startDate}
+                    setDate={handleStartDateChange}
+                    maxDate={endDate}
+                    className="max-w-full rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                     style={{
                       backgroundColor: "transparent",
                       border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
@@ -474,16 +424,12 @@ const ClientDashboard = () => {
                   To
                 </span>
                 <div className="relative min-w-0">
-                  <input
-                    type="date"
-                    value={toYMD(endDate)}
-                    min={toYMD(startDate)}
-                    max={toYMD(new Date())}
-                    onChange={(e) => {
-                      const d = ymdToLocalDate(e.target.value);
-                      if (d) handleEndDateChange(d);
-                    }}
-                    className="max-w-full cursor-pointer rounded-lg py-1.5 pl-3 pr-2 outline-none transition-all hover:bg-black/5 dark:hover:bg-white/5"
+                  <DatePicker
+                    date={endDate}
+                    setDate={handleEndDateChange}
+                    minDate={startDate}
+                    maxDate={new Date()}
+                    className="max-w-full rounded-lg transition-colors hover:bg-black/5 dark:hover:bg-white/5"
                     style={{
                       backgroundColor: "transparent",
                       border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",

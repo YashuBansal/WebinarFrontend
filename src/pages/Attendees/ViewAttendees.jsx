@@ -214,6 +214,7 @@ const ViewAttendees = () => {
   );
 
   const { employeeData } = useSelector((state) => state.employee);
+  const { leadTypeData } = useSelector((state) => state.assign);
 
   const LIMIT = useSelector((state) => state.pageLimits[tableHeader] || 10);
   const modalState = useSelector((state) => state.modals.modals);
@@ -237,6 +238,14 @@ const ViewAttendees = () => {
     [allAttendeesFilters]
   );
   const isFilterApplied = Object.keys(appliedFilters).length > 0;
+
+  const leadTypeColorMap = useMemo(() => {
+    const map = {};
+    (leadTypeData || []).forEach((lt) => {
+      if (lt._id) map[String(lt._id)] = lt.color || null;
+    });
+    return map;
+  }, [leadTypeData]);
 
   useEffect(() => {
     const currentPageInUrl = searchParams.get("page");
@@ -902,7 +911,23 @@ const ViewAttendees = () => {
                         className="p-4 text-sm font-medium group-hover:bg-black/5 dark:group-hover:bg-white/5 transition-colors"
                         style={{ color: isDark ? "#cbd5e1" : "#64748b" }}
                       >
-                        {(Number(page) - 1) * LIMIT + index + 1}
+                        {(() => {
+                          const ltColor = row?.leadType ? leadTypeColorMap[String(row.leadType)] : null;
+                          return (
+                            <span className="relative flex items-center pl-4 -ml-4">
+                              {ltColor && (
+                                <span
+                                  className="absolute bottom-[-6px] left-0 top-[-6px] w-1 rounded-full opacity-90"
+                                  style={{ backgroundColor: ltColor }}
+                                  aria-hidden
+                                />
+                              )}
+                              <span className="pl-4">
+                                {(Number(page) - 1) * LIMIT + index + 1}
+                              </span>
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="p-4 whitespace-nowrap group-hover:bg-black/5 dark:group-hover:bg-white/5 transition-colors">
                         <div

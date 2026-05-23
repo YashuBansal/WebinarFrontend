@@ -6,7 +6,7 @@ import {
   useSyncExternalStore,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Zap,
@@ -86,6 +86,7 @@ const ViewSettings = () => {
       icon: UserCircle2,
       description: "Photo, name, email, and security",
       allowedRoles: [],
+      path: "/profile",
     });
     add({
       id: "plans",
@@ -190,14 +191,22 @@ const ViewSettings = () => {
     return list;
   }, [userRole, roles, isCustomStatusEnabled]);
 
-  const [activeSection, setActiveSection] = useState(null);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const tabParam = searchParams.get("tab");
 
   const currentSection = useMemo(() => {
-    if (activeSection && sections.some((s) => s.id === activeSection))
-      return activeSection;
-    if (isDesktop && sections.length) return sections[0].id;
+    if (tabParam && sections.some((s) => s.id === tabParam))
+      return tabParam;
     return null;
-  }, [activeSection, sections, isDesktop]);
+  }, [tabParam, sections]);
+
+  const setActiveSection = (id) => {
+    if (id) {
+      setSearchParams({ tab: id });
+    } else {
+      setSearchParams({});
+    }
+  };
 
   const logSectionOpen = useCallback(
     (id) => {
@@ -212,11 +221,6 @@ const ViewSettings = () => {
 
   const handleSelectSection = useCallback(
     (id) => {
-      if (id === "profile") {
-        setActiveSection(id);
-        logSectionOpen(id);
-        return;
-      }
       const target = sections.find((s) => s.id === id);
       if (target?.path) {
         logUserActivity({
@@ -237,15 +241,6 @@ const ViewSettings = () => {
   }, [isSuccess, dispatch]);
 
   const renderSectionContent = (sectionId) => {
-    if (sectionId === "profile") {
-      return (
-        <ProfileSettings
-          theme={theme}
-          navigate={navigate}
-          userData={userData}
-        />
-      );
-    }
     return null;
   };
 
@@ -253,103 +248,37 @@ const ViewSettings = () => {
 
   return (
     <div
-      className="flex min-h-[calc(100vh-4rem)] flex-col overflow-hidden md:h-[calc(100vh-4rem)] md:max-h-[calc(100vh-4rem)] md:flex-row"
+      className="flex min-h-[calc(100vh-4rem)] flex-col overflow-hidden"
       style={{ backgroundColor: theme === "dark" ? "#0f172a" : "#F2F4F6" }}
     >
-      <div
-        className={`${currentSection && !isDesktop ? "hidden" : "flex"} h-full w-full flex-shrink-0 flex-col border-r md:w-72`}
-        style={{
-          backgroundColor:
-            theme === "dark" ? "rgba(30, 41, 59, 0.5)" : "#ffffff",
-          borderColor: theme === "dark" ? "#334155" : "#e2e8f0",
-        }}
-      >
-        <div
-          className="border-b p-6"
-          style={{ borderColor: theme === "dark" ? "#334155" : "#e2e8f0" }}
-        >
-          <h2
-            className="text-xl font-bold tracking-tight"
-            style={{ color: theme === "dark" ? "#f8fafc" : "#071028" }}
-          >
-            Settings
-          </h2>
-          <p className="mt-1 text-xs font-medium text-gray-500">
-            Manage your hub preferences
-          </p>
-        </div>
-
-        <nav className="custom-scrollbar flex-1 space-y-1 overflow-y-auto p-3">
-          {sections.map((section) => {
-            const Icon = section.icon;
-            const isActive = currentSection === section.id;
-            return (
-              <button
-                key={section.id}
-                type="button"
-                onClick={() => handleSelectSection(section.id)}
-                className={`group relative flex w-full items-center gap-3 rounded-xl px-4 py-3 transition-all duration-200 ${
-                  isActive
-                    ? theme === "dark"
-                      ? "bg-blue-500/10 text-blue-400"
-                      : "bg-blue-50 text-blue-600"
-                    : theme === "dark"
-                      ? "text-gray-400 hover:bg-white/5"
-                      : "text-gray-600 hover:bg-gray-50"
-                }`}
-              >
-                {isActive && isDesktop && (
-                  <motion.div
-                    layoutId="settings-active-pill"
-                    className="absolute left-0 h-6 w-1 rounded-r-full bg-blue-500"
-                  />
-                )}
-                <Icon
-                  className={`h-4 w-4 ${isActive ? "text-blue-500" : "text-gray-400 group-hover:text-gray-300"}`}
-                />
-                <div className="min-w-0 flex-1 text-left">
-                  <div className="text-sm font-semibold">{section.label}</div>
-                  {!isDesktop && (
-                    <div className="text-[10px] font-medium text-gray-500">
-                      {section.description}
-                    </div>
-                  )}
-                </div>
-                <ChevronRight
-                  className={`ml-auto h-3.5 w-3.5 transition-opacity ${isActive ? "opacity-100" : "opacity-30 group-hover:opacity-100"}`}
-                />
-              </button>
-            );
-          })}
-        </nav>
-      </div>
-
-      <div
-        className={`${!currentSection && !isDesktop ? "hidden" : "flex"} min-h-0 flex-1 flex-col overflow-hidden`}
-      >
-        {!isDesktop && currentSection && (
+      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+        {currentSection && (
           <div
-            className="sticky top-0 z-10 flex items-center gap-3 border-b bg-white p-4 dark:bg-slate-900"
-            style={{ borderColor: theme === "dark" ? "#334155" : "#e2e8f0" }}
+            className="sticky top-0 z-10 flex items-center gap-4 border-b p-4 sm:px-10 sm:py-6"
+            style={{ 
+              backgroundColor: theme === "dark" ? "rgba(15, 23, 42, 0.8)" : "rgba(255, 255, 255, 0.8)",
+              borderColor: theme === "dark" ? "#334155" : "#e2e8f0",
+              backdropFilter: "blur(12px)"
+            }}
           >
             <Button
               type="button"
               variant="ghost"
               size="icon"
-              className="h-9 w-9 rounded-full"
+              className="h-10 w-10 rounded-xl bg-white/5 shadow-sm transition-all hover:bg-white/10 dark:bg-slate-800/50"
               onClick={() => setActiveSection(null)}
             >
               <ChevronRight className="h-5 w-5 rotate-180" />
             </Button>
             <div>
               <h3
-                className="text-sm font-bold leading-none"
+                className="text-lg font-black leading-none tracking-tight"
                 style={{ color: theme === "dark" ? "#f8fafc" : "#071028" }}
               >
                 {activeMeta?.label}
               </h3>
-              <p className="mt-1 text-[10px] font-medium text-gray-500">
-                Settings Overview
+              <p className="mt-1 text-xs font-medium text-gray-500">
+                Settings / {activeMeta?.label}
               </p>
             </div>
           </div>
@@ -357,26 +286,21 @@ const ViewSettings = () => {
 
         <div className="custom-scrollbar min-h-0 flex-1 overflow-y-auto">
           <AnimatePresence mode="wait">
-            {currentSection && (
+            {currentSection ? (
               <motion.div
                 key={currentSection}
-                initial={{
-                  opacity: 0,
-                  x: isDesktop ? 0 : 20,
-                  y: isDesktop ? 10 : 0,
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{
+                  duration: 0.5,
+                  ease: [0.22, 1, 0.36, 1],
                 }}
-                animate={{ opacity: 1, x: 0, y: 0 }}
-                exit={{
-                  opacity: 0,
-                  x: isDesktop ? 0 : -20,
-                  y: isDesktop ? -10 : 0,
-                }}
-                transition={{ duration: 0.2 }}
-                className="mx-auto w-full max-w-5xl p-4 sm:p-8"
+                className="mx-auto w-full max-w-[1400px] p-4 sm:p-8"
               >
-                <div className="mb-6 hidden sm:mb-8 sm:block">
+                <div className="mb-6 hidden sm:mb-8 sm:block px-2">
                   <h1
-                    className="mb-2 text-2xl font-black tracking-tight sm:text-3xl"
+                    className="mb-1 text-2xl font-bold tracking-tight"
                     style={{ color: theme === "dark" ? "#f8fafc" : "#071028" }}
                   >
                     {activeMeta?.label}
@@ -387,6 +311,61 @@ const ViewSettings = () => {
                 </div>
 
                 {renderSectionContent(currentSection)}
+              </motion.div>
+            ) : (
+              <motion.div
+                key="overview"
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                transition={{
+                  duration: 0.5,
+                  ease: [0.22, 1, 0.36, 1],
+                }}
+                className="mx-auto w-full max-w-[1400px] p-6 sm:p-10"
+              >
+                <div className="mb-10">
+                  <h1
+                    className="text-2xl font-bold tracking-tight sm:text-3xl"
+                    style={{ color: theme === "dark" ? "#f8fafc" : "#071028" }}
+                  >
+                    Settings Overview
+                  </h1>
+                  <p className="mt-1 text-sm font-medium text-gray-500 sm:text-base">
+                    Choose a category below to manage your hub preferences.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+                  {sections.map((section) => {
+                    const Icon = section.icon;
+                    return (
+                      <button
+                        key={section.id}
+                        type="button"
+                        onClick={() => handleSelectSection(section.id)}
+                        className="group flex flex-col items-start p-6 rounded-2xl border transition-all duration-300 hover:shadow-xl hover:-translate-y-1 text-left"
+                        style={{
+                          backgroundColor: theme === "dark" ? "#1e293b" : "#ffffff",
+                          borderColor: theme === "dark" ? "#334155" : "#e2e8f0",
+                        }}
+                      >
+                        <div className="size-12 rounded-xl bg-blue-500/10 flex items-center justify-center mb-5 group-hover:scale-110 transition-transform">
+                          <Icon className="size-6 text-blue-500" />
+                        </div>
+                        <h3 className="text-lg font-bold mb-2" style={{ color: theme === "dark" ? "#f8fafc" : "#1e293b" }}>
+                          {section.label}
+                        </h3>
+                        <p className="text-sm text-gray-500 line-clamp-2 leading-relaxed">
+                          {section.description}
+                        </p>
+                        <div className="mt-6 flex items-center text-xs font-bold text-blue-500 opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-widest">
+                          Configure <ChevronRight className="size-3.5 ml-1" />
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </motion.div>
             )}
           </AnimatePresence>

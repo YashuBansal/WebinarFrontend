@@ -171,7 +171,7 @@ const ViewSidebarLinks = () => {
 
   return (
     <HubSubpageShell>
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/60 sm:rounded-3xl sm:p-6 md:p-8">
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-900/60 sm:rounded-2xl sm:p-6 md:p-8">
         <div className="mb-6 flex flex-col items-center justify-between gap-4 md:flex-row">
           <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
             Sidebar Links

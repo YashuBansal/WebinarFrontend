@@ -43,7 +43,7 @@ const CreateSidebarLink = () => {
 
   return (
     <HubSubpageShell maxWidthClass="max-w-5xl">
-      <div className="mx-auto mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900/60 sm:rounded-3xl">
+      <div className="mx-auto mt-2 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-lg dark:border-slate-700 dark:bg-slate-900/60 sm:rounded-2xl">
           <h3 className="bg-gray-100 p-2 text-center text-base font-medium uppercase text-gray-700 dark:bg-slate-800 dark:text-slate-200 sm:text-xl">
             Add Sidebar Link
           </h3>

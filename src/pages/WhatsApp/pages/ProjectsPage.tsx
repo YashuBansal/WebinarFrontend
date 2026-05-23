@@ -179,7 +179,7 @@ export default function ProjectsPage() {
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: "easeOut" }}
-        
+
       >
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1.5">
@@ -388,7 +388,7 @@ export default function ProjectsPage() {
           onPointerDownOutside={(e) => e.preventDefault()}
           showCloseButton={false}
         >
-          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50">
+          <div className="relative w-full rounded-2xl p-6 shadow-2xl flex flex-col bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50">
             <div className="flex items-center justify-between mb-5">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white">
                 Rename Project

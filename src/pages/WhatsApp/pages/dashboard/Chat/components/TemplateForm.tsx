@@ -8,6 +8,7 @@ import { Check, ChevronsUpDown, Send, Image, X, Info, MessageSquare } from 'luci
 import { MediaFileDialog } from '@/components/ui/MediaFileDialog';
 import { WhatsAppTemplatePreviewCard } from '@/components/ui/whatsapp-template-preview-card';
 import type { SendTemplateMessagePayload } from '@/schemas/templateSchema';
+import { motion } from 'framer-motion';
 
 interface TemplateFormProps {
   templates: any[];
@@ -283,8 +284,10 @@ export function TemplateForm({
                         }}
                         variableMappings={bodyVariables.map((val, idx) => ({
                           variable: `{{${idx + 1}}}`,
-                          mappedValue: val || `{{${idx + 1}}}`,
-                          type: 'custom'
+                          contactField: 'custom',
+                          isDynamic: false,
+                          staticValue: val || `{{${idx + 1}}}`,
+                          fallbackValue: ''
                         }))}
                         showSampleContact={true}
                         showVariableMappings={false}
@@ -295,7 +298,7 @@ export function TemplateForm({
                     <div className="absolute inset-0 opacity-[0.04] dark:opacity-[0.02] pointer-events-none bg-repeat bg-[url('/whatsapp-bg.png')] z-0" style={{ backgroundSize: '350px' }}></div>
                   </div>
                 ) : (
-                  <div className="h-[550px] border-2 border-dashed border-gray-200 dark:border-slate-800 rounded-[2.5rem] flex flex-col items-center justify-center text-center p-10 bg-gray-50/50 dark:bg-slate-900/40 relative overflow-hidden group">
+                  <div className="h-[550px] border-2 border-dashed border-gray-200 dark:border-slate-800 rounded-[2.5rem] flex flex-col items-center justify-center text-center p-10 bg-gray-50/50 dark:bg-slate-900/40 relative group">
                     <div className="relative z-10">
                       <div className="h-20 w-20 rounded-3xl bg-white dark:bg-slate-800/50 border border-gray-200 dark:border-slate-700/50 flex items-center justify-center mb-8 mx-auto shadow-xl backdrop-blur-sm group-hover:scale-110 transition-transform duration-500">
                         <MessageSquare className="h-10 w-10 text-gray-400 dark:text-slate-400" />
@@ -307,12 +310,15 @@ export function TemplateForm({
                     </div>
 
                     {/* Floating Say Hi! Bubble */}
-                    <div className="absolute bottom-6 right-6 flex items-center gap-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700/50 p-2 pr-5 rounded-full shadow-xl animate-bounce-subtle">
+                    <motion.div
+                      drag
+                      className="absolute bottom-6 right-6 flex items-center gap-3 bg-white dark:bg-slate-800 border border-gray-200 dark:border-slate-700/50 p-2 pr-5 rounded-full shadow-xl animate-bounce-subtle cursor-grab active:cursor-grabbing z-50"
+                    >
                       <div className="h-10 w-10 rounded-full bg-teal-500 overflow-hidden border-2 border-teal-400/30">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" className="h-full w-full object-cover" />
+                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="avatar" className="h-full w-full object-cover pointer-events-none" />
                       </div>
-                      <span className="text-gray-800 dark:text-white font-bold text-sm tracking-wide">Say Hi!</span>
-                    </div>
+                      <span className="text-gray-800 dark:text-white font-bold text-sm tracking-wide select-none">Say Hi!</span>
+                    </motion.div>
                   </div>
                 )}
               </div>

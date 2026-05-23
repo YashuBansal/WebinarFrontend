@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import NotificationsIcon from "./bell.svg";
-import MessageIcon from "./message.svg";
+import { Bell, MessageSquare, ExternalLink, Clock } from "lucide-react";
+import { useTheme } from "../../contexts/ThemeContext";
 import {
   getUserNotifications,
   resetUnseenCount,
@@ -115,40 +115,35 @@ const NotificationBell = ({ userData, roles, important }) => {
     }
   }
 
+  const { isDark } = useTheme();
+
   return (
-    <div className="sm:relative">
+    <div className="relative">
       <button
         ref={bellRef}
         onClick={handleBellClick}
-        className="sm:p-2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+        title={important ? "Messages" : "Notifications"}
+        className="flex h-8 w-8 items-center justify-center rounded-lg transition-all sm:h-9 sm:w-9 md:h-10 md:w-10"
+        style={{
+          backgroundColor: isDark ? "#1e293b" : "#f9fafb",
+          border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
+        }}
       >
         <div className="relative">
           {important ? (
-            <>
-              <img
-                src={MessageIcon}
-                className="w-4 h-4 min-w-4 min-h-4 sm:w-6 sm:h-6 sm:min-w-6 sm:min-h-6"
-                alt="Notifications"
-              />
-              {unseenCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                  {unseenCount}
-                </span>
-              )}
-            </>
+            <MessageSquare
+              className={`h-4 w-4 sm:h-5 sm:w-5 ${unseenCount > 0 ? "text-indigo-500 animate-pulse" : "text-indigo-400/80"}`}
+            />
           ) : (
-            <>
-              <img
-                src={NotificationsIcon}
-                className="w-4 h-4 min-w-4 min-h-4 sm:w-6 sm:h-6 sm:min-w-6 sm:min-h-6"
-                alt="Notifications"
-              />
-              {_unseenCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full px-2 py-1">
-                  {_unseenCount}
-                </span>
-              )}
-            </>
+            <Bell
+              className={`h-4 w-4 sm:h-5 sm:w-5 ${(_unseenCount > 0) ? "text-amber-500 animate-pulse" : "text-amber-400/80"}`}
+            />
+          )}
+          
+          {(important ? unseenCount : _unseenCount) > 0 && (
+            <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white ring-2 ring-white dark:ring-slate-900">
+              {important ? unseenCount : _unseenCount}
+            </span>
           )}
         </div>
       </button>
@@ -156,51 +151,59 @@ const NotificationBell = ({ userData, roles, important }) => {
       {isOpen && (
         <div
           ref={dropdownRef}
-          className="absolute right-0 mt-2 w-96 bg-white shadow-lg rounded-lg border border-gray-200 max-h-[400px] overflow-y-auto"
+          className="absolute right-0 z-[100] mt-2 w-[320px] origin-top-right rounded-xl border border-slate-200 bg-white shadow-xl dark:border-slate-700 dark:bg-slate-800 sm:w-96"
         >
           <div className="p-4">
-            <div className="flex justify-between items-center mb-2">
-              <h3 className="text-lg font-bold">
-                {important && "Important"} Notifications
-              </h3>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className={`h-2 w-2 rounded-full ${important ? 'bg-indigo-500' : 'bg-amber-500'}`} />
+                <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                  {important ? "Important Alerts" : "Notifications"}
+                </h3>
+              </div>
               <button
                 onClick={() => {
-                  navigate(
-                    `/notifications/${userData?._id}?important=${important}`
-                  );
+                  navigate(`/notifications/${userData?._id}?important=${important}`);
                   setIsOpen(false);
                 }}
-                className="text-gray-500 hover:text-gray-900 hover:underline"
+                className="flex items-center gap-1 text-xs font-medium text-indigo-600 hover:text-indigo-700 dark:text-indigo-400"
               >
-                View All
+                View All <ExternalLink className="h-3 w-3" />
               </button>
             </div>
-            <hr className="my-2 border-gray-200" />
-            <div className="divide-y">
-              {(important ? bellNotifications : _bellNotifications).map(
-                (notif) => (
+
+            <div className="custom-scrollbar max-h-[350px] space-y-1 overflow-y-auto pr-1">
+              {(important ? bellNotifications : _bellNotifications).length > 0 ? (
+                (important ? bellNotifications : _bellNotifications).map((notif) => (
                   <div
                     key={notif._id}
                     onClick={() => handleClick(notif)}
-                    className="p-3 hover:bg-gray-50 cursor-pointer"
+                    className="group relative flex flex-col rounded-lg p-3 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/50 cursor-pointer border border-transparent hover:border-slate-100 dark:hover:border-slate-600"
                   >
-                    <div className="font-medium">{notif?.title}</div>
-                    <p className="text-gray-600 text-sm">{notif?.message}</p>
-                    <div className="text-xs text-gray-500 text-right mt-1">
-                      {new Date(notif?.createdAt).toLocaleDateString()} •{" "}
-                      {new Date(notif?.createdAt).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                    <div className="flex justify-between items-start mb-1">
+                      <span className="text-[13px] font-semibold text-slate-900 dark:text-slate-100 line-clamp-1 group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors">
+                        {notif?.title}
+                      </span>
+                    </div>
+                    <p className="text-[12px] text-slate-600 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                      {notif?.message}
+                    </p>
+                    <div className="mt-2 flex items-center gap-2 text-[10px] text-slate-400">
+                      <Clock className="h-3 w-3" />
+                      <span>{new Date(notif?.createdAt).toLocaleDateString()}</span>
+                      <span>•</span>
+                      <span>{new Date(notif?.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                     </div>
                   </div>
-                )
-              )}
-
-              {(important ? bellNotifications : _bellNotifications).length ===
-                0 && (
-                <div className="p-4 text-center text-gray-700">
-                  No notifications found
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center">
+                  <div className="mb-2 flex h-12 w-12 items-center justify-center rounded-full bg-slate-50 dark:bg-slate-700/30">
+                    <Bell className="h-6 w-6 text-slate-300 dark:text-slate-600" />
+                  </div>
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    No notifications yet
+                  </p>
                 </div>
               )}
             </div>
