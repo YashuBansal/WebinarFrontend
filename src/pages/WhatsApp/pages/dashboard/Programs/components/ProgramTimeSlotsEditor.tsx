@@ -14,6 +14,8 @@ import { Plus, Trash2, AlertCircle } from 'lucide-react';
 import { TemplateSelectionDialog } from '@/components/common/TemplateSelectionDialog';
 import { Badge } from '@/components/ui/badge';
 import type { VariableMapping } from '@/api/modules/autoMessage';
+import { useTemplates } from '@/hooks/useTemplates';
+import { useMediaAssets } from '@/hooks/useMediaAssets';
 
 type SetSlotsForOccurrence = (
   occIndex: number,
@@ -23,6 +25,7 @@ type SetSlotsForOccurrence = (
 ) => void;
 
 interface ProgramTimeSlotsEditorProps {
+  projectId?: string;
   timeSlots: ProgramTimeSlot[];
   occIndex: number;
   setSlotsForOccurrence: SetSlotsForOccurrence;
@@ -30,6 +33,7 @@ interface ProgramTimeSlotsEditorProps {
 }
 
 function ProgramTimeSlotsEditorInner({
+  projectId,
   timeSlots,
   occIndex,
   setSlotsForOccurrence,
@@ -110,6 +114,7 @@ function ProgramTimeSlotsEditorInner({
             key={index}
             index={index}
             slot={slot}
+            projectId={projectId}
             updateTimeSlot={updateTimeSlot}
             updateMessageConfig={updateMessageConfig}
             removeTimeSlot={removeTimeSlot}
@@ -127,6 +132,7 @@ export const ProgramTimeSlotsEditor = memo(ProgramTimeSlotsEditorInner);
 interface ProgramTimeSlotRowProps {
   index: number;
   slot: ProgramTimeSlot;
+  projectId?: string;
   updateTimeSlot: (index: number, updates: Partial<ProgramTimeSlot>) => void;
   updateMessageConfig: (
     index: number,
@@ -140,6 +146,7 @@ interface ProgramTimeSlotRowProps {
 const ProgramTimeSlotRow = memo(function ProgramTimeSlotRow({
   index,
   slot,
+  projectId,
   updateTimeSlot,
   updateMessageConfig,
   removeTimeSlot,
@@ -152,6 +159,39 @@ const ProgramTimeSlotRow = memo(function ProgramTimeSlotRow({
   );
   const [selectedMediaAsset, setSelectedMediaAsset] = useState<any | null>(null);
   const [uploadedFileName, setUploadedFileName] = useState<string>('');
+
+  // Fetch templates to find the details of existing template by name
+  const { data: templatesResp } = useTemplates(projectId || '');
+
+  useEffect(() => {
+    if (templatesResp?.data && slot.messageConfig.templateName && !selectedTemplate) {
+      const matched = templatesResp.data.find(
+        (t: any) => t.name === slot.messageConfig.templateName
+      );
+      if (matched) {
+        setSelectedTemplate(matched);
+      }
+    }
+  }, [templatesResp, slot.messageConfig.templateName, selectedTemplate]);
+
+  // Fetch media assets to find the details of existing media asset by ID
+  const { data: mediaAssetsData } = useMediaAssets({
+    projectId: projectId || '',
+    page: 1,
+    limit: 50,
+  });
+
+  useEffect(() => {
+    if (mediaAssetsData?.data && slot.messageConfig.headerMediaAssetId && !selectedMediaAsset) {
+      const asset = mediaAssetsData.data.find(
+        (file: any) => file._id === slot.messageConfig.headerMediaAssetId
+      );
+      if (asset) {
+        setSelectedMediaAsset(asset);
+        setUploadedFileName(asset.fileName);
+      }
+    }
+  }, [mediaAssetsData, slot.messageConfig.headerMediaAssetId, selectedMediaAsset]);
 
   const handleTemplateSelect = useCallback(
     (template: any) => {
@@ -361,6 +401,7 @@ const ProgramTimeSlotRow = memo(function ProgramTimeSlotRow({
             <Label className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400 ml-1">Message Content</Label>
             <div className="flex items-center gap-2">
               <TemplateSelectionDialog
+                projectId={projectId}
                 triggerLabel={
                   slot.messageConfig.templateName ? slot.messageConfig.templateName : 'Select template'
                 }

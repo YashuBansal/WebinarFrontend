@@ -324,7 +324,7 @@ export default function TemplateSelectionForm({
                     <ChevronsUpDown className="h-4 w-4 text-slate-400 shrink-0" />
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-slate-200 dark:border-slate-700/50 shadow-2xl rounded-2xl overflow-hidden" align="start">
+                <PopoverContent disablePortal className="w-[--radix-popover-trigger-width] p-0 border-slate-200 dark:border-slate-700/50 shadow-2xl rounded-2xl overflow-hidden z-[9999]" align="start">
                   <Command className="bg-white dark:bg-slate-800/50">
                     <CommandInput placeholder="Search templates..." className="h-12 border-none focus:ring-0 focus-visible:ring-0 focus-visible:outline-none" />
                     <CommandList className="max-h-[300px]">
@@ -476,7 +476,7 @@ export default function TemplateSelectionForm({
                                 <ChevronsUpDown className="h-4 w-4 text-slate-400 shrink-0" />
                               </Button>
                             </PopoverTrigger>
-                            <PopoverContent className="w-[--radix-popover-trigger-width] p-0 border-slate-200 dark:border-slate-700/50 rounded-xl overflow-hidden" align="start">
+                            <PopoverContent disablePortal className="w-[--radix-popover-trigger-width] p-0 border-slate-200 dark:border-slate-700/50 rounded-xl overflow-hidden z-[9999]" align="start">
                               <Command>
                                 <CommandList>
                                   <CommandGroup>
