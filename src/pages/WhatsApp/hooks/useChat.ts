@@ -36,16 +36,58 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
   // Fetch quick replies (session templates)
   const { quickReplies, isLoading: isQuickRepliesLoading } = useQuickReplies(projectId || '');
 
-  // Helper function to invalidate contact queries
-  const invalidateContactQueries = useCallback(() => {
+  // 🚀 NAYA FUNCTION: Jo Sidebar ko instantly (0ms delay) cache ke through update karega
+  const syncSidebarInstantly = useCallback((msgUpdate?: Partial<ChatMessageDTO>, bringToTop: boolean = false) => {
     if (!projectId) return;
-    queryClient.invalidateQueries({
-      queryKey: [WABA_MESSAGE_QUERY_KEY, 'eligible-session-contacts', projectId]
-    });
-    queryClient.invalidateQueries({
-      queryKey: [WABA_MESSAGE_QUERY_KEY, 'unique-phone-numbers', projectId]
-    });
-  }, [projectId, queryClient]);
+
+    // Agar message data pass kiya hai, toh turant sidebar cache update karo
+    if (msgUpdate) {
+      const updateCache = (queryKey: any[], listKey: string) => {
+        queryClient.setQueryData(queryKey, (oldData: any) => {
+          if (!oldData || !oldData[listKey]) return oldData;
+
+          const newList = [...oldData[listKey]];
+          const targetPhone = msgUpdate.phoneNumber || phoneNumber;
+
+          const idx = newList.findIndex((c: any) =>
+            (typeof c === 'string' ? c : c.phoneNumber) === targetPhone
+          );
+
+          if (idx !== -1) {
+            const item = typeof newList[idx] === 'string' ? { phoneNumber: newList[idx] } : { ...newList[idx] };
+
+            // Preview text decide karo
+            let preview = item.lastMessagePreview;
+            if (msgUpdate.textBody) preview = msgUpdate.textBody;
+            else if (msgUpdate.messageFormat === 'template') preview = 'Template Message';
+            else if (msgUpdate.messageFormat === 'media') preview = 'Media Message';
+
+            newList[idx] = {
+              ...item,
+              ...(msgUpdate.status && { lastMessageStatus: msgUpdate.status }),
+              ...(preview && { lastMessagePreview: preview }),
+              ...(msgUpdate.createdAt && { lastMessageAt: msgUpdate.createdAt }),
+              ...(msgUpdate.direction && { lastMessageDirection: msgUpdate.direction }),
+            };
+
+            // Naya message bheja hai ya aaya hai toh contact ko list ke sabse upar laao
+            if (bringToTop) {
+              const [updated] = newList.splice(idx, 1);
+              newList.unshift(updated);
+            }
+          }
+          return { ...oldData, [listKey]: newList };
+        });
+      };
+
+      updateCache([WABA_MESSAGE_QUERY_KEY, 'unique-phone-numbers', projectId], 'phoneNumbers');
+      updateCache([WABA_MESSAGE_QUERY_KEY, 'eligible-session-contacts', projectId], 'eligibleContacts');
+    }
+
+    // Background mein server se actual sync rakhne ke liye invalidate bhi call kardo (network request)
+    queryClient.invalidateQueries({ queryKey: [WABA_MESSAGE_QUERY_KEY, 'unique-phone-numbers', projectId] });
+    queryClient.invalidateQueries({ queryKey: [WABA_MESSAGE_QUERY_KEY, 'eligible-session-contacts', projectId] });
+  }, [projectId, phoneNumber, queryClient]);
 
   const load = useCallback(async (nextPage?: number) => {
     if (!projectId || !phoneNumber) return;
@@ -78,9 +120,9 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
       templateComponents: components,
     };
 
-    // 1. Immediately show the message in the UI
+    // 1. Immediately show the message in the UI aur Sidebar Instantly Update karein
     setMessages((prev) => [...prev, optimistic]);
-    invalidateContactQueries();
+    syncSidebarInstantly(optimistic, true);
 
     try {
       // 2. Perform the actual API call
@@ -90,7 +132,7 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
       // 3. Update the optimistic message with the real ID and 'sent' status
       setMessages((prev) =>
         prev.map((m) => {
-          if (m._id) return m; // Already has a server ID, skip
+          if (m._id) return m;
           if (m.direction !== 'outbound') return m;
           if (m.textBody !== text) return m;
           if (m.createdAt !== optimisticCreatedAt) return m;
@@ -98,12 +140,12 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
         })
       );
 
-      // Call markAsRead after sending succeeds
+      // Call markAsRead after sending succeeds and update Sidebar to 'sent'
       wabaMessageApi.markAsRead(projectId, phoneNumber)
-        .then(() => invalidateContactQueries())
+        .then(() => syncSidebarInstantly({ status: 'sent', createdAt: sentAt }, false))
         .catch((err) => console.error('Failed to mark read after sendText:', err));
 
-      invalidateContactQueries();
+      syncSidebarInstantly();
       return id;
     } catch (error) {
       console.error('Failed to send text message:', error);
@@ -123,14 +165,11 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
       toastUtils.error('Failed to send message');
       throw error;
     }
-  }, [projectId, phoneNumber, invalidateContactQueries]);
+  }, [projectId, phoneNumber, syncSidebarInstantly]);
 
   const sendTemplate = useCallback(async (payload: SendTemplateMessagePayload) => {
     if (!projectId || !phoneNumber) return;
 
-    // Optimistic template message:
-    // Template delivery is async, and `load(1)` right after API returns can happen before the message is persisted.
-    // So we show a placeholder immediately, then replace it when polling fetches the real message from server.
     const optimisticCreatedAt = new Date().toISOString();
     const bodyVariables = payload.bodyVariables ?? [];
 
@@ -153,14 +192,14 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
       status: 'pending',
     };
 
+    // UI aur Sidebar Instantly Update karein
     setMessages((prev) => [...prev, optimistic]);
-    invalidateContactQueries();
+    syncSidebarInstantly(optimistic, true);
 
     try {
       await sendTemplateMutation.mutateAsync(payload);
       const sentAt = new Date().toISOString();
 
-      // Mark the optimistic placeholder as "sent" (server might still persist a bit later).
       setMessages((prev) =>
         prev.map((m) => {
           if (m._id) return m;
@@ -171,12 +210,11 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
         }),
       );
 
-      // Call markAsRead after sending template succeeds
       wabaMessageApi.markAsRead(projectId, phoneNumber)
-        .then(() => invalidateContactQueries())
+        .then(() => syncSidebarInstantly({ status: 'sent', createdAt: sentAt }, false))
         .catch((err) => console.error('Failed to mark read after sendTemplate:', err));
 
-      invalidateContactQueries();
+      syncSidebarInstantly();
     } catch (error) {
       console.error('Failed to send template:', error);
       const failureReason = 'Failed to send template message';
@@ -191,7 +229,7 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
       );
       toastUtils.error('Failed to send template message');
     }
-  }, [projectId, phoneNumber, sendTemplateMutation, invalidateContactQueries]);
+  }, [projectId, phoneNumber, sendTemplateMutation, syncSidebarInstantly]);
 
   const checkCanSendDirect = useCallback(async () => {
     if (!projectId || !phoneNumber) return;
@@ -210,9 +248,9 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
     load(1);
     checkCanSendDirect();
     wabaMessageApi.markAsRead(projectId, phoneNumber)
-      .then(() => invalidateContactQueries())
+      .then(() => syncSidebarInstantly())
       .catch((err) => console.error('Failed to mark messages as read on open:', err));
-  }, [projectId, phoneNumber, load, checkCanSendDirect, invalidateContactQueries]);
+  }, [projectId, phoneNumber, load, checkCanSendDirect, syncSidebarInstantly]);
 
   // Socket connection - uses singleton socket manager
   useEffect(() => {
@@ -224,17 +262,14 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
     const onMessage = (evt: any) => {
       if (!evt?.phoneNumber) return;
 
-      // Normalize phone numbers for comparison (handles + prefix differences)
       const normalizedEventPhone = normalizePhoneNumber(evt.phoneNumber);
       const normalizedActivePhone = normalizePhoneNumber(phoneNumber);
-      const isActiveContact =
-        phoneNumber && normalizedEventPhone === normalizedActivePhone;
+      const isActiveContact = phoneNumber && normalizedEventPhone === normalizedActivePhone;
 
-      // Only update messages list for the currently active contact
       if (isActiveContact) {
         setMessages((prev) => {
           const incoming: ChatMessageDTO = {
-            _id: evt._id, // Ensure ID is captured
+            _id: evt._id,
             phoneNumber: evt.phoneNumber,
             textBody: evt.textBody,
             direction: evt.direction as ChatMessageDTO['direction'],
@@ -249,19 +284,13 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
             status: evt.status,
           };
 
-          // Check if this message (by ID) is already in the list
           if (incoming._id && prev.some(m => String(m._id) === String(incoming._id))) {
-            // Still update the message to get latest status/data
             return prev.map(m => String(m._id) === String(incoming._id) ? { ...m, ...incoming } : m);
           }
 
-          // If it's an outbound message, try to find and replace a placeholder
           if (incoming.direction === 'outbound') {
-            const MATCH_WINDOW_MS = 60000; // 1 minute window for socket echoes
+            const MATCH_WINDOW_MS = 60000;
 
-            // Case 1: placeholder still has no _id (API hasn't resolved yet)
-            // Case 2: placeholder already has an _id (API resolved before socket echo)
-            //   — in this case !m._id fails, so we must also check by ID on the incoming
             const optimisticIdx = prev.findIndex(m => {
               if (m.direction !== 'outbound') return false;
               const withinWindow = Math.abs(
@@ -269,14 +298,13 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
               ) < MATCH_WINDOW_MS;
               if (!withinWindow) return false;
 
-              // Match no-id placeholder by textBody
-              if (!m._id && m.textBody === incoming.textBody) return true;
-
-              // Match already-id'd placeholder — this happens when API resolves before
-              // the WebSocket echo and the optimistic already got stamped with the server ID
+              // 1. Agar IDs directly match kar jayein (Perfect scenario)
               if (m._id && incoming._id && String(m._id) === String(incoming._id)) return true;
 
-              // For template messages (session templates): also match by templateComponents body text
+              // 2. TEXT MATCH FALLBACK
+              if (m.textBody && incoming.textBody && m.textBody === incoming.textBody) return true;
+
+              // For template messages
               if (!m._id && m.messageFormat === 'template' && incoming.messageFormat === 'template') {
                 const mBody = m.templateComponents?.find((c: any) => c.type === 'BODY')?.text;
                 const iBody = incoming.templateComponents?.find((c: any) => c.type === 'BODY')?.text;
@@ -293,7 +321,6 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
             }
           }
 
-          // Prevent duplicate append for identical messages (very quick echoes)
           const last = prev[prev.length - 1];
           if (
             last &&
@@ -307,38 +334,35 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
           return [...prev, incoming];
         });
 
-        // Recheck direct message permission when new inbound message arrives
         if (evt.direction === 'inbound') {
           checkCanSendDirect();
 
-          // INSTANTLY mark as read since we are actively looking at this contact!
           if (projectId && phoneNumber) {
             wabaMessageApi.markAsRead(projectId, phoneNumber)
-              .then(() => invalidateContactQueries())
+              .then(() => syncSidebarInstantly({ status: 'read' }, false))
               .catch((err) => console.error('Failed to mark incoming as read:', err));
           }
         }
       }
 
-      // For any inbound message (even for inactive contacts), invalidate contact queries
+      // Naya incoming message kisi bhi contact ka ho, turant sidebar mein top pe push kardo
       if (evt.direction === 'inbound') {
-        invalidateContactQueries();
+        syncSidebarInstantly(evt, true);
       }
     };
 
     socket.on('chat-message', onMessage);
 
-    // Cleanup: remove listener when contact changes (but keep socket connected)
     return () => {
       socket.off('chat-message', onMessage);
     };
-  }, [phoneNumber, checkCanSendDirect, invalidateContactQueries]);
+  }, [phoneNumber, checkCanSendDirect, syncSidebarInstantly, projectId]);
 
   useEffect(() => {
     if (!projectId || !phoneNumber) return;
 
-    const POLL_INTERVAL_MS = 10000; // ~10s
-    const HISTORY_LIMIT = 30; // include more recent messages for status merge
+    const POLL_INTERVAL_MS = 10000;
+    const HISTORY_LIMIT = 30;
     let inFlight = false;
 
     const pollLatest = async () => {
@@ -357,7 +381,6 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
             if (msg._id) idToIndex.set(String(msg._id), idx);
           });
 
-          // Replace by id (most reliable)
           for (const lm of latest) {
             if (!lm._id) continue;
             const id = String(lm._id);
@@ -367,13 +390,12 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
             }
           }
 
-          // Replace optimistic outbound messages (no _id)
           for (const lm of latest) {
             if (!lm._id) continue;
             const id = String(lm._id);
             if (idToIndex.has(id)) continue;
 
-            const MATCH_WINDOW_MS = 30000; // optimistic.createdAt vs server.createdAt can differ
+            const MATCH_WINDOW_MS = 30000;
             let targetIdx = -1;
             let bestDiff = Number.POSITIVE_INFINITY;
 
@@ -382,10 +404,10 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
 
             for (let i = 0; i < next.length; i++) {
               const pm = next[i];
-              if (pm._id) continue;
-              if (pm.direction !== 'outbound') continue;
 
-              // Template optimistic placeholder matching
+              if (pm.direction !== 'outbound') continue;
+              if (pm._id && String(pm._id) === id) continue;
+
               if (lmIsTemplate) {
                 if (pm.messageFormat !== 'template') continue;
                 if (pm.templateName !== lm.templateName) continue;
@@ -399,7 +421,6 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
                 continue;
               }
 
-              // Text/media optimistic placeholder matching (existing behavior)
               if (!pm.textBody) continue;
               if (!lm.textBody) continue;
               if (pm.textBody !== lm.textBody) continue;
@@ -419,26 +440,22 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
             }
           }
 
-          // Append missing messages by id
           const existingIds = new Set(next.filter((m) => m._id).map((m) => String(m._id)));
           const newMsgs = latest.filter((lm) => lm._id && !existingIds.has(String(lm._id)));
           if (newMsgs.length) {
             next.push(...newMsgs);
           }
 
-          // Ensure chronological order (server returns ascending order, but we keep it safe)
           next.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
           return next;
         });
       } catch (error) {
-        // Polling should not break UI; just log
         console.error('Failed to poll chat history for status updates:', error);
       } finally {
         inFlight = false;
       }
     };
 
-    // Run once immediately
     pollLatest();
 
     const intervalId = setInterval(pollLatest, POLL_INTERVAL_MS);
@@ -451,12 +468,27 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
     if (lastRequestedPageRef.current === next) return;
     lastRequestedPageRef.current = next;
     return load(next).finally(() => {
-      // clear guard once load completes
       if (lastRequestedPageRef.current === next) {
         lastRequestedPageRef.current = null;
       }
     });
   }, [hasMore, loading, page, load]);
+
+  // MASTER SYNC EFFECT: 
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMsg = messages[messages.length - 1];
+
+      syncSidebarInstantly({
+        phoneNumber: lastMsg.phoneNumber,
+        status: lastMsg.status,
+        textBody: lastMsg.textBody,
+        createdAt: lastMsg.createdAt,
+        direction: lastMsg.direction,
+        messageFormat: lastMsg.messageFormat
+      }, false);
+    }
+  }, [messages, syncSidebarInstantly]);
 
   return {
     messages,
@@ -473,5 +505,3 @@ export function useChat(projectId: string | undefined, phoneNumber: string | und
     sendTemplateMutation
   };
 }
-
-
