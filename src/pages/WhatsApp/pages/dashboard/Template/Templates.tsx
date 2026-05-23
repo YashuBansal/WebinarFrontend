@@ -5,7 +5,7 @@ import { useTemplates, useDeleteTemplate, useSyncTemplates } from '@/hooks/useTe
 import { useProjectContext } from '@/context/ProjectContext';
 import { Link, useParams } from 'react-router-dom';
 import { toastUtils } from '@/lib/utils';
-import { ConfirmationDialog } from '@/components/ui/ConfirmationDialog';
+import ConfirmDeleteModal from '../../../../../components/ConfirmDeleteModal';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { AlertCircle, LayoutGrid, Zap } from 'lucide-react';
 import { useQuickReplies } from '@/hooks/useQuickReplies';
@@ -252,21 +252,16 @@ export default function Templates() {
         </AnimatePresence>
       </main>
 
-      <ConfirmationDialog
-        isOpen={!!pendingDelete}
-        onClose={() => (deleteTemplateMutation.isPending ? null : setPendingDelete(null))}
-        onConfirm={confirmDelete}
-        title="Delete template?"
-        description={
-          pendingDelete
-            ? `Are you sure you want to delete "${pendingDelete.name}"?`
-            : ''
-        }
-        confirmText="Delete"
-        cancelText="Cancel"
-        variant="destructive"
-        isLoading={deleteTemplateMutation.isPending}
-      />
+      {pendingDelete && (
+        <ConfirmDeleteModal
+          setModal={(val) => {
+            if (!val) setPendingDelete(null);
+          }}
+          triggerDelete={confirmDelete}
+          isLoading={deleteTemplateMutation.isPending}
+          itemName={pendingDelete.name}
+        />
+      )}
     </div>
   );
 }
