@@ -363,6 +363,7 @@ export default function CreateSessionTemplatePage() {
                     exit={{ opacity: 0, height: 0 }}
                     className="mt-6 pt-6 border-t border-slate-100 dark:border-slate-800 space-y-4"
                   >
+                    <Label className="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1 block">Media Assets</Label>
                     <label className="flex items-center gap-3 p-3 bg-slate-50/50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-700/30 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-900/60 transition-all">
                       <Checkbox
                         checked={useGenericSample}
