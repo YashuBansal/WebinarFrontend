@@ -7,6 +7,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { logout } from "../../../features/slices/auth";
 import { clearNotifications } from "../../../features/slices/notification";
 import { clearWebinarData } from "../../../features/slices/webinarContact";
+import { getUserNotifications } from "../../../features/actions/notification";
 import { logOutAndClearCookies } from "../../../features/actions/auth";
 import useAddUserActivity from "../../../hooks/useAddUserActivity";
 import { getRoleNameByID } from "../../../utils/roles";
@@ -36,10 +37,32 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
   const { userData, HEADER_LABEL } = useSelector((state) => state.auth);
   const { employeeModeData } = useSelector((state) => state.employee);
   const { isSidebarOpen, activeHeaderSection } = useSelector((state) => state.globalData);
+  const { unseenCount, _unseenCount } = useSelector((state) => state.notification);
   const isMdUp = useMediaQuery("(min-width: 768px)");
+
+  const totalUnseen = (unseenCount || 0) + (_unseenCount || 0);
 
   const { showWarning, daysLeft, expiryDate } = usePlanExpiryWarning(15);
 
+  useEffect(() => {
+    if (userData?._id) {
+      const targetUserId = employeeModeData ? employeeModeData?._id : userData?._id;
+      dispatch(
+        getUserNotifications({
+          id: targetUserId,
+          important: true,
+          bell: true,
+        })
+      );
+      dispatch(
+        getUserNotifications({
+          id: targetUserId,
+          important: false,
+          bell: true,
+        })
+      );
+    }
+  }, [userData, employeeModeData, dispatch]);
 
   useEffect(() => {
     if (location.pathname.startsWith("/whatsapp")) {
@@ -363,6 +386,11 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
                     </div>
                   </div>
                   <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-500 shadow-sm dark:border-slate-800" />
+                  {totalUnseen > 0 && (
+                    <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white ring-2 ring-white dark:ring-slate-900">
+                      {totalUnseen}
+                    </span>
+                  )}
                 </div>
                 <ChevronDown className={`h-4 w-4 text-slate-500 dark:text-slate-400 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
