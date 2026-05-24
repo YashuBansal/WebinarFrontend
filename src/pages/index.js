@@ -82,6 +82,7 @@ const DocumentationPage = lazy(() => import("./Public/DocumentationPage"));
 const WhatsAppWrapper = lazy(() => import("./WhatsApp/WhatsAppWrapper"));
 const ZoomLiveWrapper = lazy(() => import("./ZoomLive/ZoomLiveWrapper"));
 const AffiliateDashboard = lazy(() => import("./Affiliate/AffiliateDashboard"));
+const ManageReferrals = lazy(() => import("./Affiliate/ManageReferrals"));
 
 
 export {
@@ -148,5 +149,6 @@ export {
   WhatsAppWrapper,
   ZoomLiveWrapper,
   AffiliateDashboard,
+  ManageReferrals,
 };
 

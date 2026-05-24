@@ -18,6 +18,7 @@ import {
   MessagesSquare,
   Target,
   Megaphone,
+  Award,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import useRoles from "../../../hooks/useRoles";
@@ -81,6 +82,11 @@ const DashboardSidebar = ({
           path: "/message-counts",
           label: "Message Counts",
           Icon: MessagesSquare,
+        },
+        {
+          path: "/manage-referrals",
+          label: "Referrals",
+          Icon: Award,
         },
       ],
     },
@@ -401,22 +407,6 @@ const DashboardSidebar = ({
           </li>
         </ComponentGuard>
       );
-      pushRow(
-        "rail-logout",
-        <li key="r-out">
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="group flex w-full items-center justify-center rounded-lg py-2.5 hover:bg-red-50 dark:hover:bg-red-500/10"
-            title="Sign out"
-          >
-            <LogOut
-              className="h-5 w-5 text-slate-500 group-hover:text-red-500"
-              strokeWidth={2}
-            />
-          </button>
-        </li>
-      );
     }
 
     if (variant === "panel") {
@@ -439,19 +429,6 @@ const DashboardSidebar = ({
             </Link>
           </li>
         </ComponentGuard>
-      );
-      pushRow(
-        "panel-logout",
-        <li key="p-out">
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="group flex w-full items-center rounded-lg px-2 py-2.5 text-left text-sm font-medium text-slate-800 dark:text-slate-200 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600"
-            style={{ fontFamily: "Inter, sans-serif" }}
-          >
-            Sign Out
-          </button>
-        </li>
       );
     }
 
@@ -477,22 +454,6 @@ const DashboardSidebar = ({
             </Link>
           </li>
         </ComponentGuard>
-      );
-      pushRow(
-        "m-out",
-        <li key="m-out">
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left font-medium text-red-600 hover:bg-red-50 dark:hover:bg-red-500/10"
-          >
-            <LogOut
-              className="h-5 w-5 text-slate-500"
-              strokeWidth={2}
-            />
-            Sign Out
-          </button>
-        </li>
       );
     }
 
