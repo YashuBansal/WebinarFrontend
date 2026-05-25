@@ -85,7 +85,7 @@ const DashboardSidebar = ({
           Icon: MessagesSquare,
         },
         {
-          path: "/unique-emails?page=1",
+          path: "/unique-email-counts", 
           label: "Unique Email Counts",
           Icon: MailCheck,
         },

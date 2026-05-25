@@ -234,7 +234,7 @@ const SuperAdminDashboard = () => {
           ? "…"
           : (uniqueEmailMetrics?.uniqueEmailCount ?? 0),
         color: "primary",
-        path: "/unique-emails?page=1",
+        path: "/unique-email-counts",
       },
     ],
     [dashBoardCardsData, isUniqueEmailPending, uniqueEmailMetrics],
