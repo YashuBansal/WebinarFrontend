@@ -43,45 +43,6 @@ function enforceAntiClickjacking() {
 enforceAntiClickjacking();
 
 function mountCharlaWidget() {
-  const lockTopRight = (element) => {
-    element.style.setProperty("position", "fixed", "important");
-    element.style.setProperty("top", "5px", "important");
-    element.style.setProperty("right", "320px", "important");
-    element.style.setProperty("left", "auto", "important");
-    element.style.setProperty("bottom", "auto", "important");
-    element.style.setProperty("transform", "none", "important");
-    element.style.setProperty("z-index", "999999", "important");
-  };
-
-  const forcePositionForNode = (node) => {
-    if (!(node instanceof HTMLElement)) return;
-    const marker = `${node.tagName} ${node.id} ${node.className}`.toLowerCase();
-    if (marker.includes("charla") || marker.includes(" widget ")) {
-      if (node.classList.contains("widget")) {
-        node.classList.remove("left", "center");
-        node.classList.add("right");
-      }
-      lockTopRight(node);
-    }
-
-    if (node instanceof HTMLIFrameElement && node.src.toLowerCase().includes("charla")) {
-      lockTopRight(node);
-    }
-  };
-
-  const applyInRoot = (root) => {
-    root.querySelectorAll('charla-widget, .widget, .widget.left, .widget.right, .widget.center, iframe[src*="charla"], [id*="charla"], [class*="charla"]').forEach((entry) => {
-      forcePositionForNode(entry);
-    });
-  };
-
-  const applyInShadowRoots = () => {
-    document.querySelectorAll("*").forEach((el) => {
-      const root = el.shadowRoot;
-      if (root) applyInRoot(root);
-    });
-  };
-
   if (document.getElementById("charla-drag-wrapper")) return;
 
   const wrapper = document.createElement("div");
