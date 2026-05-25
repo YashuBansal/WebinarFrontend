@@ -22,13 +22,16 @@ import {
   Trash2,
   Save,
   X,
-  Tag
+  Tag,
+  Send
 } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
 
 const Pullbacks = lazy(() => import("./Pullbacks"));
 const Enrollments = lazy(() => import("./Enrollments"));
 const WebinarAttendeesPage = lazy(() => import("./WebinarAttendeesPage"));
+import SendDataModal from "../../components/Webinar/SendDataModal";
+import { instance as axiosInstance } from "../../services/axiosInterceptor";
 
 import { Link, useParams, useSearchParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -38,6 +41,8 @@ import {
   AssignmentStatus,
   copyToClipboard,
   NotifActionType,
+  successToast,
+  errorToast
 } from "../../utils/extra";
 import { getAllEmployees } from "../../features/actions/employee";
 import useAddUserActivity from "../../hooks/useAddUserActivity";
@@ -83,6 +88,8 @@ const WebinarAttendees = () => {
   const [settingModalOpen, setSettingModalOpen] = useState(false);
   const [webhookDialogOpen, setWebhookDialogOpen] = useState(false);
   const [applyTagsModalOpen, setApplyTagsModalOpen] = useState(false);
+  const [sendDataModalOpen, setSendDataModalOpen] = useState(false);
+  const [isSendingData, setIsSendingData] = useState(false);
   const [bulkEnrollOpen, setBulkEnrollOpen] = useState(false);
 
   // Sync URL with State
@@ -157,6 +164,30 @@ const WebinarAttendees = () => {
     setPage(1);
   };
 
+  const handleSendData = async (integrationKey, tag) => {
+    setIsSendingData(true);
+    try {
+      const response = await axiosInstance.post("/integrations/settings/send-data", {
+        integrationKey,
+        attendeeIds: selectedRows,
+        webinarId: id,
+        tag,
+      });
+      if (response?.data?.success) {
+        successToast(response.data.message || "Data synchronized successfully!");
+        setSelectedRows([]);
+        setSendDataModalOpen(false);
+      } else {
+        errorToast(response?.data?.message || "Failed to synchronize data.");
+      }
+    } catch (err) {
+      console.error("Error sending data to integration:", err);
+      errorToast(typeof err === 'string' ? err : (err?.response?.data?.message || err?.message || "Sync failed."));
+    } finally {
+      setIsSendingData(false);
+    }
+  };
+
   const cardBg = isDark ? "rgba(30, 41, 59, 0.7)" : "rgba(255, 255, 255, 0.7)";
   const cardBorder = isDark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.06)";
 
@@ -222,6 +253,18 @@ const WebinarAttendees = () => {
                   className="flex-1 md:flex-none px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
                 >
                   <Tag className="w-4 h-4" /> Apply Tag
+                </button>
+                <button
+                  onClick={() => {
+                    if (selectedRows.length === 0) {
+                      errorToast("Please select at least one attendee first.");
+                      return;
+                    }
+                    setSendDataModalOpen(true);
+                  }}
+                  className="flex-1 md:flex-none px-5 py-2.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 rounded-xl text-sm font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+                >
+                  <Send className="w-4 h-4" /> Send Data
                 </button>
               </>
             )}
@@ -387,6 +430,14 @@ const WebinarAttendees = () => {
             isOpen={webhookDialogOpen}
             onClose={() => setWebhookDialogOpen(false)}
             onRefresh={fetchWebinarData}
+          />
+        )}
+
+        {sendDataModalOpen && (
+          <SendDataModal
+            onClose={() => setSendDataModalOpen(false)}
+            onSubmit={handleSendData}
+            isLoading={isSendingData}
           />
         )}
       </Suspense>

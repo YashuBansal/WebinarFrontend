@@ -16,6 +16,7 @@ import {
   NotifActionType,
   successToast,
   filterTruthyValues,
+  errorToast,
 } from "../../utils/extra";
 import { maskPiiDisplay } from "../../utils/maskPii";
 import AppLoader from "../../components/AppLoader";
@@ -25,9 +26,10 @@ import { clearEmployeeData } from "../../features/slices/employee";
 import { getAllEmployees } from "../../features/actions/employee";
 import GroupedAttendeesExportModal from "./Modal/GroupedAttendeeExportModal";
 import GroupedAttendeeFilterModal from "./Modal/GroupedAttendeeFilterModal";
-import { baseURL } from "../../services/axiosInterceptor";
+import { instance as axiosInstance, baseURL } from "../../services/axiosInterceptor";
 import { useBulkApplyTagsToAllAttendees } from "../../hooks/useTags";
 import ApplyTagsModal from "../../components/Webinar/ApplyTagsModal";
+import SendDataModal from "../../components/Webinar/SendDataModal";
 import { openModal } from "../../features/slices/modalSlice";
 import { setAllAttendeesFilters } from "../../features/slices/filters.slice";
 import FilterPresetModal from "../../components/Filter/FilterPresetModal";
@@ -52,6 +54,7 @@ import {
   ArrowUpDown,
   ArrowUp,
   ArrowDown,
+  Send,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Badge } from "../../components/ui/badge";
@@ -224,6 +227,8 @@ const ViewAttendees = () => {
   const [page, setPage] = useState(searchParams.get("page") || 1);
   const [deleteModal, setDeleteModal] = useState(false);
   const [applyTagsModalOpen, setApplyTagsModalOpen] = useState(false);
+  const [sendDataModalOpen, setSendDataModalOpen] = useState(false);
+  const [isSendingData, setIsSendingData] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [presetModalOpen, setPresetModalOpen] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
@@ -335,6 +340,29 @@ const ViewAttendees = () => {
     );
     setApplyTagsModalOpen(false);
   });
+
+  const handleSendData = async (integrationKey, tag) => {
+    setIsSendingData(true);
+    try {
+      const response = await axiosInstance.post("/integrations/settings/send-data", {
+        integrationKey,
+        attendeeIds: Array.from(selectedIds),
+        tag,
+      });
+      if (response?.data?.success) {
+        successToast(response.data.message || "Data synchronized successfully!");
+        setSelectedIds(new Set());
+        setSendDataModalOpen(false);
+      } else {
+        errorToast(response?.data?.message || "Failed to synchronize data.");
+      }
+    } catch (err) {
+      console.error("Error sending data to integration:", err);
+      errorToast(typeof err === 'string' ? err : (err?.response?.data?.message || err?.message || "Sync failed."));
+    } finally {
+      setIsSendingData(false);
+    }
+  };
 
   const handleCopy = useCallback(
     (additionalFilters = {}, sortOverride) => {
@@ -1237,20 +1265,42 @@ const ViewAttendees = () => {
             <span className="hidden sm:inline">Export</span>
           </Button>
           {userData?.isActive && (
-            <Button
-              type="button"
-              onClick={() => setApplyTagsModalOpen(true)}
-              className="rounded-xl flex items-center gap-2 px-4 shadow-sm transition-transform hover:scale-105"
-              style={{
-                backgroundColor: "#FF6B35",
-                color: "white",
-                border: "none",
-                boxShadow: "0 4px 10px rgba(255, 107, 53, 0.2)",
-              }}
-            >
-              <Tag className="w-4 h-4" />{" "}
-              <span className="hidden sm:inline">Apply Tags</span>
-            </Button>
+            <>
+              <Button
+                type="button"
+                onClick={() => setApplyTagsModalOpen(true)}
+                className="rounded-xl flex items-center gap-2 px-4 shadow-sm transition-transform hover:scale-105"
+                style={{
+                  backgroundColor: "#FF6B35",
+                  color: "white",
+                  border: "none",
+                  boxShadow: "0 4px 10px rgba(255, 107, 53, 0.2)",
+                }}
+              >
+                <Tag className="w-4 h-4" />{" "}
+                <span className="hidden sm:inline">Apply Tags</span>
+              </Button>
+              <Button
+                type="button"
+                onClick={() => {
+                  if (selectedIds.size === 0) {
+                    errorToast("Please select at least one attendee first.");
+                    return;
+                  }
+                  setSendDataModalOpen(true);
+                }}
+                className="rounded-xl flex items-center gap-2 px-4 shadow-sm transition-transform hover:scale-105"
+                style={{
+                  backgroundColor: "#3b82f6",
+                  color: "white",
+                  border: "none",
+                  boxShadow: "0 4px 10px rgba(59, 130, 246, 0.2)",
+                }}
+              >
+                <Send className="w-4 h-4" />{" "}
+                <span className="hidden sm:inline">Send Data</span>
+              </Button>
+            </>
           )}
         </div>
       </motion.div>
@@ -1332,6 +1382,18 @@ const ViewAttendees = () => {
                 });
               }}
               isLoading={isApplyingTags}
+            />
+          </Suspense>,
+          document.body
+        )}
+      {userData?.isActive &&
+        sendDataModalOpen &&
+        createPortal(
+          <Suspense fallback={<ModalFallback />}>
+            <SendDataModal
+              onClose={() => setSendDataModalOpen(false)}
+              onSubmit={handleSendData}
+              isLoading={isSendingData}
             />
           </Suspense>,
           document.body
