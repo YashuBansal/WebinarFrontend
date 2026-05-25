@@ -84,15 +84,16 @@ const DiscountSection = (props) => {
             checked={!isRegularDuration}
             onChange={() => {
               setIsRegularDuration(false);
-              setPlanDurationConfig({
-                custom: {
-                  duration: 0,
-                  discountType: "percent",
-                  discountValue: 0,
-                  price: 0,
-                  isEnabled: false,
-                },
-              });
+            setPlanDurationConfig({
+              custom: {
+                duration: 0,
+                discountType: "percent",
+                discountValue: 0,
+                price: 0,
+                isEnabled: false,
+                razorpayPlanId: "",
+              },
+            });
             }}
             className="h-4 w-4 text-blue-600"
           />
@@ -182,11 +183,8 @@ const DiscountSection = (props) => {
                     onChange={(e) =>
                       setPlanDurationConfig((prev) => ({
                         custom: {
+                          ...prev.custom,
                           duration: Number(e.target.value),
-                          discountType: prev.custom.discountType,
-                          discountValue: prev.custom.discountValue,
-                          price: prev.custom.price,
-                          isEnabled: prev.custom.isEnabled,
                         },
                       }))
                     }
@@ -242,6 +240,39 @@ const DiscountSection = (props) => {
                     Discount value cannot exceed the price (₹{config.price || 0}).
                   </p>
                 )}
+              </div>
+
+              {/* Razorpay Plan ID Input */}
+              <div className="flex flex-col mt-2">
+                <label htmlFor={`${key}-razorpay-id`} className="text-sm font-medium">
+                  Razorpay Plan ID (Recurring)
+                </label>
+                <Controller
+                  name={`planDurationConfig.${key}.razorpayPlanId`}
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <TextField
+                      fullWidth
+                      id={`${key}-razorpay-id`}
+                      type="text"
+                      placeholder="e.g. plan_NXYZ81H"
+                      value={value || planDurationConfig[key]?.razorpayPlanId || ""}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        onChange(val);
+                        setPlanDurationConfig(prev => ({
+                          ...prev,
+                          [key]: { ...prev[key], razorpayPlanId: val }
+                        }));
+                      }}
+                      disabled={!(planDurationConfig[key]?.isEnabled || false)}
+                      size="small"
+                    />
+                  )}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Optional. Maps this duration to a Razorpay Subscription Plan.
+                </p>
               </div>
             </div>
           </div>

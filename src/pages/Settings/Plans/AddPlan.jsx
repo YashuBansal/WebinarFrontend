@@ -212,6 +212,7 @@ const regularDurations = {
     discountValue: 0,
     price: 0,
     isEnabled: false,
+    razorpayPlanId: "",
   },
   quarterly: {
     duration: 90,
@@ -219,6 +220,7 @@ const regularDurations = {
     discountValue: 0,
     price: 0,
     isEnabled: false,
+    razorpayPlanId: "",
   },
   halfyearly: {
     duration: 180,
@@ -226,6 +228,7 @@ const regularDurations = {
     discountValue: 0,
     price: 0,
     isEnabled: false,
+    razorpayPlanId: "",
   },
   yearly: {
     duration: 365,
@@ -233,6 +236,7 @@ const regularDurations = {
     discountValue: 0,
     price: 0,
     isEnabled: false,
+    razorpayPlanId: "",
   },
   custom: {
     duration: 0,
@@ -240,6 +244,7 @@ const regularDurations = {
     discountValue: 0,
     price: 0,
     isEnabled: false,
+    razorpayPlanId: "",
   },
 };
 
@@ -361,6 +366,7 @@ export default function AddPlan() {
           setValue(`planDurationConfig.${duration}.isEnabled`, updatedConfig[duration].isEnabled);
           setValue(`planDurationConfig.${duration}.discountType`, updatedConfig[duration].discountType);
           setValue(`planDurationConfig.${duration}.discountValue`, updatedConfig[duration].discountValue);
+          setValue(`planDurationConfig.${duration}.razorpayPlanId`, updatedConfig[duration].razorpayPlanId || "");
           if (duration === 'custom') {
             setValue(`planDurationConfig.${duration}.duration`, updatedConfig[duration].duration);
           }

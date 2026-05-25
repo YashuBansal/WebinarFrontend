@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 import ComponentGuard from "../../../components/AccessControl/ComponentGuard";
-import { copyToClipboard } from "../../../utils/extra";
+import { copyToClipboard, errorToast } from "../../../utils/extra";
 import { useDispatch, useSelector } from "react-redux";
 import { checkout } from "../../../features/actions/razorpay";
 import useRoles from "../../../hooks/useRoles";
@@ -26,6 +26,15 @@ import {
 } from "../../../components/ui/dropdown-menu";
 import { cn } from "../../../lib/utils";
 
+function checkoutErrorMessage(err) {
+  const raw = err?.payload != null ? err.payload : err;
+  const fromAxios = raw?.response?.data?.message;
+  if (typeof fromAxios === "string") return fromAxios;
+  if (Array.isArray(fromAxios) && fromAxios[0]) return String(fromAxios[0]);
+  if (typeof raw?.message === "string") return raw.message;
+  return "Checkout failed. Please try again.";
+}
+
 const PlanCard = (props) => {
   const roles = useRoles();
   const dispatch = useDispatch();
@@ -36,39 +45,77 @@ const PlanCard = (props) => {
     isSelectVisible = false,
     isYearly = false,
     handlePlanSelection = (id, billingData) => {
-      dispatch(
-        checkout({ plan: id, durationType: billingData.durationType })
-      ).then((res) => {
-        if (res?.payload?.result) {
-          const order = res?.payload?.result;
-          const planRes = res?.payload?.planData;
+      dispatch(checkout({ plan: id, durationType: billingData.durationType }))
+        .unwrap()
+        .then((payload) => {
+          const order = payload?.result;
+          const selectedPlanDoc = payload?.planData;
+          if (!order?.id || !selectedPlanDoc?._id) return;
+
+          const envMode = import.meta.env.VITE_REACT_APP_WORKING_ENVIRONMENT;
+          const callbackBase =
+            envMode === "development"
+              ? import.meta.env.VITE_REACT_APP_API_BASE_URL_DEVELOPMENT
+              : import.meta.env.VITE_REACT_APP_API_BASE_URL_MAIN_PRODUCTION;
+          if (
+            typeof callbackBase !== "string" ||
+            callbackBase.trim().length === 0
+          ) {
+            errorToast(
+              "Callback URL is not configured. Please verify API base URL env settings."
+            );
+            return;
+          }
+          if (!userData?._id) {
+            errorToast("Unable to start checkout: missing user context.");
+            return;
+          }
+          if (
+            typeof import.meta.env.VITE_RAZORPAY_KEY_ID !== "string" ||
+            import.meta.env.VITE_RAZORPAY_KEY_ID.trim().length === 0
+          ) {
+            errorToast(
+              "Razorpay key is missing. Please verify frontend environment configuration."
+            );
+            return;
+          }
+          const callbackUrl = `${callbackBase}/razorpay/payment-success?planId=${selectedPlanDoc._id}&adminId=${userData._id}&durationType=${billingData?.durationType}`;
+
+          const isSubscription =
+            payload?.checkoutMode === "subscription" ||
+            order?.entity === "subscription" ||
+            (typeof order?.id === "string" && order.id.startsWith("sub_"));
+
+          if (!isSubscription) {
+            errorToast(
+              "Recurring checkout is required. This plan duration is not configured for Razorpay subscriptions."
+            );
+            return;
+          }
+
           const options = {
             key: import.meta.env.VITE_RAZORPAY_KEY_ID,
-            amount: order.amount,
-            currency: order.currency,
-            order_id: order.id,
-            callback_url: `${
-              import.meta.env.VITE_REACT_APP_WORKING_ENVIRONMENT ===
-              "development"
-                ? import.meta.env.VITE_REACT_APP_API_BASE_URL_DEVELOPMENT
-                : import.meta.env.VITE_REACT_APP_API_BASE_URL_MAIN_PRODUCTION
-            }/razorpay/payment-success?planId=${planRes._id}&adminId=${
-              userData?._id
-            }&durationType=${billingData?.durationType} `,
-            theme: {
-              color: "#3b82f6",
-            },
+            subscription_id: order.id,
+            name: selectedPlanDoc?.name || "Subscription",
+            description:
+              selectedPlanDoc?.internalName || selectedPlanDoc?.name || "",
+            callback_url: callbackUrl,
+            theme: { color: "#3b82f6" },
           };
 
           const rzp = new Razorpay(options);
           rzp.open();
-        }
-      });
+        })
+        .catch((e) => {
+          errorToast(checkoutErrorMessage(e));
+        });
     },
     selectedPlan = null,
     currentPlan = null,
     setModalData = () => {},
     planType = "active",
+    samePlanCheckoutDisabled = false,
+    subscriptionExpiresAt = null,
   } = props;
 
   const {
@@ -140,6 +187,23 @@ const PlanCard = (props) => {
   const ribbonStyle = customRibbonColor?.trim()
     ? { backgroundColor: customRibbonColor.trim() }
     : undefined;
+
+  const currentPlanUntilLabel =
+    samePlanCheckoutDisabled && subscriptionExpiresAt
+      ? new Date(subscriptionExpiresAt).toLocaleDateString(undefined, {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+        })
+      : null;
+
+  const choosePlanLabel = samePlanCheckoutDisabled
+    ? currentPlanUntilLabel
+      ? `Current plan (until ${currentPlanUntilLabel})`
+      : "Current plan"
+    : selectedPlan === null || selectedPlan !== plan?._id
+      ? "Choose plan"
+      : "Selected";
 
   return (
     <div
@@ -321,7 +385,14 @@ const PlanCard = (props) => {
               {isActive ? (
                 <Button
                   type="button"
+                  disabled={samePlanCheckoutDisabled}
+                  title={
+                    samePlanCheckoutDisabled
+                      ? "You already have this plan until the term ends."
+                      : undefined
+                  }
                   onClick={() => {
+                    if (samePlanCheckoutDisabled) return;
                     const durationType = isYearly ? "yearly" : "monthly";
                     const billingData = {
                       durationType,
@@ -331,12 +402,14 @@ const PlanCard = (props) => {
                   }}
                   className={cn(
                     "h-11 w-full rounded-xl text-sm font-bold shadow-lg transition-all",
-                    selectedPlan === plan?._id
-                      ? "bg-emerald-600 text-white shadow-emerald-500/25 hover:bg-emerald-700 dark:shadow-emerald-900/30"
-                      : "border-none bg-blue-500 text-white shadow-blue-500/20 hover:bg-blue-600 hover:shadow-blue-500/30 dark:shadow-blue-900/40",
+                    samePlanCheckoutDisabled
+                      ? "cursor-not-allowed bg-slate-400 text-white shadow-none hover:bg-slate-400"
+                      : selectedPlan === plan?._id
+                        ? "bg-emerald-600 text-white shadow-emerald-500/25 hover:bg-emerald-700 dark:shadow-emerald-900/30"
+                        : "border-none bg-blue-500 text-white shadow-blue-500/20 hover:bg-blue-600 hover:shadow-blue-500/30 dark:shadow-blue-900/40",
                   )}
                 >
-                  {selectedPlan === null || selectedPlan !== plan?._id ? "Choose plan" : "Selected"}
+                  {choosePlanLabel}
                 </Button>
               ) : null}
             </ComponentGuard>

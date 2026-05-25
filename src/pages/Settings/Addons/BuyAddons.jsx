@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useMemo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -11,6 +11,7 @@ import AddonCard from "./AddonCard";
 import useUserSubscription from "../../../hooks/useUserSubscription";
 import HubSubpageShell from "../../../components/Layout/HubSubpageShell";
 import { Button } from "../../../components/ui/button";
+import { addonHasConfiguredRazorpayPlan } from "../../../utils/addonCatalog";
 
 const BuyAddOnsPage = () => {
   const dispatch = useDispatch();
@@ -28,6 +29,11 @@ const BuyAddOnsPage = () => {
     ? expiryDate.getTime() <= Date.now()
     : true;
   const canBuyAddons = Boolean(userData?.isActive) && !isSubscriptionExpired;
+
+  const purchasableAddons = useMemo(
+    () => (addonsData || []).filter(addonHasConfiguredRazorpayPlan),
+    [addonsData]
+  );
 
   useEffect(() => {
     dispatch(getAddons());
@@ -102,14 +108,27 @@ const BuyAddOnsPage = () => {
         </motion.div>
       )}
 
-      {addonsData.length === 0 ? (
+      {canBuyAddons && purchasableAddons.length === 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8 rounded-2xl border border-amber-200/90 bg-amber-50/95 px-4 py-3 text-sm font-medium text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/35 dark:text-amber-100/90"
+        >
+          No add-ons are available for purchase right now. Each add-on needs a
+          Razorpay Subscriptions plan id configured in admin.
+        </motion.div>
+      )}
+
+      {purchasableAddons.length === 0 && addonsData.length === 0 ? (
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-white/60 py-16 text-center dark:border-slate-700 dark:bg-slate-800/40"
         >
           <Package className="mb-3 h-12 w-12 text-slate-300 dark:text-slate-600" />
-          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">No add-ons are listed yet.</p>
+          <p className="text-sm font-semibold text-slate-500 dark:text-slate-400">
+            No add-ons are listed yet.
+          </p>
         </motion.div>
       ) : (
         <motion.div
@@ -118,7 +137,7 @@ const BuyAddOnsPage = () => {
           transition={{ duration: 0.3 }}
           className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-2"
         >
-          {addonsData.map((addon, i) => (
+          {purchasableAddons.map((addon, i) => (
             <motion.div
               key={addon._id}
               className="h-full"

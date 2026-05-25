@@ -12,11 +12,18 @@ import { resetPricePlanSuccess } from "../../../features/slices/pricePlan";
 import PlanInactiveModal from "./PlanInactiveModal";
 import HubSubpageShell from "../../../components/Layout/HubSubpageShell";
 import { Button } from "../../../components/ui/button";
+import SubscriptionOverviewPanel from "./SubscriptionOverviewPanel";
+import SubscriptionEntitlementsTable from "./SubscriptionEntitlementsTable";
 
 const ViewPlans = () => {
   const roles = useRoles();
   const { userData } = useSelector((state) => state.auth);
-  const { data: subscription } = useUserSubscription();
+  const {
+    data: subscription,
+    isLoading: subscriptionLoading,
+    isError: subscriptionError,
+    error: subscriptionQueryError,
+  } = useUserSubscription();
   const { planData, isSuccess, isLoading } = useSelector(
     (state) => state.pricePlans
   );
@@ -24,7 +31,12 @@ const ViewPlans = () => {
 
   const [modalData, setModalData] = useState(null);
   const [planType, setPlanType] = useState("active");
-  const [planDuration, setPlanDuration] = useState("monthly"); // monthly | yearly | custom
+  const [planDuration, setPlanDuration] = useState("monthly");
+
+  const isAdminOnly =
+    userData &&
+    roles.isAdmin(userData.role) &&
+    !roles.isSuperAdmin(userData.role);
 
   const durationTabs = useMemo(() => {
     const tabs = [
@@ -39,7 +51,6 @@ const ViewPlans = () => {
     return tabs;
   }, [roles, userData]);
 
-  // Ensure selected tab is valid for current role
   useEffect(() => {
     if (!durationTabs.find((tab) => tab.key === planDuration)) {
       setPlanDuration(durationTabs[0]?.key || "monthly");
@@ -55,9 +66,16 @@ const ViewPlans = () => {
       return durationConfig?.isEnabled === true;
     });
 
-    if (roles.isSuperAdmin(userData.role)) return durationFilteredPlans;
+    if (
+      roles.isSuperAdmin(userData.role) ||
+      roles.isAdmin(userData.role)
+    ) {
+      return durationFilteredPlans;
+    }
     if (!subscription || !subscription.plan) return [];
-    const plan = durationFilteredPlans.find((plan) => plan._id === subscription.plan._id);
+    const plan = durationFilteredPlans.find(
+      (p) => p._id === subscription.plan._id
+    );
     if (!plan) return [];
     return [plan];
   }, [userData, planData, roles, subscription, planDuration]);
@@ -78,8 +96,38 @@ const ViewPlans = () => {
       ? null
       : subscription?.plan?._id;
 
+  const showEntitlementsBlock =
+    isAdminOnly &&
+    !subscriptionLoading &&
+    !subscriptionError &&
+    subscription;
+
   return (
     <HubSubpageShell>
+      {isAdminOnly && (
+        <div className="mb-8 space-y-6">
+          <div className="space-y-1">
+            <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
+              Plans &amp; subscription
+            </h1>
+            <p className="max-w-xl text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+              Review your organization&apos;s subscription status, limits, and
+              billing provider. Compare plans and upgrade when you need more
+              capacity.
+            </p>
+          </div>
+          <SubscriptionOverviewPanel
+            subscription={subscription}
+            isLoading={subscriptionLoading}
+            isError={subscriptionError}
+            error={subscriptionQueryError}
+          />
+          {showEntitlementsBlock && (
+            <SubscriptionEntitlementsTable subscription={subscription} />
+          )}
+        </div>
+      )}
+
       <motion.header
         initial={{ opacity: 0, y: -12 }}
         animate={{ opacity: 1, y: 0 }}
@@ -99,13 +147,13 @@ const ViewPlans = () => {
           <div className="min-w-0 space-y-1">
             <div className="flex flex-wrap items-center gap-2">
               <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
-                Plans
+                {isAdminOnly ? "Plan options" : "Plans"}
               </h1>
               <Sparkles className="hidden h-5 w-5 text-amber-400 sm:inline sm:h-6 sm:w-6" aria-hidden />
             </div>
             <p className="max-w-xl text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400">
-              Review subscription tiers and billing. Super admins can add plans, change display order, and switch
-              between active and inactive lists.
+              Review subscription tiers and billing. Super admins can add plans,
+              change display order, and switch between active and inactive lists.
             </p>
           </div>
         </div>
@@ -181,18 +229,33 @@ const ViewPlans = () => {
 
         <div className="p-5 sm:p-6">
           <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
-            {planDataFiltered?.map((item) => (
-              <div key={item?._id} className="min-w-0">
-                <PlanCard
-                  plan={item}
-                  planType={planType}
-                  setModalData={setModalData}
-                  isMenuVisible={true}
-                  currentPlan={currentPlanId}
-                  isYearly={planDuration === "yearly"}
-                />
-              </div>
-            ))}
+            {planDataFiltered?.map((item) => {
+              const samePlanCheckoutDisabled =
+                isAdminOnly &&
+                subscription?.expiryDate &&
+                subscription?.plan?._id &&
+                String(subscription.plan._id) === String(item._id) &&
+                new Date(subscription.expiryDate).getTime() > Date.now();
+
+              return (
+                <div key={item?._id} className="min-w-0">
+                  <PlanCard
+                    plan={item}
+                    planType={planType}
+                    setModalData={setModalData}
+                    isMenuVisible={true}
+                    currentPlan={currentPlanId}
+                    isYearly={planDuration === "yearly"}
+                    samePlanCheckoutDisabled={samePlanCheckoutDisabled}
+                    subscriptionExpiresAt={
+                      samePlanCheckoutDisabled
+                        ? subscription.expiryDate
+                        : null
+                    }
+                  />
+                </div>
+              );
+            })}
           </div>
 
           {planDataFiltered?.length === 0 && (
@@ -202,9 +265,12 @@ const ViewPlans = () => {
               className="mt-4 flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 bg-slate-50/80 py-14 dark:border-slate-600 dark:bg-slate-900/40"
             >
               <CreditCard className="mb-2 h-10 w-10 text-slate-300 dark:text-slate-600" />
-              <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">No plans to show</p>
+              <p className="text-sm font-semibold text-slate-600 dark:text-slate-300">
+                No plans to show
+              </p>
               <p className="mt-1 max-w-sm px-4 text-center text-xs font-medium text-slate-500 dark:text-slate-400">
-                Try another billing period or list (active / inactive), or add a plan if you are a super admin.
+                Try another billing period or list (active / inactive), or add a
+                plan if you are a super admin.
               </p>
             </motion.div>
           )}

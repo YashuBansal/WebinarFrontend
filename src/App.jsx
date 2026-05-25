@@ -73,7 +73,7 @@ import {
   ZoomLiveWrapper,
   AffiliateDashboard,
   ManageReferrals,
-  UniqueEmailCounts,
+  PaymentFailed,
 } from "./pages";
 
 import RouteGuard from "./components/AccessControl/RouteGuard";
@@ -770,6 +770,14 @@ const App = () => {
     {
       path: "/policy",
       element: <PolicyPage />,
+    },
+    {
+      path: "/failed",
+      element: (
+        <Suspense fallback={<></>}>
+          <PaymentFailed />
+        </Suspense>
+      ),
     },
     {
       path: "/terms",

@@ -20,17 +20,17 @@ export default function useUserSubscription() {
     !!isUserLoggedIn && !!role && role !== roleIds.SUPER_ADMIN;
 
   const query = useQuery({
-    queryKey: ["userSubscription"],
+    // Must include admin id so cache is not reused after logout / login as another user.
+    queryKey: ["userSubscription", userData?._id],
     queryFn: fetchUserSubscription,
-    enabled,
-    refetchInterval: enabled ? 60 * 1000 : false,
+    enabled: enabled && !!userData?._id,
+    refetchInterval: enabled && !!userData?._id ? 60 * 1000 : false,
   });
 
   useEffect(() => {
     const subscription = query.data;
     const expiryRaw = subscription?.expiryDate;
     const isActive = userData?.isActive;
-    console.log(`enabled: ${!enabled}, expiryRaw: ${!expiryRaw}, isActive: ${!isActive}`);
 
     if (!enabled) return;
     if (!expiryRaw || !isActive) return;

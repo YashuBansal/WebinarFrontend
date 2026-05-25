@@ -6,9 +6,21 @@ export const checkout = createAsyncThunk(
   "checkout",
   async ({ plan, durationType }, { rejectWithValue }) => {
     try {
-      const response = await instance.post(`/razorpay/checkout`, { plan, durationType });
-      return response?.data;
+      const idempotencyKey =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `${Date.now()}-${Math.random()}`;
 
+      const response = await instance.post(
+        `/razorpay/checkout`,
+        { plan, durationType },
+        {
+          headers: {
+            "Idempotency-Key": idempotencyKey,
+          },
+        }
+      );
+      return response?.data;
     } catch (e) {
       return rejectWithValue(e);
     }
