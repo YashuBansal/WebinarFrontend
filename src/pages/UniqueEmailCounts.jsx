@@ -3,29 +3,21 @@ import { useSearchParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import * as XLSX from "xlsx";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import DataTable from "../components/Table/DataTable";
 import { uniqueEmailCountsColumns } from "../utils/columnData";
 import { instance } from "../services/axiosInterceptor";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 const TABLE_HEADER = "Unique Email Counts";
 
-const fetchUniqueEmailCounts = async ({
-  page,
-  limit,
-  startDate,
-  endDate,
-}) => {
+const fetchUniqueEmailCounts = async ({ page, limit, startDate, endDate }) => {
   const params = new URLSearchParams();
   params.set("page", String(page));
   params.set("limit", String(limit));
   if (startDate) params.set("startDate", startDate);
   if (endDate) params.set("endDate", endDate);
-
-  const { data } = await instance.get(
-    `/attendees/metrics/unique-email-count-by-admin?${params.toString()}`
-  );
+  const { data } = await instance.get(`/attendees/metrics/unique-email-count-by-admin?${params.toString()}`);
   return data;
 };
 
@@ -71,6 +63,7 @@ const UniqueEmailCounts = () => {
     const list = apiData?.data ?? [];
     return list.map((row) => ({
       ...row,
+      _id: row.adminId,
       id: row.adminId,
     }));
   }, [apiData?.data]);
@@ -92,7 +85,7 @@ const UniqueEmailCounts = () => {
     const exportRows = rows.map((row) => ({
       "Admin Name": row.adminName ?? "",
       "Admin Email": row.adminEmail ?? "",
-      "Unique Emails": row.uniqueEmailCount ?? 0,
+      "Unique Email Count": row.uniqueEmailCount ?? 0,
     }));
     const worksheet = XLSX.utils.json_to_sheet(exportRows);
     const workbook = XLSX.utils.book_new();
@@ -146,11 +139,11 @@ const UniqueEmailCounts = () => {
             </button>
           </div>
           <div className="flex gap-4 flex-wrap">
-            <div className="flex-1 min-w-[220px] rounded-lg bg-indigo-50 border-l-4 border-indigo-500 px-4 py-3.5">
-              <div className="text-xs font-semibold uppercase tracking-wide text-indigo-700">
+            <div className="flex-1 min-w-[200px] rounded-lg bg-orange-50 border-l-4 border-orange-500 px-4 py-3.5">
+              <div className="text-xs font-semibold uppercase tracking-wide text-orange-700">
                 Overall Unique Emails
               </div>
-              <div className="mt-1 text-2xl font-bold text-indigo-900 tabular-nums">
+              <div className="mt-1 text-2xl font-bold text-orange-900 tabular-nums">
                 {isLoading ? "—" : overallUniqueEmailCount.toLocaleString()}
               </div>
             </div>

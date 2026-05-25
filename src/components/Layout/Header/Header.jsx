@@ -1,7 +1,15 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { ArrowUpRight, LayoutDashboard, Menu, Moon, Sun, Video, X } from "lucide-react";
+import { LayoutDashboard, Menu, Moon, Sun, Video, X, ChevronDown, User, LogOut } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useQueryClient } from "@tanstack/react-query";
+import { logout } from "../../../features/slices/auth";
+import { clearNotifications } from "../../../features/slices/notification";
+import { clearWebinarData } from "../../../features/slices/webinarContact";
+import { getUserNotifications } from "../../../features/actions/notification";
+import { logOutAndClearCookies } from "../../../features/actions/auth";
+import useAddUserActivity from "../../../hooks/useAddUserActivity";
 import { getRoleNameByID } from "../../../utils/roles";
 import { toggleSidebar, setActiveHeaderSection } from "../../../features/slices/globalData";
 import Profile from "./profile.svg";
@@ -17,18 +25,44 @@ import { useTheme } from "../../../contexts/ThemeContext";
 
 const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
   const [showExpiryNotice, setShowExpiryNotice] = useState(true);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
   const { theme, toggleTheme, isDark } = useTheme();
   const dispatch = useDispatch();
   const roles = useRoles();
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
+  const logUserActivity = useAddUserActivity();
   const { userData, HEADER_LABEL } = useSelector((state) => state.auth);
   const { employeeModeData } = useSelector((state) => state.employee);
   const { isSidebarOpen, activeHeaderSection } = useSelector((state) => state.globalData);
+  const { unseenCount, _unseenCount } = useSelector((state) => state.notification);
   const isMdUp = useMediaQuery("(min-width: 768px)");
+
+  const totalUnseen = (unseenCount || 0) + (_unseenCount || 0);
 
   const { showWarning, daysLeft, expiryDate } = usePlanExpiryWarning(15);
 
+  useEffect(() => {
+    if (userData?._id) {
+      const targetUserId = employeeModeData ? employeeModeData?._id : userData?._id;
+      dispatch(
+        getUserNotifications({
+          id: targetUserId,
+          important: true,
+          bell: true,
+        })
+      );
+      dispatch(
+        getUserNotifications({
+          id: targetUserId,
+          important: false,
+          bell: true,
+        })
+      );
+    }
+  }, [userData, employeeModeData, dispatch]);
 
   useEffect(() => {
     if (location.pathname.startsWith("/whatsapp")) {
@@ -57,6 +91,23 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
     navigate("/profile");
   };
 
+  const handleLogout = useCallback(() => {
+    logUserActivity({
+      action: "logout",
+      details: "User logged out successfully from header dropdown",
+    });
+
+    queryClient.clear();
+    dispatch(clearWebinarData());
+    dispatch(clearNotifications());
+    dispatch(logout());
+    dispatch(logOutAndClearCookies()).then(() => {
+      const broadcastChannel = new BroadcastChannel("auth-saas-crm");
+      broadcastChannel.postMessage({ type: "LOGOUT" });
+      broadcastChannel.close();
+    });
+  }, [dispatch, queryClient, logUserActivity]);
+
   const onExit = useCallback(() => {
     navigate("/employees?page=1");
     dispatch(setEmployeeModeId());
@@ -71,6 +122,24 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
   }, [employeeModeData, onExit]);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    if (isDropdownOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isDropdownOpen]);
+
+  useEffect(() => {
+    setIsDropdownOpen(false);
+  }, [location.pathname]);
 
   const handleDrawerToggle = () => {
     if (onMenuButtonClick) {
@@ -112,7 +181,7 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
         }}
       >
         <div className="flex h-full items-center justify-between gap-1 px-2 sm:gap-2 sm:px-4 lg:gap-4 lg:px-6">
-          <div className="flex min-w-0 flex-shrink-0 items-center gap-1 sm:gap-2 lg:gap-4">
+          <div className="flex flex-1 min-w-0 items-center gap-1 sm:gap-2 lg:gap-4 justify-start">
             <button
               ref={toggleButtonRef}
               type="button"
@@ -166,7 +235,7 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
             </div>
           </div>
 
-          <div className="custom-scrollbar-hide flex min-w-0 flex-shrink flex-1 items-center justify-center gap-1 overflow-x-auto px-2 py-3 sm:gap-2 md:gap-4 -mx-2 -my-3">
+          <div className="custom-scrollbar-hide flex-shrink-0 flex-grow-0 flex items-center justify-center gap-1 overflow-x-auto px-2 py-3 sm:gap-2 md:gap-4">
             <Link
               to="/"
               onClick={() => dispatch(setActiveHeaderSection("Dashboard"))}
@@ -288,66 +357,16 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
             </Link>
           </div>
 
-          <div className="flex flex-shrink-0 items-center gap-1.5 sm:gap-2 lg:gap-3">
-            {showPreviousDashboardLink ? (
-              <a
-                href={previousDashboardUrl}
-                title="Open previous dashboard UI"
-                className="flex items-center gap-1 rounded-lg border px-2 py-1.5 text-xs font-medium transition-colors hover:opacity-90 sm:gap-1.5 sm:px-2.5 sm:text-sm"
-                style={{
-                  backgroundColor: isDark ? "#1e293b" : "#f9fafb",
-                  borderColor: isDark ? "#334155" : "#e5e7eb",
-                  color: isDark ? "#e2e8f0" : "#334155",
-                }}
-              >
-                <ArrowUpRight className="h-4 w-4 shrink-0" aria-hidden />
-                <span className="hidden whitespace-nowrap sm:inline">
-                  Classic dashboard
-                </span>
-                <span className="whitespace-nowrap sm:hidden">Classic</span>
-              </a>
-            ) : null}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              title={
-                theme === "light" ? "Switch to dark mode" : "Switch to light mode"
-              }
-              className="flex h-8 w-8 items-center justify-center rounded-lg transition-all sm:h-9 sm:w-9 md:h-10 md:w-10"
-              style={{
-                backgroundColor: isDark ? "#1e293b" : "#f9fafb",
-                border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
-              }}
-            >
-              {theme === "light" ? (
-                <Moon className="h-4 w-4 text-slate-500 sm:h-5 sm:w-5" />
-              ) : (
-                <Sun className="h-4 w-4 text-amber-400 sm:h-5 sm:w-5" />
-              )}
-            </button>
-
-            <div className="flex items-center gap-0.5 sm:gap-1">
-              <ComponentGuard allowedRoles={[roles.ADMIN, roles.SUPER_ADMIN]}>
-                <ImportExportNotifications userData={userData} roles={roles} />
-              </ComponentGuard>
-              <NotificationBell
-                important={true}
-                userData={userData}
-                roles={roles}
-              />
-              <NotificationBell
-                important={false}
-                userData={userData}
-                roles={roles}
-              />
+          <div className="flex flex-1 items-center justify-end gap-1 sm:gap-2">
+            <div className="relative" ref={dropdownRef}>
               <button
                 type="button"
-                className="group ml-1 flex items-center gap-2 rounded-xl p-1 transition-all duration-300 hover:shadow-md sm:ml-2 sm:gap-3 sm:pr-3"
+                className="group flex items-center gap-2 rounded-xl p-1 transition-all duration-300 hover:shadow-md sm:gap-3 sm:pr-3"
                 style={{
                   backgroundColor: isDark ? "#1e293b" : "#f9fafb",
                   border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
                 }}
-                onClick={handleProfileClick}
+                onClick={() => setIsDropdownOpen(!isDropdownOpen)}
               >
                 <div className="hidden flex-col items-end leading-tight sm:flex">
                   <p className="max-w-[120px] truncate text-[13px] font-bold text-slate-900 dark:text-slate-100 lg:max-w-[160px]">
@@ -384,8 +403,124 @@ const Header = ({ toggleButtonRef, onMenuButtonClick }) => {
                     </div>
                   </div>
                   <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-500 shadow-sm dark:border-slate-800" />
+                  {totalUnseen > 0 && (
+                    <span className="absolute -right-1.5 -top-1.5 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white ring-2 ring-white dark:ring-slate-900">
+                      {totalUnseen}
+                    </span>
+                  )}
                 </div>
+                <ChevronDown className={`h-4 w-4 text-slate-500 dark:text-slate-400 transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
+
+              <AnimatePresence>
+                {isDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, scale: 0.93, y: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.93, y: -10 }}
+                    transition={{ type: "spring", stiffness: 350, damping: 25 }}
+                    className="absolute right-0 mt-2.5 w-72 rounded-2xl border p-4 shadow-xl backdrop-blur-md z-[100] flex flex-col gap-3.5"
+                    style={{
+                      backgroundColor: isDark ? "rgba(30, 41, 59, 0.98)" : "rgba(255, 255, 255, 0.98)",
+                      borderColor: isDark ? "#334155" : "#e2e8f0",
+                      boxShadow: isDark
+                        ? "0 10px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.5)"
+                        : "0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    {/* User Header Section */}
+                    <div className="flex items-center gap-3 border-b border-slate-100 dark:border-slate-800 pb-3">
+                      <div className="h-10 w-10 overflow-hidden rounded-xl ring-2 ring-indigo-500/20 bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center relative">
+                        {userData?.profileImageUrl ? (
+                          <img
+                            src={userData.profileImageUrl}
+                            alt="User Profile"
+                            className="h-full w-full object-cover"
+                          />
+                        ) : (
+                          <div className="flex h-full w-full items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                            {(() => {
+                              const name = userData?.userName || "";
+                              if (!name) return "?";
+                              const p = name.trim().split(/\s+/);
+                              if (p.length >= 2) return (p[0][0] + p[1][0]).toUpperCase();
+                              return name.slice(0, 2).toUpperCase();
+                            })()}
+                          </div>
+                        )}
+                        <div className="absolute -bottom-0.5 -right-0.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-green-500 shadow-sm dark:border-slate-900" />
+                      </div>
+                      <div className="flex flex-col leading-tight min-w-0">
+                        <p className="truncate text-sm font-bold text-slate-900 dark:text-slate-100">
+                          {userData?.userName}
+                        </p>
+                        <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-500 dark:text-indigo-400">
+                          {getRoleNameByID(userData?.role)}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Quick Action Buttons Row */}
+                    <div className="flex items-center justify-around gap-2 bg-slate-50 dark:bg-slate-800/40 p-2.5 rounded-xl border border-slate-100/50 dark:border-slate-800/50">
+                      {/* Theme Toggle Button */}
+                      <button
+                        type="button"
+                        onClick={toggleTheme}
+                        title={theme === "light" ? "Switch to dark mode" : "Switch to light mode"}
+                        className="flex h-8 w-8 items-center justify-center rounded-lg transition-all sm:h-9 sm:w-9 md:h-10 md:w-10"
+                        style={{
+                          backgroundColor: isDark ? "#1e293b" : "#f9fafb",
+                          border: isDark ? "1px solid #334155" : "1px solid #e5e7eb",
+                        }}
+                      >
+                        {theme === "light" ? (
+                          <Moon className="h-4 w-4 text-slate-500 sm:h-5 sm:w-5" />
+                        ) : (
+                          <Sun className="h-4 w-4 text-amber-400 sm:h-5 sm:w-5" />
+                        )}
+                      </button>
+
+                      {/* Import/Export Notification Bell */}
+                      <ComponentGuard allowedRoles={[roles.ADMIN, roles.SUPER_ADMIN]}>
+                        <ImportExportNotifications userData={userData} roles={roles} />
+                      </ComponentGuard>
+
+                      {/* Important Notification Bell */}
+                      <NotificationBell important={true} userData={userData} roles={roles} />
+
+                      {/* Regular Notification Bell */}
+                      <NotificationBell important={false} userData={userData} roles={roles} />
+                    </div>
+
+                    {/* Navigation Options List */}
+                    <div className="flex flex-col gap-1">
+                      {/* Profile Button */}
+                      <button
+                        onClick={() => {
+                          navigate("/profile");
+                          setIsDropdownOpen(false);
+                        }}
+                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 hover:bg-indigo-50 dark:hover:bg-indigo-950/30 text-slate-700 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                      >
+                        <User className="h-4 w-4" />
+                        <span>My Profile</span>
+                      </button>
+
+                      {/* Sign Out Button */}
+                      <button
+                        onClick={() => {
+                          handleLogout();
+                          setIsDropdownOpen(false);
+                        }}
+                        className="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-950/30 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300"
+                      >
+                        <LogOut className="h-4 w-4 text-red-500" />
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </div>
         </div>

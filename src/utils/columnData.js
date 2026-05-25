@@ -8,9 +8,9 @@ export const messageCountsColumns = [
 ];
 
 export const uniqueEmailCountsColumns = [
-  { header: "Admin Name", key: "adminName", width: 25, type: "" },
-  { header: "Admin Email", key: "adminEmail", width: 30, type: "" },
-  { header: "Unique Emails", key: "uniqueEmailCount", width: 20, type: "" },
+  { header: "Admin Name", key: "adminName", width: 30, type: "", capitalize: true },
+  { header: "Admin Email", key: "adminEmail", width: 40, type: "" },
+  { header: "Unique Email Count", key: "uniqueEmailCount", width: 30, type: "" },
 ];
 
 export const clientTableColumns = [

@@ -72,6 +72,8 @@ import {
   WhatsAppWrapper,
   ZoomLiveWrapper,
   AffiliateDashboard,
+  ManageReferrals,
+  UniqueEmailCounts,
 } from "./pages";
 
 import RouteGuard from "./components/AccessControl/RouteGuard";
@@ -451,6 +453,15 @@ const App = () => {
           element: (
             <RouteGuard roleNames={["SUPER_ADMIN"]}>
               <Clients />
+            </RouteGuard>
+          ),
+        },
+
+        {
+          path: "/manage-referrals",
+          element: (
+            <RouteGuard roleNames={["SUPER_ADMIN"]}>
+              <ManageReferrals />
             </RouteGuard>
           ),
         },
