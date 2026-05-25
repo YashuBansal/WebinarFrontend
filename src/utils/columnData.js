@@ -7,6 +7,12 @@ export const messageCountsColumns = [
   { header: "Received", key: "inbound", width: 15, type: "" },
 ];
 
+export const uniqueEmailCountsColumns = [
+  { header: "Admin Name", key: "adminName", width: 30, type: "", capitalize: true },
+  { header: "Admin Email", key: "adminEmail", width: 40, type: "" },
+  { header: "Unique Email Count", key: "uniqueEmailCount", width: 30, type: "" },
+];
+
 export const clientTableColumns = [
   { header: "Email", key: "email", width: 50, type: "" },
   {

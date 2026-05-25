@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
@@ -81,15 +82,10 @@ const metricPalette = (color) => {
   }
 };
 
-function SuperMetricTile({ label, value, color, staggerIndex = 0 }) {
+function SuperMetricTile({ label, value, color, staggerIndex = 0, path }) {
   const p = metricPalette(color);
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: staggerIndex * 0.03 }}
-      className={`rounded-2xl border p-4 transition-shadow hover:shadow-md ${p.border} ${p.bg}`}
-    >
+  const content = (
+    <>
       <div
         className={`mb-1 text-xs font-semibold uppercase tracking-wide ${p.label}`}
         style={{ fontFamily: "Inter, sans-serif" }}
@@ -102,6 +98,34 @@ function SuperMetricTile({ label, value, color, staggerIndex = 0 }) {
       >
         {value}
       </div>
+    </>
+  );
+
+  const className = `rounded-2xl border p-4 transition-all hover:shadow-md ${p.border} ${p.bg} ${path ? 'cursor-pointer hover:scale-[1.02]' : ''}`;
+
+  if (path) {
+    return (
+      <Link to={path}>
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: staggerIndex * 0.03 }}
+          className={className}
+        >
+          {content}
+        </motion.div>
+      </Link>
+    );
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: staggerIndex * 0.03 }}
+      className={className}
+    >
+      {content}
     </motion.div>
   );
 }
@@ -210,6 +234,7 @@ const SuperAdminDashboard = () => {
           ? "…"
           : (uniqueEmailMetrics?.uniqueEmailCount ?? 0),
         color: "primary",
+        path: "/unique-emails?page=1",
       },
     ],
     [dashBoardCardsData, isUniqueEmailPending, uniqueEmailMetrics],

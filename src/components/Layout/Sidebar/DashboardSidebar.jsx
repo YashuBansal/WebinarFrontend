@@ -19,6 +19,7 @@ import {
   Target,
   Megaphone,
   Award,
+  MailCheck,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import useRoles from "../../../hooks/useRoles";
@@ -82,6 +83,11 @@ const DashboardSidebar = ({
           path: "/message-counts",
           label: "Message Counts",
           Icon: MessagesSquare,
+        },
+        {
+          path: "/unique-emails?page=1",
+          label: "Unique Email Counts",
+          Icon: MailCheck,
         },
         {
           path: "/manage-referrals",

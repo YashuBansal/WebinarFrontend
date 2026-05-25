@@ -72,6 +72,7 @@ import {
   ZoomLiveWrapper,
   AffiliateDashboard,
   ManageReferrals,
+  UniqueEmailCounts,
 } from "./pages";
 
 import RouteGuard from "./components/AccessControl/RouteGuard";
@@ -310,6 +311,15 @@ const App = () => {
             </RouteGuard>
           ),
         },
+        {
+          path: "/unique-emails",
+          element: (
+            <RouteGuard roleNames={["SUPER_ADMIN"]}>
+              <UniqueEmailCounts />
+            </RouteGuard>
+          ),
+        },
+
 
         {
           path: "/webinarDetails/:id",
