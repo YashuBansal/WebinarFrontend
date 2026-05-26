@@ -123,17 +123,27 @@ function mountCharlaWidget() {
   widgetCode.src = "https://app.charla.com/widget/widget.js";
   widgetCode.onload = () => {
     const applyEverywhere = () => {
-      lockTopRight(widgetElement);
-      applyInRoot(document);
-      applyInShadowRoots();
+      if (typeof lockTopRight === "function") {
+        lockTopRight(widgetElement);
+      }
+      if (typeof applyInRoot === "function") {
+        applyInRoot(document);
+      }
+      if (typeof applyInShadowRoots === "function") {
+        applyInShadowRoots();
+      }
     };
 
     const observer = new MutationObserver((mutations) => {
       mutations.forEach((mutation) => {
         mutation.addedNodes.forEach((added) => {
           if (!(added instanceof Element)) return;
-          forcePositionForNode(added);
-          applyInRoot(added);
+          if (typeof forcePositionForNode === "function") {
+            forcePositionForNode(added);
+          }
+          if (typeof applyInRoot === "function") {
+            applyInRoot(added);
+          }
         });
       });
       applyEverywhere();

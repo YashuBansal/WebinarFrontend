@@ -23,6 +23,7 @@ import {
   PanelRight,
   FileImage,
   UserCircle2,
+  Cloud,
 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { clearOTPGenerated } from "../../features/slices/auth";
@@ -138,6 +139,14 @@ const ViewSettings = () => {
       allowedRoles: [roles.SUPER_ADMIN, roles.ADMIN],
       conditions: [isCustomStatusEnabled || isSuper],
       path: "/settings/custom-status",
+    });
+    add({
+      id: "integrations",
+      label: "Integrations",
+      icon: Cloud,
+      description: "Manage ConvertKit, AWeber, ActiveCampaign, Pabbly Emails, and Interest Pool",
+      allowedRoles: [roles.SUPER_ADMIN, roles.ADMIN],
+      path: "/settings/integrations",
     });
     add({
       id: "leads",

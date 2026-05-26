@@ -18,6 +18,9 @@ const ViewAttendees = lazy(() => import("./Attendees/ViewAttendees"));
 const CreateEmployee = lazy(() => import("./Employees/CreateEmployee"));
 const ViewSettings = lazy(() => import("./Settings/ViewSettings"));
 const ViewMaskedTables = lazy(() => import("./Settings/ViewMaskedTables"));
+const ViewIntegrations = lazy(() =>
+  import("./Settings/Integrations/ViewIntegrations")
+);
 const ViewPlans = lazy(() => import("./Settings/Plans/ViewPlans"));
 const AddPlan = lazy(() => import("./Settings/Plans/AddPlan"));
 const ViewSidebarLinks = lazy(() =>
@@ -111,6 +114,7 @@ export {
   CreateEmployee,
   ViewSettings,
   ViewMaskedTables,
+  ViewIntegrations,
   ViewPlans,
   AddPlan,
   ViewSidebarLinks,

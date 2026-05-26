@@ -23,6 +23,7 @@ import {
   CreateEmployee,
   ViewSettings,
   ViewMaskedTables,
+  ViewIntegrations,
   ViewPlans,
   AddPlan,
   ViewSidebarLinks,
@@ -559,6 +560,14 @@ const App = () => {
               roleNames={["SUPER_ADMIN", "ADMIN"]}
             >
               <CustomOptions />
+            </RouteGuard>
+          ),
+        },
+        {
+          path: "/settings/integrations",
+          element: (
+            <RouteGuard roleNames={["SUPER_ADMIN", "ADMIN"]}>
+              <ViewIntegrations />
             </RouteGuard>
           ),
         },
