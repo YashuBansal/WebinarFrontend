@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector as useReduxSelector } from "react-redux";
 import {
   addPricePlans,
   getPricePlan,
@@ -8,32 +8,12 @@ import {
 } from "../../../features/actions/pricePlan";
 import { useNavigate, useParams } from "react-router-dom";
 import AppLoader from "../../../components/AppLoader";
-import {
-  Button,
-  Checkbox,
-  Typography,
-  Box,
-  Collapse,
-  IconButton,
-  TableContainer,
-  Table,
-  TableHead,
-  TableRow,
-  TableCell,
-  Paper,
-  TableBody,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  TextField,
-} from "@mui/material";
 import InfoIcon from '@mui/icons-material/Info';
+import Collapse from "@mui/material/Collapse";
+import { ChevronDown, ChevronUp, Sparkles, ShieldCheck, Check, X, Shield, PlusCircle, PenTool } from "lucide-react";
 
-import FormInput from "../../../components/FormInput";
 import HubSubpageShell from "../../../components/Layout/HubSubpageShell";
 import { filterTruthyValues } from "../../../utils/extra";
-import { ExpandLess, ExpandMore } from "@mui/icons-material";
 import { getCustomOptions } from "../../../features/actions/globalData";
 import {
   attendeeTableColumns,
@@ -43,24 +23,64 @@ import { getAllClientsForDropdown } from "../../../features/actions/client";
 import { toast } from "sonner";
 import DiscountSection from "./DiscountSection";
 import { clearSinglePlanData } from "../../../features/slices/pricePlan";
-const tableCellStyles = {
-  paddingTop: "6px",
-  paddingBottom: "6px",
-};
-function AttendeeTable({ control, setValue, watch }) {
-  const { customOptions } = useSelector((state) => state.globalData);
+import useRoles from "../../../hooks/useRoles";
+
+// Premium Input field component styled in signature glassmorphic look
+function CustomFormInput({ name, label, control, type = "text", required = false, errorMessage = "This field is required", placeholder = "" }) {
   return (
-    <Box mt={6}>
-      <TableContainer component={Paper} elevation={3}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Field Name</TableCell>
-              <TableCell align="center">Filterable</TableCell>
-              <TableCell align="center">Downloadable</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+    <Controller
+      name={name}
+      control={control}
+      rules={{ required: required ? errorMessage : false }}
+      render={({ field, fieldState }) => (
+        <div className="flex flex-col space-y-1.5 w-full">
+          <label className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+            {label} {required && <span className="text-red-500 font-bold">*</span>}
+          </label>
+          <div className="relative">
+            <input
+              {...field}
+              type={type}
+              value={type === "number" ? field.value ?? "" : field.value}
+              onChange={(e) => {
+                const parsed = parseFloat(e.target.value);
+                return field.onChange(
+                  type === "number" ? (Number.isNaN(parsed) ? "" : parsed) : e.target.value
+                );
+              }}
+              placeholder={placeholder}
+              className={`w-full px-4 py-3 rounded-xl border bg-white/40 dark:bg-slate-900/40 text-sm text-slate-800 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 transition-all duration-200 outline-none
+                ${
+                  fieldState?.error
+                    ? "border-red-400 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
+                    : "border-slate-200 dark:border-slate-800 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 dark:focus:border-blue-500 dark:focus:ring-blue-500/10"
+                }`}
+            />
+          </div>
+          {fieldState?.error && (
+            <span className="text-xs font-semibold text-red-500 mt-1">{fieldState?.error?.message}</span>
+          )}
+        </div>
+      )}
+    />
+  );
+}
+
+function AttendeeTable({ control, setValue, watch }) {
+  const { customOptions } = useReduxSelector((state) => state.globalData);
+  
+  return (
+    <div className="mt-4 overflow-hidden rounded-2xl border border-slate-100 dark:border-slate-800 bg-white/45 dark:bg-slate-950/20 shadow-inner">
+      <div className="overflow-x-auto">
+        <table className="w-full border-collapse text-left text-sm">
+          <thead>
+            <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+              <th className="py-3 px-5 font-black uppercase tracking-wider text-[11px] text-slate-400">Field Name</th>
+              <th className="py-3 px-5 text-center font-black uppercase tracking-wider text-[11px] text-slate-400">Filterable</th>
+              <th className="py-3 px-5 text-center font-black uppercase tracking-wider text-[11px] text-slate-400">Downloadable</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
             {[
               { header: "Lead Type", key: "leadType", width: 20, type: "" },
               ...attendeeTableColumns,
@@ -71,19 +91,18 @@ function AttendeeTable({ control, setValue, watch }) {
                   ) && column.header !== "Email"
               ),
             ].map(({ key, header }) => (
-              <TableRow key={key}>
-                <TableCell sx={tableCellStyles}>{header}</TableCell>
-                <TableCell align="center" sx={tableCellStyles}>
+              <tr key={key} className="hover:bg-slate-50/30 dark:hover:bg-slate-900/10 transition-colors">
+                <td className="py-3 px-5 font-bold text-slate-700 dark:text-slate-200">{header}</td>
+                <td className="py-3 px-5 text-center">
                   <Controller
                     name={`attendeeTableConfig.${key}.filterable`}
                     control={control}
                     render={({ field: { onChange, value } }) => (
-                      <Checkbox
+                      <input
+                        type="checkbox"
                         onChange={(e) => {
                           const isChecked = e.target.checked;
-                          // Update "Downloadable" checkbox
                           onChange(isChecked);
-                          // Automatically check "Filterable" if "Downloadable" is checked
                           if (!isChecked) {
                             setValue(
                               `attendeeTableConfig.${key}.downloadable`,
@@ -98,28 +117,28 @@ function AttendeeTable({ control, setValue, watch }) {
                                 )
                               );
                               setValue(
-                                `attendeeTableConfig.customOptions.filterable`,
-                                false
+                                  `attendeeTableConfig.customOptions.filterable`,
+                                  false
                               );
                             }
                           }
                         }}
                         checked={value || false}
+                        className="h-4 w-4 rounded border-slate-300 dark:border-slate-750 text-blue-600 focus:ring-blue-500/25"
                       />
                     )}
                   />
-                </TableCell>
-                <TableCell align="center" sx={tableCellStyles}>
+                </td>
+                <td className="py-3 px-5 text-center">
                   <Controller
                     name={`attendeeTableConfig.${key}.downloadable`}
                     control={control}
                     render={({ field: { onChange, value } }) => (
-                      <Checkbox
+                      <input
+                        type="checkbox"
                         onChange={(e) => {
                           const isChecked = e.target.checked;
-                          // Update "Downloadable" checkbox
                           onChange(isChecked);
-                          // Automatically check "Filterable" if "Downloadable" is checked
                           if (isChecked) {
                             setValue(
                               `attendeeTableConfig.${key}.filterable`,
@@ -128,80 +147,72 @@ function AttendeeTable({ control, setValue, watch }) {
                           }
                         }}
                         checked={value || false}
+                        className="h-4 w-4 rounded border-slate-300 dark:border-slate-750 text-blue-600 focus:ring-blue-500/25"
                       />
                     )}
                   />
-                </TableCell>
-              </TableRow>
+                </td>
+              </tr>
             ))}
-            <TableRow>
-              <TableCell></TableCell>
-              <TableCell
-                sx={{
-                  paddingTop: "12px",
-                  paddingBottom: "12px",
-                  fontWeight: "bold",
-                }}
-              >
-                Default Options
-              </TableCell>
-
-              <TableCell sx={tableCellStyles}></TableCell>
-            </TableRow>
+            
+            {/* Header divider */}
+            <tr className="bg-slate-50/40 dark:bg-slate-900/20">
+              <td className="py-2.5 px-5 font-black text-slate-800 dark:text-slate-200 text-xs uppercase tracking-wider" colSpan={3}>
+                Default Status Options
+              </td>
+            </tr>
 
             {(Array.isArray(customOptions) ? customOptions : []).map((option) => (
-              <TableRow key={option?._id}>
-                <TableCell />
-                <TableCell>{option?.label}</TableCell>
-                <TableCell align="center" sx={tableCellStyles}>
+              <tr key={option?._id} className="hover:bg-slate-50/30 dark:hover:bg-slate-900/10 transition-colors">
+                <td className="py-3 px-5 pl-8 text-slate-600 dark:text-slate-350 font-semibold">{option?.label}</td>
+                <td className="py-3 px-5 text-center">
                   <Controller
                     name={`attendeeTableConfig.defaultOptions.${option?.label}`}
                     control={control}
                     render={({ field: { onChange, value } }) => (
-                      <Checkbox
-                        onChange={(e) => {
-                          const isChecked = e.target.checked;
-                          // Update "Downloadable" checkbox
-                          onChange(isChecked);
-                        }}
+                      <input
+                        type="checkbox"
+                        onChange={(e) => onChange(e.target.checked)}
                         checked={value || false}
                         disabled={
                           !watch(`attendeeTableConfig.status.filterable`)
                         }
+                        className="h-4 w-4 rounded border-slate-300 dark:border-slate-750 text-blue-600 focus:ring-blue-500/25 disabled:opacity-40"
                       />
                     )}
                   />
-                </TableCell>
-              </TableRow>
+                </td>
+                <td className="py-3 px-5"></td>
+              </tr>
             ))}
 
-            <TableRow>
-              <TableCell sx={tableCellStyles}>Custom Options</TableCell>
-              <TableCell align="center" sx={tableCellStyles}>
+            {/* Custom Options Allowed row */}
+            <tr className="bg-slate-50/40 dark:bg-slate-900/20">
+              <td className="py-3 px-5 font-black text-slate-850 dark:text-slate-200 text-xs uppercase tracking-wider">Custom Status Options</td>
+              <td className="py-3 px-5 text-center">
                 <Controller
                   name={`attendeeTableConfig.customOptions.filterable`}
                   control={control}
                   render={({ field: { onChange, value } }) => (
-                    <Checkbox
-                      onChange={(e) => {
-                        const isChecked = e.target.checked;
-                        // Update "Downloadable" checkbox
-                        onChange(isChecked);
-                      }}
+                    <input
+                      type="checkbox"
+                      onChange={(e) => onChange(e.target.checked)}
                       checked={value || false}
                       disabled={
                         !watch(`attendeeTableConfig.status.filterable`) ||
                         !watch(`attendeeTableConfig.isCustomOptionsAllowed`)
                       }
+                      className="h-4 w-4 rounded border-slate-300 dark:border-slate-750 text-blue-600 focus:ring-blue-500/25 disabled:opacity-40"
                     />
                   )}
                 />
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </Box>
+              </td>
+              <td className="py-3 px-5"></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }
 
@@ -258,10 +269,10 @@ export default function AddPlan() {
     reset,
     setValue,
   } = useForm();
-  const { isLoading, isSuccess, singlePlanData } = useSelector(
+  const { isLoading, isSuccess, singlePlanData } = useReduxSelector(
     (state) => state.pricePlans
   );
-  const { clientsDropdownData } = useSelector((state) => state.client);
+  const { clientsDropdownData } = useReduxSelector((state) => state.client);
   const [isTableOpen, setIsTableOpen] = useState(false);
   const [planType, setPlanType] = useState("");
   const [assignedUsers, setAssignedUsers] = useState([]);
@@ -269,6 +280,7 @@ export default function AddPlan() {
 
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const roles = useRoles();
 
   const onSubmit = async (data) => {
     const payload = filterTruthyValues(data);
@@ -283,7 +295,7 @@ export default function AddPlan() {
     payload["productRevenueMetrics"] = data["productRevenueMetrics"];
     payload["assignmentMetrics"] = data["assignmentMetrics"];
 
-    if (planType === "custom") {
+    if (planType === "custom" && assignedUsers.length > 0) {
       payload["planType"] = "custom";
       payload["assignedUsers"] = assignedUsers;
     } else {
@@ -297,7 +309,7 @@ export default function AddPlan() {
       payload["_id"] = id;
     }
 
-    if(planType === "normal" && payload["renewalNotAllowed"]) {
+    if (planType === "normal" && payload["renewalNotAllowed"]) {
       payload["renewalNotAllowed"] = false;
     }
 
@@ -348,7 +360,6 @@ export default function AddPlan() {
       setAssignedUsers(singlePlanData.assignedUsers || []);
 
       if (singlePlanData.planDurationConfig) {
-        // Ensure all required fields are present for each duration
         const updatedConfig = { ...regularDurations };
         Object.keys(singlePlanData.planDurationConfig).forEach(key => {
           if (updatedConfig[key]) {
@@ -360,7 +371,6 @@ export default function AddPlan() {
         });
         setPlanDurationConfig(updatedConfig);
         
-        // Set form values for each duration field
         Object.keys(updatedConfig).forEach(duration => {
           setValue(`planDurationConfig.${duration}.price`, updatedConfig[duration].price);
           setValue(`planDurationConfig.${duration}.isEnabled`, updatedConfig[duration].isEnabled);
@@ -392,405 +402,472 @@ export default function AddPlan() {
 
   return (
     <HubSubpageShell>
-      <div className="flex w-full justify-center px-2 py-2">
-        <Box className="max-w-4xl w-full rounded-lg border border-slate-200 bg-white shadow-md dark:border-slate-700 dark:bg-slate-900/80">
-        <Box className="px-6 py-4 bg-gray-50 border-b border-gray-200">
-          <Typography variant="h6" className="font-semibold text-gray-800">
-            {isEditMode ? "Edit Price Plan" : "Add Price Plan"}
-          </Typography>
-        </Box>
-        <form onSubmit={handleSubmit(onSubmit)} className="p-2 md:p-6 w-full">
-          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-            <FormInput
-              name="name"
-              label="Display Plan Name"
-              control={control}
-              required={true}
-              errorMessage="Plan name is required"
-            />
-            <FormInput
-              name="internalName"
-              label="Unique Plan Name"
-              control={control}
-              required={true}
-              errorMessage="Plan name is required"
-            />
-            <FormInput
-              name="employeeCount"
-              label="Employees Count"
-              type="number"
-              control={control}
-              required={true}
-              errorMessage="Employee count is required"
-            />
-            <FormInput
-              name="contactLimit"
-              label="Contact Limit"
-              type="number"
-              control={control}
-              required={true}
-              errorMessage="Contact limit is required"
-            />
-
-            <FormInput
-              name="toggleLimit"
-              label="Toggle Limit"
-              type="number"
-              control={control}
-              required={true}
-              errorMessage="Toggle limit is required"
-            />
-            <FormInput
-              name="whatsappProjectLimit"
-              label="WhatsApp Project Limit"
-              type="number"
-              control={control}
-              required={true}
-              errorMessage="WhatsApp project limit is required"
-            />
-            <FormInput
-              name="zoomProjectLimit"
-              label="Zoom Project Limit"
-              type="number"
-              control={control}
-              required={true}
-              errorMessage="Zoom project limit is required"
-            />
-            <FormInput
-              name="webinarLimit"
-              label="Webinar Limit"
-              type="number"
-              control={control}
-              required={true}
-              errorMessage="Webinar limit is required"
-            />
-            <FormControl variant="outlined">
-              <InputLabel id="attendee-label">Plan Type</InputLabel>
-              <Select
-                labelId="attendee-label"
-                value={planType}
-                onChange={(e) => setPlanType(e.target.value)}
-                label="Plan Type"
-              >
-                <MenuItem value="normal">Normal</MenuItem>
-                <MenuItem value="custom">Custom</MenuItem>
-              </Select>
-            </FormControl>
+      <div className="flex w-full justify-center px-2 py-4">
+        <div className="max-w-4xl w-full rounded-3xl border border-slate-200 bg-white/70 shadow-sm backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60 overflow-hidden">
+          
+          {/* Visual Header */}
+          <div className="px-6 py-5 bg-gradient-to-r from-slate-50/50 to-white/10 border-b border-slate-150 dark:border-slate-800 dark:bg-slate-900/40 flex items-center gap-4">
+            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shadow-sm">
+              {isEditMode ? <PenTool className="h-6 w-6" /> : <PlusCircle className="h-6 w-6" />}
+            </div>
+            <div>
+              <h2 className="text-2xl font-black text-slate-900 dark:text-slate-50 tracking-tight flex items-center gap-2">
+                {isEditMode ? "Edit Price Plan" : "Add Price Plan"}
+                <Sparkles className="h-5 w-5 text-amber-450 animate-pulse" />
+              </h2>
+              <p className="text-sm font-semibold text-slate-450 dark:text-slate-400 mt-0.5">
+                Define the tiers, features, limits, pricing structures, and Razorpay integrations.
+              </p>
+            </div>
           </div>
 
-          {planType === "custom" && (
-            <div className="mt-5">
-              <FormControl variant="outlined" className="w-full">
-                <InputLabel id="attendee-label">Users</InputLabel>
-                <Select
-                  labelId="attendee-label"
-                  fullWidth
-                  multiple
-                  value={assignedUsers}
-                  onChange={(e) => setAssignedUsers(e.target.value)}
-                  label="Select Users"
-                  MenuProps={{
-                    PaperProps: {
-                      style: {
-                        maxHeight: 350,
-                      },
-                    },
-                  }}
-                  inputProps={{
-                    'aria-label': 'Search users',
-                  }}
-                >
-                  {(Array.isArray(clientsDropdownData) ? clientsDropdownData : []).map((client, index) => (
-                    <MenuItem key={index} value={client.value}>
-                      {client.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+          <form onSubmit={handleSubmit(onSubmit)} className="p-6 md:p-8 w-full space-y-8">
+            
+            {/* Form Section 1: Core Identification */}
+            <div className="space-y-4">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
+                Plan Identification
+              </h3>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                <CustomFormInput
+                  name="name"
+                  label="Display Plan Name"
+                  control={control}
+                  required={true}
+                  errorMessage="Plan name is required"
+                  placeholder="e.g. Starter Plan"
+                />
+                <CustomFormInput
+                  name="internalName"
+                  label="Unique Plan Name"
+                  control={control}
+                  required={true}
+                  errorMessage="Plan name is required"
+                  placeholder="e.g. starter_tier_v1"
+                />
+              </div>
             </div>
-          )}
 
-          <div className="grid grid-cols-1 mt-5 lg:grid-cols-2 gap-5">
-          <FormInput
-              name="customRibbon"
-              label="Custom Ribbon"
-              control={control}
-              placeholder="Enter Custom Ribbon Label"
-            />
+            {/* Form Section 2: Usage Limits & Caps */}
+            <div className="space-y-4">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
+                Tiers & Resource Limits
+              </h3>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                <CustomFormInput
+                  name="employeeCount"
+                  label="Employees Count"
+                  type="number"
+                  control={control}
+                  required={true}
+                  errorMessage="Employee count is required"
+                  placeholder="10"
+                />
+                <CustomFormInput
+                  name="contactLimit"
+                  label="Contact Limit"
+                  type="number"
+                  control={control}
+                  required={true}
+                  errorMessage="Contact limit is required"
+                  placeholder="5000"
+                />
+                <CustomFormInput
+                  name="toggleLimit"
+                  label="Toggle Limit"
+                  type="number"
+                  control={control}
+                  required={true}
+                  errorMessage="Toggle limit is required"
+                  placeholder="100"
+                />
+                <CustomFormInput
+                  name="whatsappProjectLimit"
+                  label="WhatsApp Project Limit"
+                  type="number"
+                  control={control}
+                  required={true}
+                  errorMessage="WhatsApp project limit is required"
+                  placeholder="3"
+                />
+                <CustomFormInput
+                  name="zoomProjectLimit"
+                  label="Zoom Project Limit"
+                  type="number"
+                  control={control}
+                  required={true}
+                  errorMessage="Zoom project limit is required"
+                  placeholder="3"
+                />
+                <CustomFormInput
+                  name="webinarLimit"
+                  label="Webinar Limit"
+                  type="number"
+                  control={control}
+                  required={true}
+                  errorMessage="Webinar limit is required"
+                  placeholder="10"
+                />
+              </div>
+            </div>
 
-              {/* Color Picker */}
-              <Controller
-                name="customRibbonColor"
-                control={control}
-                render={({ field }) => (
-                  <div className="flex border px-4 py-[10px] rounded border-neutral-400 gap-5 items-center">
-                    <label
-                      htmlFor="color-picker"
-                      className="block text-gray-600"
-                    >
-                        Custom Ribbon Color
+            {/* Form Section 3: Configuration & Customizations */}
+            <div className="space-y-4">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
+                Assigned Scope & Ribbon
+              </h3>
+              <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                
+                {/* Plan Type Selector */}
+                <div className="flex flex-col space-y-1.5 w-full">
+                  <label className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                    Plan Type
+                  </label>
+                  <select
+                    value={planType}
+                    onChange={(e) => setPlanType(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/45 dark:bg-slate-900/40 text-sm text-slate-800 dark:text-slate-100 transition-all outline-none dark:border-slate-800 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                  >
+                    <option value="normal">Normal Plan (Publicly viewable)</option>
+                    <option value="custom">Custom Plan (Restricted access)</option>
+                  </select>
+                </div>
+
+                {/* Scope Users Multi-Select */}
+                {planType === "custom" ? (
+                  <div className="flex flex-col space-y-1.5 w-full">
+                    <label className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Scope Users
                     </label>
-                    <input
-                      type="color"
-                      id="color-picker"
-                      {...field}
-                      className="w-20 h-8 cursor-pointer border rounded-full"
-                    />
+                    <select
+                      multiple
+                      value={assignedUsers}
+                      onChange={(e) => {
+                        const selected = Array.from(e.target.selectedOptions, (option) => option.value);
+                        setAssignedUsers(selected);
+                      }}
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white/45 dark:bg-slate-900/40 text-sm text-slate-800 dark:text-slate-100 transition-all outline-none dark:border-slate-800 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 min-h-[120px]"
+                    >
+                      {(Array.isArray(clientsDropdownData) ? clientsDropdownData : []).map((client, index) => (
+                        <option key={index} value={client.value}>
+                          {client.label}
+                        </option>
+                      ))}
+                    </select>
+                    <p className="text-[10px] text-slate-450 dark:text-slate-500 font-bold">Hold Ctrl (or Cmd on Mac) to select multiple users.</p>
                   </div>
+                ) : (
+                  <div className="hidden sm:block" />
                 )}
-              />
-          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-4">
-            <div className="flex justify-between mt-4 items-center">
-              <Typography 
-                title="Allow creation and use of custom status options for attendee filtering"
-                className="font-semibold text-gray-800">
-                <span className="flex items-center">
-                  Custom Options
-                  <InfoIcon className="ms-2 text-blue-600 text-sm" />
-                </span>
-              </Typography>
+                <CustomFormInput
+                  name="customRibbon"
+                  label="Custom Ribbon Label"
+                  control={control}
+                  placeholder="e.g. POPULAR, BEST VALUE"
+                />
+
+                {/* Color Picker Container */}
+                <Controller
+                  name="customRibbonColor"
+                  control={control}
+                  render={({ field }) => (
+                    <div className="flex border px-4 py-2.5 rounded-xl border-slate-200/90 bg-white/40 dark:border-slate-800 dark:bg-slate-900/20 gap-5 items-center justify-between">
+                      <label
+                        htmlFor="color-picker"
+                        className="text-xs font-black uppercase tracking-wider text-slate-500 dark:text-slate-400"
+                      >
+                        Custom Ribbon Color
+                      </label>
+                      <input
+                        type="color"
+                        id="color-picker"
+                        {...field}
+                        className="w-16 h-8 cursor-pointer border border-slate-200 dark:border-slate-700 rounded-lg p-0.5"
+                      />
+                    </div>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Form Section 4: Features Checklist Toggles */}
+            <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
+                Included Features & Entitlements Toggles
+              </h3>
               
-              <Controller
-                name={`attendeeTableConfig.isCustomOptionsAllowed`}
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <Checkbox
-                    onChange={(e) => {
-                      const isChecked = e.target.checked;
-                      onChange(isChecked);
-                      if (!isChecked) {
-                        setValue(
-                          `attendeeTableConfig.customOptions.filterable`,
-                          false
-                        );
-                      }
-                    }}
-                    checked={value || false}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="flex justify-between mt-4 items-center">
-              <Typography 
-                title="Enable employee inactivity monitoring with automatic reminder notifications"
-                className="font-semibold text-gray-800">
-                <span className="flex items-center">
-                  Employee Inactivity Tracking
-                  <InfoIcon className="ms-2 text-blue-600 text-sm" />
-                </span>
-              </Typography>
-              <Controller
-                name="employeeInactivity"
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <Checkbox
-                    onChange={(e) => onChange(e.target.checked)}
-                    checked={value || false}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="flex justify-between mt-4 items-center">
-              <Typography 
-                title="Enable setting alarms for important events or deadlines"
-                className="font-semibold text-gray-800">
-                <span className="flex items-center">
-                  Set Alarm
-                  <InfoIcon className="ms-2 text-blue-600 text-sm" />
-                </span>
-              </Typography>
-              <Controller
-                name="setAlarm"
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <Checkbox
-                    onChange={(e) => {
-                      const isChecked = e.target.checked;
-                      onChange(isChecked);
-                      if (!isChecked) {
-                        setValue('whatsappNotificationOnAlarms', false);
-                      }
-                    }}
-                    checked={value || false}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="flex justify-between mt-4 items-center">
-              <Typography 
-                title="Automatically send WhatsApp messages when alarms are triggered"
-                className="font-semibold text-gray-800">
-                <span className="flex items-center">
-                  WhatsApp Notifications
-                  <InfoIcon className="ms-2 text-blue-600 text-sm" />
-                </span>
-              </Typography>
-              <Controller
-                name="whatsappNotificationOnAlarms"
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <Checkbox
-                    onChange={(e) => onChange(e.target.checked)}
-                    checked={value || false}
-                    disabled={!watch('setAlarm')}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="flex justify-between mt-4 items-center">
-              <Typography 
-                title="Provide access to calendar with alarm history and scheduled event management"
-                className="font-semibold text-gray-800">
-                <span className="flex items-center">
-                  Calendar Features
-                  <InfoIcon className="ms-2 text-blue-600 text-sm" />
-                </span>
-              </Typography>
-              <Controller
-                name="calendarFeatures"
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <Checkbox
-                    onChange={(e) => onChange(e.target.checked)}
-                    checked={value || false}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="flex justify-between mt-4 items-center">
-              <Typography 
-                title="Enable user to View Product Revenue Metrics"
-                className="font-semibold text-gray-800">
-                <span className="flex items-center">
-                  Product Revenue Metrics
-                  <InfoIcon className="ms-2 text-blue-600 text-sm" />
-                </span>
-              </Typography>
-              <Controller
-                name="productRevenueMetrics"
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <Checkbox
-                    onChange={(e) => onChange(e.target.checked)}
-                    checked={value || false}
-                  />
-                )}
-              />
-            </div>
-
-            <div className="flex justify-between mt-4 items-center">
-              <Typography 
-                title="Enable user to View Assignment Metrics"
-                className="font-semibold text-gray-800">
-                <span className="flex items-center">
-                  Assignment Metrics
-                  <InfoIcon className="ms-2 text-blue-600 text-sm" />
-                </span>
-              </Typography>
-              <Controller
-                name="assignmentMetrics"
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <Checkbox
-                    onChange={(e) => onChange(e.target.checked)}
-                    checked={value || false}
-                  />
-                )}
-              />
-            </div>
-            {
-              planType === "custom" && (
-                <div className="flex justify-between mt-4 items-center">
-                  <Typography 
-                    title="Disable renewal of this plan"
-                    className="font-semibold text-gray-800">
-                    <span className="flex items-center">
-                      Renewal Not Allowed
-                      <InfoIcon className="ms-2 text-blue-600 text-sm" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {/* Switch Item: Custom Options */}
+                <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/30 p-4 hover:border-slate-200 dark:border-slate-800/80 dark:bg-slate-950/20 transition-all">
+                  <div className="flex flex-col min-w-0 pr-4">
+                    <span className="flex items-center text-sm font-bold text-slate-800 dark:text-slate-200">
+                      Custom Options Allowed
+                      <InfoIcon className="ms-1.5 text-blue-500 text-sm shrink-0" title="Allow creation and use of custom status options for attendee filtering" />
                     </span>
-                  </Typography>
+                    <span className="text-[11px] font-semibold text-slate-400 mt-0.5 truncate">Allow custom attendee status options</span>
+                  </div>
                   <Controller
-                    name="renewalNotAllowed"
+                    name={`attendeeTableConfig.isCustomOptionsAllowed`}
                     control={control}
                     render={({ field: { onChange, value } }) => (
-                      <Checkbox
+                      <input
+                        type="checkbox"
                         onChange={(e) => {
                           const isChecked = e.target.checked;
                           onChange(isChecked);
+                          if (!isChecked) {
+                            setValue(
+                              `attendeeTableConfig.customOptions.filterable`,
+                              false
+                            );
+                          }
                         }}
                         checked={value || false}
+                        className="h-5 w-5 rounded border-slate-350 dark:border-slate-750 text-blue-600 focus:ring-blue-500/25"
                       />
                     )}
                   />
-                </div>)
-            }
-          </div>
+                </div>
 
-          <Box className="mt-6 shadow-md">
-            <Box
-              display="flex"
-              alignItems="center"
-              justifyContent="space-between"
-              className="cursor-pointer"
-              onClick={() => setIsTableOpen(!isTableOpen)}
-            >
-              <Typography variant="h6" className="mb-2 font-semibold">
-                Attendee Filters and Exports
-              </Typography>
-              <IconButton>
-                {isTableOpen ? <ExpandLess /> : <ExpandMore />}
-              </IconButton>
-            </Box>
-            <Collapse in={isTableOpen} timeout="auto" unmountOnExit>
-              <AttendeeTable
-                watch={watch}
-                control={control}
-                setValue={setValue}
-              />
-            </Collapse>
-          </Box>
+                {/* Switch Item: Employee Inactivity */}
+                <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/30 p-4 hover:border-slate-200 dark:border-slate-800/80 dark:bg-slate-950/20 transition-all">
+                  <div className="flex flex-col min-w-0 pr-4">
+                    <span className="flex items-center text-sm font-bold text-slate-800 dark:text-slate-200">
+                      Employee Inactivity Tracking
+                      <InfoIcon className="ms-1.5 text-blue-500 text-sm shrink-0" title="Enable employee inactivity monitoring with automatic reminder notifications" />
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-400 mt-0.5 truncate">Track inactive members and alert</span>
+                  </div>
+                  <Controller
+                    name="employeeInactivity"
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <input
+                        type="checkbox"
+                        onChange={(e) => onChange(e.target.checked)}
+                        checked={value || false}
+                        className="h-5 w-5 rounded border-slate-350 dark:border-slate-750 text-blue-600 focus:ring-blue-500/25"
+                      />
+                    )}
+                  />
+                </div>
 
-          <Box className="mt-6">
-            <Typography variant="h6" className="mb-2 font-semibold">
-              Duration Pricing & Discounts
-            </Typography>
+                {/* Switch Item: Set Alarm */}
+                <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/30 p-4 hover:border-slate-200 dark:border-slate-800/80 dark:bg-slate-950/20 transition-all">
+                  <div className="flex flex-col min-w-0 pr-4">
+                    <span className="flex items-center text-sm font-bold text-slate-800 dark:text-slate-200">
+                      Set Alarm Capability
+                      <InfoIcon className="ms-1.5 text-blue-500 text-sm shrink-0" title="Enable setting alarms for important events or deadlines" />
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-400 mt-0.5 truncate">Allow scheduled alarms & reminder events</span>
+                  </div>
+                  <Controller
+                    name="setAlarm"
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <input
+                        type="checkbox"
+                        onChange={(e) => {
+                          const isChecked = e.target.checked;
+                          onChange(isChecked);
+                          if (!isChecked) {
+                            setValue('whatsappNotificationOnAlarms', false);
+                          }
+                        }}
+                        checked={value || false}
+                        className="h-5 w-5 rounded border-slate-350 dark:border-slate-750 text-blue-600 focus:ring-blue-500/25"
+                      />
+                    )}
+                  />
+                </div>
 
-            <DiscountSection
-              planDurationConfig={planDurationConfig}
-              setPlanDurationConfig={setPlanDurationConfig}
-              regularDurations={regularDurations}
-              watch={watch}
-              control={control}
-            />
-          </Box>
+                {/* Switch Item: WhatsApp Notifications */}
+                <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/30 p-4 hover:border-slate-200 dark:border-slate-800/80 dark:bg-slate-950/20 transition-all">
+                  <div className="flex flex-col min-w-0 pr-4">
+                    <span className="flex items-center text-sm font-bold text-slate-800 dark:text-slate-200">
+                      WhatsApp Notifications
+                      <InfoIcon className="ms-1.5 text-blue-500 text-sm shrink-0" title="Automatically send WhatsApp messages when alarms are triggered" />
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-400 mt-0.5 truncate">Send alarm triggers via WhatsApp API</span>
+                  </div>
+                  <Controller
+                    name="whatsappNotificationOnAlarms"
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <input
+                        type="checkbox"
+                        onChange={(e) => onChange(e.target.checked)}
+                        checked={value || false}
+                        disabled={!watch('setAlarm')}
+                        className="h-5 w-5 rounded border-slate-350 dark:border-slate-750 text-blue-600 focus:ring-blue-500/25 disabled:opacity-40"
+                      />
+                    )}
+                  />
+                </div>
 
-          <Box className="mt-6">
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              disabled={isLoading}
-              className="py-2 text-sm font-medium"
-            >
-              {isLoading ? (
-                <AppLoader size="md" variant="inverse" />
-              ) : isEditMode ? (
-                "Update Plan"
-              ) : (
-                "Add Plan"
-              )}
-            </Button>
-          </Box>
-        </form>
-      </Box>
+                {/* Switch Item: Calendar Features */}
+                <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/30 p-4 hover:border-slate-200 dark:border-slate-800/80 dark:bg-slate-950/20 transition-all">
+                  <div className="flex flex-col min-w-0 pr-4">
+                    <span className="flex items-center text-sm font-bold text-slate-800 dark:text-slate-200">
+                      Calendar Features
+                      <InfoIcon className="ms-1.5 text-blue-500 text-sm shrink-0" title="Provide access to calendar with alarm history and scheduled event management" />
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-400 mt-0.5 truncate">Access deep logs and calendar planner view</span>
+                  </div>
+                  <Controller
+                    name="calendarFeatures"
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <input
+                        type="checkbox"
+                        onChange={(e) => onChange(e.target.checked)}
+                        checked={value || false}
+                        className="h-5 w-5 rounded border-slate-350 dark:border-slate-750 text-blue-600 focus:ring-blue-500/25"
+                      />
+                    )}
+                  />
+                </div>
+
+                {/* Switch Item: Product Revenue Metrics */}
+                <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/30 p-4 hover:border-slate-200 dark:border-slate-800/80 dark:bg-slate-950/20 transition-all">
+                  <div className="flex flex-col min-w-0 pr-4">
+                    <span className="flex items-center text-sm font-bold text-slate-800 dark:text-slate-200">
+                      Product Revenue Metrics
+                      <InfoIcon className="ms-1.5 text-blue-500 text-sm shrink-0" title="Enable user to View Product Revenue Metrics" />
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-400 mt-0.5 truncate">Show financial reports & earnings</span>
+                  </div>
+                  <Controller
+                    name="productRevenueMetrics"
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <input
+                        type="checkbox"
+                        onChange={(e) => onChange(e.target.checked)}
+                        checked={value || false}
+                        className="h-5 w-5 rounded border-slate-350 dark:border-slate-750 text-blue-600 focus:ring-blue-500/25"
+                      />
+                    )}
+                  />
+                </div>
+
+                {/* Switch Item: Assignment Metrics */}
+                <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/30 p-4 hover:border-slate-200 dark:border-slate-800/80 dark:bg-slate-950/20 transition-all">
+                  <div className="flex flex-col min-w-0 pr-4">
+                    <span className="flex items-center text-sm font-bold text-slate-800 dark:text-slate-200">
+                      Assignment Metrics
+                      <InfoIcon className="ms-1.5 text-blue-500 text-sm shrink-0" title="Enable user to View Assignment Metrics" />
+                    </span>
+                    <span className="text-[11px] font-semibold text-slate-400 mt-0.5 truncate">Track team tasks & assignment numbers</span>
+                  </div>
+                  <Controller
+                    name="assignmentMetrics"
+                    control={control}
+                    render={({ field: { onChange, value } }) => (
+                      <input
+                        type="checkbox"
+                        onChange={(e) => onChange(e.target.checked)}
+                        checked={value || false}
+                        className="h-5 w-5 rounded border-slate-350 dark:border-slate-750 text-blue-600 focus:ring-blue-500/25"
+                      />
+                    )}
+                  />
+                </div>
+
+                {/* Switch Item: Renewal Not Allowed */}
+                {planType === "custom" && (
+                  <div className="flex items-center justify-between rounded-2xl border border-slate-100 bg-slate-50/30 p-4 hover:border-slate-200 dark:border-slate-800/80 dark:bg-slate-950/20 transition-all">
+                    <div className="flex flex-col min-w-0 pr-4">
+                      <span className="flex items-center text-sm font-bold text-slate-800 dark:text-slate-200">
+                        Renewal Not Allowed
+                        <InfoIcon className="ms-1.5 text-blue-500 text-sm shrink-0" title="Disable renewal of this plan" />
+                      </span>
+                      <span className="text-[11px] font-semibold text-slate-400 mt-0.5 truncate">Stop billing cycles at term end</span>
+                    </div>
+                    <Controller
+                      name="renewalNotAllowed"
+                      control={control}
+                      render={({ field: { onChange, value } }) => (
+                        <input
+                          type="checkbox"
+                          onChange={(e) => onChange(e.target.checked)}
+                          checked={value || false}
+                          className="h-5 w-5 rounded border-slate-355 dark:border-slate-750 text-blue-600 focus:ring-blue-500/25"
+                        />
+                      )}
+                    />
+                  </div>
+                )}
+
+              </div>
+            </div>
+
+            {/* Form Section 5: Attendee Filters and Exports (Collapsible Table) */}
+            <div className="overflow-hidden rounded-3xl border border-slate-150 bg-white/40 dark:border-slate-800 dark:bg-slate-950/10">
+              <div
+                className="flex items-center justify-between cursor-pointer select-none px-6 py-5 hover:bg-slate-50/40 dark:hover:bg-slate-900/10 transition-colors"
+                onClick={() => setIsTableOpen(!isTableOpen)}
+              >
+                <div>
+                  <h3 className="text-sm font-bold text-slate-850 dark:text-slate-200 uppercase tracking-wider">
+                    Attendee Filters and Exports Configuration
+                  </h3>
+                  <p className="text-xs text-slate-450 dark:text-slate-400 mt-0.5">
+                    Toggle which attendee data fields are filterable or downloadable under this tier.
+                  </p>
+                </div>
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 hover:bg-slate-200/80 dark:bg-slate-800 dark:hover:bg-slate-700/80 text-slate-500 dark:text-slate-400 transition-colors">
+                  {isTableOpen ? <ChevronUp className="h-5 w-5" /> : <ChevronDown className="h-5 w-5" />}
+                </div>
+              </div>
+              <Collapse in={isTableOpen} timeout="auto" unmountOnExit>
+                <div className="px-6 pb-6">
+                  <AttendeeTable
+                    watch={watch}
+                    control={control}
+                    setValue={setValue}
+                  />
+                </div>
+              </Collapse>
+            </div>
+
+            {/* Form Section 6: Pricing and Discounts */}
+            <div className="space-y-4 pt-4 border-t border-slate-100 dark:border-slate-800">
+              <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
+                Duration Pricing & Discounts Config
+              </h3>
+              <div className="p-6 rounded-3xl border border-slate-150 bg-white/40 dark:border-slate-800 dark:bg-slate-950/10">
+                <DiscountSection
+                  planDurationConfig={planDurationConfig}
+                  setPlanDurationConfig={setPlanDurationConfig}
+                  regularDurations={regularDurations}
+                  watch={watch}
+                  control={control}
+                />
+              </div>
+            </div>
+
+            {/* Submit Action */}
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="py-3 text-sm font-bold rounded-xl bg-blue-500 hover:bg-blue-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-blue-600/35 transition-all w-full flex items-center justify-center min-h-[48px] disabled:opacity-50"
+              >
+                {isLoading ? (
+                  <AppLoader size="md" variant="inverse" />
+                ) : isEditMode ? (
+                  "Update Plan Tiers"
+                ) : (
+                  "Create Price Plan Tiers"
+                )}
+              </button>
+            </div>
+
+          </form>
+        </div>
       </div>
     </HubSubpageShell>
   );
