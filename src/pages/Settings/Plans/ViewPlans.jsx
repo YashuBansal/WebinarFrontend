@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import { CreditCard, ListOrdered, Plus, Sparkles } from "lucide-react";
-import { getPricePlans } from "../../../features/actions/pricePlan";
+import { getPricePlans, updatePricePlans } from "../../../features/actions/pricePlan";
 import PlanCard from "./PlanCard";
 import useUserSubscription from "../../../hooks/useUserSubscription";
 import ComponentGuard from "../../../components/AccessControl/ComponentGuard";
@@ -29,8 +29,24 @@ const ViewPlans = () => {
   );
   const dispatch = useDispatch();
 
+  const allActivePlans = useMemo(() => {
+    if (!Array.isArray(planData)) return [];
+    return planData.filter((item) => item.isActive);
+  }, [planData]);
+
+  const currentDefaultPlan = useMemo(() => {
+    if (!Array.isArray(planData)) return null;
+    return planData.find((item) => item.isDefaultSignupPlan && item.isActive);
+  }, [planData]);
+
   const [modalData, setModalData] = useState(null);
+  const [modalActionType, setModalActionType] = useState("active");
   const [planType, setPlanType] = useState("active");
+
+  useEffect(() => {
+    setModalActionType(planType);
+  }, [planType]);
+
   const [planDuration, setPlanDuration] = useState("monthly");
 
   const isAdminOnly =
@@ -106,15 +122,23 @@ const ViewPlans = () => {
     <HubSubpageShell>
       {isAdminOnly && (
         <div className="mb-8 space-y-6">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
-              Plans &amp; subscription
-            </h1>
-            <p className="max-w-xl text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400">
-              Review your organization&apos;s subscription status, limits, and
-              billing provider. Compare plans and upgrade when you need more
-              capacity.
-            </p>
+          <div className="flex items-start gap-4">
+            <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/15">
+              <CreditCard className="h-7 w-7 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div className="min-w-0 space-y-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-2xl font-black tracking-tight text-slate-900 dark:text-slate-50 sm:text-3xl">
+                  Plans &amp; subscription
+                </h1>
+                <Sparkles className="hidden h-5 w-5 text-amber-400 sm:inline sm:h-6 sm:w-6" aria-hidden />
+              </div>
+              <p className="max-w-xl text-sm font-medium leading-relaxed text-slate-500 dark:text-slate-400">
+                Review your organization&apos;s subscription status, limits, and
+                billing provider. Compare plans and upgrade when you need more
+                capacity.
+              </p>
+            </div>
           </div>
           <SubscriptionOverviewPanel
             subscription={subscription}
@@ -193,8 +217,58 @@ const ViewPlans = () => {
         </ComponentGuard>
       </motion.header>
 
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-800/90">
-        <div className="border-b border-slate-100 px-5 py-4 dark:border-slate-700 sm:px-6">
+      <ComponentGuard allowedRoles={[roles.SUPER_ADMIN]}>
+        <motion.div
+          initial={{ opacity: 0, y: -12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
+          className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white/70 p-4 shadow-sm backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15">
+              <Sparkles className="h-5 w-5 text-indigo-650 dark:text-indigo-400" />
+            </div>
+            <div>
+              <h3 className="text-sm font-bold text-slate-900 dark:text-slate-50">
+                Default Signup Plan
+              </h3>
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 mt-0.5">
+                Select the plan that new users will automatically receive upon registration.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3 min-w-[240px]">
+            {isLoading ? (
+              <div className="text-xs text-slate-400 font-semibold">Updating default plan...</div>
+            ) : (
+              <select
+                value={currentDefaultPlan?._id || ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val) {
+                    const selectedPlan = allActivePlans.find(p => p._id === val);
+                    if (selectedPlan) {
+                      setModalActionType("default_signup");
+                      setModalData(selectedPlan);
+                    }
+                  }
+                }}
+                className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white dark:bg-slate-900 text-xs font-bold text-slate-800 dark:text-slate-100 transition-all outline-none dark:border-slate-800 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-500/10 cursor-pointer shadow-sm"
+              >
+                <option value="" disabled>-- Select Default Plan --</option>
+                {allActivePlans.map((plan) => (
+                  <option key={plan._id} value={plan._id}>
+                    {plan.name} ({plan.internalName})
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+        </motion.div>
+      </ComponentGuard>
+
+      <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white/70 shadow-sm backdrop-blur-md dark:border-slate-800 dark:bg-slate-900/60">
+        <div className="border-b border-slate-100 dark:border-slate-800 px-5 py-4 sm:px-6">
           <h2 className="text-xs font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">
             Billing period
           </h2>
@@ -213,11 +287,10 @@ const ViewPlans = () => {
                     role="tab"
                     aria-selected={isActive}
                     onClick={() => setPlanDuration(tab.key)}
-                    className={`rounded-lg px-4 py-2 text-sm font-bold transition-all ${
-                      isActive
+                    className={`rounded-lg px-4 py-2 text-sm font-bold transition-all ${isActive
                         ? "bg-white text-slate-900 shadow-sm ring-1 ring-slate-200/80 dark:bg-slate-800 dark:text-slate-50 dark:ring-slate-600"
                         : "text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-200"
-                    }`}
+                      }`}
                   >
                     {tab.label}
                   </button>
@@ -229,7 +302,7 @@ const ViewPlans = () => {
 
         <div className="p-5 sm:p-6">
           <div className="grid grid-cols-1 gap-4 sm:gap-5 md:grid-cols-2">
-            {planDataFiltered?.map((item) => {
+            {planDataFiltered?.map((item, index) => {
               const samePlanCheckoutDisabled =
                 isAdminOnly &&
                 subscription?.expiryDate &&
@@ -238,7 +311,13 @@ const ViewPlans = () => {
                 new Date(subscription.expiryDate).getTime() > Date.now();
 
               return (
-                <div key={item?._id} className="min-w-0">
+                <motion.div
+                  key={item?._id}
+                  initial={{ opacity: 0, y: 16 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.35, delay: index * 0.05 }}
+                  className="min-w-0"
+                >
                   <PlanCard
                     plan={item}
                     planType={planType}
@@ -253,7 +332,7 @@ const ViewPlans = () => {
                         : null
                     }
                   />
-                </div>
+                </motion.div>
               );
             })}
           </div>
@@ -276,14 +355,20 @@ const ViewPlans = () => {
           )}
         </div>
 
-        {modalData && (
-          <PlanInactiveModal
-            setModalData={setModalData}
-            modalData={modalData}
-            planType={planType}
-          />
-        )}
       </div>
+
+      {modalData && (
+        <PlanInactiveModal
+          setModalData={(val) => {
+            setModalData(val);
+            if (val === null) {
+              setModalActionType(planType);
+            }
+          }}
+          modalData={modalData}
+          planType={modalActionType}
+        />
+      )}
     </HubSubpageShell>
   );
 };

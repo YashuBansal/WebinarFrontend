@@ -112,7 +112,7 @@ const PlanCard = (props) => {
     },
     selectedPlan = null,
     currentPlan = null,
-    setModalData = () => {},
+    setModalData = () => { },
     planType = "active",
     samePlanCheckoutDisabled = false,
     subscriptionExpiresAt = null,
@@ -137,6 +137,7 @@ const PlanCard = (props) => {
     customRibbon,
     customRibbonColor,
     assignmentMetrics,
+    isDefaultSignupPlan,
   } = plan;
 
   const { isCustomOptionsAllowed = false } = attendeeTableConfig || {};
@@ -191,10 +192,10 @@ const PlanCard = (props) => {
   const currentPlanUntilLabel =
     samePlanCheckoutDisabled && subscriptionExpiresAt
       ? new Date(subscriptionExpiresAt).toLocaleDateString(undefined, {
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-        })
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
       : null;
 
   const choosePlanLabel = samePlanCheckoutDisabled
@@ -208,10 +209,11 @@ const PlanCard = (props) => {
   return (
     <div
       className={cn(
-        "group relative flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-all duration-300",
-        "hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-xl",
-        "dark:border-slate-700 dark:bg-slate-800/90 dark:hover:border-slate-600 dark:hover:shadow-blue-950/20",
-        "sm:rounded-2xl",
+        "group relative flex h-full w-full flex-col overflow-hidden rounded-3xl border border-slate-200 bg-white/70 shadow-sm backdrop-blur-md transition-all duration-300",
+        "hover:-translate-y-1 hover:border-slate-300 hover:shadow-xl",
+        "dark:border-slate-800 dark:bg-slate-900/60 dark:hover:border-slate-700",
+        currentPlan === plan?._id && "border-blue-500 ring-2 ring-blue-500/20 dark:border-blue-500/70",
+        "sm:rounded-3xl",
       )}
     >
       <div
@@ -314,6 +316,11 @@ const PlanCard = (props) => {
               {plan.planType === "custom" ? (
                 <span className="inline-flex items-center rounded-full bg-violet-500/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-700 dark:bg-violet-400/90 dark:text-violet-200">
                   Custom
+                </span>
+              ) : null}
+              {isDefaultSignupPlan ? (
+                <span className="inline-flex items-center rounded-full bg-indigo-500/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-700 dark:bg-indigo-400/90 dark:text-indigo-200">
+                  Default Signup Plan
                 </span>
               ) : null}
             </div>
@@ -422,13 +429,13 @@ const PlanCard = (props) => {
 
 function MetricPill({ icon, label, value }) {
   return (
-    <div className="flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white px-3 py-2.5 dark:border-slate-600 dark:bg-slate-900/60">
-      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-500/10 dark:bg-blue-500/15">
+    <div className="flex items-center gap-2.5 rounded-2xl border border-slate-100/80 bg-slate-50/40 px-3 py-2.5 dark:border-slate-800 dark:bg-slate-950/30">
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-500/10 dark:bg-blue-500/15">
         {icon}
       </span>
       <div className="min-w-0">
         <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">{label}</p>
-        <p className="truncate text-sm font-black text-slate-900 dark:text-slate-50">{value}</p>
+        <p className="truncate text-sm font-black text-slate-900 dark:text-slate-550">{value}</p>
       </div>
     </div>
   );
@@ -436,21 +443,21 @@ function MetricPill({ icon, label, value }) {
 
 function FeatureRow({ label, enabled }) {
   return (
-    <li className="flex items-center gap-2 text-sm">
+    <li className="flex items-center gap-2.5 text-sm">
       <span
         className={cn(
-          "flex h-5 w-5 shrink-0 items-center justify-center rounded-md",
+          "flex h-5.5 w-5.5 shrink-0 items-center justify-center rounded-lg",
           enabled
-            ? "bg-emerald-500/15 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400"
-            : "bg-slate-200/80 text-slate-500 dark:bg-slate-700 dark:text-slate-400",
+            ? "bg-emerald-500/10 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-400"
+            : "bg-slate-100 text-slate-400 dark:bg-slate-850 dark:text-slate-500",
         )}
       >
-        {enabled ? <Check className="h-3.5 w-3.5 stroke-[3]" /> : <X className="h-3.5 w-3.5 stroke-[2.5]" />}
+        {enabled ? <Check className="h-3.5 w-3.5 stroke-[3]" /> : <X className="h-3 w-3.5 stroke-[2.5]" />}
       </span>
       <span
         className={cn(
-          "min-w-0 font-medium leading-snug",
-          enabled ? "text-slate-800 dark:text-slate-200" : "text-slate-500 dark:text-slate-500",
+          "min-w-0 font-bold leading-snug tracking-tight",
+          enabled ? "text-slate-700 dark:text-slate-200" : "text-slate-400 dark:text-slate-500 line-through decoration-slate-300 dark:decoration-slate-700",
         )}
       >
         {label}

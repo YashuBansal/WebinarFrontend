@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { deletePricePlan } from "../../../features/actions/pricePlan";
+import { deletePricePlan, updatePricePlans } from "../../../features/actions/pricePlan";
 import useAddUserActivity from "../../../hooks/useAddUserActivity";
 import useUserSubscription from "../../../hooks/useUserSubscription";
 
@@ -24,15 +24,27 @@ export default function PlanInactiveModal({ setModalData, modalData, planType })
       return;
     }
     if (isInputValid) {
-      dispatch(deletePricePlan({
-        _id: modalData?._id,
-        isActive: planType
-      }));
+      if (planType === "default_signup") {
+        dispatch(updatePricePlans({
+          _id: modalData?._id,
+          isDefaultSignupPlan: true
+        }));
 
-      logUserActivity({
-        action: "inactivate",
-        details: `Inactivated plan with name: ${modalData?.name}`,
-      });
+        logUserActivity({
+          action: "set_default_signup_plan",
+          details: `Set default signup plan to: ${modalData?.name}`,
+        });
+      } else {
+        dispatch(deletePricePlan({
+          _id: modalData?._id,
+          isActive: planType
+        }));
+
+        logUserActivity({
+          action: "inactivate",
+          details: `Inactivated plan with name: ${modalData?.name}`,
+        });
+      }
     }
   };
 
@@ -60,7 +72,13 @@ export default function PlanInactiveModal({ setModalData, modalData, planType })
         <div className="relative w-full max-w-md bg-white rounded-lg shadow-xl p-6">
           {/* Header */}
           <div className="flex justify-between items-center border-b pb-3 mb-4">
-            <h3 className="text-lg font-semibold">{planType === "active" ? "Deactivate" : "Activate"} Plan</h3>
+            <h3 className="text-lg font-semibold">
+              {planType === "default_signup"
+                ? "Set Default Signup Plan"
+                : planType === "active"
+                ? "Deactivate Plan"
+                : "Activate Plan"}
+            </h3>
             <button
               onClick={handleClose}
               className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -84,9 +102,11 @@ export default function PlanInactiveModal({ setModalData, modalData, planType })
           {/* Confirmation Message */}
           <div className="text-center mb-6">
             <p className="text-gray-700">
-              Confirm {planType === "active" ? "deactivation" : "activation"} by entering plan name:{" "}
+              {planType === "default_signup"
+                ? "Confirm designating this plan as the default signup plan by entering the plan name:"
+                : `Confirm ${planType === "active" ? "deactivation" : "activation"} by entering plan name:`}
             </p>
-            <p>
+            <p className="mt-1">
               <strong className="font-semibold">{modalData?.name}</strong>
             </p>
           </div>
@@ -118,11 +138,15 @@ export default function PlanInactiveModal({ setModalData, modalData, planType })
               disabled={!isInputValid}
               className={`flex-1 px-4 py-2 rounded-lg font-medium transition-colors ${
                 isInputValid
-                  ? "bg-red-600 text-white hover:bg-red-700"
+                  ? "bg-red-650 bg-indigo-600 hover:bg-indigo-700 text-white"
                   : "bg-gray-300 text-gray-500 cursor-not-allowed"
               }`}
             >
-              {planType === "active" ? "Deactivate" : "Activate"} Plan
+              {planType === "default_signup"
+                ? "Confirm Default"
+                : planType === "active"
+                ? "Deactivate Plan"
+                : "Activate Plan"}
             </button>
             <button
               onClick={handleClose}
