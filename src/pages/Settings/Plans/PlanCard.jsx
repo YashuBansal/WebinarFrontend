@@ -137,6 +137,7 @@ const PlanCard = (props) => {
     customRibbon,
     customRibbonColor,
     assignmentMetrics,
+    isDefaultSignupPlan,
   } = plan;
 
   const { isCustomOptionsAllowed = false } = attendeeTableConfig || {};
@@ -315,6 +316,11 @@ const PlanCard = (props) => {
               {plan.planType === "custom" ? (
                 <span className="inline-flex items-center rounded-full bg-violet-500/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-700 dark:bg-violet-400/90 dark:text-violet-200">
                   Custom
+                </span>
+              ) : null}
+              {isDefaultSignupPlan ? (
+                <span className="inline-flex items-center rounded-full bg-indigo-500/15 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-indigo-700 dark:bg-indigo-400/90 dark:text-indigo-200">
+                  Default Signup Plan
                 </span>
               ) : null}
             </div>
