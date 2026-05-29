@@ -82,6 +82,8 @@ const CreateCampaign = () => {
     const [contactType, setContactType] = useState<string>(CotactType.WHATSAPP);
     const [selectedTemplate, setSelectedTemplate] = useState<CampaignTemplate | null>(null);
     const [variableMappings, setVariableMappings] = useState<VariableMapping[]>([]);
+    const [selectedSessionTemplate, setSelectedSessionTemplate] = useState<CampaignTemplate | null>(null);
+    const [sessionVariableMappings, setSessionVariableMappings] = useState<VariableMapping[]>([]);
     const [headerMediaAssetId, setHeaderMediaAssetId] = useState<string | null>(null);
     const [uploadedFileName, setUploadedFileName] = useState<string>('');
 
@@ -133,14 +135,20 @@ const CreateCampaign = () => {
     }, [selectedContacts, setValue]);
 
     useEffect(() => {
-        if (selectedTemplate) {
-            setValue('templateName', selectedTemplate.name);
-        }
+        setValue('templateName', selectedTemplate?.name || '');
     }, [selectedTemplate, setValue]);
 
     useEffect(() => {
         setValue('variableMappings', variableMappings);
     }, [variableMappings, setValue]);
+
+    useEffect(() => {
+        setValue('sessionTemplateName', selectedSessionTemplate?.name || '');
+    }, [selectedSessionTemplate, setValue]);
+
+    useEffect(() => {
+        setValue('sessionVariableMappings', sessionVariableMappings);
+    }, [sessionVariableMappings, setValue]);
 
     const handleNext = async () => {
         let isValid = false;
@@ -157,7 +165,7 @@ const CreateCampaign = () => {
                 }
                 break;
             case 3:
-                isValid = selectedTemplate !== null;
+                isValid = selectedTemplate !== null || selectedSessionTemplate !== null;
                 break;
             case 4:
                 isValid = true;
@@ -190,8 +198,10 @@ const CreateCampaign = () => {
                 contactId: contact._id,
                 phoneNumber: contact.phone,
             })),
-            templateName: selectedTemplate!.name,
-            variableMappings,
+            templateName: selectedTemplate?.name || undefined,
+            variableMappings: selectedTemplate ? variableMappings : undefined,
+            sessionTemplateName: selectedSessionTemplate?.name || undefined,
+            sessionVariableMappings: selectedSessionTemplate ? sessionVariableMappings : undefined,
             sendType: data.sendType,
             scheduledAt: data.sendType === 'scheduled' ? data.scheduledAt : undefined,
             headerMediaAssetId: headerMediaAssetId || undefined,
@@ -263,6 +273,10 @@ const CreateCampaign = () => {
                             onTemplateSelect={setSelectedTemplate}
                             variableMappings={variableMappings}
                             onVariableMappingsChange={setVariableMappings}
+                            selectedSessionTemplate={selectedSessionTemplate}
+                            onSessionTemplateSelect={setSelectedSessionTemplate}
+                            sessionVariableMappings={sessionVariableMappings}
+                            onSessionVariableMappingsChange={setSessionVariableMappings}
                             headerMediaAssetId={headerMediaAssetId}
                             onHeaderMediaAssetIdChange={setHeaderMediaAssetId}
                             uploadedFileName={uploadedFileName}
@@ -278,6 +292,8 @@ const CreateCampaign = () => {
                             selectedContacts={selectedContacts}
                             selectedTemplate={selectedTemplate}
                             variableMappings={variableMappings}
+                            selectedSessionTemplate={selectedSessionTemplate}
+                            sessionVariableMappings={sessionVariableMappings}
                             onSubmit={handleSubmit(onSubmit)}
                             onPrevious={handlePrevious}
                             isSubmitting={createCampaignMutation.isPending}

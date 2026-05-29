@@ -383,7 +383,8 @@ export default function WebinarTableShell({
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.03 }}
-                    className={`group border-b transition-all duration-200 ${isSelected ? "" : "hover:bg-black/5 dark:hover:bg-white/5"
+                    onClick={() => onView(row)}
+                    className={`group border-b cursor-pointer transition-all duration-200 ${isSelected ? "" : "hover:bg-black/5 dark:hover:bg-white/5"
                       }`}
                     style={{
                       borderColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)",
@@ -406,14 +407,12 @@ export default function WebinarTableShell({
                     <td
                       className="p-4 text-sm font-medium transition-colors"
                       style={{ color: isDark ? "#94a3b8" : "#64748b", backgroundColor: cellBg }}
-                      onClick={() => onView(row)}
                     >
                       {serial}
                     </td>
                     <td
                       className="p-4 transition-colors"
                       style={{ backgroundColor: cellBg }}
-                      onClick={() => onView(row)}
                     >
                       <button className={`hover:underline text-sm font-semibold text-left whitespace-nowrap ${isDark ? "text-slate-100" : "text-[#071028]"}`}>
                         {row?.webinarName || "N/A"}
@@ -422,7 +421,6 @@ export default function WebinarTableShell({
                     <td
                       className="p-4 transition-colors"
                       style={{ backgroundColor: cellBg }}
-                      onClick={() => onView(row)}
                     >
                       <div className={`flex items-center gap-2 whitespace-nowrap text-sm font-medium ${isDark ? "text-slate-400" : "text-[#64748b]"}`}>
                         <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
@@ -468,6 +466,7 @@ export default function WebinarTableShell({
                     <td
                       className="p-4 text-right sticky right-0 z-10 transition-colors"
                       style={{ backgroundColor: stickyEdgeBg }}
+                      onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center justify-center gap-1">
                         <Button
@@ -548,13 +547,14 @@ export default function WebinarTableShell({
               formatDateAsNumber(row?.webinarDate) || row?.webinarDate || "N/A";
             const rowId = row?._id;
             const isSelected = Boolean(rowId && selectedIds.has(rowId));
-            return (
+             return (
               <motion.div
                 key={row?._id || index}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03 }}
-                className={`rounded-xl border p-4 transition-colors ${
+                onClick={() => onView(row)}
+                className={`rounded-xl border p-4 cursor-pointer transition-colors ${
                   isSelected 
                     ? (isDark ? "bg-[#22B573]/10 border-[#22B573]/30" : "bg-green-50/80 border-[#22B573]/25") 
                     : (isDark ? "bg-[#1e293b] border-slate-800" : "bg-white border-gray-200")
@@ -572,12 +572,11 @@ export default function WebinarTableShell({
                         className="border-slate-300"
                       />
                     </div>
-                    <button
-                      onClick={() => onView(row)}
-                      className={`text-base font-bold text-left min-w-0 transition-colors ${isDark ? "text-slate-100" : "text-slate-800"}`}
+                    <span
+                      className={`text-base font-bold text-left min-w-0 hover:underline transition-colors ${isDark ? "text-slate-100" : "text-slate-800"}`}
                     >
                       {row?.webinarName || "N/A"}
-                    </button>
+                    </span>
                   </div>
                   <span className={`text-xs rounded px-2 py-1 shrink-0 transition-colors ${isDark ? "bg-slate-800 text-slate-400" : "bg-slate-100 text-slate-600"}`}>
                     #{serial}
@@ -619,7 +618,10 @@ export default function WebinarTableShell({
                     </p>
                   </div>
                 </div>
-                <div className="mt-3 flex items-center justify-end gap-1">
+                <div 
+                  className="mt-3 flex items-center justify-end gap-1"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <Button
                     variant="text"
                     size="small"

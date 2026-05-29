@@ -1,9 +1,9 @@
-import { Edit2, Calendar, User, Phone, MapPin, Briefcase, Clock, FileText, ShieldCheck, Bell, History, Globe, Layers, ExternalLink, Pencil } from "lucide-react";
+import { Edit2, Calendar, User, Phone, MapPin, Briefcase, Clock, FileText, ShieldCheck, Bell, History, Globe, Layers, ExternalLink, Pencil, Eye } from "lucide-react";
 import ComponentGuard from "../../components/AccessControl/ComponentGuard";
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useMediaQuery from "../../hooks/useMediaQuery";
 import { motion } from "framer-motion";
-import { formatDateAsNumber } from "../../utils/extra";
+import { formatDateAsNumber, formatDateAsNumberWithTime } from "../../utils/extra";
 import { useTheme } from "../../contexts/ThemeContext";
 
 const formatFullName = (item) => {
@@ -61,6 +61,9 @@ const AttendeeHistoryTable = ({
   const isDark = theme === "dark";
   const scrollRef = useRef(null);
   const isSmallScreen = useMediaQuery("(max-width: 1024px)");
+  const handleViewDetails = (item) => {
+    navigate(`/particularContact/attendee-webinar-detail?email=${email}&id=${item._id}`);
+  };
 
   const counts = useMemo(() => {
     const countsData = { registeredWebinarCount: 0, attendedWebinarCount: 0 };
@@ -104,6 +107,7 @@ const AttendeeHistoryTable = ({
                     index={idx}
                     totalCount={attendeeHistoryData.length}
                     onEdit={setEditModalData}
+                    onView={handleViewDetails}
                     showEditButton={!employeeModeData && userData?.isActive}
                   />
                 ))}
@@ -124,7 +128,7 @@ const AttendeeHistoryTable = ({
                     <th className="py-4 px-2">Profession</th>
                     <th className="py-4 px-2">Source</th>
                     <ComponentGuard conditions={[!employeeModeData, userData?.isActive]}>
-                      <th className="py-4 px-2 text-center sticky right-0 bg-white dark:bg-slate-900 z-10 w-[70px]">Actions</th>
+                      <th className="py-4 px-2 text-center sticky right-0 bg-white dark:bg-slate-900 z-10 w-[100px]">Actions</th>
                     </ComponentGuard>
                   </tr>
                 </thead>
@@ -132,7 +136,11 @@ const AttendeeHistoryTable = ({
                   {attendeeHistoryData.map((item, idx) => {
                     const webinar = Array.isArray(item?.webinar) && item.webinar.length > 0 ? item.webinar[0] : null;
                     return (
-                      <tr key={idx} className="bg-slate-50/40 dark:bg-slate-900/20 hover:bg-slate-100/50 dark:hover:bg-slate-800/80 transition-colors group">
+                      <tr
+                        key={idx}
+                        onClick={() => handleViewDetails(item)}
+                        className="bg-slate-50/40 dark:bg-slate-900/20 hover:bg-slate-100/50 dark:hover:bg-slate-800/80 transition-colors group cursor-pointer"
+                      >
                         <td className="py-3 px-6 text-sm font-bold text-slate-400">{idx + 1}</td>
                         <td className="py-3 px-2">
                           <div className="flex flex-col">
@@ -186,13 +194,26 @@ const AttendeeHistoryTable = ({
                           {item?.source || "N/A"}
                         </td>
                         <ComponentGuard conditions={[!employeeModeData, userData?.isActive]}>
-                          <td className="py-4 px-2 text-center sticky right-0 bg-white dark:bg-slate-900 group-hover:bg-white dark:group-hover:bg-slate-950 transition-colors shadow-[-10px_0_15px_-5px_rgba(0,0,0,0.05)] w-[60px]">
-                            <button
-                              onClick={() => setEditModalData(item)}
-                              className="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-[#FF6B35] hover:text-white rounded-lg transition-all"
-                            >
-                              <Pencil className="w-4 h-4" />
-                            </button>
+                          <td
+                            className="py-4 px-2 text-center sticky right-0 bg-white dark:bg-slate-900 group-hover:bg-white dark:group-hover:bg-slate-950 transition-colors shadow-[-10px_0_15px_-5px_rgba(0,0,0,0.05)] w-[100px]"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <div className="flex items-center justify-center gap-2">
+                              <button
+                                onClick={() => handleViewDetails(item)}
+                                className="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-600 hover:text-white rounded-lg transition-all"
+                                title="View Details"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => setEditModalData(item)}
+                                className="p-2 bg-slate-100 dark:bg-slate-700 hover:bg-[#FF6B35] hover:text-white rounded-lg transition-all"
+                                title="Edit Details"
+                              >
+                                <Pencil className="w-4 h-4" />
+                              </button>
+                            </div>
                           </td>
                         </ComponentGuard>
                       </tr>
@@ -218,14 +239,15 @@ export const StatRow = ({ icon: Icon, label, value, color }) => (
   </div>
 );
 
-const HistoryCard = ({ item, index, totalCount, onEdit, showEditButton }) => {
+const HistoryCard = ({ item, index, totalCount, onEdit, onView, showEditButton }) => {
   const webinar = Array.isArray(item?.webinar) && item.webinar.length > 0 ? item.webinar[0] : null;
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all group"
+      onClick={() => onView(item)}
+      className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all group cursor-pointer"
     >
       <div className="flex items-start justify-between gap-4 mb-4">
         <div className="flex items-center gap-3">
@@ -237,14 +259,24 @@ const HistoryCard = ({ item, index, totalCount, onEdit, showEditButton }) => {
             <span className="text-[10px] font-black text-[#FF6B35] uppercase tracking-widest">{webinar ? formatDateAsNumber(webinar.webinarDate) : "-"}</span>
           </div>
         </div>
-        {showEditButton && (
+        <div className="flex gap-2" onClick={(e) => e.stopPropagation()}>
           <button
-            onClick={() => onEdit(item)}
-            className="p-2 bg-slate-50 dark:bg-slate-700 hover:bg-[#FF6B35] hover:text-white rounded-xl transition-all"
+            onClick={() => onView(item)}
+            className="p-2 bg-slate-50 dark:bg-slate-700 hover:bg-indigo-600 hover:text-white rounded-xl transition-all"
+            title="View Details"
           >
-            <Pencil className="w-4 h-4" />
+            <Eye className="w-4 h-4" />
           </button>
-        )}
+          {showEditButton && (
+            <button
+              onClick={() => onEdit(item)}
+              className="p-2 bg-slate-50 dark:bg-slate-700 hover:bg-[#FF6B35] hover:text-white rounded-xl transition-all"
+              title="Edit Details"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
+          )}
+        </div>
       </div>
 
       <dl className="space-y-1 pt-2 border-t border-slate-50 dark:border-slate-800">

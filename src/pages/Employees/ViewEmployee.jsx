@@ -797,7 +797,13 @@ const ViewEmployee = () => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.03 }}
-                  className="group border-b hover:bg-black/5 transition-all duration-200"
+                  onClick={() => {
+                    resetFilterRef.current = true;
+                    navigate(
+                      `/particularContact?email=${row?.email}&attendeeId=${row?._id}`,
+                    );
+                  }}
+                  className="group border-b hover:bg-black/5 transition-all duration-200 cursor-pointer"
                   style={{
                     borderColor: theme === "dark" ? "#334155" : "rgba(0,0,0,0.05)",
                   }}
@@ -816,17 +822,19 @@ const ViewEmployee = () => {
                   ))}
                   <td
                     className="p-4 text-center sticky right-0 z-10 transition-colors"
+                    onClick={(e) => e.stopPropagation()}
                     style={{ backgroundColor: panelBg }}
                   >
                     <div className="flex items-center justify-center gap-1">
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() =>
+                        onClick={() => {
+                          resetFilterRef.current = true;
                           navigate(
                             `/particularContact?email=${row?.email}&attendeeId=${row?._id}`,
-                          )
-                        }
+                          );
+                        }}
                         className="!min-w-0 !p-2 hover:bg-black/5 dark:hover:bg-white/10"
                         title="View"
                       >

@@ -27,9 +27,15 @@ const WLH_CONTACT_FIELD_OPTIONS = [
 
 interface TemplateSelectionProps {
   selectedTemplate: CampaignTemplate | null;
-  onTemplateSelect: (template: CampaignTemplate) => void;
+  onTemplateSelect: (template: CampaignTemplate | null) => void;
   variableMappings: VariableMapping[];
   onVariableMappingsChange: (mappings: VariableMapping[]) => void;
+
+  selectedSessionTemplate: CampaignTemplate | null;
+  onSessionTemplateSelect: (template: CampaignTemplate | null) => void;
+  sessionVariableMappings: VariableMapping[];
+  onSessionVariableMappingsChange: (mappings: VariableMapping[]) => void;
+
   headerMediaAssetId: string | null;
   onHeaderMediaAssetIdChange: (assetId: string | null) => void;
   uploadedFileName: string;
@@ -62,6 +68,10 @@ const TemplateSelection = ({
   onTemplateSelect,
   variableMappings,
   onVariableMappingsChange,
+  selectedSessionTemplate,
+  onSessionTemplateSelect,
+  sessionVariableMappings,
+  onSessionVariableMappingsChange,
   headerMediaAssetId,
   onHeaderMediaAssetIdChange,
   uploadedFileName,
@@ -104,11 +114,17 @@ const TemplateSelection = ({
 
   // Convert variable mappings for TemplateSelectionForm
   const autoMessageMappings: AutoMessageVariableMapping[] = variableMappings.map(toAutoMessageMapping);
+  const autoSessionMappings: AutoMessageVariableMapping[] = sessionVariableMappings.map(toAutoMessageMapping);
 
   // Handle variable mappings change from TemplateSelectionForm
   const handleVariableMappingsChange = (mappings: AutoMessageVariableMapping[]) => {
     const campaignMappings = mappings.map(toCampaignMapping);
     onVariableMappingsChange(campaignMappings);
+  };
+
+  const handleSessionVariableMappingsChange = (mappings: AutoMessageVariableMapping[]) => {
+    const campaignMappings = mappings.map(toCampaignMapping);
+    onSessionVariableMappingsChange(campaignMappings);
   };
 
   // Handle template select from TemplateSelectionForm
@@ -117,41 +133,60 @@ const TemplateSelection = ({
     setShowValidationErrors(false); // Reset validation errors when template changes
   };
 
+  const handleSessionTemplateSelect = (template: any) => {
+    onSessionTemplateSelect(template);
+    setShowValidationErrors(false);
+  };
+
   // Wrapper for setSelectedTemplate to work with Dispatch<SetStateAction<any>>
   const handleSetSelectedTemplate = (templateOrUpdater: any) => {
     if (typeof templateOrUpdater === 'function') {
-      // It's an updater function
       const currentTemplate = selectedTemplate;
       const newTemplate = templateOrUpdater(currentTemplate);
       handleTemplateSelect(newTemplate);
     } else {
-      // It's a direct value
       handleTemplateSelect(templateOrUpdater);
+    }
+  };
+
+  const handleSetSelectedSessionTemplate = (templateOrUpdater: any) => {
+    if (typeof templateOrUpdater === 'function') {
+      const currentTemplate = selectedSessionTemplate;
+      const newTemplate = templateOrUpdater(currentTemplate);
+      handleSessionTemplateSelect(newTemplate);
+    } else {
+      handleSessionTemplateSelect(templateOrUpdater);
     }
   };
 
   // Wrapper for setVariableMappings to work with Dispatch<SetStateAction<VariableMapping[]>>
   const handleSetVariableMappings = (mappingsOrUpdater: any) => {
     if (typeof mappingsOrUpdater === 'function') {
-      // It's an updater function
       const currentMappings = autoMessageMappings;
       const newMappings = mappingsOrUpdater(currentMappings);
       handleVariableMappingsChange(newMappings);
     } else {
-      // It's a direct value
       handleVariableMappingsChange(mappingsOrUpdater);
+    }
+  };
+
+  const handleSetSessionVariableMappings = (mappingsOrUpdater: any) => {
+    if (typeof mappingsOrUpdater === 'function') {
+      const currentMappings = autoSessionMappings;
+      const newMappings = mappingsOrUpdater(currentMappings);
+      handleSessionVariableMappingsChange(newMappings);
+    } else {
+      handleSessionVariableMappingsChange(mappingsOrUpdater);
     }
   };
 
   // Wrapper for setUploadedFileName to work with Dispatch<SetStateAction<string>>
   const handleSetUploadedFileName = (fileNameOrUpdater: any) => {
     if (typeof fileNameOrUpdater === 'function') {
-      // It's an updater function
       const currentFileName = uploadedFileName;
       const newFileName = fileNameOrUpdater(currentFileName);
       onUploadedFileNameChange(newFileName);
     } else {
-      // It's a direct value
       onUploadedFileNameChange(fileNameOrUpdater);
     }
   };
@@ -177,12 +212,16 @@ const TemplateSelection = ({
     return !!(mapping.staticValue && mapping.staticValue.trim());
   };
 
-  // Validation: can proceed if template is selected, media is selected (if required), and all variables are valid
+  // Validation: can proceed if at least one template (standard or session) is selected, and all variables are valid
   const hasInvalidVariables = variableMappings.length > 0 && variableMappings.some(mapping => !isVariableValid(mapping));
-  
-  const canProceed = selectedTemplate !== null && 
+  const hasInvalidSessionVariables = sessionVariableMappings.length > 0 && sessionVariableMappings.some(mapping => !isVariableValid(mapping));
+
+  const hasAtLeastOneTemplate = selectedTemplate !== null || selectedSessionTemplate !== null;
+
+  const canProceed = hasAtLeastOneTemplate && 
     (!hasMediaHeader() || headerMediaAssetId !== null || selectedMediaAsset !== null) &&
-    !hasInvalidVariables;
+    !hasInvalidVariables &&
+    !hasInvalidSessionVariables;
 
   return (
     <div className="space-y-6">
@@ -190,6 +229,8 @@ const TemplateSelection = ({
         <TemplateSelectionForm
           selectedTemplate={selectedTemplate}
           variableMappings={autoMessageMappings}
+          selectedSessionTemplate={selectedSessionTemplate}
+          sessionVariableMappings={autoSessionMappings}
           selectedMediaAsset={selectedMediaAsset}
           uploadedFileName={uploadedFileName}
           setSelectedTemplate={(template) => {
@@ -197,10 +238,17 @@ const TemplateSelection = ({
             setShowValidationErrors(false); // Reset validation errors when template changes
           }}
           setVariableMappings={handleSetVariableMappings}
+          setSelectedSessionTemplate={(template) => {
+            handleSetSelectedSessionTemplate(template);
+            setShowValidationErrors(false);
+          }}
+          setSessionVariableMappings={handleSetSessionVariableMappings}
           setSelectedMediaAsset={handleMediaAssetChange}
           setUploadedFileName={handleSetUploadedFileName}
           onTemplateSelect={handleTemplateSelect}
           onVariableMappingsChange={handleVariableMappingsChange}
+          onSessionTemplateSelect={handleSessionTemplateSelect}
+          onSessionVariableMappingsChange={handleSessionVariableMappingsChange}
           projectId={selectedProject?._id}
           contactFieldOptions={contactFieldOptions}
           showPreview={true}

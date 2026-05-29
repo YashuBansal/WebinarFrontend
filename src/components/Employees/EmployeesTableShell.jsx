@@ -442,7 +442,8 @@ export default function EmployeesTableShell({
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.02 }}
-                    className="border-b transition-colors"
+                    onClick={() => onView && onView(row)}
+                    className="border-b transition-colors cursor-pointer"
                     style={{
                       borderColor: isDark ? "#334155" : "#e2e8f0",
                       backgroundColor: selected
@@ -452,7 +453,7 @@ export default function EmployeesTableShell({
                         : "transparent",
                     }}
                   >
-                    <td className="p-4 w-12">
+                    <td className="p-4 w-12" onClick={(e) => e.stopPropagation()}>
                       <Checkbox
                         checked={Boolean(id && selectedIds.has(id))}
                         onCheckedChange={() => toggleOne(id)}
@@ -585,6 +586,7 @@ export default function EmployeesTableShell({
                     </td>
                     <td
                       className="p-4 text-right sticky right-0 z-10"
+                      onClick={(e) => e.stopPropagation()}
                       style={{
                         backgroundColor: isDark
                           ? selected

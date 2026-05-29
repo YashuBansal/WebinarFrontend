@@ -469,14 +469,17 @@ const EmployeeAssignMetrics = () => {
                         </td>
                       </tr>
                     ) : (
-                      stats.daily.map((day, idx) => (
-                        <motion.tr
-                          key={day.date}
-                          initial={{ opacity: 0, y: 10 }}
-                          animate={{ opacity: 1, y: 0 }}
-                          transition={{ delay: idx * 0.05 }}
-                          className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors group"
-                        >
+                      stats.daily.map((day, idx) => {
+                        const showAction = !roles.isEmployeeId(role) && !employeeModeData;
+                        return (
+                          <motion.tr
+                            key={day.date}
+                            initial={{ opacity: 0, y: 10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: idx * 0.05 }}
+                            onClick={() => showAction && setSelectedData(day)}
+                            className={`hover:bg-black/5 dark:hover:bg-white/5 transition-colors group ${showAction ? "cursor-pointer" : ""}`}
+                          >
                           <td className="px-6 py-4 whitespace-nowrap text-sm font-medium" style={{ color: textColor }}>
                             {day.date}
                           </td>
@@ -510,7 +513,7 @@ const EmployeeAssignMetrics = () => {
                             </div>
                           </td>
                           {!roles.isEmployeeId(role) && !employeeModeData && (
-                            <td className="px-6 py-4 text-right">
+                            <td className="px-6 py-4 text-right" onClick={(e) => e.stopPropagation()}>
                               <Button
                                 variant="ghost"
                                 size="icon"
@@ -522,7 +525,8 @@ const EmployeeAssignMetrics = () => {
                             </td>
                           )}
                         </motion.tr>
-                      ))
+                      );
+                    })
                     )}
                   </tbody>
                 </table>
@@ -596,7 +600,8 @@ const DailyStatCard = ({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: idx * 0.05 }}
       whileHover={{ scale: 1.02 }}
-      className="rounded-2xl border p-5 shadow-sm transition-all"
+      onClick={() => showViewButton && onViewDetails(day)}
+      className={`rounded-2xl border p-5 shadow-sm transition-all ${showViewButton ? "cursor-pointer" : ""}`}
       style={{
         background: glassBg,
         backdropFilter: "blur(16px)",
@@ -611,14 +616,16 @@ const DailyStatCard = ({
           <p className="font-bold text-sm" style={{ color: textColor }}>{day.date}</p>
         </div>
         {showViewButton && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onViewDetails(day)}
-            className="rounded-xl h-8 w-8 hover:bg-blue-500/10 text-blue-500 transition-all"
-          >
-            <Eye className="w-4 h-4" />
-          </Button>
+          <div onClick={(e) => e.stopPropagation()}>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => onViewDetails(day)}
+              className="rounded-xl h-8 w-8 hover:bg-blue-500/10 text-blue-500 transition-all"
+            >
+              <Eye className="w-4 h-4" />
+            </Button>
+          </div>
         )}
       </div>
 

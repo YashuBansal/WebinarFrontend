@@ -26,6 +26,7 @@ const Layout = () => {
   const [bannerOpen, setBannerOpen] = useState(false);
   const [bannerData, setBannerData] = useState(null);
   const toggleRef = useRef();
+  const scrollContainerRef = useRef(null);
 
   const isMdUp = useMediaQuery("(min-width: 768px)");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
@@ -58,11 +59,20 @@ const Layout = () => {
     setBannerOpen(false);
     setBannerData(null);
   };
+  
   useEffect(() => {
     if (!isUserLoggedIn) {
       navigate("/login");
     }
   }, [isUserLoggedIn, navigate]);
+
+  useEffect(() => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollTo(0, 0);
+    }
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
+
   useEffect(() => {
     function onAlarmPlay(data) {
       const audio = audioRef.current;
@@ -110,7 +120,10 @@ const Layout = () => {
             height: "calc(100vh - var(--header-height, 64px))",
           }}
         >
-          <div className={`custom-scrollbar absolute inset-0 min-w-0 max-w-full overflow-x-hidden ${isChatPage ? 'overflow-y-hidden' : 'overflow-y-auto'}`}>
+          <div 
+            ref={scrollContainerRef}
+            className={`custom-scrollbar absolute inset-0 min-w-0 max-w-full overflow-x-hidden ${isChatPage ? 'overflow-y-hidden' : 'overflow-y-auto'}`}
+          >
             <Suspense fallback={<FallbackPage />}>
               <Outlet />
             </Suspense>

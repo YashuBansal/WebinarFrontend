@@ -43,8 +43,6 @@ export default function ProgramDetails() {
   const updateProgramMutation = useUpdateProgram();
 
   const [isAutoAssignable, setIsAutoAssignable] = useState(false);
-  const [autoAssignCriteria, setAutoAssignCriteria] =
-    useState<AutoAssignCriteriaPayload | null>(null);
   const [apiDialogOpen, setApiDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -55,7 +53,6 @@ export default function ProgramDetails() {
   useEffect(() => {
     if (program) {
       setIsAutoAssignable(program.isAutoAssignable ?? false);
-      setAutoAssignCriteria((program.autoAssignCriteria as any) ?? null);
     }
   }, [program]);
 
@@ -81,14 +78,34 @@ export default function ProgramDetails() {
     return Array.from(variables);
   },[program]);
 
-  const handleSaveAutoAssignRules = async () => {
+  const handleAutoAssignableChange = async (newValue: boolean) => {
+    setIsAutoAssignable(newValue);
+    if (!newValue) {
+      // Automatically persist to the database immediately when turned OFF!
+      try {
+        await updateProgramMutation.mutateAsync({
+          programId: programId ?? "",
+          payload: {
+            isAutoAssignable: false,
+            autoAssignCriteria: null,
+          } as any,
+        });
+        toastUtils.success("Auto-assign rules disabled and saved successfully.");
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+
+  const handleSaveAutoAssignRules = async (savedCriteria: any) => {
     if (!programId) return;
 
     if (isAutoAssignable) {
       if (
-        !autoAssignCriteria ||
-        autoAssignCriteria.webinarIds.length === 0 ||
-        autoAssignCriteria.isAttended === null
+        !savedCriteria ||
+        !savedCriteria.webinarIds ||
+        savedCriteria.webinarIds.length === 0 ||
+        savedCriteria.isAttended === null
       ) {
         toastUtils.error(
           "Please configure the auto-assign rules (select a webinar and attendance status).",
@@ -102,7 +119,7 @@ export default function ProgramDetails() {
         programId,
         payload: {
           isAutoAssignable,
-          autoAssignCriteria: isAutoAssignable ? autoAssignCriteria : null,
+          autoAssignCriteria: isAutoAssignable ? savedCriteria : null,
         } as any, // Type cast to bypass partial UpdateProgramDto strictness
       });
       toastUtils.success("Auto-assign rules updated.");
@@ -284,11 +301,18 @@ export default function ProgramDetails() {
           >
             <div className="flex items-center gap-3 mb-6 px-2">
               <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400">
-                <Zap className="h-4 w-4" />
+                <Settings className="h-4 w-4" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Active Assignments</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Automation Rules</span>
             </div>
-            <ProgramAssignmentsSection programId={programId} program={program} />
+            <AutoAssignRuleBuilder
+              isAutoAssignable={isAutoAssignable}
+              onAutoAssignableChange={handleAutoAssignableChange}
+              criteria={(program.autoAssignCriteria as any) ?? null}
+              onSave={handleSaveAutoAssignRules}
+              isSaving={updateProgramMutation.isPending}
+              disabled={isProgramCancelled}
+            />
           </motion.section>
 
           <motion.section
@@ -298,19 +322,11 @@ export default function ProgramDetails() {
           >
             <div className="flex items-center gap-3 mb-6 px-2">
               <div className="h-8 w-8 rounded-lg bg-slate-50 dark:bg-slate-950 border border-slate-100 dark:border-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400">
-                <Settings className="h-4 w-4" />
+                <Zap className="h-4 w-4" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Automation Rules</span>
+              <span className="text-[10px] font-black uppercase tracking-widest text-slate-600 dark:text-slate-400">Active Assignments</span>
             </div>
-            <AutoAssignRuleBuilder
-              isAutoAssignable={isAutoAssignable}
-              onAutoAssignableChange={setIsAutoAssignable}
-              criteria={autoAssignCriteria}
-              onCriteriaChange={setAutoAssignCriteria}
-              onSave={handleSaveAutoAssignRules}
-              isSaving={updateProgramMutation.isPending}
-              disabled={isProgramCancelled}
-            />
+            <ProgramAssignmentsSection programId={programId} program={program} />
           </motion.section>
         </div>
       </main>

@@ -219,6 +219,15 @@ const uploadMediaAsset = async (file: File, projectId: string): Promise<any> => 
   return data;
 };
 
+/**
+ * Check if session window is active for a given phone number
+ */
+const checkSessionStatus = async (projectId: string, phoneNumber: string): Promise<{ canSend: boolean }> => {
+  const cleanPhone = phoneNumber.startsWith('+') ? phoneNumber : `+${phoneNumber}`;
+  const { data } = await axiosInstance.get(`/whatsapp/chat/can-send-direct/${projectId}/${encodeURIComponent(cleanPhone)}`);
+  return data.data; // returns { canSend: boolean }
+};
+
 export const templateApi = {
   syncTemplates,
   getTemplates,
@@ -232,4 +241,5 @@ export const templateApi = {
   exchangeCode,
   uploadSampleMedia,
   uploadMediaAsset,
+  checkSessionStatus,
 };

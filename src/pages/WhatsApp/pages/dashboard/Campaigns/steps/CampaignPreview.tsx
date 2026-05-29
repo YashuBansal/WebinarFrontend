@@ -34,6 +34,8 @@ interface CampaignPreviewProps {
   selectedContacts: CampaignContact[];
   selectedTemplate: CampaignTemplate | null;
   variableMappings: VariableMapping[];
+  selectedSessionTemplate?: CampaignTemplate | null;
+  sessionVariableMappings?: VariableMapping[];
   onSubmit: () => void;
   onPrevious: () => void;
   isSubmitting: boolean;
@@ -49,6 +51,8 @@ const CampaignPreview = ({
   selectedContacts,
   selectedTemplate,
   variableMappings,
+  selectedSessionTemplate = null,
+  sessionVariableMappings = [],
   onSubmit,
   onPrevious,
   isSubmitting,
@@ -233,17 +237,41 @@ const CampaignPreview = ({
             </div>
           </div>
           
-          <div className="bg-slate-50/50 dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-slate-700/50 p-8 flex justify-center">
-            <div className="w-full max-w-sm">
-              <WhatsAppTemplatePreviewCard
-                template={selectedTemplate}
-                variableMappings={variableMappings}
-                sampleContact={sampleContact}
-                showSampleContact={true}
-                showVariableMappings={true}
-                headerMediaAsset={selectedMediaAsset}
-              />
-            </div>
+          <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+            {selectedSessionTemplate && (
+              <div className="bg-slate-50/50 dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-slate-700/50 p-6 flex flex-col items-center">
+                <Badge className="mb-4 bg-green-500 hover:bg-green-600 text-white font-extrabold uppercase text-[10px] tracking-wide px-3 py-1 rounded-full">
+                  ⚡ Session Delivery
+                </Badge>
+                <div className="w-full">
+                  <WhatsAppTemplatePreviewCard
+                    template={selectedSessionTemplate}
+                    variableMappings={sessionVariableMappings}
+                    sampleContact={sampleContact}
+                    showSampleContact={true}
+                    showVariableMappings={true}
+                  />
+                </div>
+              </div>
+            )}
+
+            {selectedTemplate && (
+              <div className="bg-slate-50/50 dark:bg-slate-800/50 rounded-3xl border border-slate-200 dark:border-slate-700/50 p-6 flex flex-col items-center">
+                <Badge className="mb-4 bg-blue-500 hover:bg-blue-600 text-white font-extrabold uppercase text-[10px] tracking-wide px-3 py-1 rounded-full">
+                  🌐 Standard Fallback
+                </Badge>
+                <div className="w-full">
+                  <WhatsAppTemplatePreviewCard
+                    template={selectedTemplate}
+                    variableMappings={variableMappings}
+                    sampleContact={sampleContact}
+                    showSampleContact={true}
+                    showVariableMappings={true}
+                    headerMediaAsset={selectedMediaAsset}
+                  />
+                </div>
+              </div>
+            )}
           </div>
         </motion.div>
 

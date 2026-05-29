@@ -227,10 +227,11 @@ const Pullbacks = (props) => {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.03 }}
                     key={item._id || index}
-                    className={cn("group border-b transition-all duration-200", isSelected ? (isDark ? "bg-green-500/10" : "bg-green-50/50") : (isDark ? "border-slate-800/60 hover:bg-slate-800/20" : "border-slate-100 hover:bg-black/5"))}
+                    onClick={() => navigate(`/particularContact?email=${item?.attendeeEmail}&attendeeId=${item?.attendee}`)}
+                    className={cn("group border-b transition-all duration-200 cursor-pointer", isSelected ? (isDark ? "bg-green-500/10" : "bg-green-50/50") : (isDark ? "border-slate-800/60 hover:bg-slate-800/20" : "border-slate-100 hover:bg-black/5"))}
                   >
                     {userData?.isActive && (
-                      <td className={cn("p-4 align-middle sticky left-0 z-10 transition-colors", isSelected ? (isDark ? "bg-[#064e3b]" : "#f0fdf4") : (isDark ? "bg-slate-950 group-hover:bg-slate-900/80" : "bg-white group-hover:bg-slate-50/80"))}>
+                      <td className={cn("p-4 align-middle sticky left-0 z-10 transition-colors", isSelected ? (isDark ? "bg-[#064e3b]" : "#f0fdf4") : (isDark ? "bg-slate-950 group-hover:bg-slate-900/80" : "bg-white group-hover:bg-slate-50/80"))} onClick={(e) => e.stopPropagation()}>
                         <Checkbox
                           checked={isSelected}
                           onCheckedChange={() => handleSelectRow(item._id)}
@@ -249,7 +250,7 @@ const Pullbacks = (props) => {
                         </td>
                       );
                     })}
-                    <td className={cn("p-4 sticky right-0 z-10 transition-colors", isSelected ? (isDark ? "bg-[#064e3b]" : "#f0fdf4") : (isDark ? "bg-slate-950 group-hover:bg-slate-900/80" : "bg-white group-hover:bg-slate-50/80"))}>
+                    <td className={cn("p-4 sticky right-0 z-10 transition-colors", isSelected ? (isDark ? "bg-[#064e3b]" : "#f0fdf4") : (isDark ? "bg-slate-950 group-hover:bg-slate-900/80" : "bg-white group-hover:bg-slate-50/80"))} onClick={(e) => e.stopPropagation()}>
                       <div className="flex justify-center items-center gap-1">
                         {userData?.isActive && item.status !== AssignmentStatus.REASSIGN_APPROVED && (
                           <>

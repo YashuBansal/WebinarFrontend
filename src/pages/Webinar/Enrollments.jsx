@@ -244,7 +244,8 @@ const Enrollments = (props) => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.03 }}
                   key={item._id || index}
-                  className={cn("group border-b transition-all duration-200", isDark ? "border-slate-800/60 hover:bg-slate-800/20" : "border-slate-100 hover:bg-black/5")}
+                  onClick={() => navigate(`/particularContact?email=${item?.attendee}&attendeeId=${item?.attendeeId}`)}
+                  className={cn("group border-b transition-all duration-200 cursor-pointer", isDark ? "border-slate-800/60 hover:bg-slate-800/20" : "border-slate-100 hover:bg-black/5")}
                 >
                   <td className={cn("p-4 text-sm font-bold sticky left-0 z-10 group-hover:bg-slate-50/80", isDark ? "text-slate-500 bg-slate-950 group-hover:bg-slate-900/80" : "text-slate-400 bg-white")}>
                     {startRow + index}
@@ -257,7 +258,7 @@ const Enrollments = (props) => {
                       </td>
                     );
                   })}
-                  <td className={cn("p-4 sticky right-0 z-10 group-hover:bg-slate-50/80", isDark ? "bg-slate-950 group-hover:bg-slate-900/80" : "bg-white")}>
+                  <td className={cn("p-4 sticky right-0 z-10 group-hover:bg-slate-50/80", isDark ? "bg-slate-950 group-hover:bg-slate-900/80" : "bg-white")} onClick={(e) => e.stopPropagation()}>
                     <div className="flex justify-center">
                       <Button
                         variant="ghost"

@@ -29,8 +29,7 @@ interface AutoAssignRuleBuilderProps {
   isAutoAssignable: boolean;
   onAutoAssignableChange: (val: boolean) => void;
   criteria: AutoAssignCriteriaPayload | null;
-  onCriteriaChange: (val: AutoAssignCriteriaPayload | null) => void;
-  onSave?: () => void;
+  onSave?: (criteria: AutoAssignCriteriaPayload | null) => void;
   isSaving?: boolean;
   /** When true, UI is read-only and users cannot change or save rules. */
   disabled?: boolean;
@@ -40,7 +39,6 @@ export function AutoAssignRuleBuilder({
   isAutoAssignable,
   onAutoAssignableChange,
   criteria,
-  onCriteriaChange,
   onSave,
   isSaving,
   disabled = false,
@@ -68,7 +66,9 @@ export function AutoAssignRuleBuilder({
 
   // Initialize from props if editing (only once, when criteria is first available)
   React.useEffect(() => {
-    if (criteria && !hasInitialized.current) {
+    if (hasInitialized.current) return;
+
+    if (criteria) {
       setSelectedWebinarIds(criteria.webinarIds || []);
       setIsAttended(criteria.isAttended ?? null);
 
@@ -80,8 +80,8 @@ export function AutoAssignRuleBuilder({
           console.error("Failed to parse conditions", e);
         }
       }
-      hasInitialized.current = true;
     }
+    hasInitialized.current = true;
   }, [criteria]);
 
   const handleConditionUpdate = (id: string, updates: Partial<FilterCondition>) => {
@@ -102,21 +102,6 @@ export function AutoAssignRuleBuilder({
   };
 
   const { mutateAsync: fetchAdvanceCount, data: advanceCountData, isPending } = useAdvanceFilterCount();
-
-  // Every time something changes, we should push it up
-  React.useEffect(() => {
-    if (!isAutoAssignable) {
-      onCriteriaChange(null);
-      return;
-    }
-
-    const units = mapConditionsToAdvanceUnits(conditions);
-    onCriteriaChange({
-      webinarIds: selectedWebinarIds,
-      isAttended: isAttended,
-      conditions: units,
-    });
-  }, [conditions, selectedWebinarIds, isAttended, isAutoAssignable]);
 
   const testCount = async () => {
     if (selectedWebinarIds.length === 0 || isAttended === null) return;
@@ -173,6 +158,7 @@ export function AutoAssignRuleBuilder({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.4, ease: "easeInOut" }}
+            className={disabled ? "pointer-events-none opacity-60 select-none" : ""}
           >
             <CardContent className="p-6 sm:p-8 space-y-10">
               {/* Primary Filters */}
@@ -298,7 +284,16 @@ export function AutoAssignRuleBuilder({
 
                 {onSave && (
                   <Button
-                    onClick={onSave}
+                    onClick={() => {
+                      if (onSave) {
+                        const units = mapConditionsToAdvanceUnits(conditions);
+                        onSave({
+                          webinarIds: selectedWebinarIds,
+                          isAttended: isAttended,
+                          conditions: units,
+                        });
+                      }
+                    }}
                     disabled={disabled || isSaving}
                     className="h-11 px-10 rounded-xl bg-[#22B573] hover:bg-[#1da467] text-white font-bold text-xs shadow-lg shadow-green-600/20 transition-all hover:scale-[1.02] active:scale-[0.98] gap-2"
                   >

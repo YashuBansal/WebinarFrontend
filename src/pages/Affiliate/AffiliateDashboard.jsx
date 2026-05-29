@@ -52,6 +52,7 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
 
   const [copied, setCopied] = useState(false);
   const [referralTab, setReferralTab] = useState("customers"); // "customers" or "signups"
+  const [tierFilter, setTierFilter] = useState("all"); // "all" | "tier1" | "tier2"
   const { theme } = useTheme();
   const isDark = theme === "dark";
 
@@ -177,11 +178,12 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
               </motion.div>
             </div>
 
-            {/* Toggle Switch between Customers and Signups */}
+            {/* Toggle Switch and Tier Filter Selector */}
             <motion.div
               variants={itemVariants}
-              className="flex justify-center md:justify-start"
+              className="flex flex-col sm:flex-row items-center justify-between gap-4"
             >
+              {/* Customers / Signups Switch */}
               <div className="flex p-1 rounded-xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/50 dark:border-slate-700/50 backdrop-blur-md relative shadow-sm">
                 <button
                   onClick={() => setReferralTab("customers")}
@@ -216,6 +218,20 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
                   <span className="relative z-10">Signups</span>
                 </button>
               </div>
+
+              {/* Tier Filter Selector Dropdown */}
+              <div className="flex items-center gap-2.5 w-full sm:w-auto">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">Filter Network:</span>
+                <select
+                  value={tierFilter}
+                  onChange={(e) => setTierFilter(e.target.value)}
+                  className="w-full sm:w-48 rounded-xl border border-slate-200 bg-white/70 py-2 text-xs font-bold text-slate-700 outline-none transition-all focus:border-rose-450 dark:border-slate-800 dark:bg-slate-900/80 dark:text-slate-300 dark:focus:border-rose-800 shadow-sm"
+                >
+                  <option value="all">All Network Tiers</option>
+                  <option value="tier1">Direct Referral (Tier 1)</option>
+                  <option value="tier2">Sub-Referral (Tier 2)</option>
+                </select>
+              </div>
             </motion.div>
 
             {/* Referrals Table Container */}
@@ -233,38 +249,55 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
                 style={{ borderColor: isDark ? "#334155" : "rgba(0,0,0,0.05)" }}
               >
                 <Users className="h-4 w-4 text-rose-500" />
-                <span className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                <span className="text-sm font-bold text-slate-800 dark:text-slate-100 border-r border-slate-200/60 dark:border-slate-700/60 pr-2">
                   {referralTab === "customers" ? "Referred Paid Customers" : "Referred Signups List"}
+                </span>
+                <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+                  {tierFilter === "all" ? "All Tiers" : tierFilter === "tier1" ? "Tier 1 Only" : "Tier 2 Only"}
                 </span>
               </div>
               <div className="overflow-x-auto custom-scrollbar">
-                {referralTab === "customers" ? (
-                  <table className="w-full text-left border-collapse min-w-[900px]">
-                    <thead>
-                      <tr style={{ backgroundColor: isDark ? "rgba(15,23,42,0.95)" : "#F9FAFB" }}>
-                        <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Name</th>
-                        <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Email</th>
-                        <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Number</th>
-                        <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Invoice ID</th>
-                        <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Purchase Date</th>
-                        <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Plan Purchased</th>
-                        <th className="p-4 font-semibold text-xs uppercase tracking-wider text-right" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Commission Amount</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-200/50 dark:divide-slate-800/50">
-                      {referrals.filter(r => r.status === 'customer').length === 0 ? (
-                        <tr>
-                          <td colSpan={7} className="p-8 text-center text-sm font-semibold text-slate-400 dark:text-slate-500">
-                            No referred paid customers yet. Share your link to start earning!
-                          </td>
+                {referralTab === "customers" ? (() => {
+                  const filteredList = referrals.filter(
+                    (r) =>
+                      r.status === "customer" &&
+                      (tierFilter === "all" ? true : tierFilter === "tier1" ? r.tier === 1 : r.tier === 2)
+                  );
+
+                  return (
+                    <table className="w-full text-left border-collapse min-w-[950px]">
+                      <thead>
+                        <tr style={{ backgroundColor: isDark ? "rgba(15,23,42,0.95)" : "#F9FAFB" }}>
+                          <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Name</th>
+                          <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Email</th>
+                          <th className="p-4 font-semibold text-xs uppercase tracking-wider text-center" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Tier</th>
+                          <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Number</th>
+                          <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Invoice ID</th>
+                          <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Purchase Date</th>
+                          <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Plan Purchased</th>
+                          <th className="p-4 font-semibold text-xs uppercase tracking-wider text-right" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Commission Amount</th>
                         </tr>
-                      ) : (
-                        referrals
-                          .filter((r) => r.status === "customer")
-                          .map((cust) => (
+                      </thead>
+                      <tbody className="divide-y divide-slate-200/50 dark:divide-slate-800/50">
+                        {filteredList.length === 0 ? (
+                          <tr>
+                            <td colSpan={8} className="p-8 text-center text-sm font-semibold text-slate-400 dark:text-slate-500">
+                              No referred paid customers matching this tier.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredList.map((cust) => (
                             <tr key={cust.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors" style={{ borderColor: isDark ? "#334155" : "#e2e8f0" }}>
                               <td className="p-4 text-sm font-bold text-slate-800 dark:text-slate-200">{cust.name}</td>
                               <td className="p-4 text-sm text-slate-600 dark:text-slate-400 font-medium">{cust.email}</td>
+                              <td className="p-4 text-center">
+                                <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${cust.tier === 1
+                                  ? "bg-orange-50 text-orange-655 dark:bg-orange-950/20 dark:text-orange-400"
+                                  : "bg-pink-50 text-pink-655 dark:bg-pink-950/20 dark:text-pink-400"
+                                  }`}>
+                                  Tier {cust.tier}
+                                </span>
+                              </td>
                               <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400">{cust.number}</td>
                               <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400">{cust.invoiceId || "-"}</td>
                               <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400">{cust.purchaseDate || "-"}</td>
@@ -278,41 +311,57 @@ const AffiliateDashboard = ({ view = "dashboard" }) => {
                               </td>
                             </tr>
                           ))
-                      )}
-                    </tbody>
-                  </table>
-                ) : (
-                  <table className="w-full text-left border-collapse min-w-[700px]">
-                    <thead>
-                      <tr style={{ backgroundColor: isDark ? "rgba(15,23,42,0.95)" : "#F9FAFB" }}>
-                        <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Name</th>
-                        <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Email</th>
-                        <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Number</th>
-                        <th className="p-4 font-semibold text-xs uppercase tracking-wider text-right" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Registration Date</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-200/50 dark:divide-slate-800/50">
-                      {referrals.filter(r => r.status === 'signup').length === 0 ? (
-                        <tr>
-                          <td colSpan={4} className="p-8 text-center text-sm font-semibold text-slate-400 dark:text-slate-500">
-                            No referred signups yet. Share your link to start earning!
-                          </td>
+                        )}
+                      </tbody>
+                    </table>
+                  );
+                })() : (() => {
+                  const filteredList = referrals.filter(
+                    (r) =>
+                      r.status === "signup" &&
+                      (tierFilter === "all" ? true : tierFilter === "tier1" ? r.tier === 1 : r.tier === 2)
+                  );
+
+                  return (
+                    <table className="w-full text-left border-collapse min-w-[750px]">
+                      <thead>
+                        <tr style={{ backgroundColor: isDark ? "rgba(15,23,42,0.95)" : "#F9FAFB" }}>
+                          <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Name</th>
+                          <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Email</th>
+                          <th className="p-4 font-semibold text-xs uppercase tracking-wider text-center" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Tier</th>
+                          <th className="p-4 font-semibold text-xs uppercase tracking-wider" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Number</th>
+                          <th className="p-4 font-semibold text-xs uppercase tracking-wider text-right" style={{ color: isDark ? "#94a3b8" : "#64748b" }}>Registration Date</th>
                         </tr>
-                      ) : (
-                        referrals
-                          .filter((r) => r.status === "signup")
-                          .map((signup) => (
+                      </thead>
+                      <tbody className="divide-y divide-slate-200/50 dark:divide-slate-800/50">
+                        {filteredList.length === 0 ? (
+                          <tr>
+                            <td colSpan={5} className="p-8 text-center text-sm font-semibold text-slate-400 dark:text-slate-500">
+                              No referred signups matching this tier.
+                            </td>
+                          </tr>
+                        ) : (
+                          filteredList.map((signup) => (
                             <tr key={signup.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors" style={{ borderColor: isDark ? "#334155" : "#e2e8f0" }}>
                               <td className="p-4 text-sm font-bold text-slate-800 dark:text-slate-200">{signup.name}</td>
                               <td className="p-4 text-sm text-slate-600 dark:text-slate-400 font-medium">{signup.email}</td>
+                              <td className="p-4 text-center">
+                                <span className={`inline-flex px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider ${signup.tier === 1
+                                  ? "bg-orange-50 text-orange-655 dark:bg-orange-950/20 dark:text-orange-400"
+                                  : "bg-pink-50 text-pink-655 dark:bg-pink-950/20 dark:text-pink-400"
+                                  }`}>
+                                  Tier {signup.tier}
+                                </span>
+                              </td>
                               <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400">{signup.number}</td>
                               <td className="p-4 text-xs font-mono text-slate-500 dark:text-slate-400 text-right">{signup.registrationDate}</td>
                             </tr>
                           ))
-                      )}
-                    </tbody>
-                  </table>
-                )}
+                        )}
+                      </tbody>
+                    </table>
+                  );
+                })()}
               </div>
             </motion.div>
           </motion.div>

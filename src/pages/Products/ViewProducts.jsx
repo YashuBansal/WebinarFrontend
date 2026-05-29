@@ -989,7 +989,8 @@ const ViewProducts = () => {
                       duration: 0.35,
                       ease: [0.22, 1, 0.36, 1],
                     }}
-                    className="border-b transition-colors group"
+                    onClick={() => openViewDetails(product)}
+                    className="border-b transition-colors group cursor-pointer"
                     style={{
                       borderColor: theme === "dark" ? "#334155" : "#e2e8f0",
                       backgroundColor: isSelected
@@ -1001,6 +1002,7 @@ const ViewProducts = () => {
                   >
                     <td
                       className="p-4 sticky left-0 z-10 group-hover:bg-black/5 dark:group-hover:bg-white/5 transition-colors"
+                      onClick={(e) => e.stopPropagation()}
                       style={{
                         backgroundColor:
                           theme === "dark"
@@ -1069,6 +1071,7 @@ const ViewProducts = () => {
                     {showActions && (
                       <td
                         className="p-4 text-right sticky right-0 z-10 transition-colors"
+                        onClick={(e) => e.stopPropagation()}
                         style={{
                           backgroundColor:
                             theme === "dark"

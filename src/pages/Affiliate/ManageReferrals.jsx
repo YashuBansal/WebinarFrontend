@@ -161,22 +161,47 @@ const ManageReferrals = () => {
     );
   });
 
-  const filteredReferrals = referrals.filter((r) => {
-    const term = searchTerm.toLowerCase();
-    const matchesSearch =
-      r.referrerName.toLowerCase().includes(term) ||
-      r.referrerEmail.toLowerCase().includes(term) ||
-      r.referredName.toLowerCase().includes(term) ||
-      r.referredEmail.toLowerCase().includes(term) ||
-      (r.planPurchased && r.planPurchased.toLowerCase().includes(term));
+  const filteredReferrals = React.useMemo(() => {
+    const matched = referrals.filter((r) => {
+      const term = searchTerm.toLowerCase();
+      const matchesSearch =
+        r.referrerName.toLowerCase().includes(term) ||
+        r.referrerEmail.toLowerCase().includes(term) ||
+        r.referredName.toLowerCase().includes(term) ||
+        r.referredEmail.toLowerCase().includes(term) ||
+        (r.planPurchased && r.planPurchased.toLowerCase().includes(term));
 
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "customer" && r.status === "customer") ||
-      (statusFilter === "signup" && r.status === "signup");
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "customer" && r.status === "customer") ||
+        (statusFilter === "signup" && r.status === "signup");
 
-    return matchesSearch && matchesStatus;
-  });
+      return matchesSearch && matchesStatus;
+    });
+
+    // Deduplicate by referred email, prioritizing the original/first purchase (earliest createdAt)
+    const emailToReferralMap = new Map();
+
+    for (const r of matched) {
+      const email = r.referredEmail.toLowerCase();
+      const existing = emailToReferralMap.get(email);
+      if (!existing) {
+        emailToReferralMap.set(email, r);
+      } else {
+        // Compare createdAt dates to always keep the earliest one (representing the original signup/first conversion)
+        const existingDate = new Date(existing.createdAt || 0);
+        const newDate = new Date(r.createdAt || 0);
+        if (newDate < existingDate) {
+          emailToReferralMap.set(email, r);
+        }
+      }
+    }
+
+    const result = Array.from(emailToReferralMap.values());
+
+    // Keep chronological order of signups (latest first)
+    return result.sort((a, b) => new Date(b.createdAt || b.registrationDate || 0) - new Date(a.createdAt || a.registrationDate || 0));
+  }, [referrals, searchTerm, statusFilter]);
 
   const filteredPayouts = payouts.filter((p) => {
     const term = searchTerm.toLowerCase();
@@ -499,7 +524,11 @@ const ManageReferrals = () => {
                       </tr>
                     ) : (
                       filteredProfiles.map((prof) => (
-                        <tr key={prof.id} className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors">
+                        <tr
+                          key={prof.id}
+                          onClick={() => setSelectedNetworkPartner(prof)}
+                          className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors cursor-pointer"
+                        >
                           <td className="p-4">
                             <div className="flex flex-col gap-0.5">
                               <span className="text-sm font-extrabold text-slate-800 dark:text-slate-200">{prof.name}</span>
@@ -526,13 +555,13 @@ const ManageReferrals = () => {
                               {prof.payoutsCount}
                             </span>
                           </td>
-                          <td className="p-4 text-right">
+                          <td className="p-4 text-right" onClick={(e) => e.stopPropagation()}>
                             <div className="flex items-center justify-end gap-2">
                               <Button
                                 onClick={() => setSelectedNetworkPartner(prof)}
                                 variant="outline"
                                 size="sm"
-                                className="h-8 text-xs font-bold gap-1 rounded-xl border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700 hover:scale-[1.01] transition-all text-slate-700 dark:text-slate-300"
+                                className="h-8 text-xs font-bold gap-1 rounded-xl border-slate-200 hover:border-slate-350 dark:border-slate-800 dark:hover:border-slate-700 hover:scale-[1.01] transition-all text-slate-700 dark:text-slate-300"
                               >
                                 <Eye className="h-3.5 w-3.5 text-blue-500" />
                               </Button>
@@ -558,17 +587,16 @@ const ManageReferrals = () => {
             {/* Tab 2: Referrals Ledger Table */}
             {activeTab === "referrals" && (
               <div className="overflow-x-auto custom-scrollbar">
-                <table className="w-full text-left border-collapse min-w-[1150px]">
+                <table className="w-full text-left border-collapse min-w-[1050px]">
                   <thead>
                     <tr style={{ backgroundColor: isDark ? "rgba(15,23,42,0.95)" : "#F9FAFB" }}>
                       <th className="p-4 font-bold text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Referred User</th>
                       <th className="p-4 font-bold text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Invited By</th>
-                      <th className="p-4 font-bold text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500 text-center">Tier</th>
                       <th className="p-4 font-bold text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Plan Purchased</th>
                       <th className="p-4 font-bold text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Invoice ID</th>
+                      <th className="p-4 font-bold text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Signup Date</th>
                       <th className="p-4 font-bold text-[10px] uppercase tracking-wider text-slate-400 dark:text-slate-500">Purchase Date</th>
                       <th className="p-4 font-bold text-[10px] uppercase tracking-wider text-center text-slate-400 dark:text-slate-500">Status</th>
-                      <th className="p-4 font-bold text-[10px] uppercase tracking-wider text-right text-slate-400 dark:text-slate-500">Commission</th>
                       <th className="p-4 font-bold text-[10px] uppercase tracking-wider text-right text-slate-400 dark:text-slate-500">Audit Trail</th>
                     </tr>
                   </thead>
@@ -594,19 +622,14 @@ const ManageReferrals = () => {
                               <span className="text-xs text-slate-500 dark:text-slate-400">{ref.referrerEmail}</span>
                             </div>
                           </td>
-                          <td className="p-4 text-center">
-                            <span className={`inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold ${ref.tier === 1
-                              ? "bg-orange-50 text-orange-600 border border-orange-200/20 dark:bg-orange-950/20 dark:text-orange-400"
-                              : "bg-pink-50 text-pink-600 border border-pink-200/20 dark:bg-pink-950/20 dark:text-pink-400"
-                              }`}>
-                              Tier {ref.tier}
-                            </span>
-                          </td>
                           <td className="p-4 text-xs font-semibold text-slate-700 dark:text-slate-300">
                             {ref.planPurchased || "-"}
                           </td>
                           <td className="p-4 font-mono text-xs text-slate-500 dark:text-slate-400">
                             {ref.invoiceId || "-"}
+                          </td>
+                          <td className="p-4 font-mono text-xs text-slate-500 dark:text-slate-400">
+                            {ref.createdAt ? ref.createdAt.split('T')[0] : "-"}
                           </td>
                           <td className="p-4 font-mono text-xs text-slate-500 dark:text-slate-400">
                             {ref.purchaseDate || "-"}
@@ -618,9 +641,6 @@ const ManageReferrals = () => {
                               }`}>
                               {ref.status}
                             </span>
-                          </td>
-                          <td className="p-4 text-right font-black text-slate-800 dark:text-slate-50 tabular-nums text-sm">
-                            ₹{ref.commission.toFixed(2)}
                           </td>
                           <td className="p-4 text-right">
                             <Button
@@ -1151,9 +1171,14 @@ const ManageReferrals = () => {
       {/* View Attribution Click Audit Trail Overlay Modal */}
       <AnimatePresence>
         {selectedAuditReferral && (() => {
-          // Generate realistic attribution timeline click history for this referred user
-          const activePartnerEmail = selectedAuditReferral.referrerEmail;
-          const activePartnerName = selectedAuditReferral.referrerName;
+          // Find the corresponding Tier 1 referral for this user to resolve the actual winning referrer
+          const tier1ReferralForThisUser = referrals.find(
+            (r) => r.referredEmail === selectedAuditReferral.referredEmail && r.tier === 1
+          ) || selectedAuditReferral;
+
+          const activePartnerEmail = tier1ReferralForThisUser.referrerEmail;
+          const activePartnerName = tier1ReferralForThisUser.referrerName;
+          const activePartnerCode = tier1ReferralForThisUser.referrerCode;
 
           const regDate = new Date(selectedAuditReferral.createdAt || selectedAuditReferral.registrationDate || Date.now());
 
@@ -1215,7 +1240,7 @@ const ManageReferrals = () => {
               touchNum: previousClicks.length + 1,
               partnerName: activePartnerName,
               partnerEmail: activePartnerEmail,
-              partnerCode: selectedAuditReferral.referrerCode || "client_882948",
+              partnerCode: activePartnerCode || "client_882948",
               isWinning: true
             }
           ];
@@ -1377,7 +1402,7 @@ const ManageReferrals = () => {
                         </div>
                         <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
                           <span className="text-[10px] font-bold text-slate-400">Referral Code:</span>
-                          <span className="font-mono text-xs font-extrabold text-rose-500">{selectedAuditReferral.referrerCode || "client_882948"}</span>
+                          <span className="font-mono text-xs font-extrabold text-rose-500">{activePartnerCode || "client_882948"}</span>
                         </div>
                       </div>
                     </div>

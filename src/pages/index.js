@@ -44,6 +44,7 @@ const Profile = lazy(() => import("./Profile/Profile"));
 const WebinarAttendees = lazy(() => import("./Webinar/WebinarAttendees"));
 const NotesPage = lazy(() => import("./Contacts/NotesPage"));
 const AttendeeHistory = lazy(() => import("./Contacts/AttendeeHistory"));
+const AttendeeWebinarDetail = lazy(() => import("./Contacts/AttendeeWebinarDetail"));
 const CalendarPage = lazy(() => import("./Calendar/CalendarPage"));
 const AddOnsPage = lazy(() => import("./Settings/Addons/Addons"));
 const BuyAddOnsPage = lazy(() => import("./Settings/Addons/BuyAddons"));
@@ -99,6 +100,7 @@ export {
   LeadTypes,
   EmployeeDashboard,
   AttendeeHistory,
+  AttendeeWebinarDetail,
   Dashboard,
   Login,
   Signup,

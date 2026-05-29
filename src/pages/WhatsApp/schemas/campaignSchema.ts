@@ -54,8 +54,10 @@ export const createCampaignWorkflowSchema = z.object({
   selectedContacts: contactSelectionSchema.shape.selectedContacts,
   
   // Step 3
-  templateName: templateSelectionSchema.shape.templateName,
+  templateName: z.string().optional(),
   variableMappings: templateSelectionSchema.shape.variableMappings,
+  sessionTemplateName: z.string().optional(),
+  sessionVariableMappings: templateSelectionSchema.shape.variableMappings,
   
   // Step 4
   sendType: campaignSendBaseSchema.shape.sendType,
@@ -201,8 +203,10 @@ export const createCampaignPayloadSchema = z.object({
     contactId: z.string(),
     phoneNumber: z.string(),
   })),
-  templateName: z.string().min(1),
+  templateName: z.string().optional(),
   variableMappings: z.array(variableMappingSchema).optional(),
+  sessionTemplateName: z.string().optional(),
+  sessionVariableMappings: z.array(variableMappingSchema).optional(),
   sendType: z.enum(['now', 'scheduled']),
   scheduledAt: z.string().nullable().optional(),
   headerMediaAssetId: z.string().optional(),

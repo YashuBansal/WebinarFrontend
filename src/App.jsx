@@ -39,6 +39,7 @@ import {
   WebinarAttendees,
   NotesPage,
   AttendeeHistory,
+  AttendeeWebinarDetail,
   CalendarPage,
   AddOnsPage,
   BuyAddOnsPage,
@@ -357,6 +358,11 @@ const App = () => {
         {
           path: "/particularContact/attendee-history",
           element: <AttendeeHistory />,
+        },
+
+        {
+          path: "/particularContact/attendee-webinar-detail",
+          element: <AttendeeWebinarDetail />,
         },
 
         {

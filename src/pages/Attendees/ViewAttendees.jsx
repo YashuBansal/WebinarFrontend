@@ -411,6 +411,7 @@ const ViewAttendees = () => {
         item?.salesLastStatus,
         item?.reminderLastStatus,
         item?.tags?.join(" "),
+        item?.phones?.join(" "),
       ]
         .join(" ")
         .toLowerCase()
@@ -907,7 +908,8 @@ const ViewAttendees = () => {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      className="border-b transition-colors group"
+                      onClick={() => navigate(`/particularContact?email=${row?._id}&attendeeId=${row?.attendeeId}`)}
+                      className="border-b transition-colors group cursor-pointer"
                       style={{
                         borderColor: isDark ? "#334155" : "#e2e8f0",
                         backgroundColor: isSelected
@@ -919,6 +921,7 @@ const ViewAttendees = () => {
                     >
                       <td
                         className="p-4 sticky left-0 z-10 group-hover:bg-black/5 dark:group-hover:bg-white/5 transition-colors"
+                        onClick={(e) => e.stopPropagation()}
                         style={{
                           backgroundColor: isDark
                             ? isSelected
@@ -1090,6 +1093,7 @@ const ViewAttendees = () => {
                       </td>
                       <td
                         className="p-4 text-right sticky right-0 z-10 transition-colors"
+                        onClick={(e) => e.stopPropagation()}
                         style={{
                           backgroundColor: isDark
                             ? isSelected

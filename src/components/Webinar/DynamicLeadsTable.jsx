@@ -240,13 +240,17 @@ export const DynamicLeadsTable = ({
             const cellBg = isSelected ? selectedBg : undefined;
             const stickyEdgeBg = isSelected ? selectedBg : (isDark ? '#1e293b' : '#ffffff');
 
+            const actionsColumn = visibleColumns.find(c => c.key === 'actions');
+            const onViewClick = actionsColumn?.onViewClick;
+
             return (
               <motion.tr
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: index * 0.03 }}
                 key={rowId || index}
-                className={`group border-b transition-all duration-200 ${
+                onClick={() => onViewClick && onViewClick(item)}
+                className={`group border-b cursor-pointer transition-all duration-200 ${
                   isSelected ? '' : 'hover:bg-black/5'
                 }`}
                 style={{ 
@@ -298,6 +302,7 @@ export const DynamicLeadsTable = ({
                         backgroundColor: isActions ? stickyEdgeBg : undefined 
                       }}
                       title={typeof content === 'string' ? content : ''}
+                      onClick={isActions ? (e) => e.stopPropagation() : undefined}
                     >
                       {content}
                     </td>
