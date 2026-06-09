@@ -20,6 +20,7 @@ import {
   Megaphone,
   Award,
   MailCheck,
+  Workflow,
 } from "lucide-react";
 import { useDispatch, useSelector } from "react-redux";
 import useRoles from "../../../hooks/useRoles";
@@ -85,7 +86,7 @@ const DashboardSidebar = ({
           Icon: MessagesSquare,
         },
         {
-          path: "/unique-email-counts", 
+          path: "/unique-email-counts",
           label: "Unique Email Counts",
           Icon: MailCheck,
         },
@@ -135,6 +136,12 @@ const DashboardSidebar = ({
             label: "Interest Pool",
             Icon: Target,
             children: [],
+          },
+          {
+            path: "/admin/automations",
+            label: "Automations",
+            Icon: Workflow,
+            children: ["automations"],
           },
         ],
     },

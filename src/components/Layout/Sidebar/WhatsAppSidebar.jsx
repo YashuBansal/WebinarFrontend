@@ -81,6 +81,7 @@ const WhatsAppSidebar = ({ variant, section, handleNavigation }) => {
     { name: "Media Files", path: `/whatsapp/dashboard/${projectId}/media-files`, icon: FileText },
     { name: "Tags", path: `/whatsapp/dashboard/${projectId}/tags`, icon: Tag },
     { name: "Sequence", path: `/whatsapp/dashboard/${projectId}/programs`, icon: ListTree },
+    { name: "Automations", path: `/whatsapp/dashboard/${projectId}/automations`, icon: Zap },
     { name: "Configuration", path: `/whatsapp/dashboard/${projectId}/configuration`, icon: Settings },
   ];
 

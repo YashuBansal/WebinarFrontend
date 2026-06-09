@@ -16,6 +16,7 @@ export default function DashboardLayout() {
   const dashboardBaseUrl = import.meta.env.VITE_REACT_APP_DASHBOARD_BASE_URL;
   const isLoggedOut = isAuthError || (!isAuthLoading && !userData);
   const isChatPage = location.pathname.split('/').includes('chat');
+  const isFullScreenPage = isChatPage || (location.pathname.includes('/automations/') && location.pathname.split('/automations/')[1]?.length > 0);
 
   useEffect(() => {
     if (!isLoggedOut || !dashboardBaseUrl?.trim()) return;
@@ -126,9 +127,9 @@ export default function DashboardLayout() {
   return (
     <div className="flex w-full min-h-screen bg-transparent">
       <div className="flex-1 flex flex-col min-w-0">
-        <main className={`flex-1 flex justify-center items-stretch min-w-0 ${isChatPage ? 'p-0' : ''}`}>
-          <div className={`w-full max-w-full flex flex-col min-w-0 ${isChatPage ? 'bg-transparent' : ''}`}>
-            <div className={`flex-1 min-w-0 ${isChatPage ? 'p-0' : 'p-0 md:p-4'}`}>
+        <main className={`flex-1 flex justify-center items-stretch min-w-0 ${isFullScreenPage ? 'p-0' : ''}`}>
+          <div className={`w-full max-w-full flex flex-col min-w-0 ${isFullScreenPage ? 'bg-transparent' : ''}`}>
+            <div className={`flex-1 min-w-0 ${isFullScreenPage ? 'p-0' : 'p-0 md:p-4'}`}>
               <Suspense fallback={<div className='p-8 text-center text-muted-foreground'>Loading...</div>}>
                 <Outlet />
               </Suspense>

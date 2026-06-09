@@ -26,6 +26,9 @@ import alarm from "./slices/alarm";
 import location from "./slices/location";
 import { razorpaySlice } from "./slices/razorpay";
 import filters from "./slices/filters.slice";
+import importProgress from "./slices/importProgress";
+import { attendeesApi } from "./slices/attendeesApi";
+import flow from "./slices/flowSlice";
 
 // Combine your individual reducers here
 const rootReducer = combineReducers({
@@ -51,7 +54,10 @@ const rootReducer = combineReducers({
   alarm,
   location,
   razorpaySlice,
-  filters
+  filters,
+  importProgress,
+  flow,
+  [attendeesApi.reducerPath]: attendeesApi.reducer,
 });
 
 // Custom root reducer handling a clear action
@@ -91,7 +97,7 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: false,
-    }),
+    }).concat(attendeesApi.middleware),
 });
 
 export default store;

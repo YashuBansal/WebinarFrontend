@@ -1,10 +1,25 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { ArrowUp, ArrowDown, ArrowUpDown, Eye, Trash2, Calendar, XCircle } from 'lucide-react';
-import { format } from 'date-fns';
 import { formatDateAsNumber } from '../../utils/extra';
-import { motion } from 'framer-motion';
 import { Checkbox } from '../ui/checkbox';
 import { Button } from '../ui/button';
+import { useVirtualizer } from '@tanstack/react-virtual';
+
+// Modern, micro-animated skeleton row loader for query cold starts
+const TableRowSkeleton = ({ columnsCount }) => {
+  return (
+    <tr className="animate-pulse border-b border-slate-100 dark:border-slate-800/40">
+      <td className="p-4 align-middle">
+        <div className="h-4 w-4 bg-slate-200 dark:bg-slate-700/50 rounded" />
+      </td>
+      {Array.from({ length: columnsCount }).map((_, i) => (
+        <td key={i} className="p-4">
+          <div className="h-4 bg-slate-200 dark:bg-slate-700/50 rounded w-2/3" />
+        </td>
+      ))}
+    </tr>
+  );
+};
 
 export const DynamicLeadsTable = ({
   columns,
@@ -16,7 +31,7 @@ export const DynamicLeadsTable = ({
   resizingColumn,
   theme,
   indexOfFirstItem,
-  sortedAttendees,
+  sortedAttendees = [],
   onSort,
   onResizeStart,
   onResizeDoubleClick,
@@ -26,7 +41,17 @@ export const DynamicLeadsTable = ({
   isLoading,
   leadTypeData = [],
 }) => {
-  // Build a fast lookup map: leadType _id (string) -> color
+  const isDark = theme === 'dark';
+  const textPrimary = isDark ? '#f8fafc' : '#071028';
+  const textMuted = isDark ? '#94a3b8' : '#64748b';
+  
+  const visibleColumns = useMemo(() => {
+    return columns.filter(col => columnVisibility[col.key] !== false);
+  }, [columns, columnVisibility]);
+
+  const selectedIds = useMemo(() => new Set(selectedRows), [selectedRows]);
+
+  // Build a fast O(1) lookup map for leadType colors
   const leadTypeColorMap = useMemo(() => {
     const map = {};
     (leadTypeData || []).forEach((lt) => {
@@ -34,12 +59,32 @@ export const DynamicLeadsTable = ({
     });
     return map;
   }, [leadTypeData]);
-  const isDark = theme === 'dark';
-  const textPrimary = isDark ? '#f8fafc' : '#071028';
-  const textMuted = isDark ? '#94a3b8' : '#64748b';
-  
-  const visibleColumns = columns.filter(col => columnVisibility[col.key] !== false);
-  const selectedIds = useMemo(() => new Set(selectedRows), [selectedRows]);
+
+  // Dynamic Scroll Parent binding ref
+  const tableBodyRef = useRef(null);
+  const [scrollContainer, setScrollContainer] = useState(null);
+
+  useEffect(() => {
+    if (tableBodyRef.current) {
+      // Find the nearest scrollable shell wrapper (defined in WebinarAttendeesTableShell)
+      const container = tableBodyRef.current.closest('.overflow-auto') || tableBodyRef.current.parentElement;
+      setScrollContainer(container);
+    }
+  }, []);
+
+  // Initialize Row Virtualizer using spacer rows pattern
+  const rowVirtualizer = useVirtualizer({
+    count: sortedAttendees?.length || 0,
+    getScrollElement: () => scrollContainer,
+    estimateSize: () => 53, // standard row height in pixels
+    overscan: 12,           // keep 12 rows pre-rendered out of view for ultra-smooth scrolling
+  });
+
+  const virtualRows = rowVirtualizer.getVirtualItems();
+  const totalSize = rowVirtualizer.getTotalSize();
+
+  const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
+  const paddingBottom = virtualRows.length > 0 ? totalSize - virtualRows[virtualRows.length - 1].end : 0;
 
   const formatDuration = (seconds) => {
     if (!seconds) return '0m';
@@ -73,7 +118,7 @@ export const DynamicLeadsTable = ({
               variant="ghost"
               size="icon"
               onClick={(e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // Stop row click navigation
                 if (col.onViewClick) col.onViewClick(item);
               }}
               className="h-8 w-8 rounded-lg hover:bg-purple-50 dark:hover:bg-purple-500/10"
@@ -85,7 +130,7 @@ export const DynamicLeadsTable = ({
               variant="ghost"
               size="icon"
               onClick={(e) => {
-                e.stopPropagation();
+                e.stopPropagation(); // Stop row click navigation
                 if (col.onDeleteClick) col.onDeleteClick(item);
               }}
               className="h-8 w-8 rounded-lg hover:bg-red-50 dark:hover:bg-red-500/10"
@@ -101,8 +146,8 @@ export const DynamicLeadsTable = ({
         );
       case 'dateTime':
         return (
-          <div className="flex items-center gap-2 whitespace-nowrap text-sm font-medium text-[#64748b]">
-            <Calendar className="w-4 h-4 text-gray-400" />
+          <div className="flex items-center gap-2 whitespace-nowrap text-sm font-medium text-[#64748b] dark:text-[#94a3b8]">
+            <Calendar className="w-4 h-4 text-gray-400 dark:text-gray-500" />
             <span>{formatDateAsNumber(item[col.dataKey])}</span>
           </div>
         );
@@ -156,7 +201,7 @@ export const DynamicLeadsTable = ({
       <thead className="sticky top-0 z-20">
         <tr style={{ backgroundColor: isDark ? '#1e293b' : '#F9FAFB' }}>
           <th
-            className="p-4 text-left align-middle font-semibold text-xs uppercase tracking-wider sticky left-0 z-30"
+            className="p-4 text-left align-middle font-semibold text-xs uppercase tracking-wider sticky left-0 z-30 border-b border-slate-100 dark:border-slate-800"
             style={{
               backgroundColor: isDark ? '#1e293b' : '#F9FAFB',
               color: textMuted,
@@ -172,7 +217,7 @@ export const DynamicLeadsTable = ({
               onCheckedChange={(c) =>
                 onToggleSelectAll && onToggleSelectAll(Boolean(c), sortedAttendees.map(r => r._id))
               }
-              className="border-slate-300"
+              className="border-slate-300 dark:border-slate-700"
             />
           </th>
           {visibleColumns.map((col) => {
@@ -180,7 +225,7 @@ export const DynamicLeadsTable = ({
             return (
               <th
                 key={col.key}
-                className={`font-semibold text-xs uppercase tracking-wider text-gray-500 hover:bg-black/5 transition-colors select-none group relative ${
+                className={`font-semibold text-xs uppercase tracking-wider text-gray-500 hover:bg-black/5 dark:hover:bg-white/5 border-b border-slate-100 dark:border-slate-800 transition-colors select-none group relative ${
                   isActions ? 'text-center sticky right-0 z-30' : 'text-left'
                 } ${col.sortable ? 'cursor-pointer' : ''}`}
                 style={{
@@ -191,15 +236,16 @@ export const DynamicLeadsTable = ({
               >
                 <div
                   className={`p-4 flex items-center ${isActions ? 'justify-center' : 'gap-2'}`}
+                  style={{ color: textMuted }}
                 >
                   {col.label}
                   {col.sortable && (
                     <span className="ml-1">
                       {sortColumn === col.key ? (
                         sortDirection === 'asc' ? (
-                          <ArrowUp className="w-3.5 h-3.5" style={{ color: "#3b82f6" }} />
+                          <ArrowUp className="w-3.5 h-3.5 text-blue-500" />
                         ) : (
-                          <ArrowDown className="w-3.5 h-3.5" style={{ color: "#3b82f6" }} />
+                          <ArrowDown className="w-3.5 h-3.5 text-blue-500" />
                         )
                       ) : (
                         <ArrowUpDown className="w-3.5 h-3.5 opacity-40" />
@@ -219,107 +265,118 @@ export const DynamicLeadsTable = ({
           })}
         </tr>
       </thead>
-      <tbody>
+      
+      <tbody ref={tableBodyRef} className="relative">
         {isLoading && (!sortedAttendees || sortedAttendees.length === 0) ? (
-          <tr>
-            <td
-              colSpan={visibleColumns.length + 1}
-              className="px-6 py-20 text-center"
-            >
-              <div className="flex flex-col items-center gap-3">
-                <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm font-medium text-gray-400">Loading attendees...</p>
-              </div>
-            </td>
-          </tr>
+          Array.from({ length: 10 }).map((_, i) => (
+            <TableRowSkeleton key={i} columnsCount={visibleColumns.length} />
+          ))
         ) : sortedAttendees && sortedAttendees.length > 0 ? (
-          sortedAttendees.map((item, index) => {
-            const rowId = item._id;
-            const isSelected = Boolean(rowId && selectedIds.has(rowId));
-            const selectedBg = isDark ? 'rgba(34, 197, 94, 0.1)' : '#f0fdf4';
-            const cellBg = isSelected ? selectedBg : undefined;
-            const stickyEdgeBg = isSelected ? selectedBg : (isDark ? '#1e293b' : '#ffffff');
+          <>
+            {/* Top Virtual Spacer */}
+            {paddingTop > 0 && (
+              <tr style={{ height: `${paddingTop}px` }}>
+                <td colSpan={visibleColumns.length + 1} style={{ padding: 0, border: 0 }} />
+              </tr>
+            )}
 
-            const actionsColumn = visibleColumns.find(c => c.key === 'actions');
-            const onViewClick = actionsColumn?.onViewClick;
+            {/* Rendered Virtual Rows */}
+            {virtualRows.map((virtualRow) => {
+              const item = sortedAttendees[virtualRow.index];
+              const index = virtualRow.index;
+              const rowId = item._id;
+              const isSelected = Boolean(rowId && selectedIds.has(rowId));
+              const selectedBg = isDark ? 'rgba(59, 130, 246, 0.15)' : '#f0fdf4';
+              const cellBg = isSelected ? selectedBg : undefined;
+              const stickyEdgeBg = isSelected ? selectedBg : (isDark ? '#1e293b' : '#ffffff');
 
-            return (
-              <motion.tr
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.03 }}
-                key={rowId || index}
-                onClick={() => onViewClick && onViewClick(item)}
-                className={`group border-b cursor-pointer transition-all duration-200 ${
-                  isSelected ? '' : 'hover:bg-black/5'
-                }`}
-                style={{ 
-                  backgroundColor: cellBg,
-                  borderColor: 'rgba(0,0,0,0.05)'
-                }}
-              >
-                <td
-                  className="p-4 align-middle sticky left-0 z-10 transition-colors"
-                  style={{ backgroundColor: stickyEdgeBg }}
-                  onClick={(e) => e.stopPropagation()}
+              const actionsColumn = visibleColumns.find(c => c.key === 'actions');
+              const onViewClick = actionsColumn?.onViewClick;
+
+              return (
+                <tr
+                  key={rowId || index}
+                  data-index={index}
+                  ref={rowVirtualizer.measureElement}
+                  onClick={() => onViewClick && onViewClick(item)}
+                  className={`group border-b border-slate-100 dark:border-slate-800/40 cursor-pointer transition-all duration-200 ${
+                    isSelected ? '' : 'hover:bg-slate-50 dark:hover:bg-slate-800/30'
+                  }`}
+                  style={{ 
+                    backgroundColor: cellBg,
+                    height: `${virtualRow.size}px`,
+                  }}
                 >
-                  <Checkbox
-                    checked={isSelected}
-                    onCheckedChange={() => rowId && onToggleSelect && onToggleSelect(rowId)}
-                    className="border-slate-300"
-                  />
-                </td>
-                {visibleColumns.map((col) => {
-                  const content = renderCellContent(item, col, index);
-                  const isSpecialCol = ['registeredWebinars', 'attendedWebinars', 'pastWebinarDuration'].includes(col.key);
-                  let textColor = textMuted;
-                  let isBold = false;
-                  
-                  if (col.key === 'serialNo') {
+                  <td
+                    className="p-4 align-middle sticky left-0 z-10 transition-colors"
+                    style={{ backgroundColor: stickyEdgeBg }}
+                    onClick={(e) => e.stopPropagation()} // Stop row click navigation
+                  >
+                    <Checkbox
+                      checked={isSelected}
+                      onCheckedChange={() => rowId && onToggleSelect && onToggleSelect(rowId)}
+                      className="border-slate-300 dark:border-slate-700"
+                    />
+                  </td>
+                  {visibleColumns.map((col) => {
+                    const content = renderCellContent(item, col, index);
+                    const isSpecialCol = ['registeredWebinars', 'attendedWebinars', 'pastWebinarDuration'].includes(col.key);
+                    let textColor = textMuted;
+                    let isBold = false;
+                    
+                    if (col.key === 'serialNo') {
                       textColor = textMuted;
                       isBold = true;
-                  } else if (col.key === 'firstName' || col.key === 'lastName' || col.key === 'email') {
+                    } else if (col.key === 'firstName' || col.key === 'lastName' || col.key === 'email') {
                       textColor = textPrimary;
                       isBold = true;
-                  } else if (col.key === 'attendedWebinars') {
+                    } else if (col.key === 'attendedWebinars') {
                       textColor = Number(item[col.dataKey] || 0) > 0 ? "#22B573" : textMuted;
                       isBold = true;
-                  } else if (isSpecialCol) {
+                    } else if (isSpecialCol) {
                       textColor = textPrimary;
                       isBold = true;
-                  }
+                    }
 
-                  const isActions = col.key === 'actions';
+                    const isActions = col.key === 'actions';
 
-                  return (
-                    <td
-                      key={col.key}
-                      className={`p-4 text-sm transition-colors ${isBold ? 'font-bold' : 'font-medium'} ${
-                        isActions ? 'text-right sticky right-0 z-10' : ''
-                      }`}
-                      style={{ 
-                        color: textColor,
-                        backgroundColor: isActions ? stickyEdgeBg : undefined 
-                      }}
-                      title={typeof content === 'string' ? content : ''}
-                      onClick={isActions ? (e) => e.stopPropagation() : undefined}
-                    >
-                      {content}
-                    </td>
-                  );
-                })}
-              </motion.tr>
-            );
-          })
+                    return (
+                      <td
+                        key={col.key}
+                        className={`p-4 text-sm transition-colors ${isBold ? 'font-bold' : 'font-medium'} ${
+                          isActions ? 'text-right sticky right-0 z-10 border-l border-slate-100 dark:border-slate-800/40' : ''
+                        }`}
+                        style={{ 
+                          color: textColor,
+                          backgroundColor: isActions ? stickyEdgeBg : undefined 
+                        }}
+                        title={typeof content === 'string' ? content : ''}
+                        onClick={isActions ? (e) => e.stopPropagation() : undefined} // Stop row click navigation
+                      >
+                        {content}
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+
+            {/* Bottom Virtual Spacer */}
+            {paddingBottom > 0 && (
+              <tr style={{ height: `${paddingBottom}px` }}>
+                <td colSpan={visibleColumns.length + 1} style={{ padding: 0, border: 0 }} />
+              </tr>
+            )}
+          </>
         ) : (
           <tr>
             <td
               colSpan={visibleColumns.length + 1}
               className="px-6 py-20 text-center"
             >
-               <div className="flex flex-col items-center gap-3 opacity-40">
-                  <p className="text-sm font-medium">No attendees found.</p>
-               </div>
+              <div className="flex flex-col items-center gap-3 opacity-40">
+                <p className="text-sm font-medium text-slate-500 dark:text-slate-400">No attendees found.</p>
+              </div>
             </td>
           </tr>
         )}

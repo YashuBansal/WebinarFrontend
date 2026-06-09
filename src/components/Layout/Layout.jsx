@@ -38,7 +38,10 @@ const Layout = () => {
       : 280
     : 0;
 
-  const isChatPage = location.pathname.split('/').includes('chat');
+  const isFullScreenPage =
+    location.pathname.split('/').includes('chat') ||
+    location.pathname.includes('/automations/') ||
+    location.pathname.includes('/admin/automations');
 
   const handleMenuButtonClick = useCallback(() => {
     if (isMdUp) {
@@ -122,7 +125,7 @@ const Layout = () => {
         >
           <div 
             ref={scrollContainerRef}
-            className={`custom-scrollbar absolute inset-0 min-w-0 max-w-full overflow-x-hidden ${isChatPage ? 'overflow-y-hidden' : 'overflow-y-auto'}`}
+            className={`custom-scrollbar absolute inset-0 min-w-0 max-w-full overflow-x-hidden ${isFullScreenPage ? 'overflow-y-hidden' : 'overflow-y-auto'}`}
           >
             <Suspense fallback={<FallbackPage />}>
               <Outlet />

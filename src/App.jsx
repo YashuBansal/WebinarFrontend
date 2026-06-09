@@ -100,6 +100,8 @@ import { getNoticeBoard } from "./features/actions/noticeBoard";
 import WebinarParticipants from "./pages/Webinar/Participants/WebinarParticipants";
 import { getUnAcknowledgedAlarms } from "./features/actions/alarm";
 import ErrorFallback from "./components/Fallback/ErrorFallback";
+import AutomationFlowCanvas from "./components/AutomationFlow/AutomationFlowCanvas";
+import FlowExecutionHistory from "./components/AutomationFlow/FlowExecutionHistory";
 
 const RedirectToExternal = ({ url }) => {
   useEffect(() => {
@@ -776,6 +778,24 @@ const App = () => {
           element: (
             <RouteGuard roleNames={["ADMIN"]}>
               <ZoomLiveWrapper />
+            </RouteGuard>
+          ),
+        },
+        {
+          path: "/admin/automations",
+          element: (
+            <RouteGuard roleNames={["ADMIN"]}>
+              <AutomationFlowCanvas />
+            </RouteGuard>
+          ),
+        },
+        {
+          path: "/automations/history",
+          element: (
+            <RouteGuard roleNames={["ADMIN"]}>
+              <div className="p-4 md:p-8 h-full bg-slate-50 dark:bg-slate-900">
+                <FlowExecutionHistory />
+              </div>
             </RouteGuard>
           ),
         },

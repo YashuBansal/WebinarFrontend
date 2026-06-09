@@ -61,6 +61,50 @@ socket.on("connect_error", (error) => {
   // No need to start the interval here to avoid race conditions.
 });
 
+// --- Real-time CSV Import Pipeline Socket Bindings ---
+import { startImport, failImport } from "./features/slices/importProgress";
+import { createThrottledProgressDispatcher, createBatchLogDispatcher } from "./utils/socketThrottler";
+
+let store;
+let throttledProgressDispatcher;
+let throttledLogDispatcher;
+
+export const injectStoreToSocket = (_store) => {
+  store = _store;
+  throttledProgressDispatcher = createThrottledProgressDispatcher(store);
+  throttledLogDispatcher = createBatchLogDispatcher(store);
+};
+
+// Start signal
+socket.on("import:start", (data) => {
+  if (store) {
+    store.dispatch(startImport(data));
+  }
+});
+
+// Throttled progress telemetry (fires every 400ms max)
+socket.on("import:progress", (data) => {
+  if (throttledProgressDispatcher) {
+    throttledProgressDispatcher(data);
+  }
+});
+
+// Batched log stream aggregation (flushes accumulated logs every 400ms)
+socket.on("import:log", (data) => {
+  if (throttledLogDispatcher) {
+    throttledLogDispatcher(data);
+  }
+});
+
+// Failure handler
+socket.on("import:failed", (errorMsg) => {
+  if (store) {
+    store.dispatch(failImport(errorMsg));
+  }
+});
+
+
+
 
 // --- Socket Manager ---
 // 3. Export a manager object to control the socket from your application

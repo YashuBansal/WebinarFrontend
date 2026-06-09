@@ -6,6 +6,7 @@ import App from "./App";
 import store from "./features/store";
 import persistStore from "redux-persist/es/persistStore";
 import { injectStore } from "./services/axiosInterceptor";
+import { injectStoreToSocket } from "./socket";
 import { Provider } from "react-redux";
 import { PersistGate } from "redux-persist/integration/react";
 import { injectStoreInDateFormat } from "./utils/extra";
@@ -271,6 +272,7 @@ if (document.readyState === "complete") {
 
 injectStore(store);
 injectStoreInDateFormat(store);
+injectStoreToSocket(store);
 let persistor = persistStore(store);
 
 const queryClient = new QueryClient({

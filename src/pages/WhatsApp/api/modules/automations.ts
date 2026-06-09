@@ -1,4 +1,4 @@
-import axiosInstance from "@/api/axios";
+import axiosInstance from "../axios";
 
 export type AutomationFlow = {
   _id: string;
@@ -10,12 +10,12 @@ export type AutomationFlow = {
 };
 
 export async function listAutomations(projectId: string): Promise<AutomationFlow[]> {
-  const { data } = await axiosInstance.get(`/automations`, { params: { projectId } });
+  const { data } = await axiosInstance.get(`/automations`, { params: { projectId, category: "whatsapp", flowType: "whatsapp" } });
   return data;
 }
 
 export async function createAutomation(projectId: string, payload: Partial<AutomationFlow>) {
-  const { data } = await axiosInstance.post(`/automations`, payload, { params: { projectId } });
+  const { data } = await axiosInstance.post(`/automations`, { ...payload, flowType: "whatsapp" }, { params: { projectId } });
   return data;
 }
 
